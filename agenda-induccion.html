@@ -236,8 +236,8 @@ function renderAgenda() {
       rows.forEach(r => {
         const tipo = (r['Tipo'] || '').toLowerCase();
         const act = (r['Actividad'] || '').trim();
-        const horaI = (r['Hora_inicio'] || '').trim();
-        const horaF = (r['Hora_fin'] || '').trim();
+const horaI = (r['Hora inicio'] || '').trim();
+const horaF = (r['Hora fin'] || '').trim();
         const resp = (r['Responsable'] || '').trim();
         const aula = (r['Aula'] || '').trim();
         const horaStr = horaI && horaF ? horaI + ' – ' + horaF : horaI || horaF;
