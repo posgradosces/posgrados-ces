@@ -707,7 +707,7 @@ function renderDash() {
   document.getElementById('k-camp').textContent=camps.size;
   document.getElementById('k-pend').textContent=pend;
 
-  const pRows=Object.entries(cProg).map(([k,v])=>[k,v.size]).sort((a,b)=>b[1]-a[1]);
+  const pRows=Object.entries(cProg).map(([k,v])=>[k,v.size]).sort((a,b)=>a[0].localeCompare(b[0],'es'));
   document.getElementById('tbl-prog').innerHTML = pRows.map(([p,n])=>`
     <div>
       <div class="fila" onclick="toggleAcord('prog-${p.replace(/[^a-z0-9]/gi,'_')}',this)">
