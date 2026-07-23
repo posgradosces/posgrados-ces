@@ -393,8 +393,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
     </div>
 
+    <!-- BUSCAR CAMPO DE ROTACIÓN -->
     <div class="buscador">
-      <div class="buscador-tit">Buscar residente</div>
+      <div class="buscador-tit">Buscar campo de rotación</div>
+      <div class="buscador-row">
+        <input type="text" id="fc-camp" placeholder="Campo..." oninput="buscarCampo()">
+        <select id="fc-anio" onchange="buscarCampo()"><option value="">Todos los años</option></select>
+        <select id="fc-prog" onchange="buscarCampo()"><option value="">Todas las especialidades</option></select>
+      </div>
+      <div class="res-lista" id="fc-lista"></div>
+    </div>
+
+    <div class="buscador" id="box-residente">
+      <div class="buscador-tit" id="tit-residente">Buscar residente</div>
       <div class="buscador-row">
         <input type="text" id="b-nom" placeholder="Nombre..." oninput="buscar()">
         <select id="b-prog" onchange="buscar()"><option value="">Todos los programas</option></select>
@@ -820,6 +831,24 @@ function renderDash() {
   const pP=document.getElementById('pn-prog');
   if(pP) pP.innerHTML='<option value="">Todos los programas</option>'+
     [...progs].sort().map(p=>`<option value="${p}">${p}</option>`).join('');
+
+  // Selects del buscador "Campo de rotación" (Año = Semestre limpio tipo "2027-1")
+  const semCleanSet=new Set();
+  datos.forEach(r=>{
+    const sem=(r['Semestre']||'').trim();
+    if(!sem) return;
+    sem.split(' / ').forEach(s=>{
+      const st=s.trim();
+      if(/^\d{4}-[12]$/.test(st)) semCleanSet.add(st);
+    });
+  });
+  const fA=document.getElementById('fc-anio');
+  if(fA) fA.innerHTML='<option value="">Todos los años</option>'+
+    [...semCleanSet].sort().map(s=>`<option value="${s}">${s}</option>`).join('');
+
+  const fP=document.getElementById('fc-prog');
+  if(fP) fP.innerHTML='<option value="">Todas las especialidades</option>'+
+    [...progs].sort().map(p=>`<option value="${p}">${p}</option>`).join('');
 }
 
 // ============================================================
@@ -956,16 +985,16 @@ function filtrarKPI(tipo) {
     document.getElementById('b-prog').value='';
     document.getElementById('b-sem').value='';
     buscar();
-    document.querySelector('.buscador').scrollIntoView({behavior:'smooth'});
+    document.getElementById('box-residente').scrollIntoView({behavior:'smooth'});
   } else if(tipo==='mov') {
     document.getElementById('b-nom').value='';
     document.getElementById('b-prog').value='';
     document.getElementById('b-sem').value='';
     buscarMov();
-    document.querySelector('.buscador').scrollIntoView({behavior:'smooth'});
+    document.getElementById('box-residente').scrollIntoView({behavior:'smooth'});
   } else if(tipo==='pend') {
     buscarPend();
-    document.querySelector('.buscador').scrollIntoView({behavior:'smooth'});
+    document.getElementById('box-residente').scrollIntoView({behavior:'smooth'});
   }
 }
 
@@ -983,7 +1012,7 @@ function buscarPend() {
 }
 
 function mostrarResultados(filtrado, titulo) {
-  document.querySelector('.buscador-tit').textContent = titulo;
+  document.getElementById('tit-residente').textContent = titulo;
   const personas={};
   filtrado.forEach(r=>{
     const id=(r['ID']||r['Persona']||'sin').trim();
@@ -1008,7 +1037,7 @@ function mostrarResultados(filtrado, titulo) {
 // BUSCADOR
 // ============================================================
 function buscar() {
-  document.querySelector('.buscador-tit').textContent = 'Buscar residente';
+  document.getElementById('tit-residente').textContent = 'Buscar residente';
   const nom=document.getElementById('b-nom').value.toLowerCase().trim();
   const prog=document.getElementById('b-prog').value;
   const sem=document.getElementById('b-sem').value;
@@ -1022,12 +1051,56 @@ function buscar() {
   mostrarResultados(filtrado, 'Resultados');
 }
 
+// ============================================================
+// BUSCAR CAMPO DE ROTACIÓN (texto libre + Año + Especialidad)
+// Independiente del filtro global "Ver semestre": busca en todos los datos.
+// ============================================================
+function buscarCampo() {
+  const camp=(document.getElementById('fc-camp').value||'').toLowerCase().trim();
+  const anio=document.getElementById('fc-anio').value;
+  const prog=document.getElementById('fc-prog').value;
+  const lista=document.getElementById('fc-lista');
+  if(!camp && !anio && !prog) { lista.innerHTML=''; return; }
+
+  const filtrado=[];
+  datos.forEach(r=>{
+    const campoVal=(r['Campo de rotacion']||'').trim();
+    if(!campoVal || campoVal==='VACACIONES') return;
+    const sem=(r['Semestre']||'').trim();
+    const progVal=(r['Programa']||'').trim();
+    const id=(r['ID']||r['Persona']||'').trim();
+
+    const campOk = !camp || campoVal.toLowerCase().includes(camp);
+    const anioOk = !anio || sem.split(' / ').map(s=>s.trim()).includes(anio);
+    const progOk = !prog || progVal===prog;
+
+    if(campOk && anioOk && progOk) {
+      filtrado.push({
+        id,
+        residente: r['Persona']||id||'—',
+        periodo: sem + (r['Mes']?(' · '+r['Mes']):''),
+        progRot: progVal + (r['Rotacion']?(' / '+r['Rotacion']):'')
+      });
+    }
+  });
+
+  if(!filtrado.length) { lista.innerHTML='<div class="empty">Sin resultados.</div>'; return; }
+
+  lista.innerHTML = filtrado.map(f=>`
+    <div class="res-item" onclick="verResidente('${f.id.replace(/'/g,"\\'")}')">
+      <span class="res-nombre">${f.residente}</span>
+      <span class="res-tag">${f.periodo}</span>
+      <span class="res-tag">${f.progRot}</span>
+      <button class="btn-ver" onclick="event.stopPropagation();verResidente('${f.id.replace(/'/g,"\\'")}')">Ver →</button>
+    </div>`).join('');
+}
+
 function verPrograma(prog) {
   document.getElementById('b-prog').value=prog;
   document.getElementById('b-nom').value='';
   document.getElementById('b-sem').value='';
   buscar();
-  document.querySelector('.buscador').scrollIntoView({behavior:'smooth'});
+  document.getElementById('box-residente').scrollIntoView({behavior:'smooth'});
 }
 
 function verResidente(id) { pantallaAnterior='coord'; cedulaActiva=id; ir('crono'); renderCrono(id); }
