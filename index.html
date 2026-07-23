@@ -870,7 +870,7 @@ function construirListaPendientes() {
 
     const progSan = saneaTexto(prog);
     const residenteSan = saneaTexto(nombre+'_'+id);
-    const rotSan = saneaTexto(camp+'_'+mes+'_'+sem);
+    const rotSan = claveCarpetaRotacion(camp, mes, sem);
 
     const infoPrograma = estadoDriveGlobal[progSan];
     const infoResidente = infoPrograma ? infoPrograma[residenteSan] : null;
@@ -1071,6 +1071,33 @@ function saneaTexto(t) {
   return String(t).trim().replace(/[\\/:*?"<>|]/g, "_").replace(/\s+/g, "_");
 }
 
+// Mapa de nombre de mes -> número de mes (para ordenar carpetas cronológicamente)
+const MESES_NUM = {
+  ENERO:'01', FEBRERO:'02', MARZO:'03', ABRIL:'04', MAYO:'05', JUNIO:'06',
+  JULIO:'07', AGOSTO:'08', SEPTIEMBRE:'09', OCTUBRE:'10', NOVIEMBRE:'11', DICIEMBRE:'12'
+};
+
+// Arma la clave de carpeta de rotación en formato AAAA-MM_CAMPO, para que las
+// carpetas en Drive ordenen cronológicamente (ej: "2026-07_HPTU").
+// El año se toma del campo Semestre (formato "AAAA-S"), que siempre trae un
+// único año calendario claro, a diferencia de "Anio academico" (ej. "2025-2026").
+function claveCarpetaRotacion(camp, mes, sem) {
+  const anio = String(sem || '').split('-')[0].trim();
+  const mesNormalizado = String(mes || '').toUpperCase().trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  let mesNum = MESES_NUM[mesNormalizado];
+  if (!mesNum) {
+    // Cubre casos como "VACACIONES DICIEMBRE" donde el mes viene con texto extra
+    const encontrado = Object.keys(MESES_NUM).find(m => mesNormalizado.indexOf(m) !== -1);
+    if (encontrado) mesNum = MESES_NUM[encontrado];
+  }
+  if (anio && mesNum) {
+    return saneaTexto(`${anio}-${mesNum}_${camp}`);
+  }
+  // Respaldo si el mes no se reconoce: igual conserva el año al inicio
+  return saneaTexto(`${anio}_${mes}_${camp}`);
+}
+
 async function sincronizarConDrive(programa, residente, mapaRotaciones) {
   if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf('PEGA_AQUI') !== -1) return;
   try {
@@ -1145,7 +1172,7 @@ function archivoABase64(file) {
   });
 }
 
-async function subirArchivo(inputEl, clave, tipoDocumento, programa, residente, rotacion) {
+async function subirArchivo(inputEl, clave, tipoDocumento, programa, residente, rotacion, nombreRotacion) {
   const file = inputEl.files[0];
   if(!file) return;
 
@@ -1175,6 +1202,7 @@ async function subirArchivo(inputEl, clave, tipoDocumento, programa, residente, 
         programa: programa,
         residente: residente,
         rotacion: rotacion,
+        nombreRotacion: nombreRotacion,
         tipoDocumento: tipoDocumento
       })
     });
@@ -1269,10 +1297,11 @@ function renderCrono(cedula) {
       const esPend=est==='Pendiente';
       const claveRot=(cedula+'_'+sem+'_'+mes+'_'+camp).replace(/[^a-zA-Z0-9]/g,'_');
       const residenteId=(nombre+'_'+cedula).replace(/'/g,"\\'");
-      const rotacionId=(camp+'_'+mes+'_'+sem).replace(/'/g,"\\'");
+      const rotacionId=claveCarpetaRotacion(camp, mes, sem).replace(/'/g,"\\'");
+      const nombreRotId=String(rot).replace(/'/g,"\\'");
       const progId=prog.replace(/'/g,"\\'");
       clavesEval.push(claveRot);
-      mapaRotaciones[saneaTexto(camp+'_'+mes+'_'+sem)]=claveRot;
+      mapaRotaciones[claveCarpetaRotacion(camp, mes, sem)]=claveRot;
       html+=`<tr>
         <td class="mes-cell">${mes}</td><td>${camp}</td><td>${rot}</td>
         <td>${esPend?`<span class="pend-badge">Pendiente</span>`:`<span class="ok-estado">${est||'—'}</span>`}</td>
@@ -1281,7 +1310,7 @@ function renderCrono(cedula) {
           <div class="eval-widget">
             <label class="btn-upload" id="lbl-nota-${claveRot}">
               <span class="btn-upload-text">📄 Nota</span>
-              <input type="file" accept=".pdf,image/*" style="display:none" onchange="subirArchivo(this,'${claveRot}','nota','${progId}','${residenteId}','${rotacionId}')">
+              <input type="file" accept=".pdf,image/*" style="display:none" onchange="subirArchivo(this,'${claveRot}','nota','${progId}','${residenteId}','${rotacionId}','${nombreRotId}')">
             </label>
             <div class="eval-status" id="status-${claveRot}"></div>
           </div>
