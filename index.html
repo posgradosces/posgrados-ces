@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Posgrados Clínicos — Universidad CES</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{
   --az:#1F4E79;--az-med:#2E75B6;--az-claro:#BDD7EE;--az-suave:#EBF3FB;
@@ -156,6 +157,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .log-count-badge{background:rgba(255,255,255,.2);border-radius:10px;padding:2px 9px;font-size:11px;font-weight:600}
 .btn-clear-log{background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.8);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;transition:all .2s}
 .btn-clear-log:hover{background:rgba(255,255,255,.15)}
+.btn-actualizar-claro{background:var(--blanco);border:1.3px solid var(--az-claro);color:var(--az);border-radius:6px;padding:4px 11px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-actualizar-claro:hover{background:var(--az-suave)}
+.btn-actualizar-claro:disabled{opacity:.6;cursor:default}
 .log-programa{font-size:10px;color:var(--sec);background:var(--fondo);border:1px solid var(--borde);border-radius:4px;padding:1px 6px}
 
 /* ===== CRONOGRAMA ===== */
@@ -205,6 +209,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .eval-status.ok{color:var(--teal);font-weight:600}
 .eval-status.err{color:#c00;font-weight:600}
 .eval-status.pend-recordatorio{color:var(--nar-txt);font-weight:700}
+.nota-consolidada{font-size:10px;color:var(--sec);background:var(--fondo);border:1px solid var(--borde);border-radius:6px;padding:4px 7px;line-height:1.35;max-width:200px}
+.nota-consolidada strong{color:var(--az)}
+.aviso-multihoja{margin:.6rem 0 1.25rem;padding:11px 14px;background:#FDECEA;border:1.5px solid #F1998E;border-radius:10px;font-size:12.5px;color:#8A2A1F;line-height:1.6;font-weight:600}
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:768px){
@@ -418,21 +425,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="log-section" id="pend-notas-section">
       <div class="log-hdr">
         <span>
-          Notas pendientes
+          Checklist de notas por residente
           <span class="log-count-badge" id="pend-notas-count">0</span>
         </span>
         <span class="log-hdr-hint">Según lo archivado en Drive</span>
         <button class="btn-clear-log" onclick="cargarPendientesNotas(true)">Actualizar</button>
       </div>
       <div style="padding:10px 14px;display:flex;gap:.6rem;flex-wrap:wrap;border-bottom:1px solid var(--borde)">
-        <input type="text" id="pn-nom" placeholder="Buscar residente..." oninput="renderPendientesNotas()"
+        <input type="text" id="pn-nom" placeholder="Buscar residente..." oninput="renderChecklistNotas()"
           style="flex:1;min-width:140px;padding:8px 10px;border:1.5px solid var(--borde);border-radius:8px;font-size:13px;outline:none;background:var(--fondo)">
-        <select id="pn-prog" onchange="renderPendientesNotas()"
+        <select id="pn-prog" onchange="renderChecklistNotas()"
           style="flex:1;min-width:140px;padding:8px 10px;border:1.5px solid var(--borde);border-radius:8px;font-size:13px;outline:none;background:var(--fondo)">
           <option value="">Todos los programas</option>
         </select>
       </div>
-      <div class="log-tbl-wrap">
+      <div class="log-tbl-wrap" style="max-height:420px">
         <div id="pend-notas-contenido"><div class="log-empty">Cargando información desde Drive...</div></div>
       </div>
     </div>
@@ -864,7 +871,7 @@ async function cargarPendientesNotas(forzar) {
     cont.innerHTML = '<div class="log-empty">Sistema de cargue aún no configurado.</div>';
     return;
   }
-  if(estadoDriveGlobal && !forzar) { renderPendientesNotas(); return; }
+  if(estadoDriveGlobal && !forzar) { renderChecklistNotas(); return; }
 
   cont.innerHTML = '<div class="log-empty">Cargando información desde Drive...</div>';
   try {
@@ -872,7 +879,7 @@ async function cargarPendientesNotas(forzar) {
     const data = await resp.json();
     if(data.ok) {
       estadoDriveGlobal = data.datos || {};
-      renderPendientesNotas();
+      renderChecklistNotas();
     } else {
       cont.innerHTML = '<div class="log-empty">No se pudo consultar Drive: '+(data.mensaje||'intenta de nuevo')+'</div>';
     }
@@ -881,21 +888,29 @@ async function cargarPendientesNotas(forzar) {
   }
 }
 
-function construirListaPendientes() {
-  if(!estadoDriveGlobal) return [];
-  const pendientes = [];
+// Agrupa por residente TODAS sus rotaciones que requieren nota (no solo las
+// pendientes), para poder mostrar un checklist/auditoria completa por
+// residente, en vez de una tabla plana con solo las que faltan.
+function construirChecklistPorResidente() {
+  if(!estadoDriveGlobal) return {};
+  const grupos = {};
   datos.forEach(r=>{
     const tipo=(r['Tipo']||'').toUpperCase().trim();
     if(tipo!=='RESIDENTE CES') return;
     const camp=(r['Campo de rotacion']||'').trim();
     if(!camp || camp==='VACACIONES') return;
     if(!pasaFiltroSem(r)) return;
+    // Compatibilidad: si el CSV aun no trae "Aplica nota", se asume "Si"
+    const aplicaNota=(r['Aplica nota']||'Si').trim();
+    if(aplicaNota==='No') return;
+    const mes=r['Mes']||'';
+    const sem=r['Semestre']||'';
+    if(!semestreDesdeCorte(sem)) return;
 
     const id=(r['ID']||'').trim();
     const nombre=(r['Persona']||'').trim();
     const prog=(r['Programa']||'').trim();
-    const mes=r['Mes']||'';
-    const sem=r['Semestre']||'';
+    const rot=r['Rotacion']||r['Detalle original']||'';
 
     const progSan = saneaTexto(prog);
     const residenteSan = saneaTexto(nombre+'_'+id);
@@ -904,17 +919,16 @@ function construirListaPendientes() {
     const infoPrograma = estadoDriveGlobal[progSan];
     const infoResidente = infoPrograma ? infoPrograma[residenteSan] : null;
     const infoRot = infoResidente ? infoResidente[rotSan] : null;
-
     const tieneNota = infoRot ? !!infoRot.nota : false;
 
-    if(!tieneNota) {
-      pendientes.push({id,nombre,prog,camp,mes,sem,tieneNota});
-    }
+    if(!grupos[id]) grupos[id] = {id, nombre, prog, items:[], pend:0};
+    grupos[id].items.push({camp, rot, mes, sem, tieneNota});
+    if(!tieneNota) grupos[id].pend++;
   });
-  return pendientes;
+  return grupos;
 }
 
-function renderPendientesNotas() {
+function renderChecklistNotas() {
   const cont = document.getElementById('pend-notas-contenido');
   const badge = document.getElementById('pend-notas-count');
   if(!cont) return;
@@ -923,40 +937,68 @@ function renderPendientesNotas() {
   const nomFiltro = (document.getElementById('pn-nom').value||'').toLowerCase().trim();
   const progFiltro = document.getElementById('pn-prog').value;
 
-  let lista = construirListaPendientes();
-  badge.textContent = lista.length;
+  const grupos = construirChecklistPorResidente();
+  let lista = Object.values(grupos);
 
-  if(nomFiltro) lista = lista.filter(p=>p.nombre.toLowerCase().includes(nomFiltro));
-  if(progFiltro) lista = lista.filter(p=>p.prog===progFiltro);
+  const totalPend = lista.reduce((a,g)=>a+g.pend,0);
+  badge.textContent = totalPend;
 
-  lista.sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+  if(nomFiltro) lista = lista.filter(g=>g.nombre.toLowerCase().includes(nomFiltro));
+  if(progFiltro) lista = lista.filter(g=>g.prog===progFiltro);
+
+  lista.sort((a,b)=> (b.pend - a.pend) || a.nombre.localeCompare(b.nombre,'es'));
 
   if(!lista.length) {
-    cont.innerHTML = '<div class="log-empty">Sin pendientes con estos filtros.</div>';
+    cont.innerHTML = '<div class="log-empty">Sin residentes con estos filtros.</div>';
     return;
   }
 
-  cont.innerHTML = `<table class="log-tbl">
-    <thead>
-      <tr>
-        <th>Residente</th>
-        <th>Programa</th>
-        <th>Campo</th>
-        <th>Mes / Semestre</th>
-        <th>Nota</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${lista.map(p=>`
-        <tr>
-          <td style="font-weight:600;color:var(--az)">${p.nombre}</td>
-          <td><span class="log-programa">${p.prog}</span></td>
-          <td>${p.camp}</td>
-          <td>${p.mes} · ${p.sem}</td>
-          <td>${p.tieneNota?'✅':'<span class="pend-badge">Falta</span>'}</td>
-        </tr>`).join('')}
-    </tbody>
-  </table>`;
+  cont.innerHTML = lista.map(g=>{
+    const gid = 'chknota-'+saneaTexto(g.id);
+    const tagPend = g.pend
+      ? `<span class="acord-tag pend">${g.pend} pend.</span>`
+      : `<span class="acord-tag" style="color:var(--teal);border-color:var(--teal)">Al día</span>`;
+    return `
+    <div>
+      <div class="fila" onclick="toggleAcordNotas('${gid}',this)">
+        <span class="fila-txt">${g.nombre}</span>
+        <span class="acord-tag">${g.prog}</span>
+        ${tagPend}
+        <span class="fila-arr">▶</span>
+      </div>
+      <div class="acord-detalle" id="${gid}">
+        <div class="acord-titulo">Checklist de notas — ${g.nombre}</div>
+        <table class="log-tbl">
+          <thead><tr><th>Mes / Semestre</th><th>Campo</th><th>Rotación</th><th>Estado</th></tr></thead>
+          <tbody>
+            ${g.items.map(it=>`
+              <tr>
+                <td>${it.mes} · ${it.sem}</td>
+                <td>${it.camp}</td>
+                <td>${it.rot}</td>
+                <td>${it.tieneNota?'<span class="ok-estado">✅ Cargada</span>':'<span class="pend-badge">⚠ Pendiente</span>'}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Variante de toggleAcord scoped al contenedor del checklist de coordinacion
+// (que no vive dentro de un .card-body, por eso no reutiliza toggleAcord tal cual)
+function toggleAcordNotas(id, filaEl) {
+  const detalle = document.getElementById(id);
+  const arr = filaEl.querySelector('.fila-arr');
+  const estaAbierto = detalle.classList.contains('open');
+  const contenedor = document.getElementById('pend-notas-contenido');
+  contenedor.querySelectorAll('.acord-detalle.open').forEach(d=>d.classList.remove('open'));
+  contenedor.querySelectorAll('.fila-arr.open').forEach(a=>a.classList.remove('open'));
+  if(!estaAbierto) {
+    detalle.classList.add('open');
+    arr.classList.add('open');
+    setTimeout(()=>detalle.scrollIntoView({behavior:'smooth',block:'nearest'}),150);
+  }
 }
 
 // ============================================================
@@ -1144,6 +1186,23 @@ function saneaTexto(t) {
   return String(t).trim().replace(/[\\/:*?"<>|]/g, "_").replace(/\s+/g, "_");
 }
 
+// El sistema de cargue de notas solo aplica desde este semestre en adelante
+// (formato "AAAA-1" = enero-junio, "AAAA-2" = julio-diciembre). Las notas de
+// periodos anteriores ya se cargaron por otro medio antes de que este
+// sistema existiera, asi que no deben quedar marcadas como "pendientes"
+// para siempre. Para cambiar el corte en el futuro, solo hay que editar
+// este valor.
+const SEMESTRE_CORTE_NOTAS = '2026-2';
+
+function semestreDesdeCorte(sem) {
+  const m = String(sem||'').match(/^(\d{4})-(\d)/);
+  if(!m) return false;
+  const anio = parseInt(m[1], 10), parte = parseInt(m[2], 10);
+  const [anioC, parteC] = SEMESTRE_CORTE_NOTAS.split('-').map(Number);
+  if(anio !== anioC) return anio > anioC;
+  return parte >= parteC;
+}
+
 // Mapa de nombre de mes -> número de mes (para ordenar carpetas cronológicamente)
 const MESES_NUM = {
   ENERO:'01', FEBRERO:'02', MARZO:'03', ABRIL:'04', MAYO:'05', JUNIO:'06',
@@ -1171,7 +1230,7 @@ function claveCarpetaRotacion(camp, mes, sem) {
   return saneaTexto(`${anio}_${mes}_${camp}`);
 }
 
-async function sincronizarConDrive(programa, residente, mapaRotaciones) {
+async function sincronizarConDrive(programa, residente, mapaRotaciones, checklistItems) {
   if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf('PEGA_AQUI') !== -1) return;
   try {
     const url = APPS_SCRIPT_URL + '?accion=consultar&programa=' + encodeURIComponent(programa) + '&residente=' + encodeURIComponent(residente);
@@ -1183,18 +1242,65 @@ async function sincronizarConDrive(programa, residente, mapaRotaciones) {
     Object.keys(mapaRotaciones).forEach(rotSan => {
       const clave = mapaRotaciones[rotSan];
       const infoServidor = data.rotaciones[rotSan];
-      if(infoServidor) {
-        if(!estados[clave]) estados[clave] = {};
-        if(infoServidor.certificado) estados[clave].certificado = true;
-        if(infoServidor.nota) estados[clave].nota = true;
-      }
+      if(!estados[clave]) estados[clave] = {};
+      // Drive manda la verdad en cada sincronizacion: si el archivo ya no
+      // esta (por ejemplo, si coordinacion lo borro manualmente del Drive),
+      // el estado local se revierte a "pendiente" en vez de quedar "cargada"
+      // para siempre por lo que quedo guardado en una visita anterior.
+      estados[clave].nota = !!(infoServidor && infoServidor.nota);
     });
     guardarEvalDocs(estados);
     Object.values(mapaRotaciones).forEach(actualizarUIEval);
     actualizarResumenEval(Object.values(mapaRotaciones));
+    if(checklistItems) renderChecklistResidente(checklistItems);
   } catch(e) {
     // Si falla la consulta (sin conexión, etc.) se queda con lo que haya en este dispositivo
   }
+}
+
+// Pinta el checklist de notas del residente (todas las rotaciones que
+// requieren nota, con su estado real segun localStorage/Drive) y actualiza
+// el contador de pendientes en el encabezado del checklist.
+function renderChecklistResidente(checklistItems) {
+  const body = document.getElementById('checklist-residente-body');
+  const badge = document.getElementById('chk-res-count');
+  if(!body) return;
+  const estados = leerEvalDocs();
+  let pend = 0;
+  body.innerHTML = (checklistItems||[]).map(it=>{
+    const tieneNota = !!(estados[it.claveRot] && estados[it.claveRot].nota);
+    if(!tieneNota) pend++;
+    return `<tr>
+      <td>${it.mes} · ${it.sem}</td>
+      <td>${it.camp}</td>
+      <td>${it.rot}</td>
+      <td>${tieneNota?'<span class="ok-estado">✅ Cargada</span>':'<span class="pend-badge">⚠ Pendiente</span>'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4" class="dash-cell">Sin rotaciones que requieran nota.</td></tr>';
+  if(badge) badge.textContent = pend;
+  window._checklistResidenteItems = checklistItems||[];
+}
+
+function toggleChecklistResidente() {
+  const det = document.getElementById('checklist-residente-detalle');
+  const arr = document.getElementById('chk-res-arr');
+  if(!det) return;
+  const abierto = det.classList.toggle('open');
+  if(arr) arr.classList.toggle('open', abierto);
+}
+
+// Fuerza una nueva consulta a Drive sin esperar a que el residente recargue
+// la pagina. Reconstruye todo el cronograma (es la forma mas simple y segura
+// de garantizar que todo -botones, checklist, contador- quede consistente).
+function actualizarEstadoManual() {
+  if(!cedulaActiva) return;
+  const btn = document.getElementById('btn-actualizar-estado');
+  if(btn) { btn.disabled = true; btn.textContent = 'Actualizando...'; }
+  renderCrono(cedulaActiva);
+  setTimeout(()=>{
+    const btn2 = document.getElementById('btn-actualizar-estado');
+    if(btn2) { btn2.disabled = false; btn2.textContent = '🔄 Actualizar estado'; }
+  }, 1200);
 }
 
 function actualizarResumenEval(claves) {
@@ -1236,6 +1342,39 @@ function comprimirImagen(file) {
   });
 }
 
+// Combina varias imagenes (fotos de cada hoja escaneada) en un solo PDF,
+// una hoja por pagina, corriendo enteramente en el navegador (sin backend
+// adicional). Devuelve un objeto File listo para subir igual que cualquier
+// otro archivo.
+async function combinarImagenesEnPDF(files) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt' });
+  for(let i=0; i<files.length; i++){
+    const imgFile = await comprimirImagen(files[i]);
+    const dataUrl = await new Promise((resolve, reject) => {
+      const lector = new FileReader();
+      lector.onload = () => resolve(lector.result);
+      lector.onerror = reject;
+      lector.readAsDataURL(imgFile);
+    });
+    const img = await new Promise((resolve, reject) => {
+      const im = new Image();
+      im.onload = () => resolve(im);
+      im.onerror = reject;
+      im.src = dataUrl;
+    });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const ratio = Math.min(pageW / img.width, pageH / img.height);
+    const w = img.width * ratio, h = img.height * ratio;
+    const x = (pageW - w) / 2, y = (pageH - h) / 2;
+    if(i > 0) doc.addPage();
+    doc.addImage(dataUrl, 'JPEG', x, y, w, h);
+  }
+  const blob = doc.output('blob');
+  return new File([blob], 'nota_consolidada.pdf', { type: 'application/pdf' });
+}
+
 function archivoABase64(file) {
   return new Promise((resolve, reject) => {
     const lector = new FileReader();
@@ -1246,8 +1385,8 @@ function archivoABase64(file) {
 }
 
 async function subirArchivo(inputEl, clave, tipoDocumento, programa, residente, rotacion, nombreRotacion) {
-  const file = inputEl.files[0];
-  if(!file) return;
+  const files = Array.from(inputEl.files || []);
+  if(!files.length) return;
 
   const status = document.getElementById('status-'+clave);
 
@@ -1258,11 +1397,29 @@ async function subirArchivo(inputEl, clave, tipoDocumento, programa, residente, 
     return;
   }
 
-  status.textContent = 'Comprimiendo y enviando...';
-  status.className = 'eval-status';
+  // Si selecciona varias hojas, deben ser todas fotos (no se puede mezclar
+  // con un PDF ya armado, porque no hay forma de "abrir" un PDF existente
+  // y agregarle paginas de imagen de forma confiable en el navegador).
+  if(files.length > 1 && !files.every(f => f.type.startsWith('image/'))) {
+    status.textContent = 'Si subes varias hojas deben ser todas fotos (no mezcles con un PDF). Si ya tienes un PDF armado, sube solo ese archivo.';
+    status.className = 'eval-status err';
+    inputEl.value = '';
+    return;
+  }
 
   try {
-    const archivoFinal = await comprimirImagen(file);
+    let archivoFinal;
+    if(files.length > 1) {
+      status.textContent = `Combinando ${files.length} hojas en un solo PDF...`;
+      status.className = 'eval-status';
+      archivoFinal = await combinarImagenesEnPDF(files);
+    } else {
+      archivoFinal = await comprimirImagen(files[0]);
+    }
+
+    status.textContent = 'Comprimiendo y enviando...';
+    status.className = 'eval-status';
+
     const base64 = await archivoABase64(archivoFinal);
 
     const resp = await fetch(APPS_SCRIPT_URL, {
@@ -1270,8 +1427,8 @@ async function subirArchivo(inputEl, clave, tipoDocumento, programa, residente, 
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({
         archivoBase64: base64,
-        nombreArchivo: archivoFinal.name || file.name,
-        tipoMime: archivoFinal.type || file.type || 'application/pdf',
+        nombreArchivo: archivoFinal.name || files[0].name,
+        tipoMime: archivoFinal.type || files[0].type || 'application/pdf',
         programa: programa,
         residente: residente,
         rotacion: rotacion,
@@ -1305,6 +1462,40 @@ function toggleSemestre(id) {
   if(bloque) bloque.classList.toggle('abierto');
 }
 
+// Dado un renglon "No" (mes intermedio de un bloque), busca hacia adelante en
+// la lista cronologica del residente (mis) el mes en el que SI aplica la nota
+// (mismo Campo de rotacion + misma Rotacion, comparando solo contra los
+// renglones consecutivos, igual que en la macro de Excel).
+function buscarMesFinalBloque(mis, filaActual) {
+  const idx = mis.indexOf(filaActual);
+  if(idx===-1) return null;
+  const camp = filaActual['Campo de rotacion'];
+  const rot = filaActual['Rotacion'];
+  for(let i=idx+1; i<mis.length; i++){
+    if(mis[i]['Campo de rotacion']!==camp || mis[i]['Rotacion']!==rot) break;
+    if((mis[i]['Aplica nota']||'Si').trim()==='Si'){
+      return {mes: mis[i]['Mes']||'', sem: mis[i]['Semestre']||''};
+    }
+  }
+  return null;
+}
+
+// Dado el renglon final de un bloque ("Si"), cuenta hacia atras cuantos meses
+// consecutivos comparten el mismo Campo de rotacion + Rotacion, para saber si
+// es una rotacion de varios meses con nota consolidada.
+function contarMesesBloque(mis, filaFinal) {
+  const idx = mis.indexOf(filaFinal);
+  if(idx===-1) return 1;
+  const camp = filaFinal['Campo de rotacion'];
+  const rot = filaFinal['Rotacion'];
+  let n=1;
+  for(let i=idx-1; i>=0; i--){
+    if(mis[i]['Campo de rotacion']!==camp || mis[i]['Rotacion']!==rot) break;
+    n++;
+  }
+  return n;
+}
+
 // ============================================================
 // CRONOGRAMA INDIVIDUAL
 // ============================================================
@@ -1332,6 +1523,7 @@ function renderCrono(cedula) {
   const sa=semsActivos();
   const clavesEval=[];
   const mapaRotaciones={};
+  const checklistItems=[];
   let html=`
     <div class="perfil-card">
       <div class="avatar">${ini}</div>
@@ -1346,8 +1538,28 @@ function renderCrono(cedula) {
         <div class="p-stat"><div class="p-stat-n" id="eval-pend-n" style="color:var(--nar-txt)">—</div><div class="p-stat-l">Notas pend.</div></div>
       </div>
     </div>
-    <div style="margin:1rem 0 1.25rem;padding:11px 14px;background:var(--az-suave);border:1px solid var(--az-claro);border-radius:10px;font-size:12px;color:var(--az);line-height:1.6">
+    <div style="margin:1rem 0 .6rem;padding:11px 14px;background:var(--az-suave);border:1px solid var(--az-claro);border-radius:10px;font-size:12px;color:var(--az);line-height:1.6">
       <strong>ℹ Nota sobre cargue de notas:</strong> Los campos de rotación en <strong>HPTU</strong>, <strong>HGM</strong> y <strong>SOMA</strong> entregan las notas directamente a la coordinación. Si tu rotación fue en alguno de estos, no debes cargarla aquí.
+    </div>
+    <div class="aviso-multihoja">
+      💡 <strong>¿Tu nota tiene varias hojas?</strong> Al presionar el botón "Nota" puedes seleccionar varias fotos a la vez (una por hoja): el sistema las combina automáticamente en un solo PDF antes de subirlas.
+    </div>
+    <div class="log-section" style="margin-bottom:1.25rem">
+      <div class="log-hdr" style="cursor:pointer" onclick="toggleChecklistResidente()">
+        <span>📋 Checklist de notas <span class="log-count-badge" id="chk-res-count">0</span></span>
+        <span class="fila-arr" id="chk-res-arr" style="color:#fff">▶</span>
+      </div>
+      <div class="acord-detalle" id="checklist-residente-detalle">
+        <div style="padding:9px 14px;display:flex;justify-content:flex-end;border-bottom:1px solid var(--borde)">
+          <button class="btn-actualizar-claro" id="btn-actualizar-estado" onclick="actualizarEstadoManual()">🔄 Actualizar estado</button>
+        </div>
+        <div style="max-height:280px;overflow-y:auto">
+          <table class="log-tbl">
+            <thead><tr><th>Mes / Semestre</th><th>Campo</th><th>Rotación</th><th>Estado</th></tr></thead>
+            <tbody id="checklist-residente-body"></tbody>
+          </table>
+        </div>
+      </div>
     </div>`;
   semsOrd.forEach(sem=>{
     const esAct=sa.includes(sem);
@@ -1368,26 +1580,42 @@ function renderCrono(cedula) {
       const est=(r['Estado confirmacion']||'').trim();
       const obs=r['Observacion']||'';
       const esPend=est==='Pendiente';
-      const claveRot=(cedula+'_'+sem+'_'+mes+'_'+camp).replace(/[^a-zA-Z0-9]/g,'_');
-      const residenteId=(nombre+'_'+cedula).replace(/'/g,"\\'");
-      const rotacionId=claveCarpetaRotacion(camp, mes, sem).replace(/'/g,"\\'");
-      const nombreRotId=String(rot).replace(/'/g,"\\'");
-      const progId=prog.replace(/'/g,"\\'");
-      clavesEval.push(claveRot);
-      mapaRotaciones[claveCarpetaRotacion(camp, mes, sem)]=claveRot;
+      // Compatibilidad: si el CSV aun no trae "Aplica nota" (datos generados
+      // antes de este cambio), se asume "Si" para no romper el flujo anterior.
+      const aplicaNota=(r['Aplica nota']||'Si').trim();
+      const semVigente=semestreDesdeCorte(sem);
+
+      let celdaEval;
+      if(!semVigente) {
+        celdaEval=`<span class="dash-cell">— (rotación anterior a ${SEMESTRE_CORTE_NOTAS}, no aplica en el sistema)</span>`;
+      } else if(aplicaNota==='No') {
+        const info=buscarMesFinalBloque(mis, r);
+        const destino=info?`${info.mes}${info.sem?' ('+info.sem+')':''}`:'un mes posterior';
+        celdaEval=`<div class="nota-consolidada">ℹ️ Nota consolidada en <strong>${destino}</strong>. No debes cargar nada en este mes.</div>`;
+      } else {
+        const claveRot=(cedula+'_'+sem+'_'+mes+'_'+camp).replace(/[^a-zA-Z0-9]/g,'_');
+        const residenteId=(nombre+'_'+cedula).replace(/'/g,"\\'");
+        const rotacionId=claveCarpetaRotacion(camp, mes, sem).replace(/'/g,"\\'");
+        const nombreRotId=String(rot).replace(/'/g,"\\'");
+        const progId=prog.replace(/'/g,"\\'");
+        clavesEval.push(claveRot);
+        mapaRotaciones[claveCarpetaRotacion(camp, mes, sem)]=claveRot;
+        checklistItems.push({claveRot, mes, sem, camp, rot});
+        celdaEval=`
+          <div class="eval-widget">
+            <label class="btn-upload" id="lbl-nota-${claveRot}">
+              <span class="btn-upload-text">📄 Nota</span>
+              <input type="file" accept=".pdf,image/*" multiple style="display:none" onchange="subirArchivo(this,'${claveRot}','nota','${progId}','${residenteId}','${rotacionId}','${nombreRotId}')">
+            </label>
+            <div class="eval-status" id="status-${claveRot}"></div>
+          </div>`;
+      }
+
       html+=`<tr>
         <td class="mes-cell">${mes}</td><td>${camp}</td><td>${rot}</td>
         <td>${esPend?`<span class="pend-badge">Pendiente</span>`:`<span class="ok-estado">${est||'—'}</span>`}</td>
         <td>${obs?`<span class="obs-cell">${obs}</span>`:`<span class="dash-cell">—</span>`}</td>
-        <td class="eval-cell">
-          <div class="eval-widget">
-            <label class="btn-upload" id="lbl-nota-${claveRot}">
-              <span class="btn-upload-text">📄 Nota</span>
-              <input type="file" accept=".pdf,image/*" style="display:none" onchange="subirArchivo(this,'${claveRot}','nota','${progId}','${residenteId}','${rotacionId}','${nombreRotId}')">
-            </label>
-            <div class="eval-status" id="status-${claveRot}"></div>
-          </div>
-        </td>
+        <td class="eval-cell">${celdaEval}</td>
       </tr>`;
     });
     html+=`</tbody></table></div></div>`;
@@ -1395,7 +1623,8 @@ function renderCrono(cedula) {
   document.getElementById('crono-contenido').innerHTML=html;
   clavesEval.forEach(actualizarUIEval);
   actualizarResumenEval(clavesEval);
-  sincronizarConDrive(prog, nombre+'_'+cedula, mapaRotaciones);
+  renderChecklistResidente(checklistItems);
+  sincronizarConDrive(prog, nombre+'_'+cedula, mapaRotaciones, checklistItems);
 }
 </script>
 </body>
