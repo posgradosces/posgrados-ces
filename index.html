@@ -133,12 +133,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .buscador-row{display:flex;gap:.6rem;flex-wrap:wrap}
 .buscador-row input,.buscador-row select{flex:1;min-width:140px;padding:8px 10px;border:1.5px solid var(--borde);border-radius:8px;font-size:13px;outline:none;background:var(--fondo)}
 .buscador-row input:focus,.buscador-row select:focus{border-color:var(--az-med)}
-.ms-wrap{position:relative;flex:1;min-width:180px}
-.ms-wrap input{width:100%}
-.ms-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:220px;overflow-y:auto;background:var(--blanco);border:1.5px solid var(--az-claro);border-radius:8px;box-shadow:0 6px 18px rgba(31,78,121,0.15);z-index:50;padding:4px}
-.ms-opcion{display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:13px;cursor:pointer;border-radius:6px}
+.ms-wrap{position:relative;flex:1;min-width:180px;width:100%;box-sizing:border-box}
+.ms-wrap input{width:100%;box-sizing:border-box}
+.ms-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;width:100%;box-sizing:border-box;max-height:220px;overflow-y:auto;background:var(--blanco);border:1.5px solid var(--az-claro);border-radius:8px;box-shadow:0 6px 18px rgba(31,78,121,0.15);z-index:50;padding:4px}
+.ms-opcion{display:flex;align-items:flex-start;justify-content:flex-start;gap:8px;padding:6px 8px;font-size:13px;cursor:pointer;border-radius:6px;text-align:left;line-height:1.35}
 .ms-opcion:hover{background:var(--az-suave)}
-.ms-opcion input{width:auto;flex:none}
+.ms-opcion input{width:auto;flex:none;margin-top:2px}
 .ms-opcion.ms-vacio{color:var(--sec);cursor:default}
 .ms-opcion.ms-vacio:hover{background:none}
 .ms-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:.6rem}
@@ -896,11 +896,18 @@ function renderDash() {
   if(fP) fP.innerHTML='<option value="">Todas las especialidades</option>'+
     [...progs].sort().map(p=>`<option value="${p}">${p}</option>`).join('');
 
-  // Instituciones/campos distintos para el selector multiple de "Buscar campo de rotación"
+  // Instituciones/campos distintos para el selector multiple de "Buscar campo
+  // de rotación": se separan igual que en el panel "Campos de rotación"
+  // (por " - "), para no mezclar campos compuestos como "FRACTURAS - INCODOL
+  // - C. ROSARIO CENTRO - HGM" en una sola opcion gigante.
   const campSet=new Set();
   datos.forEach(r=>{
     const c=(r['Campo de rotacion']||'').trim();
-    if(c && c!=='VACACIONES') campSet.add(c);
+    if(!c || c==='VACACIONES') return;
+    c.split(' - ').forEach(tok=>{
+      const t=tok.trim();
+      if(t) campSet.add(t);
+    });
   });
   camposUnicosDisponibles = [...campSet].sort((a,b)=>a.localeCompare(b,'es'));
 }
@@ -1206,7 +1213,7 @@ function buscarCampo() {
     const progVal=(r['Programa']||'').trim();
     const id=(r['ID']||r['Persona']||'').trim();
 
-    const campOk = camposSeleccionados.size===0 || camposSeleccionados.has(campoVal);
+    const campOk = camposSeleccionados.size===0 || campoVal.split(' - ').map(t=>t.trim()).some(t=>camposSeleccionados.has(t));
     const anioOk = !anio || sem.split(' / ').map(s=>s.trim()).includes(anio);
     const mesOk = !mesFiltro || mesVal.toUpperCase()===mesFiltro;
     const progOk = !prog || progVal===prog;
