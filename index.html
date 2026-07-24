@@ -1606,7 +1606,6 @@ function renderCrono(cedula) {
         checklistItems.push({claveRot, mes, sem, camp, rot});
         celdaEval=`
           <div class="eval-widget">
-            <a href="https://incluces.ces.edu.co/Account/Login" target="_blank" rel="noopener" class="eval-link">Evaluar en Incluces ↗</a>
             <label class="btn-upload" id="lbl-nota-${claveRot}">
               <span class="btn-upload-text">📄 Nota</span>
               <input type="file" accept=".pdf,image/*" multiple style="display:none" onchange="subirArchivo(this,'${claveRot}','nota','${progId}','${residenteId}','${rotacionId}','${nombreRotId}')">
