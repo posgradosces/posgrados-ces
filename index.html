@@ -133,6 +133,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .buscador-row{display:flex;gap:.6rem;flex-wrap:wrap}
 .buscador-row input,.buscador-row select{flex:1;min-width:140px;padding:8px 10px;border:1.5px solid var(--borde);border-radius:8px;font-size:13px;outline:none;background:var(--fondo)}
 .buscador-row input:focus,.buscador-row select:focus{border-color:var(--az-med)}
+.ms-wrap{position:relative;flex:1;min-width:180px}
+.ms-wrap input{width:100%}
+.ms-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:220px;overflow-y:auto;background:var(--blanco);border:1.5px solid var(--az-claro);border-radius:8px;box-shadow:0 6px 18px rgba(31,78,121,0.15);z-index:50;padding:4px}
+.ms-opcion{display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:13px;cursor:pointer;border-radius:6px}
+.ms-opcion:hover{background:var(--az-suave)}
+.ms-opcion input{width:auto;flex:none}
+.ms-opcion.ms-vacio{color:var(--sec);cursor:default}
+.ms-opcion.ms-vacio:hover{background:none}
+.ms-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:.6rem}
+.ms-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--az);background:var(--az-suave);border:1px solid var(--az-claro);border-radius:20px;padding:4px 6px 4px 10px}
+.ms-chip span{cursor:pointer;font-weight:700;line-height:1;padding:0 2px}
+.ms-chip span:hover{color:#b3261e}
 .res-lista{margin-top:.8rem;max-height:320px;overflow-y:auto}
 .res-item{padding:9px 12px;border-radius:7px;font-size:13px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--fondo);cursor:pointer;transition:background .15s}
 .res-item:hover{background:var(--az-suave)}
@@ -404,11 +416,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <!-- BUSCAR CAMPO DE ROTACIÓN -->
     <div class="buscador">
       <div class="buscador-tit">Buscar campo de rotación</div>
-      <div class="buscador-row">
-        <input type="text" id="fc-camp" placeholder="Campo..." oninput="buscarCampo()">
+      <div class="buscador-row" style="flex-wrap:wrap">
+        <div class="ms-wrap" id="fc-camp-wrap">
+          <input type="text" id="fc-camp" placeholder="Institución/campo... (elige una o varias)" autocomplete="off"
+            oninput="filtrarOpcionesCampo()" onfocus="filtrarOpcionesCampo()">
+          <div class="ms-dropdown" id="fc-camp-dropdown"></div>
+        </div>
+        <select id="fc-mes" onchange="buscarCampo()">
+          <option value="">Todos los meses</option>
+          <option value="ENERO">Enero</option>
+          <option value="FEBRERO">Febrero</option>
+          <option value="MARZO">Marzo</option>
+          <option value="ABRIL">Abril</option>
+          <option value="MAYO">Mayo</option>
+          <option value="JUNIO">Junio</option>
+          <option value="JULIO">Julio</option>
+          <option value="AGOSTO">Agosto</option>
+          <option value="SEPTIEMBRE">Septiembre</option>
+          <option value="OCTUBRE">Octubre</option>
+          <option value="NOVIEMBRE">Noviembre</option>
+          <option value="DICIEMBRE">Diciembre</option>
+        </select>
         <select id="fc-anio" onchange="buscarCampo()"><option value="">Todos los años</option></select>
         <select id="fc-prog" onchange="buscarCampo()"><option value="">Todas las especialidades</option></select>
       </div>
+      <div class="ms-chips" id="fc-camp-chips"></div>
       <div class="res-lista" id="fc-lista"></div>
     </div>
 
@@ -482,6 +514,12 @@ const EVAL_KEY = 'ces_eval_docs';
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwGfR900KCT1-jzZqT9NoaqYSymtxonSB0ZYTX-EAfbKOLBKo0vVSGNWq4IMFSOS4T2/exec';
 
 let datos = [];
+// Lista de instituciones/campos distintos disponibles para el selector
+// multiple del panel de coordinación, y el conjunto de las seleccionadas
+// actualmente (se conserva mientras dure la sesión, para poder marcar
+// varias variantes de escritura del mismo sitio, ej. "HGM" y "HGM.").
+let camposUnicosDisponibles = [];
+let camposSeleccionados = new Set();
 let modo = null;
 let cedulaActiva = null;
 let pantallaAnterior = null;
@@ -857,6 +895,14 @@ function renderDash() {
   const fP=document.getElementById('fc-prog');
   if(fP) fP.innerHTML='<option value="">Todas las especialidades</option>'+
     [...progs].sort().map(p=>`<option value="${p}">${p}</option>`).join('');
+
+  // Instituciones/campos distintos para el selector multiple de "Buscar campo de rotación"
+  const campSet=new Set();
+  datos.forEach(r=>{
+    const c=(r['Campo de rotacion']||'').trim();
+    if(c && c!=='VACACIONES') campSet.add(c);
+  });
+  camposUnicosDisponibles = [...campSet].sort((a,b)=>a.localeCompare(b,'es'));
 }
 
 // ============================================================
@@ -1098,26 +1144,74 @@ function buscar() {
 // BUSCAR CAMPO DE ROTACIÓN (texto libre + Año + Especialidad)
 // Independiente del filtro global "Ver semestre": busca en todos los datos.
 // ============================================================
+function filtrarOpcionesCampo() {
+  const texto=(document.getElementById('fc-camp').value||'').toLowerCase().trim();
+  const dd=document.getElementById('fc-camp-dropdown');
+  const opciones = camposUnicosDisponibles.filter(c=>!texto || c.toLowerCase().includes(texto));
+  if(!opciones.length) {
+    dd.innerHTML = '<div class="ms-opcion ms-vacio">Sin coincidencias</div>';
+  } else {
+    dd.innerHTML = opciones.map(c=>{
+      const marcado = camposSeleccionados.has(c);
+      const cEsc = c.replace(/'/g,"\\'");
+      return `<label class="ms-opcion"><input type="checkbox" ${marcado?'checked':''} onchange="toggleCampoSeleccionado('${cEsc}')"> ${c}</label>`;
+    }).join('');
+  }
+  dd.style.display='block';
+}
+
+function toggleCampoSeleccionado(valor) {
+  if(camposSeleccionados.has(valor)) camposSeleccionados.delete(valor); else camposSeleccionados.add(valor);
+  renderChipsCampo();
+  buscarCampo();
+}
+
+function quitarCampoSeleccionado(valor) {
+  camposSeleccionados.delete(valor);
+  renderChipsCampo();
+  filtrarOpcionesCampo();
+  buscarCampo();
+}
+
+function renderChipsCampo() {
+  const cont=document.getElementById('fc-camp-chips');
+  if(!cont) return;
+  if(!camposSeleccionados.size) { cont.innerHTML=''; return; }
+  cont.innerHTML=[...camposSeleccionados].sort((a,b)=>a.localeCompare(b,'es')).map(c=>{
+    const cEsc = c.replace(/'/g,"\\'");
+    return `<span class="ms-chip">${c} <span onclick="quitarCampoSeleccionado('${cEsc}')">&times;</span></span>`;
+  }).join('');
+}
+
+// Cierra el desplegable de instituciones al hacer clic fuera de el
+document.addEventListener('click', function(e){
+  const wrap = document.getElementById('fc-camp-wrap');
+  const dd = document.getElementById('fc-camp-dropdown');
+  if(wrap && dd && !wrap.contains(e.target)) dd.style.display='none';
+});
+
 function buscarCampo() {
-  const camp=(document.getElementById('fc-camp').value||'').toLowerCase().trim();
   const anio=document.getElementById('fc-anio').value;
+  const mesFiltro=document.getElementById('fc-mes').value;
   const prog=document.getElementById('fc-prog').value;
   const lista=document.getElementById('fc-lista');
-  if(!camp && !anio && !prog) { lista.innerHTML=''; return; }
+  if(!camposSeleccionados.size && !anio && !mesFiltro && !prog) { lista.innerHTML=''; return; }
 
   const filtrado=[];
   datos.forEach(r=>{
     const campoVal=(r['Campo de rotacion']||'').trim();
     if(!campoVal || campoVal==='VACACIONES') return;
     const sem=(r['Semestre']||'').trim();
+    const mesVal=(r['Mes']||'').trim();
     const progVal=(r['Programa']||'').trim();
     const id=(r['ID']||r['Persona']||'').trim();
 
-    const campOk = !camp || campoVal.toLowerCase().includes(camp);
+    const campOk = camposSeleccionados.size===0 || camposSeleccionados.has(campoVal);
     const anioOk = !anio || sem.split(' / ').map(s=>s.trim()).includes(anio);
+    const mesOk = !mesFiltro || mesVal.toUpperCase()===mesFiltro;
     const progOk = !prog || progVal===prog;
 
-    if(campOk && anioOk && progOk) {
+    if(campOk && anioOk && mesOk && progOk) {
       filtrado.push({
         id,
         residente: r['Persona']||id||'—',
