@@ -195,6 +195,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ok-estado{font-size:12px;color:#6aaa6a;font-weight:500}
 .obs-cell{font-size:12px;color:var(--sec);font-style:italic}
 .dash-cell{color:#cdd4dc}
+.vacaciones-cell{display:inline-block;font-size:12px;font-weight:600;color:var(--teal);background:var(--teal-bg);border:1px solid var(--teal);border-radius:20px;padding:4px 12px}
 .sin{text-align:center;padding:2.5rem;color:var(--sec);font-size:14px}
 
 /* ===== EVALUACION Y DOCUMENTOS ===== */
@@ -1586,7 +1587,9 @@ function renderCrono(cedula) {
       const semVigente=semestreDesdeCorte(sem);
 
       let celdaEval;
-      if(!semVigente) {
+      if(camp==='VACACIONES') {
+        celdaEval=`<span class="vacaciones-cell">😎☀️ ¡Descansa!</span>`;
+      } else if(!semVigente) {
         celdaEval=`<span class="dash-cell">— (rotación anterior a ${SEMESTRE_CORTE_NOTAS}, no aplica en el sistema)</span>`;
       } else if(aplicaNota==='No') {
         const info=buscarMesFinalBloque(mis, r);
@@ -1603,6 +1606,7 @@ function renderCrono(cedula) {
         checklistItems.push({claveRot, mes, sem, camp, rot});
         celdaEval=`
           <div class="eval-widget">
+            <a href="https://incluces.ces.edu.co/Account/Login" target="_blank" rel="noopener" class="eval-link">Evaluar en Incluces ↗</a>
             <label class="btn-upload" id="lbl-nota-${claveRot}">
               <span class="btn-upload-text">📄 Nota</span>
               <input type="file" accept=".pdf,image/*" multiple style="display:none" onchange="subirArchivo(this,'${claveRot}','nota','${progId}','${residenteId}','${rotacionId}','${nombreRotId}')">
