@@ -135,10 +135,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .buscador-row input:focus,.buscador-row select:focus{border-color:var(--az-med)}
 .ms-wrap{position:relative;flex:1;min-width:180px;width:100%;box-sizing:border-box}
 .ms-wrap input{width:100%;box-sizing:border-box}
-.ms-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;width:100%;box-sizing:border-box;max-height:220px;overflow-y:auto;background:var(--blanco);border:1.5px solid var(--az-claro);border-radius:8px;box-shadow:0 6px 18px rgba(31,78,121,0.15);z-index:50;padding:4px}
+.ms-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;width:100%;box-sizing:border-box;max-height:220px;overflow-y:auto;overflow-x:hidden;background:var(--blanco);border:1.5px solid var(--az-claro);border-radius:8px;box-shadow:0 6px 18px rgba(31,78,121,0.15);z-index:50;padding:4px}
 .ms-opcion{display:flex;align-items:flex-start;justify-content:flex-start;gap:8px;padding:6px 8px;font-size:13px;cursor:pointer;border-radius:6px;text-align:left;line-height:1.35}
 .ms-opcion:hover{background:var(--az-suave)}
-.ms-opcion input{width:auto;flex:none;margin-top:2px}
+.ms-opcion input{width:auto;flex:none;margin-top:2px;flex-shrink:0}
+.ms-opcion-txt{flex:1;min-width:0;overflow-wrap:break-word;word-break:break-word}
 .ms-opcion.ms-vacio{color:var(--sec);cursor:default}
 .ms-opcion.ms-vacio:hover{background:none}
 .ms-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:.6rem}
@@ -1161,7 +1162,7 @@ function filtrarOpcionesCampo() {
     dd.innerHTML = opciones.map(c=>{
       const marcado = camposSeleccionados.has(c);
       const cEsc = c.replace(/'/g,"\\'");
-      return `<label class="ms-opcion"><input type="checkbox" ${marcado?'checked':''} onchange="toggleCampoSeleccionado('${cEsc}')"> ${c}</label>`;
+      return `<label class="ms-opcion"><input type="checkbox" ${marcado?'checked':''} onchange="toggleCampoSeleccionado('${cEsc}')"><span class="ms-opcion-txt">${c}</span></label>`;
     }).join('');
   }
   dd.style.display='block';
