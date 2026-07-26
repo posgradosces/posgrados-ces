@@ -1744,7 +1744,7 @@ function renderCrono(cedula) {
 
       let celdaEstado;
       if(esPend) celdaEstado=`<span class="pend-badge">Pendiente</span>`;
-      else if(esNegado) celdaEstado=`<span class="negado-badge">⚠ Negado</span>`;
+      else if(esNegado) celdaEstado=`<span class="negado-badge">⚠ Negado — Estamos reasignando el campo</span>`;
       else celdaEstado=`<span class="ok-estado">${est||'—'}</span>`;
 
       html+=`<tr>
