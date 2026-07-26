@@ -12,6 +12,7 @@
   --teal:#0B7A6E;--teal-bg:#E1F5EE;--blanco:#ffffff;--fondo:#F4F7FB;
   --texto:#1a2535;--sec:#5a6a7a;--borde:#d0dce8;
   --naranja:#FFD580;--nar-txt:#7A3C00;
+  --morado:#E9D6F5;--mor-txt:#7030A0;
   --radio:10px;--sh:0 2px 16px rgba(31,78,121,0.09);
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -153,6 +154,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .res-nombre{font-weight:500;flex:2;min-width:120px}
 .res-tag{font-size:11px;color:var(--sec);background:var(--fondo);border:1px solid var(--borde);border-radius:4px;padding:1px 6px;white-space:nowrap}
 .res-tag.pend{background:var(--naranja);border-color:#e0b84a;color:var(--nar-txt);font-weight:600}
+.res-tag.negado{background:var(--morado);border-color:#b98ed6;color:var(--mor-txt);font-weight:600}
 .btn-ver{background:var(--az-suave);color:var(--az);border:1px solid var(--az-claro);border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;margin-left:auto}
 .btn-ver:hover{background:var(--az-claro)}
 
@@ -205,6 +207,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .crono-tbl tr:nth-child(even) td{background:var(--az-suave)}
 .mes-cell{font-weight:600;white-space:nowrap;color:var(--az);min-width:80px}
 .pend-badge{display:inline-block;background:var(--naranja);color:var(--nar-txt);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px}
+.negado-badge{display:inline-block;background:var(--morado);color:var(--mor-txt);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px}
 .ok-estado{font-size:12px;color:#6aaa6a;font-weight:500}
 .obs-cell{font-size:12px;color:var(--sec);font-style:italic}
 .dash-cell{color:#cdd4dc}
@@ -401,6 +404,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="kpi" onclick=""><div class="kpi-n" id="k-prog">—</div><div class="kpi-lbl">Programas</div></div>
       <div class="kpi teal" onclick=""><div class="kpi-n" id="k-camp">—</div><div class="kpi-lbl">Campos de rotación</div></div>
       <div class="kpi warn" onclick="filtrarKPI('pend')"><div class="kpi-n" id="k-pend">—</div><div class="kpi-lbl">Pendientes de confirmar</div></div>
+      <div class="kpi warn" onclick="filtrarKPI('negado')"><div class="kpi-n" id="k-negado" style="color:var(--mor-txt)">—</div><div class="kpi-lbl">Negados (requieren reasignación)</div></div>
     </div>
 
     <div class="grid2">
@@ -765,7 +769,7 @@ function renderDash() {
   construirFiltroSems();
 
   const res=new Set(), mov=new Set(), progs=new Set(), camps=new Set();
-  let pend=0;
+  let pend=0, negados=0;
   const cProg={}, cCamp={}, resxProg={}, resxCamp={};
 
   datos.forEach(r=>{
@@ -785,6 +789,7 @@ function renderDash() {
     if(!pasa) return;
 
     if(est==='Pendiente') pend++;
+    if(est==='Negado') negados++;
 
     if(tipo==='RESIDENTE CES'&&id) {
       res.add(id);
@@ -792,7 +797,7 @@ function renderDash() {
       cProg[prog].add(id);
       if(!resxProg[prog]) resxProg[prog]=[];
       if(!resxProg[prog].find(x=>x.id===id))
-        resxProg[prog].push({id,nombre,nivel,sem,pend:0});
+        resxProg[prog].push({id,nombre,nivel,sem,pend:0,negado:0});
     }
     if(tipo==='MOVILIDAD ENTRANTE'&&id) {
       mov.add(id);
@@ -816,11 +821,19 @@ function renderDash() {
     Object.values(resxCamp).flat().filter(x=>x.id===id).forEach(x=>x.pend=(x.pend||0)+1);
   });
 
+  datos.filter(r=>pasaFiltroSem(r)&&(r['Estado confirmacion']||'').trim()==='Negado').forEach(r=>{
+    const id=(r['ID']||r['Persona']||'').trim();
+    const prog=(r['Programa']||'').trim();
+    if(resxProg[prog]) { const p=resxProg[prog].find(x=>x.id===id); if(p) p.negado=(p.negado||0)+1; }
+    Object.values(resxCamp).flat().filter(x=>x.id===id).forEach(x=>x.negado=(x.negado||0)+1);
+  });
+
   document.getElementById('k-res').textContent=res.size;
   document.getElementById('k-mov').textContent=mov.size;
   document.getElementById('k-prog').textContent=progs.size;
   document.getElementById('k-camp').textContent=camps.size;
   document.getElementById('k-pend').textContent=pend;
+  document.getElementById('k-negado').textContent=negados;
 
   const pRows=Object.entries(cProg).map(([k,v])=>[k,v.size]).sort((a,b)=>a[0].localeCompare(b[0],'es'));
   document.getElementById('tbl-prog').innerHTML = pRows.map(([p,n])=>`
@@ -1092,6 +1105,9 @@ function filtrarKPI(tipo) {
   } else if(tipo==='pend') {
     buscarPend();
     document.getElementById('box-residente').scrollIntoView({behavior:'smooth'});
+  } else if(tipo==='negado') {
+    buscarNegado();
+    document.getElementById('box-residente').scrollIntoView({behavior:'smooth'});
   }
 }
 
@@ -1108,14 +1124,20 @@ function buscarPend() {
   mostrarResultados(filtrado, 'Pendientes de confirmar');
 }
 
+function buscarNegado() {
+  const filtrado = datos.filter(r=>(r['Estado confirmacion']||'').trim()==='Negado' && pasaFiltroSem(r));
+  mostrarResultados(filtrado, 'Negados (requieren reasignación)');
+}
+
 function mostrarResultados(filtrado, titulo) {
   document.getElementById('tit-residente').textContent = titulo;
   const personas={};
   filtrado.forEach(r=>{
     const id=(r['ID']||r['Persona']||'sin').trim();
-    if(!personas[id]) personas[id]={nombre:r['Persona']||'',programa:r['Programa']||'',nivel:r['Nivel / Origen']||'',sems:new Set(),pend:0,id};
+    if(!personas[id]) personas[id]={nombre:r['Persona']||'',programa:r['Programa']||'',nivel:r['Nivel / Origen']||'',sems:new Set(),pend:0,negado:0,id};
     if(r['Semestre']) personas[id].sems.add(r['Semestre']);
     if((r['Estado confirmacion']||'').trim()==='Pendiente') personas[id].pend++;
+    if((r['Estado confirmacion']||'').trim()==='Negado') personas[id].negado++;
   });
   const lista=document.getElementById('res-lista');
   const items=Object.values(personas);
@@ -1126,6 +1148,7 @@ function mostrarResultados(filtrado, titulo) {
       <span class="res-tag">${p.programa}</span>
       <span class="res-tag">${p.nivel}</span>
       ${p.pend?`<span class="res-tag pend">${p.pend} pendientes</span>`:''}
+      ${p.negado?`<span class="res-tag negado">${p.negado} negados</span>`:''}
       <button class="btn-ver" onclick="event.stopPropagation();verResidente('${p.id.replace(/'/g,"\\'")}')">Ver →</button>
     </div>`).join('');
 }
@@ -1615,6 +1638,7 @@ function renderCrono(cedula) {
   const nivel=info['Nivel / Origen']||'';
   const total=mis.length;
   const pends=mis.filter(r=>(r['Estado confirmacion']||'').trim()==='Pendiente').length;
+  const negados=mis.filter(r=>(r['Estado confirmacion']||'').trim()==='Negado').length;
   const sems=[...new Set(mis.map(r=>r['Semestre']||'').filter(Boolean))];
   const porSem={};
   mis.forEach(r=>{const s=r['Semestre']||'Sin semestre';if(!porSem[s])porSem[s]=[];porSem[s].push(r);});
@@ -1638,6 +1662,7 @@ function renderCrono(cedula) {
         <div class="p-stat"><div class="p-stat-n">${total}</div><div class="p-stat-l">Rotaciones</div></div>
         <div class="p-stat"><div class="p-stat-n">${sems.length}</div><div class="p-stat-l">Semestres</div></div>
         ${pends?`<div class="p-stat"><div class="p-stat-n" style="color:var(--nar-txt)">${pends}</div><div class="p-stat-l">Pendientes</div></div>`:''}
+        ${negados?`<div class="p-stat"><div class="p-stat-n" style="color:var(--mor-txt)">${negados}</div><div class="p-stat-l">Negados</div></div>`:''}
         <div class="p-stat"><div class="p-stat-n" id="eval-pend-n" style="color:var(--nar-txt)">—</div><div class="p-stat-l">Notas pend.</div></div>
       </div>
     </div>
@@ -1683,6 +1708,7 @@ function renderCrono(cedula) {
       const est=(r['Estado confirmacion']||'').trim();
       const obs=r['Observacion']||'';
       const esPend=est==='Pendiente';
+      const esNegado=est==='Negado';
       // Compatibilidad: si el CSV aun no trae "Aplica nota" (datos generados
       // antes de este cambio), se asume "Si" para no romper el flujo anterior.
       const aplicaNota=(r['Aplica nota']||'Si').trim();
@@ -1716,9 +1742,14 @@ function renderCrono(cedula) {
           </div>`;
       }
 
+      let celdaEstado;
+      if(esPend) celdaEstado=`<span class="pend-badge">Pendiente</span>`;
+      else if(esNegado) celdaEstado=`<span class="negado-badge">⚠ Negado</span>`;
+      else celdaEstado=`<span class="ok-estado">${est||'—'}</span>`;
+
       html+=`<tr>
         <td class="mes-cell">${mes}</td><td>${camp}</td><td>${rot}</td>
-        <td>${esPend?`<span class="pend-badge">Pendiente</span>`:`<span class="ok-estado">${est||'—'}</span>`}</td>
+        <td>${celdaEstado}</td>
         <td>${obs?`<span class="obs-cell">${obs}</span>`:`<span class="dash-cell">—</span>`}</td>
         <td class="eval-cell">${celdaEval}</td>
       </tr>`;
