@@ -627,7 +627,7 @@ ANESTESIA,2026-2027,2026-2,Vacaciones,R1,1001366309,MARTIN CASTRO,Vacaciones dic
 ANESTESIA,2026-2027,2026-2,Residente CES,R2,1037663469,MARIA CAMILA VELASQUEZ PIZZIRUSSO,JULIO,C. NOEL,ANESTESIA PEDIATRICA I,"C. NOEL
 ANESTESIA PEDIATRICA I",Pendiente,Campo anterior: C. CES / ANESTESIA GENERAL IV,No
 ANESTESIA,2026-2027,2026-2,Residente CES,R2,1037663469,MARIA CAMILA VELASQUEZ PIZZIRUSSO,AGOSTO,C. NOEL,ANESTESIA PEDIATRICA I,"C. NOEL
-ANESTESIA PEDIATRICA I",Pendiente,Campo anterior: C. CES / ANESTESIA GENERAL IV,Si
+ANESTESIA PEDIATRICA I",Confirmado,,Si
 ANESTESIA,2026-2027,2026-2,Residente CES,R2,1037663469,MARIA CAMILA VELASQUEZ PIZZIRUSSO,SEPTIEMBRE,C. AMERICAS - H. NEUROLOGICO DE COLOMBIA,NEUROANESTESIA,"C. AMERICAS - H. NEUROLOGICO DE COLOMBIA
 NEUROANESTESIA",Pendiente,Campo anterior: HGM / ANESTESIA OBSTETRICA I,No
 ANESTESIA,2026-2027,2026-2,Residente CES,R2,1037663469,MARIA CAMILA VELASQUEZ PIZZIRUSSO,OCTUBRE,C. AMERICAS - H. NEUROLOGICO DE COLOMBIA,NEUROANESTESIA,"C. AMERICAS - H. NEUROLOGICO DE COLOMBIA
@@ -8199,23 +8199,23 @@ PSIQUIATRIA COMUNITARIA",Pendiente,Campo anterior: C. SAN JUAN DE DIOS (LA CEJA)
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1017268630,CAROLINA FRANCO SALAZAR,AGOSTO,METROSALUD SANTACRUZ- VILLA DEL SOCORRO,PSIQUIATRIA COMUNITARIA,"METROSALUD SANTACRUZ- VILLA DEL SOCORRO 
 PSIQUIATRIA COMUNITARIA",Pendiente,Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1017268630,CAROLINA FRANCO SALAZAR,SEPTIEMBRE,HMUA,PSICOTERAPIA I,"HMUA 
-PSICOTERAPIA I",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
+PSICOTERAPIA I",Pendiente,Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1017268630,CAROLINA FRANCO SALAZAR,OCTUBRE,MENTE PLENA,CONSULTA EXTERNA II,"MENTE PLENA
-CONSULTA EXTERNA II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
+CONSULTA EXTERNA II",Pendiente,Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1017268630,CAROLINA FRANCO SALAZAR,NOVIEMBRE,MENTE PLENA,CONSULTA EXTERNA II,"MENTE PLENA
-CONSULTA EXTERNA II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
+CONSULTA EXTERNA II",Pendiente,Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1017268630,CAROLINA FRANCO SALAZAR,DICIEMBRE,MENTE PLENA,CONSULTA EXTERNA II,"MENTE PLENA
-CONSULTA EXTERNA II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
+CONSULTA EXTERNA II",Pendiente,Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1017268630,CAROLINA FRANCO SALAZAR,ENERO,C. SAN JUAN DE DIOS DE LA CEJA,FARMACODEPENDENCIA,"C. SAN JUAN DE DIOS DE LA CEJA
-FARMACODEPENDENCIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. CES / MEDICINA INTERNA | Solicitar / verificar confirmacion del campo,No
+FARMACODEPENDENCIA",Pendiente,Campo anterior: C. CES / MEDICINA INTERNA | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1017268630,CAROLINA FRANCO SALAZAR,FEBRERO,C. SAN JUAN DE DIOS DE LA CEJA,FARMACODEPENDENCIA,"C. SAN JUAN DE DIOS DE LA CEJA
-FARMACODEPENDENCIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. CES / NEUROLOGIA | Solicitar / verificar confirmacion del campo,No
+FARMACODEPENDENCIA",Pendiente,Campo anterior: C. CES / NEUROLOGIA | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1017268630,CAROLINA FRANCO SALAZAR,MARZO,C. SAN JUAN DE DIOS DE LA CEJA,FARMACODEPENDENCIA,"C. SAN JUAN DE DIOS DE LA CEJA
-FARMACODEPENDENCIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. LAS AMERICAS / NEUROPSIQUIATRIA | Solicitar / verificar confirmacion del campo,Si
+FARMACODEPENDENCIA",Pendiente,Campo anterior: C. LAS AMERICAS / NEUROPSIQUIATRIA | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1017268630,CAROLINA FRANCO SALAZAR,ABRIL,HGM,PSIQUIATRIA DE ENLACE I,"HGM
-PSIQUIATRIA DE ENLACE I",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA DE ENLACE I",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1017268630,CAROLINA FRANCO SALAZAR,MAYO,HGM,PSIQUIATRIA DE ENLACE I,"HGM
-PSIQUIATRIA DE ENLACE I",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HMUA / PSICOTERAPIA I | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA DE ENLACE I",Pendiente,Campo anterior: HMUA / PSICOTERAPIA I | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1017268630,CAROLINA FRANCO SALAZAR,JUNIO,HGM,PSIQUIATRIA DE ENLACE I,"HGM
 PSIQUIATRIA DE ENLACE I",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2026-2,Vacaciones,R2,1017268630,CAROLINA FRANCO SALAZAR,Vacaciones diciembre,VACACIONES,Vacaciones diciembre,14 DE DICIEMBRE DE 2026 AL 7 DE ENERO DE 2027,Pendiente,14 DE DICIEMBRE DE 2026 AL 7 DE ENERO DE 2027 | Verificar / gestionar vacaciones,Si
@@ -8225,23 +8225,23 @@ FARMACODEPENDENCIA",Pendiente,Campo anterior: HOMO / PSIQUIATRIA GENERAL,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1017260831,ESTEFANIA DIAZ GOMEZ,AGOSTO,C. SAN JUAN DE DIOS DE LA CEJA,FARMACODEPENDENCIA,"C. SAN JUAN DE DIOS DE LA CEJA
 FARMACODEPENDENCIA",Pendiente,Campo anterior: HOMO / PSIQUIATRIA GENERAL,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1017260831,ESTEFANIA DIAZ GOMEZ,SEPTIEMBRE,C. SAN JUAN DE DIOS DE LA CEJA,FARMACODEPENDENCIA,"C. SAN JUAN DE DIOS DE LA CEJA
-FARMACODEPENDENCIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
+FARMACODEPENDENCIA",Pendiente,Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1017260831,ESTEFANIA DIAZ GOMEZ,OCTUBRE,HGM,PSIQUIATRIA DE ENLACE I,"HGM
-PSIQUIATRIA DE ENLACE I",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA DE ENLACE I",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1017260831,ESTEFANIA DIAZ GOMEZ,NOVIEMBRE,HGM,PSIQUIATRIA DE ENLACE I,"HGM
-PSIQUIATRIA DE ENLACE I",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA DE ENLACE I",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1017260831,ESTEFANIA DIAZ GOMEZ,DICIEMBRE,HGM,PSIQUIATRIA DE ENLACE I,"HGM
-PSIQUIATRIA DE ENLACE I",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA DE ENLACE I",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1017260831,ESTEFANIA DIAZ GOMEZ,ENERO,MENTE PLENA,CONSULTA EXTERNA II,"MENTE PLENA
-CONSULTA EXTERNA II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
+CONSULTA EXTERNA II",Pendiente,Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1017260831,ESTEFANIA DIAZ GOMEZ,FEBRERO,MENTE PLENA,CONSULTA EXTERNA II,"MENTE PLENA
-CONSULTA EXTERNA II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
+CONSULTA EXTERNA II",Pendiente,Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1017260831,ESTEFANIA DIAZ GOMEZ,MARZO,MENTE PLENA,CONSULTA EXTERNA II,"MENTE PLENA
-CONSULTA EXTERNA II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
+CONSULTA EXTERNA II",Pendiente,Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1017260831,ESTEFANIA DIAZ GOMEZ,ABRIL,HMUA,PSICOTERAPIA I,"HMUA 
-PSICOTERAPIA I",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. LAS AMERICAS / NEUROPSIQUIATRIA | Solicitar / verificar confirmacion del campo,Si
+PSICOTERAPIA I",Pendiente,Campo anterior: C. LAS AMERICAS / NEUROPSIQUIATRIA | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1017260831,ESTEFANIA DIAZ GOMEZ,MAYO,METROSALUD SANTACRUZ- VILLA DEL SOCORRO,PSIQUIATRIA COMUNITARIA,"METROSALUD SANTACRUZ- VILLA DEL SOCORRO 
-PSIQUIATRIA COMUNITARIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. CES / NEUROLOGIA | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA COMUNITARIA",Pendiente,Campo anterior: C. CES / NEUROLOGIA | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1017260831,ESTEFANIA DIAZ GOMEZ,JUNIO,METROSALUD SANTACRUZ- VILLA DEL SOCORRO,PSIQUIATRIA COMUNITARIA,"METROSALUD SANTACRUZ- VILLA DEL SOCORRO 
 PSIQUIATRIA COMUNITARIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. CES / MEDICINA INTERNA | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2026-2,Vacaciones,R2,1017260831,ESTEFANIA DIAZ GOMEZ,Vacaciones diciembre,VACACIONES,Vacaciones diciembre,14 DE DICIEMBRE DE 2026 AL 7 DE ENERO DE 2027,Pendiente,14 DE DICIEMBRE DE 2026 AL 7 DE ENERO DE 2027 | Verificar / gestionar vacaciones,Si
@@ -8251,23 +8251,23 @@ PSIQUIATRIA DE ENLACE I",Pendiente,Campo anterior: C. CES / MEDICINA INTERNA,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1066750922,LUIS RICARDO SUAREZ DIAZ,AGOSTO,HGM,PSIQUIATRIA DE ENLACE I,"HGM
 PSIQUIATRIA DE ENLACE I",Pendiente,Campo anterior: C. CES / NEUROLOGIA,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1066750922,LUIS RICARDO SUAREZ DIAZ,SEPTIEMBRE,HGM,PSIQUIATRIA DE ENLACE I,"HGM
-PSIQUIATRIA DE ENLACE I",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. LAS AMERICAS / NEUROPSIQUIATRIA | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA DE ENLACE I",Pendiente,Campo anterior: C. LAS AMERICAS / NEUROPSIQUIATRIA | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1066750922,LUIS RICARDO SUAREZ DIAZ,OCTUBRE,C. SAN JUAN DE DIOS DE LA CEJA,FARMACODEPENDENCIA,"C. SAN JUAN DE DIOS DE LA CEJA
-FARMACODEPENDENCIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
+FARMACODEPENDENCIA",Pendiente,Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1066750922,LUIS RICARDO SUAREZ DIAZ,NOVIEMBRE,C. SAN JUAN DE DIOS DE LA CEJA,FARMACODEPENDENCIA,"C. SAN JUAN DE DIOS DE LA CEJA
-FARMACODEPENDENCIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
+FARMACODEPENDENCIA",Pendiente,Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1066750922,LUIS RICARDO SUAREZ DIAZ,DICIEMBRE,C. SAN JUAN DE DIOS DE LA CEJA,FARMACODEPENDENCIA,"C. SAN JUAN DE DIOS DE LA CEJA
-FARMACODEPENDENCIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
+FARMACODEPENDENCIA",Pendiente,Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1066750922,LUIS RICARDO SUAREZ DIAZ,ENERO,HMUA,PSICOTERAPIA I,"HMUA 
-PSICOTERAPIA I",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,Si
+PSICOTERAPIA I",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1066750922,LUIS RICARDO SUAREZ DIAZ,FEBRERO,METROSALUD SANTACRUZ- VILLA DEL SOCORRO,PSIQUIATRIA COMUNITARIA,"METROSALUD SANTACRUZ- VILLA DEL SOCORRO 
-PSIQUIATRIA COMUNITARIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA COMUNITARIA",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1066750922,LUIS RICARDO SUAREZ DIAZ,MARZO,METROSALUD SANTACRUZ- VILLA DEL SOCORRO,PSIQUIATRIA COMUNITARIA,"METROSALUD SANTACRUZ- VILLA DEL SOCORRO 
-PSIQUIATRIA COMUNITARIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA COMUNITARIA",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1066750922,LUIS RICARDO SUAREZ DIAZ,ABRIL,MENTE PLENA,CONSULTA EXTERNA II,"MENTE PLENA
-CONSULTA EXTERNA II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
+CONSULTA EXTERNA II",Pendiente,Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1066750922,LUIS RICARDO SUAREZ DIAZ,MAYO,MENTE PLENA,CONSULTA EXTERNA II,"MENTE PLENA
-CONSULTA EXTERNA II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
+CONSULTA EXTERNA II",Pendiente,Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1066750922,LUIS RICARDO SUAREZ DIAZ,JUNIO,MENTE PLENA,CONSULTA EXTERNA II,"MENTE PLENA
 CONSULTA EXTERNA II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2026-2,Vacaciones,R2,1066750922,LUIS RICARDO SUAREZ DIAZ,Vacaciones diciembre,VACACIONES,Vacaciones diciembre,14 DE DICIEMBRE DE 2026 AL 7 DE ENERO DE 2027,Pendiente,14 DE DICIEMBRE DE 2026 AL 7 DE ENERO DE 2027 | Verificar / gestionar vacaciones,Si
@@ -8277,23 +8277,23 @@ CONSULTA EXTERNA II",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA I,
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1000416700,MARIA ANTONIA ANGEL CABAL,AGOSTO,MENTE PLENA,CONSULTA EXTERNA II,"MENTE PLENA
 CONSULTA EXTERNA II",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA I,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1000416700,MARIA ANTONIA ANGEL CABAL,SEPTIEMBRE,MENTE PLENA,CONSULTA EXTERNA II,"MENTE PLENA
-CONSULTA EXTERNA II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,Si
+CONSULTA EXTERNA II",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1000416700,MARIA ANTONIA ANGEL CABAL,OCTUBRE,METROSALUD SANTACRUZ- VILLA DEL SOCORRO,PSIQUIATRIA COMUNITARIA,"METROSALUD SANTACRUZ- VILLA DEL SOCORRO 
-PSIQUIATRIA COMUNITARIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. CES / MEDICINA INTERNA | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA COMUNITARIA",Pendiente,Campo anterior: C. CES / MEDICINA INTERNA | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1000416700,MARIA ANTONIA ANGEL CABAL,NOVIEMBRE,METROSALUD SANTACRUZ- VILLA DEL SOCORRO,PSIQUIATRIA COMUNITARIA,"METROSALUD SANTACRUZ- VILLA DEL SOCORRO 
-PSIQUIATRIA COMUNITARIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. LAS AMERICAS / NEUROPSIQUIATRIA | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA COMUNITARIA",Pendiente,Campo anterior: C. LAS AMERICAS / NEUROPSIQUIATRIA | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R2,1000416700,MARIA ANTONIA ANGEL CABAL,DICIEMBRE,HGM,PSIQUIATRIA DE ENLACE I,"HGM
-PSIQUIATRIA DE ENLACE I",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. CES / NEUROLOGIA | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA DE ENLACE I",Pendiente,Campo anterior: C. CES / NEUROLOGIA | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1000416700,MARIA ANTONIA ANGEL CABAL,ENERO,HGM,PSIQUIATRIA DE ENLACE I,"HGM
-PSIQUIATRIA DE ENLACE I",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA DE ENLACE I",Pendiente,Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1000416700,MARIA ANTONIA ANGEL CABAL,FEBRERO,HGM,PSIQUIATRIA DE ENLACE I,"HGM
-PSIQUIATRIA DE ENLACE I",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA DE ENLACE I",Pendiente,Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1000416700,MARIA ANTONIA ANGEL CABAL,MARZO,HMUA,PSICOTERAPIA I,"HMUA 
-PSICOTERAPIA I",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
+PSICOTERAPIA I",Pendiente,Campo anterior: HOMO / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1000416700,MARIA ANTONIA ANGEL CABAL,ABRIL,C. SAN JUAN DE DIOS DE LA CEJA,FARMACODEPENDENCIA,"C. SAN JUAN DE DIOS DE LA CEJA
-FARMACODEPENDENCIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
+FARMACODEPENDENCIA",Pendiente,Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1000416700,MARIA ANTONIA ANGEL CABAL,MAYO,C. SAN JUAN DE DIOS DE LA CEJA,FARMACODEPENDENCIA,"C. SAN JUAN DE DIOS DE LA CEJA
-FARMACODEPENDENCIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
+FARMACODEPENDENCIA",Pendiente,Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R2,1000416700,MARIA ANTONIA ANGEL CABAL,JUNIO,C. SAN JUAN DE DIOS DE LA CEJA,FARMACODEPENDENCIA,"C. SAN JUAN DE DIOS DE LA CEJA
 FARMACODEPENDENCIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS (LA CEJA) / PSIQUIATRIA GENERAL | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2026-2,Vacaciones,R2,1000416700,MARIA ANTONIA ANGEL CABAL,Vacaciones diciembre,VACACIONES,Vacaciones diciembre,14 DE DICIEMBRE DE 2026 AL 7 DE ENERO DE 2027,Pendiente,14 DE DICIEMBRE DE 2026 AL 7 DE ENERO DE 2027 | Verificar / gestionar vacaciones,Si
@@ -8303,7 +8303,7 @@ PSIQUIATRIA DE ENLACE II",Pendiente,Campo anterior: METROSALUD SANTACRUZ- VILLA 
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1017276256,ANDRES FELIPE ALZATE ARBELAEZ,AGOSTO,C. CES,PSIQUIATRIA DE ENLACE II,"C. CES 
 PSIQUIATRIA DE ENLACE II",Pendiente,Campo anterior: METROSALUD SANTACRUZ- VILLA DEL SOCORRO / PSIQUIATRIA COMUNITARIA,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1017276256,ANDRES FELIPE ALZATE ARBELAEZ,SEPTIEMBRE,C. CES,PSIQUIATRIA DE ENLACE II,"C. CES 
-PSIQUIATRIA DE ENLACE II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA DE ENLACE II",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA I | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1017276256,ANDRES FELIPE ALZATE ARBELAEZ,OCTUBRE,"H. CLINICO SAN - CARLOS, MADRID ESPAÑA",ELECTIVA: PSIQUIATRIA,"H. CLINICO SAN
 CARLOS, MADRID ESPAÑA
 ELECTIVA: PSIQUIATRIA
@@ -8313,19 +8313,19 @@ CARLOS, MADRID ESPAÑA
 ELECTIVA: PSIQUIATRIA
 ",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA II,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1017276256,ANDRES FELIPE ALZATE ARBELAEZ,DICIEMBRE,HPTU,ENDOCRINOLOGIA,"HPTU
-ENDOCRINOLOGIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA II | Solicitar / verificar confirmacion del campo,Si
+ENDOCRINOLOGIA",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA II | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1017276256,ANDRES FELIPE ALZATE ARBELAEZ,ENERO,MEDICINA LEGAL,PSIQUIATRIA FORENSE,"MEDICINA LEGAL
-PSIQUIATRIA FORENSE",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA FORENSE",Pendiente,Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1017276256,ANDRES FELIPE ALZATE ARBELAEZ,FEBRERO,C. CES,PSICOTERAPIA II,"C. CES
-PSICOTERAPIA II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA | Solicitar / verificar confirmacion del campo,Si
+PSICOTERAPIA II",Pendiente,Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1017276256,ANDRES FELIPE ALZATE ARBELAEZ,MARZO,HPTU,PSIQUIATRIA INFANTIL,"HPTU
-PSIQUIATRIA INFANTIL",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA INFANTIL",Pendiente,Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1017276256,ANDRES FELIPE ALZATE ARBELAEZ,ABRIL,HPTU,PSIQUIATRIA INFANTIL,"HPTU
-PSIQUIATRIA INFANTIL",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA INFANTIL",Pendiente,Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1017276256,ANDRES FELIPE ALZATE ARBELAEZ,MAYO,INTEGRAR,PSIQUIATRIA INFANTIL,"INTEGRAR
-PSIQUIATRIA INFANTIL",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA INFANTIL",Pendiente,Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1017276256,ANDRES FELIPE ALZATE ARBELAEZ,JUNIO,ELECTIVA,ELECTIVA,"ELECTIVA 
-",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,Si
+",Pendiente,Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2026-2,Vacaciones,R3,1017276256,ANDRES FELIPE ALZATE ARBELAEZ,Vacaciones diciembre,VACACIONES,Vacaciones diciembre,PRIMER TIEMPO DEL 18 AL 30 DE SEPTIEMBRE 2026 ( 10 DIAS HABILES) - SEGUNDO TIEMPO DEL 5 AL 9 DE ENERO DEL 2027,Pendiente,PRIMER TIEMPO DEL 18 AL 30 DE SEPTIEMBRE 2026 ( 10 DIAS HABILES) - SEGUNDO TIEMPO DEL 5 AL 9 DE ENERO DEL 2027 | Verificar / gestionar vacaciones,Si
 PSIQUIATRIA,2026-2027,2027-1,Vacaciones,R3,1017276256,ANDRES FELIPE ALZATE ARBELAEZ,Vacaciones junio,VACACIONES,Vacaciones junio,24 DE JUNIO 2027 A 30 JUNIO 2027.,Pendiente,24 DE JUNIO 2027 A 30 JUNIO 2027. | Verificar / gestionar vacaciones,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152214158,JULIAN RAMIREZ MEJIA,JULIO,ELECTIVA,TERAPIA FAMILIAR H.MUA,"ELECTIVA 
@@ -8333,77 +8333,77 @@ TERAPIA FAMILIAR H.MUA",Pendiente,Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152214158,JULIAN RAMIREZ MEJIA,AGOSTO,MEDICINA LEGAL,PSIQUIATRIA FORENSE,"MEDICINA LEGAL
 PSIQUIATRIA FORENSE",Pendiente,Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152214158,JULIAN RAMIREZ MEJIA,SEPTIEMBRE,HPTU,ENDOCRINOLOGIA,"HPTU
-ENDOCRINOLOGIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA | Solicitar / verificar confirmacion del campo,Si
+ENDOCRINOLOGIA",Pendiente,Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152214158,JULIAN RAMIREZ MEJIA,OCTUBRE,C. CES,PSIQUIATRIA DE ENLACE II,"C. CES 
-PSIQUIATRIA DE ENLACE II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA DE ENLACE II",Pendiente,Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152214158,JULIAN RAMIREZ MEJIA,NOVIEMBRE,C. CES,PSIQUIATRIA DE ENLACE II,"C. CES 
-PSIQUIATRIA DE ENLACE II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA DE ENLACE II",Pendiente,Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152214158,JULIAN RAMIREZ MEJIA,DICIEMBRE,C. CES,PSIQUIATRIA DE ENLACE II,"C. CES 
-PSIQUIATRIA DE ENLACE II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA DE ENLACE II",Pendiente,Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152214158,JULIAN RAMIREZ MEJIA,ENERO,HPTU,PSIQUIATRIA INFANTIL,"HPTU
-PSIQUIATRIA INFANTIL",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA II | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA INFANTIL",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA II | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152214158,JULIAN RAMIREZ MEJIA,FEBRERO,HPTU,PSIQUIATRIA INFANTIL,"HPTU
-PSIQUIATRIA INFANTIL",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA II | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA INFANTIL",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA II | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152214158,JULIAN RAMIREZ MEJIA,MARZO,INTEGRAR,PSIQUIATRIA INFANTIL,"INTEGRAR
-PSIQUIATRIA INFANTIL",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA II | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA INFANTIL",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA II | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152214158,JULIAN RAMIREZ MEJIA,ABRIL,C. CES,PSICOTERAPIA II,"C. CES
-PSICOTERAPIA II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HMUA / PSICOTERAPIA I | Solicitar / verificar confirmacion del campo,Si
+PSICOTERAPIA II",Pendiente,Campo anterior: HMUA / PSICOTERAPIA I | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152214158,JULIAN RAMIREZ MEJIA,MAYO,ELECTIVA,ELECTIVA,"ELECTIVA 
-",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: METROSALUD SANTACRUZ- VILLA DEL SOCORRO / PSIQUIATRIA COMUNITARIA | Solicitar / verificar confirmacion del campo,No
+",Pendiente,Campo anterior: METROSALUD SANTACRUZ- VILLA DEL SOCORRO / PSIQUIATRIA COMUNITARIA | Solicitar / verificar confirmacion del campo,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152214158,JULIAN RAMIREZ MEJIA,JUNIO,ELECTIVA,ELECTIVA,"ELECTIVA 
-",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: METROSALUD SANTACRUZ- VILLA DEL SOCORRO / PSIQUIATRIA COMUNITARIA | Solicitar / verificar confirmacion del campo,Si
+",Pendiente,Campo anterior: METROSALUD SANTACRUZ- VILLA DEL SOCORRO / PSIQUIATRIA COMUNITARIA | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2026-2,Vacaciones,R3,1152214158,JULIAN RAMIREZ MEJIA,Vacaciones diciembre,VACACIONES,Vacaciones diciembre,14 DE DICIEMBRE DE 2026 AL 7 DE ENERO DE 2027,Pendiente,14 DE DICIEMBRE DE 2026 AL 7 DE ENERO DE 2027 | Verificar / gestionar vacaciones,Si
 PSIQUIATRIA,2026-2027,2027-1,Vacaciones,R3,1152214158,JULIAN RAMIREZ MEJIA,Vacaciones junio,VACACIONES,Vacaciones junio,24 DE JUNIO 2027 A 30 JUNIO 2027.,Pendiente,24 DE JUNIO 2027 A 30 JUNIO 2027. | Verificar / gestionar vacaciones,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,JULIO,INTEGRAR,PSIQUIATRIA INFANTIL,"INTEGRAR
 PSIQUIATRIA INFANTIL",Pendiente,Campo anterior: HGM / PSIQUIATRIA DE ENLACE I,Si
-PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,AGOSTO,HOMO,PSIQUIATRIA INFANTIL,"HOMO
-PSIQUIATRIA INFANTIL",Pendiente,Campo anterior: HGM / PSIQUIATRIA DE ENLACE I,Si
-PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,SEPTIEMBRE,INTEGRAR,PSIQUIATRIA INFANTIL,"INTEGRAR
-PSIQUIATRIA INFANTIL",Pendiente,Negado en HGM - HSJD Ceja - Integrar | Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,AGOSTO,MENTE PLENA,PSIQUIATRIA INFANTIL,"MENTE PLENA
+PSIQUIATRIA INFANTIL",Pendiente,Campo anterior: HGM / PSIQUIATRIA DE ENLACE I,No
+PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,SEPTIEMBRE,MENTE PLENA,PSIQUIATRIA INFANTIL,"MENTE PLENA
+PSIQUIATRIA INFANTIL",Pendiente,Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,OCTUBRE,MEDICINA LEGAL,PSIQUIATRIA FORENSE,"MEDICINA LEGAL
-PSIQUIATRIA FORENSE",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA FORENSE",Pendiente,Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,NOVIEMBRE,HPTU,ENDOCRINOLOGIA,"HPTU
-ENDOCRINOLOGIA",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA | Solicitar / verificar confirmacion del campo,Si
+ENDOCRINOLOGIA",Pendiente,Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,DICIEMBRE,C. CES,PSICOTERAPIA II,"C. CES
-PSICOTERAPIA II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA | Solicitar / verificar confirmacion del campo,Si
-PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,ENERO,ELECTIVA,ELECTIVA,"ELECTIVA 
-",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA II | Solicitar / verificar confirmacion del campo,No
-PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,FEBRERO,ELECTIVA,ELECTIVA,"ELECTIVA 
-",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA II | Solicitar / verificar confirmacion del campo,No
+PSICOTERAPIA II",Pendiente,Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA,Si
+PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,ENERO,HMUA,ELECTIVA: TERAPIA FAMILIAR,"HMUA
+ELECTIVA: TERAPIA FAMILIAR",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA II,No
+PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,FEBRERO,HMUA,ELECTIVA: TERAPIA FAMILIAR,"HMUA
+ELECTIVA: TERAPIA FAMILIAR",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA II,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,MARZO,ELECTIVA,ELECTIVA,"ELECTIVA 
-",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: METROSALUD SANTACRUZ- VILLA DEL SOCORRO / PSIQUIATRIA COMUNITARIA | Solicitar / verificar confirmacion del campo,Si
+",Pendiente,Campo anterior: METROSALUD SANTACRUZ- VILLA DEL SOCORRO / PSIQUIATRIA COMUNITARIA,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,ABRIL,C. CES,PSIQUIATRIA DE ENLACE II,"C. CES 
-PSIQUIATRIA DE ENLACE II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: METROSALUD SANTACRUZ- VILLA DEL SOCORRO / PSIQUIATRIA COMUNITARIA | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA DE ENLACE II",Pendiente,Campo anterior: METROSALUD SANTACRUZ- VILLA DEL SOCORRO / PSIQUIATRIA COMUNITARIA,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,MAYO,C. CES,PSIQUIATRIA DE ENLACE II,"C. CES 
-PSIQUIATRIA DE ENLACE II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HMUA / PSICOTERAPIA I | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA DE ENLACE II",Pendiente,Campo anterior: HMUA / PSICOTERAPIA I,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,JUNIO,C. CES,PSIQUIATRIA DE ENLACE II,"C. CES 
-PSIQUIATRIA DE ENLACE II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA II | Solicitar / verificar confirmacion del campo,Si
-PSIQUIATRIA,2026-2027,2026-2,Vacaciones,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,Vacaciones diciembre,VACACIONES,Vacaciones diciembre,11 DE MARZO 2027 A 31 MARZO 2027,Pendiente,11 DE MARZO 2027 A 31 MARZO 2027,Si
+PSIQUIATRIA DE ENLACE II",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA II,Si
+PSIQUIATRIA,2026-2027,2026-2,Vacaciones,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,Vacaciones diciembre,VACACIONES,Vacaciones diciembre,10 DE FEBRERO 2027 A 30 FEBRERO 2027,Pendiente,10 DE FEBRERO 2027 A 30 FEBRERO 2027,Si
 PSIQUIATRIA,2026-2027,2027-1,Vacaciones,R3,1152439126,LUISA MARIA RAMIREZ ESCOBAR,Vacaciones junio,VACACIONES,Vacaciones junio,24 DE JUNIO 2027 A 30 JUNIO 2027.,Pendiente,24 DE JUNIO 2027 A 30 JUNIO 2027. | Verificar / gestionar vacaciones,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152213426,MARIA ADELAIDA DE GREIFF ALVAREZ,JULIO,HPTU,ENDOCRINOLOGIA,"HPTU
 ENDOCRINOLOGIA",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA II,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152213426,MARIA ADELAIDA DE GREIFF ALVAREZ,AGOSTO,C. CES,PSICOTERAPIA II,"C. CES
 PSICOTERAPIA II",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA II,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152213426,MARIA ADELAIDA DE GREIFF ALVAREZ,SEPTIEMBRE,MEDICINA LEGAL,PSIQUIATRIA FORENSE,"MEDICINA LEGAL
-PSIQUIATRIA FORENSE",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: MENTE PLENA / CONSULTA EXTERNA II | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA FORENSE",Pendiente,Campo anterior: MENTE PLENA / CONSULTA EXTERNA II,Si
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152213426,MARIA ADELAIDA DE GREIFF ALVAREZ,OCTUBRE,ELECTIVA,ELECTIVA,"ELECTIVA 
-",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: METROSALUD SANTACRUZ- VILLA DEL SOCORRO / PSIQUIATRIA COMUNITARIA | Solicitar / verificar confirmacion del campo,No
+",Pendiente,Campo anterior: METROSALUD SANTACRUZ- VILLA DEL SOCORRO / PSIQUIATRIA COMUNITARIA,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152213426,MARIA ADELAIDA DE GREIFF ALVAREZ,NOVIEMBRE,ELECTIVA,ELECTIVA,"ELECTIVA 
-",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: METROSALUD SANTACRUZ- VILLA DEL SOCORRO / PSIQUIATRIA COMUNITARIA | Solicitar / verificar confirmacion del campo,No
+",Pendiente,Campo anterior: METROSALUD SANTACRUZ- VILLA DEL SOCORRO / PSIQUIATRIA COMUNITARIA,No
 PSIQUIATRIA,2026-2027,2026-2,Residente CES,R3,1152213426,MARIA ADELAIDA DE GREIFF ALVAREZ,DICIEMBRE,ELECTIVA,ELECTIVA,"ELECTIVA 
-",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HMUA / PSICOTERAPIA I | Solicitar / verificar confirmacion del campo,Si
+",Pendiente,Campo anterior: HMUA / PSICOTERAPIA I,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152213426,MARIA ADELAIDA DE GREIFF ALVAREZ,ENERO,C. CES,PSIQUIATRIA DE ENLACE II,"C. CES 
-PSIQUIATRIA DE ENLACE II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA DE ENLACE II",Pendiente,Campo anterior: HGM / PSIQUIATRIA DE ENLACE I,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152213426,MARIA ADELAIDA DE GREIFF ALVAREZ,FEBRERO,C. CES,PSIQUIATRIA DE ENLACE II,"C. CES 
-PSIQUIATRIA DE ENLACE II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA DE ENLACE II",Pendiente,Campo anterior: HGM / PSIQUIATRIA DE ENLACE I,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152213426,MARIA ADELAIDA DE GREIFF ALVAREZ,MARZO,C. CES,PSIQUIATRIA DE ENLACE II,"C. CES 
-PSIQUIATRIA DE ENLACE II",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: HGM / PSIQUIATRIA DE ENLACE I | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA DE ENLACE II",Pendiente,Campo anterior: HGM / PSIQUIATRIA DE ENLACE I,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152213426,MARIA ADELAIDA DE GREIFF ALVAREZ,ABRIL,INTEGRAR,PSIQUIATRIA INFANTIL,"INTEGRAR
-PSIQUIATRIA INFANTIL",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA INFANTIL",Pendiente,Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA,Si
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152213426,MARIA ADELAIDA DE GREIFF ALVAREZ,MAYO,HPTU,PSIQUIATRIA INFANTIL,"HPTU
-PSIQUIATRIA INFANTIL",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA | Solicitar / verificar confirmacion del campo,No
+PSIQUIATRIA INFANTIL",Pendiente,Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA,No
 PSIQUIATRIA,2026-2027,2027-1,Residente CES,R3,1152213426,MARIA ADELAIDA DE GREIFF ALVAREZ,JUNIO,HPTU,PSIQUIATRIA INFANTIL,"HPTU
-PSIQUIATRIA INFANTIL",Pendiente,Solicitar / verificar confirmacion del campo | Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA | Solicitar / verificar confirmacion del campo,Si
+PSIQUIATRIA INFANTIL",Pendiente,Campo anterior: C. SAN JUAN DE DIOS DE LA CEJA / FARMACODEPENDENCIA,Si
 PSIQUIATRIA,2026-2027,2026-2,Vacaciones,R3,1152213426,MARIA ADELAIDA DE GREIFF ALVAREZ,Vacaciones diciembre,VACACIONES,Vacaciones diciembre,14 DE DICIEMBRE DE 2026 AL 7 DE ENERO DE 2027,Pendiente,14 DE DICIEMBRE DE 2026 AL 7 DE ENERO DE 2027,Si
 PSIQUIATRIA,2026-2027,2027-1,Vacaciones,R3,1152213426,MARIA ADELAIDA DE GREIFF ALVAREZ,Vacaciones junio,VACACIONES,Vacaciones junio,24 DE JUNIO 2027 A 30 JUNIO 2027.,Pendiente,24 DE JUNIO 2027 A 30 JUNIO 2027. | Verificar / gestionar vacaciones,Si
 RADIOLOGIA,2026-2027,2026-2,Residente CES,R1,1152212228,ANA MARIA MENA NEIRA,JULIO,HGM,RADIOLOGIA CONVENCIONAL Y FLUOROSCOPIA,"HGM
