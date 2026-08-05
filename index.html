@@ -147,6 +147,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ms-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--az);background:var(--az-suave);border:1px solid var(--az-claro);border-radius:20px;padding:4px 6px 4px 10px}
 .ms-chip span{cursor:pointer;font-weight:700;line-height:1;padding:0 2px}
 .ms-chip span:hover{color:#b3261e}
+.resumen-meses{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:.7rem}
+.resumen-meses-lbl{font-size:11px;color:var(--sec);text-transform:uppercase;letter-spacing:.05em;margin-right:2px}
+.chip-mes{display:inline-flex;align-items:center;font-size:12px;font-weight:600;color:var(--teal);background:var(--teal-bg);border:1px solid var(--teal);border-radius:20px;padding:4px 11px}
 .res-lista{margin-top:.8rem;max-height:320px;overflow-y:auto}
 .res-item{padding:9px 12px;border-radius:7px;font-size:13px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--fondo);cursor:pointer;transition:background .15s}
 .res-item:hover{background:var(--az-suave)}
@@ -447,6 +450,33 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
       <div class="ms-chips" id="fc-camp-chips"></div>
       <div class="res-lista" id="fc-lista"></div>
+    </div>
+
+    <!-- BUSCAR POR ROTACIÓN -->
+    <div class="buscador">
+      <div class="buscador-tit">Buscar por rotación</div>
+      <div class="buscador-row" style="flex-wrap:wrap">
+        <input type="text" id="br-nombre" list="br-rotaciones-list" placeholder="Nombre de la rotación..." autocomplete="off" oninput="buscarRotacion()">
+        <datalist id="br-rotaciones-list"></datalist>
+        <select id="br-prog" onchange="buscarRotacion()"><option value="">Todas las especialidades</option></select>
+        <select id="br-mes" onchange="buscarRotacion()">
+          <option value="">Todos los meses</option>
+          <option value="ENERO">Enero</option>
+          <option value="FEBRERO">Febrero</option>
+          <option value="MARZO">Marzo</option>
+          <option value="ABRIL">Abril</option>
+          <option value="MAYO">Mayo</option>
+          <option value="JUNIO">Junio</option>
+          <option value="JULIO">Julio</option>
+          <option value="AGOSTO">Agosto</option>
+          <option value="SEPTIEMBRE">Septiembre</option>
+          <option value="OCTUBRE">Octubre</option>
+          <option value="NOVIEMBRE">Noviembre</option>
+          <option value="DICIEMBRE">Diciembre</option>
+        </select>
+      </div>
+      <div class="resumen-meses" id="br-resumen-meses"></div>
+      <div class="res-lista" id="br-lista"></div>
     </div>
 
     <div class="buscador" id="box-residente">
@@ -910,6 +940,19 @@ function renderDash() {
   if(fP) fP.innerHTML='<option value="">Todas las especialidades</option>'+
     [...progs].sort().map(p=>`<option value="${p}">${p}</option>`).join('');
 
+  // Selects/datalist del buscador "Buscar por rotación"
+  const brP=document.getElementById('br-prog');
+  if(brP) brP.innerHTML='<option value="">Todas las especialidades</option>'+
+    [...progs].sort().map(p=>`<option value="${p}">${p}</option>`).join('');
+
+  const rotSet=new Set();
+  datos.forEach(r=>{
+    const rv=(r['Rotacion']||r['Detalle original']||'').trim();
+    if(rv) rotSet.add(rv);
+  });
+  const brList=document.getElementById('br-rotaciones-list');
+  if(brList) brList.innerHTML=[...rotSet].sort((a,b)=>a.localeCompare(b,'es')).map(r=>`<option value="${r}"></option>`).join('');
+
   // Instituciones/campos distintos para el selector multiple de "Buscar campo
   // de rotación": se separan igual que en el panel "Campos de rotación"
   // (por " - "), para no mezclar campos compuestos como "FRACTURAS - INCODOL
@@ -1251,6 +1294,67 @@ function buscarCampo() {
       });
     }
   });
+
+  if(!filtrado.length) { lista.innerHTML='<div class="empty">Sin resultados.</div>'; return; }
+
+  lista.innerHTML = filtrado.map(f=>`
+    <div class="res-item" onclick="verResidente('${f.id.replace(/'/g,"\\'")}')">
+      <span class="res-nombre">${f.residente}</span>
+      <span class="res-tag">${f.periodo}</span>
+      <span class="res-tag">${f.progRot}</span>
+      <button class="btn-ver" onclick="event.stopPropagation();verResidente('${f.id.replace(/'/g,"\\'")}')">Ver →</button>
+    </div>`).join('');
+}
+
+// ============================================================
+// BUSCAR POR ROTACIÓN (nombre de rotación + especialidad + mes)
+// Responde directamente "¿en qué meses está la rotación X de la
+// especialidad Y?": arma un resumen de meses encontrados además del
+// listado detallado. Independiente del filtro global "Ver semestre":
+// busca en todos los datos.
+// ============================================================
+const ORDEN_MESES=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+
+function buscarRotacion() {
+  const texto=(document.getElementById('br-nombre').value||'').toLowerCase().trim();
+  const prog=document.getElementById('br-prog').value;
+  const mesFiltro=document.getElementById('br-mes').value;
+  const lista=document.getElementById('br-lista');
+  const resumen=document.getElementById('br-resumen-meses');
+  if(!texto && !prog && !mesFiltro) { lista.innerHTML=''; resumen.innerHTML=''; return; }
+
+  const filtrado=[];
+  const mesesEncontrados=new Set();
+  datos.forEach(r=>{
+    const rotVal=(r['Rotacion']||r['Detalle original']||'').trim();
+    if(!rotVal) return;
+    const progVal=(r['Programa']||'').trim();
+    const mesVal=(r['Mes']||'').trim();
+    const sem=(r['Semestre']||'').trim();
+    const id=(r['ID']||r['Persona']||'').trim();
+
+    const rotOk = !texto || rotVal.toLowerCase().includes(texto);
+    const progOk = !prog || progVal===prog;
+    const mesOk = !mesFiltro || mesVal.toUpperCase()===mesFiltro;
+
+    if(rotOk && progOk && mesOk) {
+      if(mesVal) mesesEncontrados.add(mesVal.toUpperCase());
+      filtrado.push({
+        id,
+        residente: r['Persona']||id||'—',
+        periodo: sem + (mesVal?(' · '+mesVal):''),
+        progRot: progVal + (rotVal?(' / '+rotVal):'')
+      });
+    }
+  });
+
+  if(mesesEncontrados.size) {
+    const mesesOrd=[...mesesEncontrados].sort((a,b)=>ORDEN_MESES.indexOf(a)-ORDEN_MESES.indexOf(b));
+    resumen.innerHTML = '<span class="resumen-meses-lbl">Meses encontrados:</span>'+
+      mesesOrd.map(m=>`<span class="chip-mes">${m.charAt(0)+m.slice(1).toLowerCase()}</span>`).join('');
+  } else {
+    resumen.innerHTML='';
+  }
 
   if(!filtrado.length) { lista.innerHTML='<div class="empty">Sin resultados.</div>'; return; }
 
