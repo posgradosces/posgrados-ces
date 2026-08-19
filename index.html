@@ -641,7 +641,7 @@ async function refrescoAutomatico() {
     aplicarPeriodoDb(periodoSeleccionadoDb);
   }
   if (document.getElementById('panel-cuadricula').style.display === 'block' && contextoGrid.programa) {
-    cargarCuadricula();
+    cargarCuadricula(true);
   }
   if (document.getElementById('panel-gestion-operativa').style.display === 'block') {
     if (usuarioActual.rol === 'coordinadora') {
@@ -1828,7 +1828,10 @@ function calcularAnioSemestre(mes, anioInicio) {
   return { anioAcademico, semestre };
 }
 
-async function cargarCuadricula() {
+// silencioso=true se usa en el refresco automático de fondo: actualiza los datos SIN pasar por
+// el mensaje "⏳ Cargando..." — así la cuadrícula que ya estás viendo no desaparece un momento
+// y reaparece; simplemente se reemplaza de una vez por la versión actualizada cuando ya está lista.
+async function cargarCuadricula(silencioso) {
   const programa = document.getElementById('cg-programa').value.trim();
   const anioDesde = document.getElementById('cg-periodo').value.trim();
   const anioHastaTexto = document.getElementById('cg-periodo-hasta').value.trim();
@@ -1850,16 +1853,20 @@ async function cargarCuadricula() {
 
   const boton = document.getElementById('boton-cargar-cuadricula');
   const textoOriginalBoton = boton.textContent;
-  boton.textContent = 'Cargando...';
-  boton.disabled = true;
-  document.getElementById('contenedor-cuadricula').innerHTML = '<p style="color:#888;">⏳ Cargando datos, un momento...</p>';
+  if (!silencioso) {
+    boton.textContent = 'Cargando...';
+    boton.disabled = true;
+    document.getElementById('contenedor-cuadricula').innerHTML = '<p style="color:#888;">⏳ Cargando datos, un momento...</p>';
+  }
 
   const resHistorico = await leerBackend('listarHistorico');
 
-  boton.textContent = textoOriginalBoton;
-  boton.disabled = false;
+  if (!silencioso) {
+    boton.textContent = textoOriginalBoton;
+    boton.disabled = false;
+  }
 
-  if (!resHistorico.ok) { mostrarMensaje('Error cargando histórico: ' + resHistorico.error, 'error'); return; }
+  if (!resHistorico.ok) { if (!silencioso) mostrarMensaje('Error cargando histórico: ' + resHistorico.error, 'error'); return; }
 
   registrosGridActual = resHistorico.datos.filter(r =>
     r.Programa === programa && anioAcademicosBuscados.has(String(r.AnioAcademico))
