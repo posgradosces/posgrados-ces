@@ -135,6 +135,7 @@
         </div>
         <div><button class="btn-secundario" onclick="descargarCuadriculaExcel()">📤 Descargar Excel</button></div>
         <div><button class="btn-secundario" onclick="actualizarCuadriculaActual()">🔄 Actualizar</button></div>
+        <div><button class="btn-secundario" id="boton-archivar-periodo" style="display:none; border-color:#888; color:#555;" onclick="abrirArchivarPeriodo()">🗄 Archivar periodo académico</button></div>
       </div>
       <div id="contenedor-cuadricula"><p style="color:#999;">Escribe programa y año académico, luego "Cargar cuadrícula".</p></div>
       <p style="font-size:12px; color:#888; margin-top:8px;">
@@ -178,6 +179,7 @@
           <div style="position:relative;"><label>Año (puedes elegir varios)</label><input id="db-b1-anio" autocomplete="off" placeholder="Todos los años" oninput="mostrarSugerencias('db-b1-anio')" onfocus="mostrarSugerencias('db-b1-anio')"><div id="sug-db-b1-anio" class="caja-sugerencias"></div><div id="chips-db-b1-anio" style="margin-top:4px;"></div></div>
           <div style="position:relative;"><label>Especialidad (puedes elegir varias)</label><input id="db-b1-programa" autocomplete="off" placeholder="Todas" oninput="mostrarSugerencias('db-b1-programa')" onfocus="mostrarSugerencias('db-b1-programa')"><div id="sug-db-b1-programa" class="caja-sugerencias"></div><div id="chips-db-b1-programa" style="margin-top:4px;"></div></div>
           <div><button class="btn-primario" onclick="buscarPorCampo()">Buscar</button></div>
+          <div><button class="btn-secundario" onclick="limpiarBusquedaCampo()">🧹 Limpiar</button></div>
         </div>
         <div id="db-resultado-campo" style="margin-top:10px;"></div>
       </div>
@@ -189,6 +191,7 @@
           <div style="position:relative;"><label>Especialidad (puedes elegir varias)</label><input id="db-b2-programa" autocomplete="off" placeholder="Todas" oninput="mostrarSugerencias('db-b2-programa')" onfocus="mostrarSugerencias('db-b2-programa')"><div id="sug-db-b2-programa" class="caja-sugerencias"></div><div id="chips-db-b2-programa" style="margin-top:4px;"></div></div>
           <div style="position:relative;"><label>Mes (puedes elegir varios)</label><input id="db-b2-mes" autocomplete="off" placeholder="Todos los meses" oninput="mostrarSugerencias('db-b2-mes')" onfocus="mostrarSugerencias('db-b2-mes')"><div id="sug-db-b2-mes" class="caja-sugerencias"></div><div id="chips-db-b2-mes" style="margin-top:4px;"></div></div>
           <div><button class="btn-primario" onclick="buscarPorRotacion()">Buscar</button></div>
+          <div><button class="btn-secundario" onclick="limpiarBusquedaRotacion()">🧹 Limpiar</button></div>
         </div>
         <div id="db-resultado-rotacion" style="margin-top:10px;"></div>
       </div>
@@ -200,6 +203,7 @@
           <div style="position:relative;"><label>Programa (puedes elegir varios)</label><input id="db-b3-programa" autocomplete="off" placeholder="Todos" oninput="mostrarSugerencias('db-b3-programa')" onfocus="mostrarSugerencias('db-b3-programa')"><div id="sug-db-b3-programa" class="caja-sugerencias"></div><div id="chips-db-b3-programa" style="margin-top:4px;"></div></div>
           <div style="position:relative;"><label>Semestre (puedes elegir varios)</label><input id="db-b3-semestre" autocomplete="off" placeholder="Todos" oninput="mostrarSugerencias('db-b3-semestre')" onfocus="mostrarSugerencias('db-b3-semestre')"><div id="sug-db-b3-semestre" class="caja-sugerencias"></div><div id="chips-db-b3-semestre" style="margin-top:4px;"></div></div>
           <div><button class="btn-primario" onclick="buscarResidente()">Buscar</button></div>
+          <div><button class="btn-secundario" onclick="limpiarBusquedaResidente()">🧹 Limpiar</button></div>
         </div>
         <div id="db-resultado-residente" style="margin-top:10px;"></div>
       </div>
@@ -228,6 +232,7 @@
             <select id="go-filtro-periodo"><option value="">Todos</option></select>
           </div>
           <div><button class="btn-primario" onclick="aplicarFiltrosGestion()">Filtrar</button></div>
+          <div><button class="btn-secundario" onclick="limpiarFiltrosGestionOperativa()">🧹 Limpiar</button></div>
           <div><button class="btn-secundario" onclick="descargarGestionOperativaExcel()">📤 Descargar Excel</button></div>
           <div><button class="btn-secundario" onclick="actualizarGestionAuxiliar()">🔄 Actualizar</button></div>
         </div>
@@ -261,8 +266,8 @@
             <div><label>Mes</label><select id="vm-mes"><option value="">Todos</option></select></div>
             <div><button class="btn-primario" onclick="aplicarValidacionMensual()">Filtrar ></button></div>
             <div><button class="btn-secundario" style="background:var(--negado-bg); color:var(--negado-tx); font-weight:600;" onclick="filtrarVmPorEstado('Negado')">Negados</button></div>
+            <div><button class="btn-secundario" onclick="limpiarFiltrosVm()">🧹 Limpiar</button></div>
             <div><button class="btn-secundario" onclick="aplicarValidacionMensual(true)">🔄 Actualizar</button></div>
-            <div><button class="btn-secundario" style="border-color:#888; color:#555;" onclick="abrirArchivarPeriodo()">🗄 Archivar periodo académico</button></div>
           </div>
           <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0; margin-bottom:16px; text-align:center;">
             <div class="vm-kpi" data-estado="Confirmado" onclick="filtrarVmPorEstado('Confirmado')" style="background:var(--confirmado-bg); color:var(--confirmado-tx); padding:16px; cursor:pointer; border-radius:6px 0 0 6px;">
@@ -303,6 +308,7 @@
         <div><label>Documento de ID</label><input id="hist-filtro-id" autocomplete="off" placeholder="Cédula..." onkeydown="if(event.key==='Enter') aplicarFiltrosHistorico()"></div>
         <div style="position:relative;"><label>Programa / Especialidad</label><input id="hist-filtro-programa" autocomplete="off" placeholder="Todos" oninput="mostrarSugerencias('hist-filtro-programa')" onfocus="mostrarSugerencias('hist-filtro-programa')" onkeydown="if(event.key==='Enter') aplicarFiltrosHistorico()"><div id="sug-hist-filtro-programa" class="caja-sugerencias"></div></div>
         <div><button class="btn-primario" onclick="aplicarFiltrosHistorico()">🔍 Buscar</button></div>
+        <div><button class="btn-secundario" onclick="limpiarFiltrosHistorico()">🧹 Limpiar</button></div>
         <div><button class="btn-secundario" onclick="cargarHistorico(true)">🔄 Actualizar datos</button></div>
       </div>
       <p id="hist-resumen" style="font-size:12px; color:#888;"></p>
@@ -324,6 +330,7 @@
         <div><label>Documento de ID</label><input id="mov-filtro-documento" autocomplete="off" placeholder="Cédula..." oninput="buscarMovilidad()"></div>
         <div><label>Especialidad</label><input id="mov-filtro-programa" autocomplete="off" placeholder="Escribe..." oninput="buscarMovilidad()"></div>
         <div><label>Lugar de rotación</label><input id="mov-filtro-lugar" autocomplete="off" placeholder="Escribe..." oninput="buscarMovilidad()"></div>
+        <div style="align-self:flex-end;"><button class="btn-secundario" onclick="limpiarFiltrosMovilidad()">🧹 Limpiar</button></div>
       </div>
       <div style="overflow-x:auto;">
         <table class="lista">
@@ -557,6 +564,7 @@ function entrarAlApp() {
     document.getElementById('boton-agregar-residente').style.display = 'inline-block';
     document.getElementById('boton-copiar-filas').style.display = 'inline-block';
     document.getElementById('boton-importar-excel').style.display = 'inline-block';
+    document.getElementById('boton-archivar-periodo').style.display = 'inline-block';
     document.getElementById('vista-gestion-coordinadora').style.display = 'block';
     document.getElementById('vista-gestion-auxiliar').style.display = 'none';
     document.getElementById('tab-btn-gestion').style.display = 'inline-block';
@@ -573,6 +581,7 @@ function entrarAlApp() {
     document.getElementById('boton-agregar-residente').style.display = 'none';
     document.getElementById('boton-copiar-filas').style.display = 'none';
     document.getElementById('boton-importar-excel').style.display = 'none';
+    document.getElementById('boton-archivar-periodo').style.display = 'none';
     document.getElementById('vista-gestion-coordinadora').style.display = 'none';
     document.getElementById('vista-gestion-auxiliar').style.display = 'block';
     document.getElementById('tab-btn-gestion').style.display = 'inline-block';
@@ -900,8 +909,11 @@ function cargarPeriodosVm() {
 // día. El historial completo NO se toca — sigue disponible siempre en "Histórico de rotaciones".
 // ============================================================
 function abrirArchivarPeriodo() {
-  const periodos = [...document.getElementById('vm-periodo').options].map(o => o.value).filter(v => v);
-  if (periodos.length === 0) { mostrarMensaje('No hay periodos académicos cargados todavía.', 'error'); return; }
+  const PATRON_PERIODO_VALIDO = /^\d{4}-[12]$/;
+  const periodos = [...new Set(
+    cacheHistoricoCompleto.map(r => String(r.Semestre || '').trim()).filter(p => PATRON_PERIODO_VALIDO.test(p))
+  )].sort();
+  if (periodos.length === 0) { mostrarMensaje('No hay periodos académicos cargados todavía. Visita el Dashboard o el Histórico primero para que se carguen los datos.', 'error'); return; }
 
   const opcionesPeriodo = periodos.map(p => `<option value="${p}">${p}</option>`).join('');
   const opcionesPrograma = ['<option value="">Todos los programas</option>']
@@ -969,6 +981,15 @@ async function ejecutarArchivarPeriodo() {
   cerrarModal();
   cargarCola();
   aplicarValidacionMensual(true);
+}
+
+function limpiarFiltrosVm() {
+  limpiarFiltros({
+    textos: ['vm-nombre', 'vm-documento'],
+    selects: ['vm-periodo', 'vm-mes'],
+    multis: ['vm-programa']
+  });
+  aplicarValidacionMensual();
 }
 
 async function aplicarValidacionMensual(forzarRecarga) {
@@ -1053,12 +1074,24 @@ function dibujarTablaValidacionMensual(filas) {
   cuerpo.innerHTML = filas.slice(0, 300).map(f => {
     const colores = COLORES_ESTADO[f.Estado] || { bg: '#eee', tx: '#333' };
     const filaOp = cacheColaCompleta.find(g => g.ClaveUnica === f.ClaveUnica);
-    const acciones = (f.Estado === 'Pendiente' || f.Estado === 'Cambio' || f.Estado === 'Negado') ? `
-      <div class="fila-acciones">
-        ${f.Estado !== 'Negado' ? `<button class="btn-gestionado btn-pequeno" onclick="ejecutarEstado('${f.ClaveUnica}','Gestionado')">Gestionado</button>
-        <button class="btn-negado btn-pequeno" onclick="ejecutarEstado('${f.ClaveUnica}','Negado')">Negado</button>` : ''}
-        <button class="btn-secundario btn-pequeno" onclick="abrirComentario('${f.ClaveUnica}')">💬</button>
-      </div>` : `<button class="btn-secundario btn-pequeno" onclick="abrirComentario('${f.ClaveUnica}')">💬</button>`;
+    let acciones;
+    if (f.Estado === 'Negado') {
+      acciones = `
+        <div class="fila-acciones">
+          <button class="btn-gestionado btn-pequeno" onclick="ejecutarEstado('${f.ClaveUnica}','Gestionado')">✅ Confirmar</button>
+          <button class="btn-secundario btn-pequeno" onclick="abrirReasignarNegado('${f.ClaveUnica}')">🔁 Cambiar</button>
+          <button class="btn-secundario btn-pequeno" onclick="abrirComentario('${f.ClaveUnica}')">💬</button>
+        </div>`;
+    } else if (f.Estado === 'Pendiente' || f.Estado === 'Cambio') {
+      acciones = `
+        <div class="fila-acciones">
+          <button class="btn-gestionado btn-pequeno" onclick="ejecutarEstado('${f.ClaveUnica}','Gestionado')">Gestionado</button>
+          <button class="btn-negado btn-pequeno" onclick="ejecutarEstado('${f.ClaveUnica}','Negado')">Negado</button>
+          <button class="btn-secundario btn-pequeno" onclick="abrirComentario('${f.ClaveUnica}')">💬</button>
+        </div>`;
+    } else {
+      acciones = `<button class="btn-secundario btn-pequeno" onclick="abrirComentario('${f.ClaveUnica}')">💬</button>`;
+    }
 
     return `<tr>
       <td>${esc(f.Programa)}</td>
@@ -1112,6 +1145,12 @@ async function cargarHistorico(forzarRecarga) {
   cargarProgramasConocidos(); // por si el desplegable de programa todavía no tenía datos
   document.getElementById('hist-resumen').textContent = '';
   cuerpo.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999; padding:24px;">Escribe un filtro (o varios) y dale "🔍 Buscar".</td></tr>';
+}
+
+function limpiarFiltrosHistorico() {
+  limpiarFiltros({ textos: ['hist-filtro-nombre', 'hist-filtro-id', 'hist-filtro-programa'] });
+  document.getElementById('hist-resumen').textContent = '';
+  document.getElementById('tabla-historico').innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999; padding:24px;">Escribe un filtro (o varios) y dale "🔍 Buscar".</td></tr>';
 }
 
 function aplicarFiltrosHistorico() {
@@ -1184,6 +1223,13 @@ function buscarMovilidad() {
   } else {
     document.getElementById('tabla-movilidad').innerHTML = '<tr><td colspan="9" style="text-align:center; color:#999; padding:24px;">Elige "Aceptados", "Negados" o "Pendientes" arriba, o escribe un nombre/documento para buscar en todos los estados.</td></tr>';
   }
+}
+
+function limpiarFiltrosMovilidad() {
+  limpiarFiltros({ textos: ['mov-filtro-nombre', 'mov-filtro-documento', 'mov-filtro-programa', 'mov-filtro-lugar'] });
+  movilidadFiltroActivo = null;
+  actualizarKpisMovilidad();
+  buscarMovilidad();
 }
 
 function actualizarKpisMovilidad() {
@@ -1506,6 +1552,22 @@ function quitarChip(idInput, valor) {
   aplicarFiltroTrasCambioChips(idInput);
 }
 
+// Limpia un grupo de filtros (texto plano, selects y campos de selección múltiple) y opcionalmente
+// vuelve a correr la función que redibuja la vista, para que quede en su estado "normal" — sin
+// dejar la tabla congelada con el último resultado de una búsqueda que ya no aplica.
+function limpiarFiltros({ textos = [], selects = [], multis = [], resultado = null, funcionAplicar = null }) {
+  textos.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  selects.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  multis.forEach(id => {
+    seleccionesMulti[id] = [];
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+    renderizarChips(id);
+  });
+  if (resultado) { const el = document.getElementById(resultado); if (el) el.innerHTML = ''; }
+  if (funcionAplicar) funcionAplicar();
+}
+
 function renderizarChips(idInput) {
   const contenedor = document.getElementById('chips-' + idInput);
   if (!contenedor) return;
@@ -1596,6 +1658,16 @@ function buscarResidente() {
   document.getElementById('db-resultado-residente').innerHTML = tablaResultados(resultado);
 }
 
+function limpiarBusquedaCampo() {
+  limpiarFiltros({ multis: ['db-b1-campo', 'db-b1-mes', 'db-b1-anio', 'db-b1-programa'], resultado: 'db-resultado-campo' });
+}
+function limpiarBusquedaRotacion() {
+  limpiarFiltros({ textos: ['db-b2-rotacion'], multis: ['db-b2-programa', 'db-b2-mes'], resultado: 'db-resultado-rotacion' });
+}
+function limpiarBusquedaResidente() {
+  limpiarFiltros({ textos: ['db-b3-nombre'], multis: ['db-b3-programa', 'db-b3-semestre'], resultado: 'db-resultado-residente' });
+}
+
 function cargarMesesFiltro() {
   const select = document.getElementById('go-filtro-mes');
   MESES.forEach(mes => {
@@ -1621,6 +1693,15 @@ function cargarPeriodosFiltro() {
     select.appendChild(opt);
   });
   if (periodosPresentes.includes(valorActual)) select.value = valorActual;
+}
+
+function limpiarFiltrosGestionOperativa() {
+  limpiarFiltros({
+    textos: ['go-filtro-nombre', 'go-filtro-documento'],
+    selects: ['go-filtro-estado', 'go-filtro-mes', 'go-filtro-periodo'],
+    multis: ['go-filtro-programa'],
+    funcionAplicar: aplicarFiltrosGestion
+  });
 }
 
 function aplicarFiltrosGestion() {
@@ -2329,14 +2410,17 @@ function abrirCeldaSoloLectura(clave) {
   document.getElementById('overlay-modal').style.display = 'flex';
 }
 
-function bloqueObservaciones(registro, clave) {
+// mostrarBotonPropio=false suprime el botón "Guardar observaciones" propio del bloque — se usa
+// cuando el llamador ya va a poner un único botón "Guardar cambios" combinado más abajo (celda
+// editable), para que no queden dos botones de guardar por separado en el mismo modal.
+function bloqueObservaciones(registro, clave, mostrarBotonPropio = true) {
   return `
     <hr style="margin:16px 0; border:none; border-top:1px solid #eee;">
     <label>Observación interna (solo equipo)</label>
     <textarea id="modal-obs-interna" rows="2" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">${esc(registro.ObservacionInterna || '')}</textarea>
     <label>Observación pública (visible a residentes)</label>
     <textarea id="modal-obs-publica" rows="2" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">${esc(registro.Observacion || '')}</textarea>
-    <div class="fila-botones"><button class="btn-secundario" onclick="ejecutarGuardarObservaciones('${clave}')">Guardar observaciones</button></div>`;
+    ${mostrarBotonPropio ? `<div class="fila-botones"><button class="btn-secundario" onclick="ejecutarGuardarObservaciones('${clave}')">Guardar observaciones</button></div>` : ''}`;
 }
 
 function abrirCeldaExistente(clave) {
@@ -2348,15 +2432,19 @@ function abrirCeldaExistente(clave) {
 
   if (registro.Estado === 'Negado') {
     html += `
+      <p style="font-size:12px; color:#7030A0; background:#EBDAE9; padding:8px 10px; border-radius:6px;">Este cupo fue negado. Si la institución cambió de decisión y lo confirma con el MISMO sitio, usa "Confirmar". Si va a un sitio distinto, usa "Cambiar".</p>
+      <div class="fila-botones">
+        <button class="btn-gestionado" onclick="ejecutarEstado('${clave}','Gestionado')">✅ Confirmar (mismo sitio)</button>
+      </div>
       <label>Nuevo campo de rotación</label><input id="modal-nuevo-campo">
       <label>Nueva rotación</label><input id="modal-nueva-rotacion">
-      <div class="fila-botones"><button class="btn-primario" onclick="ejecutarReasignar('${clave}')">Confirmar reasignación</button></div>`;
+      <div class="fila-botones"><button class="btn-primario" onclick="ejecutarReasignar('${clave}')">🔁 Cambiar a otro sitio</button></div>`;
+    html += bloqueObservaciones(registro, clave);
   } else {
     html += `
       <label>Campo de rotación</label><input id="modal-campo" value="${esc(registro.CampoRotacion || '')}">
       <label>Nombre de la rotación</label><input id="modal-rotacion" value="${esc(registro.Rotacion || '')}">
       <div class="fila-botones">
-        <button class="btn-secundario" onclick="ejecutarEdicion('${clave}')">Guardar cambio</button>
         <button class="btn-gestionado" onclick="ejecutarEstado('${clave}','Gestionado')">Gestionado</button>
         <button class="btn-negado" onclick="ejecutarEstado('${clave}','Negado')">Negado</button>
       </div>
@@ -2364,9 +2452,9 @@ function abrirCeldaExistente(clave) {
         <button class="btn-secundario" onclick="copiarCelda('${(registro.CampoRotacion||'').replace(/'/g,"\\'")}', '${(registro.Rotacion||'').replace(/'/g,"\\'")}')">📋 Copiar esta rotación</button>
         ${portapapelesCelda ? `<button class="btn-secundario" onclick="pegarEnFormulario()">📌 Pegar aquí (${esc(portapapelesCelda.campoRotacion)})</button>` : ''}
       </div>`;
+    html += bloqueObservaciones(registro, clave, false);
+    html += `<div class="fila-botones"><button class="btn-primario" onclick="ejecutarGuardarCambiosCelda('${clave}')">💾 Guardar cambios</button></div>`;
   }
-
-  html += bloqueObservaciones(registro, clave);
   html += `<div class="fila-botones" style="border-top:1px solid #eee; margin-top:14px; padding-top:12px;">
     <button style="background:none; border:1px solid #9C0006; color:#9C0006; border-radius:5px; padding:6px 12px; cursor:pointer; font-size:12px;" onclick="confirmarEliminarCelda('${clave}')">🗑 Eliminar esta rotación</button>
   </div>`;
@@ -2427,6 +2515,12 @@ function abrirCeldaAuxiliar(clave) {
         <button class="btn-gestionado" onclick="ejecutarEstado('${clave}','Gestionado')">Gestionado</button>
         <button class="btn-negado" onclick="ejecutarEstado('${clave}','Negado')">Negado</button>
       </div>`;
+  } else if (registro.Estado === 'Negado') {
+    html += `
+      <p style="font-size:12px; color:#7030A0; background:#EBDAE9; padding:8px 10px; border-radius:6px;">Si la institución cambió de decisión y confirma con el MISMO sitio, puedes confirmarlo aquí. Para cambiar a otro sitio distinto, avísale a una coordinadora.</p>
+      <div class="fila-botones">
+        <button class="btn-gestionado" onclick="ejecutarEstado('${clave}','Gestionado')">✅ Confirmar (mismo sitio)</button>
+      </div>`;
   }
 
   html += bloqueObservaciones(registro, clave);
@@ -2451,14 +2545,77 @@ async function ejecutarGuardarObservaciones(clave) {
   } else { mostrarMensaje('Error: ' + resultado.error, 'error'); }
 }
 
-async function ejecutarEdicion(clave) {
+// Aplica en memoria el resultado de 'editarCampoRotacion' sin volver a pedirle la lista
+// completa al servidor. tipo 'cambio' = el registro seguía Pendiente y solo se actualizó el
+// campo/rotación. tipo 'cancelar' = pasó (o ya estaba) por Confirmado→Cambio; si la fila no
+// existía todavía en la cola (primera vez que se cancela algo Confirmado) se reconstruye igual
+// que la crea el backend, en vez de tener que refrescar todo solo por esa fila nueva.
+function aplicarResultadoEdicionEnCache(clave, resultado, campoRotacion, rotacion) {
+  if (resultado.tipo === 'cambio') {
+    actualizarCacheLocal(clave, {
+      op: { CampoRotacion: campoRotacion, Rotacion: rotacion, Alerta: 'CAMBIO', AlertaDescartada: '' },
+      hist: { CampoRotacion: campoRotacion, Rotacion: rotacion }
+    });
+    return;
+  }
+  const alertaTxt = 'CANCELAR EN ' + resultado.sitioAnterior;
+  const existeEnOp = cacheColaCompleta.some(f => f.ClaveUnica === clave);
+  if (existeEnOp) {
+    actualizarCacheLocal(clave, {
+      op: { CampoRotacion: campoRotacion, Rotacion: rotacion, Estado: 'Cambio', Alerta: alertaTxt, AlertaDescartada: '' },
+      hist: { CampoRotacion: campoRotacion, Rotacion: rotacion, Estado: 'Cambio' }
+    });
+  } else {
+    const base = registrosGridActual.find(r => r.ClaveUnica === clave) || cacheHistoricoCompleto.find(r => r.ClaveUnica === clave);
+    if (base) {
+      cacheColaCompleta.push({
+        ClaveUnica: clave, Programa: base.Programa, Periodo: base.Semestre, Tipo: base.Tipo, Nivel: base.Nivel,
+        ResidenteID: base.ResidenteID, ResidenteNombre: base.ResidenteNombre, Mes: base.Mes,
+        CampoRotacion: campoRotacion, Rotacion: rotacion, Estado: 'Cambio',
+        Observacion: 'Confirmado previamente en: ' + resultado.sitioAnterior, Alerta: alertaTxt,
+        ObservacionInterna: base.ObservacionInterna || '', ComentarioPor: base.ComentarioPor || '', AlertaDescartada: ''
+      });
+    }
+    actualizarCacheLocal(clave, { hist: { CampoRotacion: campoRotacion, Rotacion: rotacion, Estado: 'Cambio' } });
+  }
+}
+
+// Botón único "💾 Guardar cambios" del modal de celda: guarda la rotación (si cambió) y las
+// observaciones (si cambiaron) en una sola acción — antes había que guardar cada cosa por
+// separado, y a veces el usuario solo hacía una de las dos por error.
+async function ejecutarGuardarCambiosCelda(clave) {
   const campoRotacion = document.getElementById('modal-campo').value;
   const rotacion = document.getElementById('modal-rotacion').value;
-  const resultado = await llamarBackend('editarCampoRotacion', { clave, campoRotacion, rotacion });
-  if (resultado.ok) {
-    mostrarMensaje(resultado.tipo === 'cancelar' ? 'Marcado para cancelar en ' + resultado.sitioAnterior : 'Cambio registrado.', 'ok');
-    cerrarModal(); refrescarVistasGestion();
-  } else { mostrarMensaje('Error: ' + resultado.error, 'error'); }
+  const observacionInterna = document.getElementById('modal-obs-interna').value;
+  const observacionPublica = document.getElementById('modal-obs-publica').value;
+
+  const registro = registrosGridActual.find(r => r.ClaveUnica === clave) || {};
+  const cambioRotacion = campoRotacion !== (registro.CampoRotacion || '') || rotacion !== (registro.Rotacion || '');
+  const cambioObs = observacionInterna !== (registro.ObservacionInterna || '') || observacionPublica !== (registro.Observacion || '');
+
+  if (!cambioRotacion && !cambioObs) { mostrarMensaje('No hay cambios para guardar.', 'error'); return; }
+
+  const mensajes = [];
+
+  if (cambioRotacion) {
+    const resultadoEdicion = await llamarBackend('editarCampoRotacion', { clave, campoRotacion, rotacion });
+    if (!resultadoEdicion.ok) { mostrarMensaje('Error guardando la rotación: ' + resultadoEdicion.error, 'error'); return; }
+    aplicarResultadoEdicionEnCache(clave, resultadoEdicion, campoRotacion, rotacion);
+    mensajes.push(resultadoEdicion.tipo === 'cancelar' ? 'rotación cambiada (marcada para cancelar en ' + resultadoEdicion.sitioAnterior + ')' : 'rotación actualizada');
+  }
+
+  if (cambioObs) {
+    const resultadoObs = await llamarBackend('actualizarObservaciones', { clave, observacionInterna, observacionPublica });
+    if (!resultadoObs.ok) { mostrarMensaje('Error guardando observaciones: ' + resultadoObs.error, 'error'); return; }
+    const cambiosOp = { ObservacionInterna: observacionInterna, Observacion: observacionPublica };
+    if (observacionInterna.trim() !== '') cambiosOp.AlertaDescartada = '';
+    actualizarCacheLocal(clave, { op: cambiosOp, hist: { Observacion: observacionPublica, ObservacionInterna: observacionInterna } });
+    mensajes.push('observaciones guardadas');
+  }
+
+  mostrarMensaje('Guardado: ' + mensajes.join(' · ') + '.', 'ok');
+  cerrarModal();
+  redibujarVistaActual();
 }
 
 async function ejecutarEstado(clave, nuevoEstado) {
@@ -2484,8 +2641,33 @@ async function ejecutarReasignar(clave) {
   const nuevaRotacion = document.getElementById('modal-nueva-rotacion').value;
   if (!nuevoCampo || !nuevaRotacion) { mostrarMensaje('Completa los dos campos.', 'error'); return; }
   const resultado = await llamarBackend('reasignarNegado', { clave, nuevoCampo, nuevaRotacion });
-  if (resultado.ok) { mostrarMensaje('Reasignado.', 'ok'); cerrarModal(); refrescarVistasGestion(); }
+  if (resultado.ok) {
+    mostrarMensaje('Reasignado — vuelve a quedar Pendiente para confirmar.', 'ok');
+    cerrarModal();
+    actualizarCacheLocal(clave, {
+      op: { Estado: 'Pendiente', CampoRotacion: nuevoCampo, Rotacion: nuevaRotacion, Alerta: '', AccionRequerida: '', Antes: '', Ahora: '' },
+      hist: { Estado: 'Pendiente', CampoRotacion: nuevoCampo, Rotacion: nuevaRotacion }
+    });
+    redibujarVistaActual();
+  }
   else { mostrarMensaje('Error: ' + resultado.error, 'error'); }
+}
+
+// Modal ligero de "Cambiar a otro sitio" para un Negado, invocable directamente desde la tabla
+// de Validación Mensual (sin tener que ir hasta la celda en el Cuadro de rotaciones).
+function abrirReasignarNegado(clave) {
+  const registro = cacheHistoricoCompleto.find(r => r.ClaveUnica === clave) || cacheColaCompleta.find(r => r.ClaveUnica === clave);
+  const html = `
+    <h3>🔁 Cambiar a otro sitio</h3>
+    <p style="font-size:12px; color:#888;">${registro ? esc(registro.ResidenteNombre) + ' — ' + esc(registro.Mes) : ''}</p>
+    <label>Nuevo campo de rotación</label><input id="modal-nuevo-campo">
+    <label>Nueva rotación</label><input id="modal-nueva-rotacion">
+    <div class="fila-botones">
+      <button class="btn-secundario" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-primario" onclick="ejecutarReasignar('${clave}')">Confirmar reasignación</button>
+    </div>`;
+  document.getElementById('contenido-modal').innerHTML = html;
+  document.getElementById('overlay-modal').style.display = 'flex';
 }
 
 function cerrarModal() { document.getElementById('overlay-modal').style.display = 'none'; }
