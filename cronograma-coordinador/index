@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma de Rotaciones · Coordinador de Programa</title>
+<style>
+  :root {
+    --pendiente-tx: #823C00;
+    --confirmado-tx: #1F4E79;
+    --negado-tx: #7030A0;
+    --cambio-tx: #9C0006;
+    --azul-ces: #003865;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; background: #f4f6f8; color: #222; }
+  header { background: var(--azul-ces); color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  header h1 { font-size: 17px; margin: 0; }
+  header .usuario { font-size: 13px; display: flex; align-items: center; gap: 12px; }
+  button { cursor: pointer; border: none; border-radius: 6px; padding: 8px 14px; font-size: 14px; }
+  .btn-primario { background: var(--azul-ces); color: white; }
+  .btn-secundario { background: #e0e0e0; color: #333; }
+  .btn-primario:disabled { opacity: .55; cursor: default; }
+
+  #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 16px; }
+  .caja-login { background: white; padding: 32px; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); width: 340px; max-width: 100%; }
+  .caja-login h2 { margin-top: 0; color: var(--azul-ces); font-size: 18px; }
+  .caja-login p.subtitulo { font-size: 13px; color: #666; margin-top: -8px; margin-bottom: 18px; }
+  .caja-login input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+  .error { color: #9C0006; font-size: 13px; margin-top: 6px; min-height: 16px; }
+
+  #app-screen { display: none; }
+  .contenedor { padding: 20px; max-width: 1300px; margin: 0 auto; }
+  .panel { background: white; border-radius: 10px; padding: 18px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .panel h2 { margin-top: 0; font-size: 16px; color: var(--azul-ces); }
+  .aviso-tiempo-real { font-size: 12px; color: #888; display: flex; align-items: center; gap: 6px; }
+  .punto-vivo { width: 8px; height: 8px; border-radius: 50%; background: #2e7d32; display: inline-block; animation: latido 2s infinite; }
+  @keyframes latido { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+  .controles-cuadricula { display: flex; gap: 14px; align-items: end; flex-wrap: wrap; margin-bottom: 16px; }
+  .controles-cuadricula label { font-size: 12px; color: #555; display: block; margin-bottom: 3px; }
+  .controles-cuadricula select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; min-width: 200px; font-size: 14px; }
+
+  .contenedor-scroll-cuadricula { max-height: 68vh; overflow: auto; border: 1px solid #e2e2e2; border-radius: 6px; }
+  table.cuadricula { border-collapse: collapse; width: 100%; font-size: 12px; }
+  table.cuadricula th, table.cuadricula td { border: 1px solid #e2e2e2; padding: 0; text-align: center; }
+  table.cuadricula thead th { background: #f0f2f5; padding: 8px 4px; font-size: 11px; color: #555; white-space: nowrap; position: sticky; top: 0; z-index: 2; }
+  table.cuadricula thead tr:first-child th { top: 0; }
+  table.cuadricula thead tr:last-child th { top: 33px; }
+  table.cuadricula th.esquina { position: sticky; left: 0; z-index: 3; text-align: left; background: #f0f2f5; }
+  table.cuadricula td.col-residente { text-align: left; padding: 8px; white-space: nowrap; background: #fafbfc; font-weight: 600; position: sticky; left: 0; z-index: 1; }
+  tr.fila-grupo td { background: var(--azul-ces); color: white; font-weight: 700; padding: 6px 10px !important; text-align: left; position: sticky; left: 0; }
+  .celda { width: 110px; height: 52px; padding: 4px !important; font-size: 11px; line-height: 1.25; cursor: default; }
+  .celda-vacia { color: #ccc; }
+
+  .leyenda { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 12px; color: #555; }
+  .leyenda span.punto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
+  .mensaje-vacio { color: #999; padding: 20px 4px; }
+  .mensaje-flotante { position: fixed; bottom: 18px; right: 18px; background: #333; color: white; padding: 10px 16px; border-radius: 6px; font-size: 13px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; }
+  .mensaje-flotante.visible { opacity: 1; }
+  .mensaje-flotante.error { background: #9C0006; }
+  .mensaje-flotante.ok { background: #1F4E79; }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="caja-login">
+    <h2>Cronograma de Rotaciones</h2>
+    <p class="subtitulo">Acceso para coordinadores de programa · Posgrados Clínicos CES</p>
+    <input type="password" id="login-password" placeholder="Clave de acceso" autocomplete="current-password">
+    <button class="btn-primario" style="width:100%; margin-top:8px;" onclick="intentarLogin()">Entrar</button>
+    <div class="error" id="login-error"></div>
+  </div>
+</div>
+
+<div id="app-screen">
+  <header>
+    <h1>📅 Cronograma de Rotaciones</h1>
+    <div class="usuario">
+      <span class="aviso-tiempo-real"><span class="punto-vivo"></span> Actualizado en tiempo real</span>
+      <span id="nombre-usuario-header"></span>
+      <button class="btn-secundario" onclick="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="contenedor">
+    <p id="bienvenida" style="font-size:15px; color:#444; margin: 4px 0 16px;"></p>
+    <div class="panel">
+      <h2 id="titulo-programa">Cargando programa…</h2>
+
+      <div class="controles-cuadricula">
+        <div id="selector-programa-wrap" style="display:none;">
+          <label>Programa</label>
+          <select id="sel-programa" onchange="cambiarPrograma()"></select>
+        </div>
+        <div>
+          <label>Año académico</label>
+          <select id="sel-anio-academico" onchange="cambiarAnioAcademico()"></select>
+        </div>
+        <div>
+          <button class="btn-primario" id="btn-descargar" onclick="descargarCuadriculaExcel()">📥 Descargar Excel</button>
+        </div>
+      </div>
+
+      <div id="contenedor-cuadricula"><p class="mensaje-vacio">Cargando cronograma…</p></div>
+
+      <div class="leyenda">
+        <span><span class="punto" style="background:var(--pendiente-tx);"></span>Pendiente</span>
+        <span><span class="punto" style="background:var(--confirmado-tx);"></span>Confirmado</span>
+        <span><span class="punto" style="background:var(--negado-tx);"></span>Negado</span>
+        <span><span class="punto" style="background:var(--cambio-tx);"></span>Cambio</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mensaje-flotante" id="mensaje-flotante"></div>
+
+<script>
+// ============================================================
+// CONFIGURACIÓN — misma Web App que ya usa Gestión Operativa (mismo backend, mismo Sheet)
+// ============================================================
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwgzWT4TQgmE87Kbc2vIypW_QNhcpWtONQC5ssrZmtTGABfBuXMZBkmRVcc_mHPId7hxg/exec';
+
+const MESES = ['Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre','Enero','Febrero','Marzo','Abril','Mayo','Junio'];
+const MESES_VACACIONES = ['Vacaciones 1', 'Vacaciones 2'];
+const COLOR_TEXTO_ESTADO = { 'Pendiente': '#C00000', 'Confirmado': '#000000', 'Negado': '#7030A0', 'Cambio': '#C00000' };
+const NIVELES_ORDEN = ['R1', 'R2', 'R3', 'R4', 'R5', 'Movilidad Académica'];
+
+const cacheColorCampo = {};
+function colorDeFondoPorCampo(campo, rotacion) {
+  const clave = (String(campo || '').trim() + '|' + String(rotacion || '').trim()).toUpperCase();
+  if (!clave.trim()) return '#ffffff';
+  if (cacheColorCampo[clave]) return cacheColorCampo[clave];
+  let hash = 0;
+  for (let i = 0; i < clave.length; i++) hash = (hash * 31 + clave.charCodeAt(i)) >>> 0;
+  const color = `hsl(${hash % 360}, 62%, 83%)`;
+  cacheColorCampo[clave] = color;
+  return color;
+}
+
+function esc(valor) {
+  return String(valor === null || valor === undefined ? '' : valor)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function agruparPorNivel(filas) {
+  const grupos = { 'R1': [], 'R2': [], 'R3': [], 'R4': [], 'R5': [], 'Movilidad Académica': [] };
+  filas.forEach(f => {
+    const nivelLimpio = String(f.nivel || '').trim().toUpperCase();
+    const clave = grupos.hasOwnProperty(nivelLimpio) ? nivelLimpio : 'Movilidad Académica';
+    grupos[clave].push(f);
+  });
+  return grupos;
+}
+
+// ============================================================
+// SESIÓN — sessionStorage propio de esta pantalla (independiente del de Gestión Operativa),
+// se borra solo al cerrar la pestaña, y expira tras 20 min sin actividad.
+// ============================================================
+const CLAVE_SESION = 'sesionCronogramaCoordinador';
+const MINUTOS_INACTIVIDAD = 20;
+let usuarioActual = null;      // { usuarioCorto, claveHash, nombreCompleto }
+let programasPermitidos = [];  // array de nombres de programa que puede ver este usuario
+let programaSeleccionado = null;
+let anioSeleccionado = null;   // "2026" (año de inicio del académico 2026-2027)
+let datosCompletos = [];       // todo lo que devolvió el backend (ya filtrado server-side)
+let ultimaActividadMs = Date.now();
+let ultimoGuardadoActividadMs = 0;
+let intervaloRefresco = null;
+
+function guardarSesion() {
+  try {
+    sessionStorage.setItem(CLAVE_SESION, JSON.stringify({
+      usuarioActual, programaSeleccionado, anioSeleccionado, actividad: Date.now()
+    }));
+  } catch (err) { /* si el navegador bloquea sessionStorage, simplemente no persiste entre recargas */ }
+}
+
+function restaurarSesionSiVigente() {
+  let guardado;
+  try { guardado = JSON.parse(sessionStorage.getItem(CLAVE_SESION) || 'null'); } catch (err) { return false; }
+  if (!guardado || !guardado.usuarioActual) return false;
+
+  const minutosInactivo = (Date.now() - guardado.actividad) / 60000;
+  if (minutosInactivo >= MINUTOS_INACTIVIDAD) {
+    sessionStorage.removeItem(CLAVE_SESION);
+    return false;
+  }
+
+  usuarioActual = guardado.usuarioActual;
+  programaSeleccionado = guardado.programaSeleccionado;
+  anioSeleccionado = guardado.anioSeleccionado;
+  ultimaActividadMs = guardado.actividad;
+  entrarAlApp();
+  return true;
+}
+
+function marcarActividad() {
+  if (!usuarioActual) return;
+  ultimaActividadMs = Date.now();
+  if (ultimaActividadMs - ultimoGuardadoActividadMs > 10000) {
+    ultimoGuardadoActividadMs = ultimaActividadMs;
+    guardarSesion();
+  }
+}
+
+function iniciarMonitorInactividad() {
+  ['click', 'keydown', 'mousemove', 'touchstart', 'scroll'].forEach(evento =>
+    document.addEventListener(evento, marcarActividad, { passive: true })
+  );
+  setInterval(() => {
+    if (!usuarioActual) return;
+    const minutosInactivo = (Date.now() - ultimaActividadMs) / 60000;
+    if (minutosInactivo >= MINUTOS_INACTIVIDAD) {
+      cerrarSesion();
+      document.getElementById('login-error').textContent = 'Se cerró tu sesión por inactividad (20 min). Ingresa de nuevo.';
+    }
+  }, 30000);
+}
+
+async function sha256Hex(texto) {
+  const buffer = new TextEncoder().encode(texto);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ============================================================
+// LOGIN
+// ============================================================
+async function intentarLogin() {
+  const password = document.getElementById('login-password').value;
+  const errorDiv = document.getElementById('login-error');
+  errorDiv.textContent = '';
+
+  if (!password) { errorDiv.textContent = 'Ingresa tu clave de acceso.'; return; }
+
+  const claveHash = await sha256Hex(password);
+
+  let resultado;
+  try {
+    // usuario vacío a propósito: el backend identifica a la persona (y sus programas)
+    // solo por el hash de la clave, sin necesidad de un usuario aparte.
+    const respuesta = await fetch(WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ accion: 'login', credencial: { usuario: '', claveHash } })
+    });
+    resultado = await respuesta.json();
+  } catch (err) {
+    errorDiv.textContent = 'No se pudo conectar. Revisa tu conexión e intenta de nuevo.';
+    return;
+  }
+
+  if (!resultado.ok) { errorDiv.textContent = resultado.error || 'Clave incorrecta.'; return; }
+
+  if (resultado.rol !== 'coordinador_programa') {
+    errorDiv.textContent = 'Esta clave no corresponde a un acceso de coordinador de programa.';
+    return;
+  }
+
+  usuarioActual = { usuarioCorto: '', claveHash, nombreCompleto: resultado.nombreCompleto };
+  guardarSesion();
+  entrarAlApp();
+}
+
+function entrarAlApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  document.getElementById('nombre-usuario-header').textContent = usuarioActual.nombreCompleto;
+  document.getElementById('bienvenida').textContent = 'Bienvenido/a Dr(a). ' + usuarioActual.nombreCompleto;
+  iniciarMonitorInactividad();
+  cargarCronograma(false);
+  if (!intervaloRefresco) intervaloRefresco = setInterval(() => cargarCronograma(true), 60000); // silencioso, cada 60s
+}
+
+function cerrarSesion() {
+  usuarioActual = null;
+  programasPermitidos = [];
+  datosCompletos = [];
+  if (intervaloRefresco) { clearInterval(intervaloRefresco); intervaloRefresco = null; }
+  try { sessionStorage.removeItem(CLAVE_SESION); } catch (err) {}
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-password').value = '';
+}
+
+// ============================================================
+// CARGA DE DATOS — filtrado en el servidor (solo su(s) programa(s), nunca confía en el navegador)
+// ============================================================
+async function leerBackend(accion, extraParams) {
+  let url = WEB_APP_URL + '?accion=' + accion + '&usuario=' + encodeURIComponent(usuarioActual.usuarioCorto) + '&claveHash=' + encodeURIComponent(usuarioActual.claveHash);
+  if (extraParams) {
+    Object.keys(extraParams).forEach(clave => { url += '&' + encodeURIComponent(clave) + '=' + encodeURIComponent(extraParams[clave]); });
+  }
+  const respuesta = await fetch(url);
+  const resultado = await respuesta.json();
+  if (!resultado.ok && resultado.error === 'No autorizado. Vuelve a iniciar sesión.') {
+    mostrarMensaje('Tu sesión expiró o no es válida. Vuelve a iniciar sesión.', 'error');
+    cerrarSesion();
+  }
+  return resultado;
+}
+
+async function llamarBackend(accion, datos) {
+  const respuesta = await fetch(WEB_APP_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ accion, datos, credencial: { usuario: usuarioActual.usuarioCorto, claveHash: usuarioActual.claveHash } })
+  });
+  const resultado = await respuesta.json();
+  if (!resultado.ok && resultado.error === 'No autorizado. Vuelve a iniciar sesión.') {
+    mostrarMensaje('Tu sesión expiró o no es válida. Vuelve a iniciar sesión.', 'error');
+    cerrarSesion();
+  }
+  return resultado;
+}
+
+async function cargarCronograma(silencioso) {
+  if (!silencioso) document.getElementById('contenedor-cuadricula').innerHTML = '<p class="mensaje-vacio">⏳ Cargando cronograma…</p>';
+
+  const resultado = await leerBackend('listarHistoricoCoordinador');
+  if (!resultado.ok) {
+    if (!silencioso) document.getElementById('contenedor-cuadricula').innerHTML = '<p class="mensaje-vacio">' + esc(resultado.error || 'No se pudo cargar el cronograma.') + '</p>';
+    return;
+  }
+
+  programasPermitidos = resultado.programas || [];
+  datosCompletos = resultado.datos || [];
+
+  if (!programaSeleccionado || !programasPermitidos.includes(programaSeleccionado)) {
+    programaSeleccionado = programasPermitidos[0] || null;
+  }
+
+  poblarSelectorProgramas();
+  poblarSelectorAniosAcademicos();
+  redibujarCuadricula();
+  guardarSesion();
+}
+
+function poblarSelectorProgramas() {
+  const wrap = document.getElementById('selector-programa-wrap');
+  const select = document.getElementById('sel-programa');
+  if (programasPermitidos.length <= 1) { wrap.style.display = 'none'; return; }
+
+  wrap.style.display = 'block';
+  select.innerHTML = '';
+  programasPermitidos.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p; opt.textContent = p;
+    if (p === programaSeleccionado) opt.selected = true;
+    select.appendChild(opt);
+  });
+}
+
+function cambiarPrograma() {
+  programaSeleccionado = document.getElementById('sel-programa').value;
+  anioSeleccionado = null; // el año disponible puede variar de un programa a otro
+  poblarSelectorAniosAcademicos();
+  redibujarCuadricula();
+  guardarSesion();
+}
+
+// Arma la lista de años académicos (AnioAcademico, ej. "2026-2027") que efectivamente tienen
+// datos para el programa seleccionado, más recientes primero.
+function poblarSelectorAniosAcademicos() {
+  const select = document.getElementById('sel-anio-academico');
+  const registrosPrograma = datosCompletos.filter(r => r.Programa === programaSeleccionado);
+  const aniosDisponibles = [...new Set(registrosPrograma.map(r => String(r.AnioAcademico)))]
+    .filter(a => /^\d{4}-\d{4}$/.test(a))
+    .sort((a, b) => b.localeCompare(a));
+
+  select.innerHTML = '';
+  if (aniosDisponibles.length === 0) {
+    const opt = document.createElement('option');
+    opt.value = ''; opt.textContent = 'Sin datos';
+    select.appendChild(opt);
+    anioSeleccionado = null;
+    return;
+  }
+
+  aniosDisponibles.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a; opt.textContent = a;
+    select.appendChild(opt);
+  });
+
+  if (!anioSeleccionado || !aniosDisponibles.includes(anioSeleccionado)) anioSeleccionado = aniosDisponibles[0];
+  select.value = anioSeleccionado;
+}
+
+function cambiarAnioAcademico() {
+  anioSeleccionado = document.getElementById('sel-anio-academico').value;
+  redibujarCuadricula();
+  guardarSesion();
+}
+
+// ============================================================
+// DIBUJO DE LA CUADRÍCULA — mismo formato visual que Gestión Operativa, solo lectura
+// ============================================================
+function redibujarCuadricula() {
+  document.getElementById('titulo-programa').textContent = programaSeleccionado
+    ? programaSeleccionado + (anioSeleccionado ? ' · ' + anioSeleccionado : '')
+    : 'Sin programa asignado';
+  document.getElementById('btn-descargar').disabled = !programaSeleccionado || !anioSeleccionado;
+
+  const contenedor = document.getElementById('contenedor-cuadricula');
+  if (!programaSeleccionado || !anioSeleccionado) {
+    contenedor.innerHTML = '<p class="mensaje-vacio">No hay cronograma disponible todavía.</p>';
+    return;
+  }
+
+  const registros = datosCompletos.filter(r => r.Programa === programaSeleccionado && String(r.AnioAcademico) === anioSeleccionado);
+  const partes = anioSeleccionado.split('-');
+  const anioInicio = partes[0], anioSiguiente = partes[1];
+
+  const vistos = new Set();
+  const filas = [];
+  registros.forEach(r => {
+    if (!vistos.has(r.ResidenteID)) { vistos.add(r.ResidenteID); filas.push({ id: r.ResidenteID, nombre: r.ResidenteNombre, nivel: r.Nivel }); }
+  });
+
+  if (filas.length === 0) {
+    contenedor.innerHTML = '<p class="mensaje-vacio">No hay residentes cargados para este año académico.</p>';
+    return;
+  }
+
+  const grupos = agruparPorNivel(filas);
+  const totalColumnas = MESES.length + MESES_VACACIONES.length + 1;
+
+  let html = '<div class="contenedor-scroll-cuadricula"><table class="cuadricula"><thead>';
+  html += `<tr><th class="esquina" rowspan="2">Residente</th>
+    <th colspan="6" style="background:#003865; color:white;">${esc(anioInicio)}-2</th>
+    <th colspan="6" style="background:#003865; color:white;">${esc(anioSiguiente)}-1</th>
+    <th rowspan="2" style="background:#5b7fa6; color:white;">Vacaciones 1</th>
+    <th rowspan="2" style="background:#5b7fa6; color:white;">Vacaciones 2</th></tr><tr>`;
+  MESES.forEach(mes => html += `<th>${mes}</th>`);
+  html += '</tr></thead><tbody>';
+
+  function renderCelda(res, mes) {
+    const registro = registros.find(r => String(r.ResidenteID) === String(res.id) && r.Mes === mes);
+    if (!registro) return '<td class="celda celda-vacia" style="cursor:default;"></td>';
+    const colorTexto = COLOR_TEXTO_ESTADO[registro.Estado] || '#333';
+    const colorFondo = colorDeFondoPorCampo(registro.CampoRotacion, registro.Rotacion);
+    const titulo = esc((registro.CampoRotacion || '') + ' — ' + (registro.Rotacion || '') + ' (' + (registro.Estado || '') + ')');
+    return `<td class="celda" style="color:${colorTexto}; background:${colorFondo};" title="${titulo}">
+      <strong>${esc(registro.CampoRotacion || '')}</strong><br>${esc(registro.Rotacion || '')}
+    </td>`;
+  }
+
+  NIVELES_ORDEN.forEach(nombreGrupo => {
+    const filasGrupo = grupos[nombreGrupo];
+    if (!filasGrupo || filasGrupo.length === 0) return;
+    html += `<tr class="fila-grupo"><td colspan="${totalColumnas}">${esc(nombreGrupo)}</td></tr>`;
+    filasGrupo.forEach(res => {
+      html += `<tr><td class="col-residente">${esc(res.nombre)}<br><span style="color:#888; font-weight:400;">${esc(res.id)} · ${esc(res.nivel || '')}</span></td>`;
+      MESES.forEach(mes => { html += renderCelda(res, mes); });
+      MESES_VACACIONES.forEach(mes => { html += renderCelda(res, mes); });
+      html += '</tr>';
+    });
+  });
+
+  html += '</tbody></table></div>';
+  contenedor.innerHTML = html;
+}
+
+// ============================================================
+// DESCARGAR EXCEL — reutiliza exportarCuadricula_ del backend (mismos colores, mismo formato)
+// ============================================================
+async function descargarCuadriculaExcel() {
+  if (!programaSeleccionado || !anioSeleccionado) return;
+
+  mostrarMensaje('Generando el Excel, un momento…', 'ok');
+
+  const registros = datosCompletos.filter(r => r.Programa === programaSeleccionado && String(r.AnioAcademico) === anioSeleccionado);
+  const vistos = new Set();
+  const filas = [];
+  registros.forEach(r => {
+    if (!vistos.has(r.ResidenteID)) { vistos.add(r.ResidenteID); filas.push({ id: r.ResidenteID, nombre: r.ResidenteNombre, nivel: r.Nivel }); }
+  });
+
+  const partes = anioSeleccionado.split('-');
+  const bloque = { anioInicio: partes[0], anioSiguiente: partes[1], anioAcademico: anioSeleccionado };
+
+  const resultado = await llamarBackend('exportarCuadricula', {
+    programa: programaSeleccionado,
+    anioInicio: bloque.anioInicio,
+    anioSiguiente: bloque.anioSiguiente,
+    bloques: [bloque],
+    filas,
+    registros
+  });
+
+  if (!resultado.ok) { mostrarMensaje('Error: ' + resultado.error, 'error'); return; }
+
+  const bytes = atob(resultado.base64);
+  const buffer = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) buffer[i] = bytes.charCodeAt(i);
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+  const enlace = document.createElement('a');
+  enlace.href = URL.createObjectURL(blob);
+  enlace.download = resultado.filename;
+  enlace.click();
+
+  mostrarMensaje('Descargado.', 'ok');
+}
+
+// ============================================================
+// MENSAJES FLOTANTES
+// ============================================================
+let temporizadorMensaje = null;
+function mostrarMensaje(texto, tipo) {
+  const div = document.getElementById('mensaje-flotante');
+  div.textContent = texto;
+  div.className = 'mensaje-flotante visible' + (tipo === 'error' ? ' error' : tipo === 'ok' ? ' ok' : '');
+  if (temporizadorMensaje) clearTimeout(temporizadorMensaje);
+  temporizadorMensaje = setTimeout(() => { div.classList.remove('visible'); }, 3500);
+}
+
+// ============================================================
+// INICIO
+// ============================================================
+document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') intentarLogin(); });
+restaurarSesionSiVigente();
+</script>
+</body>
+</html>
