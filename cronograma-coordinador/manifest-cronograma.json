@@ -1,0 +1,23 @@
+{
+  "name": "Cronograma Coordinador - Posgrados CES",
+  "short_name": "Cronograma Coord.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1F4E79",
+  "theme_color": "#1F4E79",
+  "icons": [
+    {
+      "src": "icon-cronograma-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-cronograma-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
