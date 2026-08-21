@@ -1,12 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-  <link rel="manifest" href="manifest-gestion.json"> 
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-gestion-192.png"> 
-  <link rel="apple-touch-icon" href="icon-gestion-192.png"> 
-  <meta name="theme-color" content="#1F4E79"> 
-  <meta name="apple-mobile-web-app-capable" content="yes"> 
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> 
-  <meta name="apple-mobile-web-app-title" content="Gestion Operativa">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -225,6 +218,13 @@
         <div class="controles-cuadricula" style="margin-bottom:10px;">
           <div style="position:relative;"><label>Residente</label><input id="go-filtro-nombre" autocomplete="off" placeholder="Nombre..." onkeydown="if(event.key==='Enter') aplicarFiltrosGestion()"></div>
           <div><label>Documento de ID</label><input id="go-filtro-documento" autocomplete="off" placeholder="Cédula..." onkeydown="if(event.key==='Enter') aplicarFiltrosGestion()"></div>
+          <div><label>Filtrar por asistente</label>
+            <select id="go-filtro-asistente" onchange="aplicarFiltroAsistente()">
+              <option value="">Todos los programas</option>
+              <option value="Eliana">Programas de Eliana</option>
+              <option value="Jeimy">Programas de Jeimy</option>
+            </select>
+          </div>
           <div style="position:relative;"><label>Programa (puedes elegir varios)</label><input id="go-filtro-programa" autocomplete="off" placeholder="Escribe y selecciona..." oninput="mostrarSugerencias('go-filtro-programa')" onfocus="mostrarSugerencias('go-filtro-programa')"><div id="sug-go-filtro-programa" class="caja-sugerencias"></div><div id="chips-go-filtro-programa" style="margin-top:4px;"></div></div>
           <div><label>Estado</label>
             <select id="go-filtro-estado">
@@ -641,7 +641,7 @@ async function refrescoAutomatico() {
     aplicarPeriodoDb(periodoSeleccionadoDb);
   }
   if (document.getElementById('panel-cuadricula').style.display === 'block' && contextoGrid.programa) {
-    cargarCuadricula();
+    cargarCuadricula(true);
   }
   if (document.getElementById('panel-gestion-operativa').style.display === 'block') {
     if (usuarioActual.rol === 'coordinadora') {
@@ -744,8 +744,22 @@ async function cargarProgramasConocidos() {
   listasSugerencias['vm-programa'] = listaProgramasConocidos;
   listasSugerencias['hist-filtro-programa'] = listaProgramasConocidos;
 
-  const aniosAcademicos = [...new Set(cacheHistoricoCompleto.map(r => r.AnioAcademico).filter(Boolean).map(rango => rango.split('-')[0]))].sort();
-  listasSugerencias['cg-periodo'] = aniosAcademicos;
+  // Antes se mostraba solo el año suelto de inicio (ej. "2026"), que había que traducir de
+  // memoria al año académico real. Ahora se muestran los DOS semestres reales de cada año
+  // académico (ej. "2026-2" y "2027-1"), en el mismo formato que ya usan Periodo/Semestre en el
+  // resto del sistema — al elegir cualquiera de los dos, el campo igual se llena con el año de
+  // inicio correcto ("2026"), que es lo que espera cargarCuadricula().
+  const aniosInicioUnicos = [...new Set(cacheHistoricoCompleto.map(r => r.AnioAcademico).filter(Boolean).map(rango => rango.split('-')[0]))].sort();
+  const sugerenciasPeriodo = [];
+  mapaAnioPeriodoAInicio = {};
+  aniosInicioUnicos.forEach(anioInicio => {
+    const semestreUno = anioInicio + '-2';
+    const semestreDos = (Number(anioInicio) + 1) + '-1';
+    sugerenciasPeriodo.push(semestreUno, semestreDos);
+    mapaAnioPeriodoAInicio[semestreUno] = anioInicio;
+    mapaAnioPeriodoAInicio[semestreDos] = anioInicio;
+  });
+  listasSugerencias['cg-periodo'] = sugerenciasPeriodo;
 }
 
 function mostrarSugerenciasPrograma() {
@@ -1088,6 +1102,7 @@ function dibujarTablaValidacionMensual(filas) {
           <button class="btn-gestionado btn-pequeno" onclick="ejecutarEstado('${f.ClaveUnica}','Gestionado')">✅ Confirmar</button>
           <button class="btn-secundario btn-pequeno" onclick="abrirReasignarNegado('${f.ClaveUnica}')">🔁 Cambiar</button>
           <button class="btn-secundario btn-pequeno" onclick="abrirComentario('${f.ClaveUnica}')">💬</button>
+          <button class="btn-secundario btn-pequeno" onclick="abrirNotificarAsistente('${f.ClaveUnica}')" title="Enviar aviso urgente por correo">🔔</button>
         </div>`;
     } else if (f.Estado === 'Pendiente' || f.Estado === 'Cambio') {
       acciones = `
@@ -1095,6 +1110,7 @@ function dibujarTablaValidacionMensual(filas) {
           <button class="btn-gestionado btn-pequeno" onclick="ejecutarEstado('${f.ClaveUnica}','Gestionado')">Gestionado</button>
           <button class="btn-negado btn-pequeno" onclick="ejecutarEstado('${f.ClaveUnica}','Negado')">Negado</button>
           <button class="btn-secundario btn-pequeno" onclick="abrirComentario('${f.ClaveUnica}')">💬</button>
+          <button class="btn-secundario btn-pequeno" onclick="abrirNotificarAsistente('${f.ClaveUnica}')" title="Enviar aviso urgente por correo">🔔</button>
         </div>`;
     } else {
       acciones = `<button class="btn-secundario btn-pequeno" onclick="abrirComentario('${f.ClaveUnica}')">💬</button>`;
@@ -1482,6 +1498,10 @@ async function irACeldaDesdeComentario(clave, programa, periodo) {
 
 // Listas de valores conocidos por campo, para el autocompletado genérico
 let listasSugerencias = {};
+// Traduce lo que se ve en la sugerencia de "Año académico" (ej. "2026-2" o "2027-1", formato
+// semestre real de la hoja) al año de inicio que en realidad necesita el campo cg-periodo
+// (ej. "2026") — ambos semestres de un mismo año académico apuntan al mismo año de inicio.
+let mapaAnioPeriodoAInicio = {};
 
 function llenarSelectoresBusqueda() {
   const semestresValidos = [...new Set(cacheHistoricoCompleto.map(r => r.Semestre).filter(esPeriodoValido))].sort();
@@ -1537,7 +1557,10 @@ function mostrarSugerencias(idInput) {
 }
 
 function seleccionarSugerencia(idInput, valor) {
-  document.getElementById(idInput).value = valor;
+  // cg-periodo es especial: lo que se ve en la lista es el semestre real ("2026-2", "2027-1"),
+  // pero el campo necesita el año de inicio ("2026") — mapaAnioPeriodoAInicio hace esa traducción.
+  const valorReal = (idInput === 'cg-periodo' && mapaAnioPeriodoAInicio[valor]) ? mapaAnioPeriodoAInicio[valor] : valor;
+  document.getElementById(idInput).value = valorReal;
   document.getElementById('sug-' + idInput).style.display = 'none';
 }
 
@@ -1702,10 +1725,45 @@ function cargarPeriodosFiltro() {
   if (periodosPresentes.includes(valorActual)) select.value = valorActual;
 }
 
+// ============================================================
+// FILTRO POR ASISTENTE — atajo para que cada auxiliar vea de una sola vez solo los programas
+// que le corresponden a ella. No es una restricción real de acceso (cualquiera puede seguir
+// viendo y trabajando cualquier programa si hace falta) — es solo para agilizar el filtro.
+// Jeimy no tiene lista propia: se calcula como "todo lo que no es de Eliana", así no hay que
+// mantener dos listas sincronizadas si se agrega un programa nuevo al sistema.
+// ============================================================
+const PROGRAMAS_ELIANA = [
+  'Anestesia', 'Anestesia Cardiovascular y Torácica', 'Cirugía general', 'Cirugía Cardiovascular',
+  'Cirugía plástica, Reconstructiva y Estética', 'Dermatología', 'Dermatopatología',
+  'Dolor y Cuidado Paliativo', 'Ginecología y Obstetricia', 'Gastroenterología',
+  'Medicina de urgencias', 'Oftalmología', 'Radiología', 'Urología'
+];
+
+// Quita tildes/mayúsculas para comparar nombres de programa sin que un acento o una may/min
+// distinta rompa la coincidencia (ej. "Cirugía" en el sistema vs "Cirugia" tipeado aquí).
+function normalizarTextoPrograma(texto) {
+  return String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+}
+
+function aplicarFiltroAsistente() {
+  const valor = document.getElementById('go-filtro-asistente').value;
+  const elianaNorm = PROGRAMAS_ELIANA.map(normalizarTextoPrograma);
+
+  if (!valor) {
+    seleccionesMulti['go-filtro-programa'] = [];
+  } else if (valor === 'Eliana') {
+    seleccionesMulti['go-filtro-programa'] = listaProgramasConocidos.filter(p => elianaNorm.includes(normalizarTextoPrograma(p)));
+  } else if (valor === 'Jeimy') {
+    seleccionesMulti['go-filtro-programa'] = listaProgramasConocidos.filter(p => !elianaNorm.includes(normalizarTextoPrograma(p)));
+  }
+  renderizarChips('go-filtro-programa');
+  aplicarFiltrosGestion();
+}
+
 function limpiarFiltrosGestionOperativa() {
   limpiarFiltros({
     textos: ['go-filtro-nombre', 'go-filtro-documento'],
-    selects: ['go-filtro-estado', 'go-filtro-mes', 'go-filtro-periodo'],
+    selects: ['go-filtro-estado', 'go-filtro-mes', 'go-filtro-periodo', 'go-filtro-asistente'],
     multis: ['go-filtro-programa'],
     funcionAplicar: aplicarFiltrosGestion
   });
@@ -1793,7 +1851,10 @@ function calcularAnioSemestre(mes, anioInicio) {
   return { anioAcademico, semestre };
 }
 
-async function cargarCuadricula() {
+// silencioso=true se usa en el refresco automático de fondo: actualiza los datos SIN pasar por
+// el mensaje "⏳ Cargando..." — así la cuadrícula que ya estás viendo no desaparece un momento
+// y reaparece; simplemente se reemplaza de una vez por la versión actualizada cuando ya está lista.
+async function cargarCuadricula(silencioso) {
   const programa = document.getElementById('cg-programa').value.trim();
   const anioDesde = document.getElementById('cg-periodo').value.trim();
   const anioHastaTexto = document.getElementById('cg-periodo-hasta').value.trim();
@@ -1815,16 +1876,20 @@ async function cargarCuadricula() {
 
   const boton = document.getElementById('boton-cargar-cuadricula');
   const textoOriginalBoton = boton.textContent;
-  boton.textContent = 'Cargando...';
-  boton.disabled = true;
-  document.getElementById('contenedor-cuadricula').innerHTML = '<p style="color:#888;">⏳ Cargando datos, un momento...</p>';
+  if (!silencioso) {
+    boton.textContent = 'Cargando...';
+    boton.disabled = true;
+    document.getElementById('contenedor-cuadricula').innerHTML = '<p style="color:#888;">⏳ Cargando datos, un momento...</p>';
+  }
 
   const resHistorico = await leerBackend('listarHistorico');
 
-  boton.textContent = textoOriginalBoton;
-  boton.disabled = false;
+  if (!silencioso) {
+    boton.textContent = textoOriginalBoton;
+    boton.disabled = false;
+  }
 
-  if (!resHistorico.ok) { mostrarMensaje('Error cargando histórico: ' + resHistorico.error, 'error'); return; }
+  if (!resHistorico.ok) { if (!silencioso) mostrarMensaje('Error cargando histórico: ' + resHistorico.error, 'error'); return; }
 
   registrosGridActual = resHistorico.datos.filter(r =>
     r.Programa === programa && anioAcademicosBuscados.has(String(r.AnioAcademico))
@@ -2304,26 +2369,54 @@ function abrirModalAgregarResidente() {
   const html = `
     <h3>Agregar residente</h3>
     <p style="font-size:12px; color:#888;">${esc(contextoGrid.programa)} · ${esc(contextoGrid.anioInicio)}-${esc(contextoGrid.anioSiguiente)}</p>
+    <label>Tipo</label>
+    <select id="modal-res-tipo" onchange="actualizarCamposTipoResidente()" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">
+      <option value="Residente CES" selected>Residente CES</option>
+      <option value="Movilidad entrante">Movilidad académica (entrante)</option>
+    </select>
     <label>Nombre</label><input id="modal-res-nombre">
-    <label>Cédula (CC)</label><input id="modal-res-cc">
-    <label>Nivel</label><input id="modal-res-nivel" placeholder="R2">
+    <label>Documento de identidad</label><input id="modal-res-cc" placeholder="Cédula, pasaporte u otro — letras y números">
+    <div id="campos-residente-ces">
+      <label>Nivel</label><input id="modal-res-nivel" placeholder="R2">
+    </div>
+    <div id="campos-residente-movilidad" style="display:none;">
+      <label>Universidad de origen</label><input id="modal-res-universidad">
+      <label>Correo</label><input id="modal-res-correo" type="email">
+    </div>
     <div class="fila-botones"><button class="btn-primario" onclick="confirmarAgregarResidente()">Agregar a la cuadrícula</button></div>`;
   document.getElementById('contenido-modal').innerHTML = html;
   document.getElementById('overlay-modal').style.display = 'flex';
 }
 
+// Cambia qué campos se piden según el tipo elegido: un Residente CES necesita Nivel, un
+// residente de Movilidad necesita Universidad de origen y Correo en su lugar (no Nivel).
+function actualizarCamposTipoResidente() {
+  const esMovilidad = document.getElementById('modal-res-tipo').value === 'Movilidad entrante';
+  document.getElementById('campos-residente-ces').style.display = esMovilidad ? 'none' : 'block';
+  document.getElementById('campos-residente-movilidad').style.display = esMovilidad ? 'block' : 'none';
+}
+
 function confirmarAgregarResidente() {
+  const tipo = document.getElementById('modal-res-tipo').value;
   const nombre = document.getElementById('modal-res-nombre').value.trim();
   const cc = document.getElementById('modal-res-cc').value.trim();
-  const nivel = document.getElementById('modal-res-nivel').value.trim();
-  if (!nombre || !cc) { mostrarMensaje('Completa nombre y cédula.', 'error'); return; }
+  if (!nombre || !cc) { mostrarMensaje('Completa nombre y documento.', 'error'); return; }
+
+  let nivel = '', universidadOrigen = '', correo = '';
+  if (tipo === 'Movilidad entrante') {
+    universidadOrigen = document.getElementById('modal-res-universidad').value.trim();
+    correo = document.getElementById('modal-res-correo').value.trim();
+    if (!universidadOrigen) { mostrarMensaje('Completa la universidad de origen.', 'error'); return; }
+  } else {
+    nivel = document.getElementById('modal-res-nivel').value.trim();
+  }
 
   if (filasGridActual.some(f => String(f.id) === String(cc))) {
     mostrarMensaje('Ese residente ya está en la cuadrícula.', 'error');
     return;
   }
 
-  filasGridActual.push({ id: cc, nombre, nivel });
+  filasGridActual.push({ id: cc, nombre, nivel, tipo, universidadOrigen, correo });
   cerrarModal();
   redibujarCuadricula();
   mostrarMensaje('Residente agregado. Ahora asigna sus rotaciones dando clic en cada mes.', 'ok');
@@ -2341,14 +2434,19 @@ function abrirCeldaVacia(residenteId, mes, anioInicioBloque) {
   anioInicioBloqueCeldaVacia = anioInicioBloque || contextoGrid.anioInicio;
   const residente = filasGridActual.find(f => String(f.id) === String(residenteId));
   const esVacaciones = MESES_VACACIONES.includes(mes);
+  // Si el residente ya quedó marcado como Movilidad entrante al agregarlo, se respeta ese tipo
+  // por defecto en cada mes — ya no hay que volver a elegirlo celda por celda.
+  const tipoDefault = esVacaciones ? 'Vacaciones' : (residente.tipo || 'Residente CES');
+  const infoExtra = residente.tipo === 'Movilidad entrante' && residente.universidadOrigen
+    ? ' · ' + esc(residente.universidadOrigen) : '';
   const html = `
     <h3>${residente.nombre} — ${mes}</h3>
-    <p style="font-size:12px; color:#888;">${contextoGrid.programa} · ${anioInicioBloqueCeldaVacia}-${Number(anioInicioBloqueCeldaVacia) + 1}</p>
+    <p style="font-size:12px; color:#888;">${contextoGrid.programa} · ${anioInicioBloqueCeldaVacia}-${Number(anioInicioBloqueCeldaVacia) + 1}${infoExtra}</p>
     <label>Tipo</label>
     <select id="modal-tipo" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">
-      <option${esVacaciones ? '' : ' selected'}>Residente CES</option>
-      <option>Movilidad entrante</option>
-      <option${esVacaciones ? ' selected' : ''}>Vacaciones</option>
+      <option${tipoDefault === 'Residente CES' ? ' selected' : ''}>Residente CES</option>
+      <option${tipoDefault === 'Movilidad entrante' ? ' selected' : ''}>Movilidad entrante</option>
+      <option${tipoDefault === 'Vacaciones' ? ' selected' : ''}>Vacaciones</option>
     </select>
     <label>Campo de rotación</label><input id="modal-campo" value="${esVacaciones ? 'VACACIONES' : ''}">
     <label>Nombre de la rotación</label><input id="modal-rotacion" value="${esVacaciones ? mes : ''}">
@@ -2367,8 +2465,9 @@ async function guardarCeldaNueva(residenteId, mes) {
 
   const { anioAcademico, semestre } = calcularAnioSemestre(mes, anioInicioBloqueCeldaVacia || contextoGrid.anioInicio);
   const resultado = await llamarBackend('guardarPendiente', {
-    residenteId: residente.id, residenteNombre: residente.nombre, nivel: residente.nivel, mes,
-    programa: contextoGrid.programa, periodo: semestre,
+    residenteId: residente.id, residenteNombre: residente.nombre, nivel: residente.nivel,
+    universidadOrigen: residente.universidadOrigen || '', correo: residente.correo || '',
+    mes, programa: contextoGrid.programa, periodo: semestre,
     anioAcademico, semestre,
     tipo, campoRotacion, rotacion
   });
@@ -2435,7 +2534,11 @@ function abrirCeldaExistente(clave) {
   if (!registro) { mostrarMensaje('No se encontró el registro.', 'error'); return; }
 
   let html = `<h3>${esc(registro.ResidenteNombre)} — ${esc(registro.Mes)}</h3>
-    <p style="font-size:12px; color:#888;">${esc(registro.Programa)} · Estado actual: <strong>${esc(registro.Estado)}</strong></p>`;
+    <p style="font-size:12px; color:#888;">${esc(registro.Programa)} · Estado actual: <strong>${esc(registro.Estado)}</strong></p>
+    ${registro.Tipo === 'Movilidad entrante' ? `<p style="font-size:12px; color:#888;">🎓 ${esc(registro.UniversidadOrigen || 'Universidad no registrada')}${registro.Correo ? ' · ' + esc(registro.Correo) : ''}</p>` : ''}
+    <div class="fila-botones">
+      <button class="btn-secundario" onclick="abrirNotificarAsistente('${clave}')" title="Enviar un correo urgente a una asistente sobre este registro">🔔 Notificar Asistente</button>
+    </div>`;
 
   if (registro.Estado === 'Negado') {
     html += `
@@ -2513,6 +2616,7 @@ function abrirCeldaAuxiliar(clave) {
 
   let html = `<h3>${esc(registro.ResidenteNombre)} — ${esc(registro.Mes)}</h3>
     <p style="font-size:12px; color:#888;">${esc(registro.Programa)}</p>
+    ${registro.Tipo === 'Movilidad entrante' ? `<p style="font-size:12px; color:#888;">🎓 ${esc(registro.UniversidadOrigen || 'Universidad no registrada')}${registro.Correo ? ' · ' + esc(registro.Correo) : ''}</p>` : ''}
     <p><strong>${esc(registro.CampoRotacion || '')}</strong><br>${esc(registro.Rotacion || '')}</p>
     <p style="font-size:12px; color:#888;">Estado actual: <strong>${esc(registro.Estado)}</strong></p>`;
 
@@ -2707,6 +2811,7 @@ function dibujarLista(filas, idTabla) {
           <input type="checkbox" ${seleccionActual === 'Negado' ? 'checked' : ''} onchange="marcarSeleccionGestion('${claveEsc}', 'Negado', this)"> Negado
         </label>
         <button class="btn-secundario btn-pequeno" onclick="abrirComentario('${claveEsc}')">💬 Comentar</button>
+        ${usuarioActual.rol === 'coordinadora' ? `<button class="btn-secundario btn-pequeno" onclick="abrirNotificarAsistente('${claveEsc}')" title="Enviar aviso urgente por correo">🔔 Notificar</button>` : ''}
       </div>`;
     tr.dataset.clave = fila.ClaveUnica;
     if (seleccionActual) tr.style.background = seleccionActual === 'Gestionado' ? '#eafaf0' : '#f7edf9';
@@ -2924,6 +3029,58 @@ function dibujarAlertasComentarios(filas) {
 // Descarta un aviso (comentario o Negado) del panel. No borra el comentario ni cambia el
 // estado — solo lo oculta de esta lista hasta que haya novedad (un comentario nuevo, o vuelva
 // a quedar Negado, lo hacen reaparecer automáticamente).
+// ============================================================
+// NOTIFICAR ASISTENTE — aviso urgente puntual por correo (coordinadora). No cambia nada del
+// registro, solo dispara un correo marcado como urgente a la(s) asistente(s) elegida(s), para
+// los casos que no pueden esperar a la revisión normal de la cola (ej. un cambio en un periodo
+// lejano que no van a ver hasta dentro de mucho).
+// ============================================================
+function abrirNotificarAsistente(clave) {
+  const registro = registrosGridActual.find(r => r.ClaveUnica === clave)
+    || cacheColaCompleta.find(r => r.ClaveUnica === clave)
+    || cacheHistoricoCompleto.find(r => r.ClaveUnica === clave);
+  if (!registro) { mostrarMensaje('No se encontró el registro.', 'error'); return; }
+
+  const html = `
+    <h3>🔔 Notificar a una asistente</h3>
+    <p style="font-size:12px; color:#888;">${esc(registro.ResidenteNombre || '')} — ${esc(registro.Mes || '')} (${esc(registro.Programa || '')})</p>
+    <p style="font-size:12px; color:#555;">Se enviará un correo marcado como urgente para que lo revise cuanto antes en la Gestión Operativa.</p>
+    <label style="display:flex; align-items:center; gap:8px; margin:10px 0 6px;">
+      <input type="checkbox" id="notif-jeimy" checked> Jeimy Saldarriaga (jsaldarriagaa@ces.edu.co)
+    </label>
+    <label style="display:flex; align-items:center; gap:8px; margin:0 0 10px;">
+      <input type="checkbox" id="notif-eliana"> Eliana Ramirez (earamirez@ces.edu.co)
+    </label>
+    <label>Mensaje (opcional)</label>
+    <textarea id="notif-mensaje" rows="3" placeholder="Ej: Cambio urgente, por favor revisar antes de mañana" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;"></textarea>
+    <div class="fila-botones">
+      <button class="btn-secundario" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-primario" onclick="ejecutarNotificarAsistente('${clave}')">📧 Enviar notificación urgente</button>
+    </div>`;
+  document.getElementById('contenido-modal').innerHTML = html;
+  document.getElementById('overlay-modal').style.display = 'flex';
+}
+
+async function ejecutarNotificarAsistente(clave) {
+  const destinatarios = [];
+  if (document.getElementById('notif-jeimy').checked) destinatarios.push('Jeimy');
+  if (document.getElementById('notif-eliana').checked) destinatarios.push('Eliana');
+  if (destinatarios.length === 0) { mostrarMensaje('Selecciona al menos una asistente.', 'error'); return; }
+
+  const mensaje = document.getElementById('notif-mensaje').value;
+  const boton = document.querySelector('#contenido-modal .btn-primario');
+  if (boton) { boton.disabled = true; boton.textContent = '⏳ Enviando...'; }
+
+  const resultado = await llamarBackend('notificarAsistente', { clave, destinatarios, mensaje });
+  if (resultado.ok) {
+    mostrarMensaje('Notificación urgente enviada a ' + resultado.enviadosA.join(' y ') + '.', 'ok');
+    cerrarModal();
+  } else {
+    mostrarMensaje('Error al notificar: ' + resultado.error, 'error');
+    if (boton) { boton.disabled = false; boton.textContent = '📧 Enviar notificación urgente'; }
+  }
+}
+
 async function descartarAlerta(clave) {
   const resultado = await llamarBackend('descartarAlerta', { clave });
   if (resultado.ok) {
