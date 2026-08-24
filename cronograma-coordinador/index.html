@@ -701,10 +701,26 @@ function mostrarMensaje(texto, tipo) {
 // ============================================================
 // BACKEND
 // ============================================================
+// Corta cualquier petición al backend que lleve más de 30 segundos sin responder — Apps Script
+// normalmente responde en 1-3 segundos, así que 30s ya es una señal clara de que algo se colgó
+// (sobrecarga, cold start, etc.). Sin este límite, una petición atascada dejaba el "Cargando..."
+// congelado para siempre, sin ninguna forma de que el usuario supiera que debía reintentar.
+const TIMEOUT_BACKEND_MS = 30000;
+
+async function fetchConTimeout_(url, opciones) {
+  const controlador = new AbortController();
+  const timeoutId = setTimeout(() => controlador.abort(), TIMEOUT_BACKEND_MS);
+  try {
+    return await fetch(url, Object.assign({}, opciones, { signal: controlador.signal }));
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 async function llamarBackend(accion, datos) {
   let resultado;
   try {
-    const respuesta = await fetch(WEB_APP_URL, {
+    const respuesta = await fetchConTimeout_(WEB_APP_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ accion, datos, credencial: { usuario: usuarioActual.usuarioCorto, claveHash: usuarioActual.claveHash } })
@@ -713,9 +729,12 @@ async function llamarBackend(accion, datos) {
   } catch (err) {
     // Puede pasar cuando llegan varias peticiones casi al mismo tiempo (ej. al guardar una
     // celda, que dispara guardar + recargar cuadrícula + recargar cola seguidas) y Apps Script
-    // responde con una página de error en vez de JSON — sin este manejo, esto tumbaba la
-    // pantalla en blanco en vez de mostrar un aviso y dejar reintentar.
-    return { ok: false, error: 'No se pudo conectar con el servidor (puede ser una sobrecarga momentánea). Intenta de nuevo en unos segundos.' };
+    // responde con una página de error en vez de JSON, o simplemente no responde a tiempo —
+    // sin este manejo, esto tumbaba la pantalla o la dejaba colgada en vez de mostrar un aviso.
+    const mensaje = err.name === 'AbortError'
+      ? 'El servidor tardó demasiado en responder. Intenta de nuevo.'
+      : 'No se pudo conectar con el servidor (puede ser una sobrecarga momentánea). Intenta de nuevo en unos segundos.';
+    return { ok: false, error: mensaje };
   }
   if (!resultado.ok && resultado.error === 'No autorizado. Vuelve a iniciar sesión.') {
     mostrarMensaje('Tu sesión expiró o no es válida. Por favor vuelve a iniciar sesión.', 'error');
@@ -733,12 +752,15 @@ async function leerBackend(accion, extraParams) {
   }
   let resultado;
   try {
-    const respuesta = await fetch(url);
+    const respuesta = await fetchConTimeout_(url);
     resultado = await respuesta.json();
   } catch (err) {
-    // Mismo caso que en llamarBackend: una respuesta no-JSON (página de error de Apps Script
-    // por sobrecarga/concurrencia) ya no tumba la pantalla — se convierte en un error manejable.
-    return { ok: false, error: 'No se pudo conectar con el servidor (puede ser una sobrecarga momentánea). Intenta de nuevo en unos segundos.' };
+    // Mismo caso que en llamarBackend: una respuesta no-JSON o una petición que nunca responde
+    // ya no cuelga la pantalla — se convierte en un error manejable con opción de reintentar.
+    const mensaje = err.name === 'AbortError'
+      ? 'El servidor tardó demasiado en responder. Intenta de nuevo.'
+      : 'No se pudo conectar con el servidor (puede ser una sobrecarga momentánea). Intenta de nuevo en unos segundos.';
+    return { ok: false, error: mensaje };
   }
   if (!resultado.ok && resultado.error === 'No autorizado. Vuelve a iniciar sesión.') {
     mostrarMensaje('Tu sesión expiró o no es válida. Por favor vuelve a iniciar sesión.', 'error');
@@ -1156,7 +1178,15 @@ async function cargarPanelEjecutivo(forzarRecarga) {
   if (cacheHistoricoCompleto.length === 0 || forzarRecarga) {
     document.getElementById('db-barra-datos').textContent = '⏳ Cargando datos...';
     const res = await leerBackend('listarHistorico');
-    if (!res.ok) { mostrarMensaje('Error cargando el panel: ' + res.error, 'error'); return; }
+    if (!res.ok) {
+      mostrarMensaje('Error cargando el panel: ' + res.error, 'error');
+      // Antes esto dejaba el aviso "Cargando datos..." congelado para siempre si la petición
+      // fallaba — ahora muestra el error ahí mismo, con un botón para reintentar sin tener que
+      // recargar toda la página.
+      document.getElementById('db-barra-datos').innerHTML = '⚠️ No se pudieron cargar los datos: ' + esc(res.error) +
+        ' <button class="btn-secundario btn-pequeno" onclick="cargarPanelEjecutivo(true)" style="margin-left:10px;">Reintentar</button>';
+      return;
+    }
     cacheHistoricoCompleto = res.datos;
     llenarSelectoresBusqueda();
     dibujarChipsPeriodo();
