@@ -1433,7 +1433,7 @@ function dibujarListasEjecutivo(datos) {
     porPrograma[r.Programa] = porPrograma[r.Programa] || {};
     porPrograma[r.Programa][r.ResidenteNombre] = r.Nivel || '';
   });
-  const listaProgramas = Object.keys(porPrograma).map(p => ({ nombre: p, residentes: porPrograma[p] })).sort((a, b) => Object.keys(b.residentes).length - Object.keys(a.residentes).length);
+  const listaProgramas = Object.keys(porPrograma).map(p => ({ nombre: p, residentes: porPrograma[p] })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
   document.getElementById('db-lista-programas').innerHTML = listaProgramas.map((p, i) => `
     <div>
       <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 12px; border-bottom:1px solid #f4f4f4; font-size:13px; cursor:pointer;" onclick="toggleExpandirLista('prog-${i}')">
@@ -1441,7 +1441,7 @@ function dibujarListasEjecutivo(datos) {
       </div>
       <div id="prog-${i}" style="display:none; background:#fafbfc;">
         <div style="padding:6px 16px; font-size:11px; font-weight:700; color:var(--azul-ces); text-transform:uppercase;">Residentes en ${esc(p.nombre)}</div>
-        ${Object.keys(p.residentes).map(nombre => `
+        ${Object.keys(p.residentes).sort((a, b) => a.localeCompare(b, 'es')).map(nombre => `
           <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 16px; border-top:1px solid #eee; font-size:12px;">
             <span>${esc(nombre)}</span><span class="pastilla" style="background:#eef1f5; color:#555;">${esc(p.residentes[nombre])}</span>
           </div>`).join('')}
@@ -1455,7 +1455,7 @@ function dibujarListasEjecutivo(datos) {
       porCampo[campoIndividual][r.ResidenteNombre] = r.Nivel || '';
     });
   });
-  const listaCampos = Object.keys(porCampo).map(c => ({ nombre: c, residentes: porCampo[c] })).sort((a, b) => Object.keys(b.residentes).length - Object.keys(a.residentes).length);
+  const listaCampos = Object.keys(porCampo).map(c => ({ nombre: c, residentes: porCampo[c] })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
   document.getElementById('db-lista-campos').innerHTML = listaCampos.map((c, i) => `
     <div>
       <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 12px; border-bottom:1px solid #f4f4f4; font-size:13px; cursor:pointer;" onclick="toggleExpandirLista('campo-${i}')">
@@ -1463,7 +1463,7 @@ function dibujarListasEjecutivo(datos) {
       </div>
       <div id="campo-${i}" style="display:none; background:#fafbfc;">
         <div style="padding:6px 16px; font-size:11px; font-weight:700; color:#0d6e5f; text-transform:uppercase;">Residentes en ${esc(c.nombre)}</div>
-        ${Object.keys(c.residentes).map(nombre => `
+        ${Object.keys(c.residentes).sort((a, b) => a.localeCompare(b, 'es')).map(nombre => `
           <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 16px; border-top:1px solid #eee; font-size:12px;">
             <span>${esc(nombre)}</span><span class="pastilla" style="background:#eef1f5; color:#555;">${esc(c.residentes[nombre])}</span>
           </div>`).join('')}
