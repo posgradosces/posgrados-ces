@@ -3,49 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestión Operativa — Posgrados Clínicos</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<title>Cronograma de Rotaciones · Coordinador de Programa</title>
 <style>
   :root {
-    --pendiente-bg: #FFD580; --pendiente-tx: #823C00;
-    --confirmado-bg: #BDD7EE; --confirmado-tx: #1F4E79;
-    --negado-bg: #EBDAE9; --negado-tx: #7030A0;
-    --cambio-bg: #FFC7CE; --cambio-tx: #9C0006;
-    --gestionado-bg: #C6EFCE; --gestionado-tx: #006100;
+    --pendiente-tx: #823C00;
+    --confirmado-tx: #1F4E79;
+    --negado-tx: #7030A0;
+    --cambio-tx: #9C0006;
     --azul-ces: #003865;
   }
   * { box-sizing: border-box; }
   body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; background: #f4f6f8; color: #222; }
-  header { background: var(--azul-ces); color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
-  header h1 { font-size: 18px; margin: 0; }
-  header .usuario { font-size: 14px; display: flex; align-items: center; gap: 12px; }
+  header { background: var(--azul-ces); color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  header h1 { font-size: 17px; margin: 0; }
+  header .usuario { font-size: 13px; display: flex; align-items: center; gap: 12px; }
   button { cursor: pointer; border: none; border-radius: 6px; padding: 8px 14px; font-size: 14px; }
   .btn-primario { background: var(--azul-ces); color: white; }
   .btn-secundario { background: #e0e0e0; color: #333; }
-  .btn-gestionado { background: var(--gestionado-bg); color: var(--gestionado-tx); }
-  .btn-negado { background: var(--negado-bg); color: var(--negado-tx); }
-  .btn-pequeno { padding: 5px 10px; font-size: 12px; margin: 2px; }
+  .btn-primario:disabled { opacity: .55; cursor: default; }
 
-  #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-  .caja-login { background: white; padding: 32px; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); width: 320px; }
+  #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 16px; }
+  .caja-login { background: white; padding: 32px; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); width: 340px; max-width: 100%; }
   .caja-login h2 { margin-top: 0; color: var(--azul-ces); font-size: 18px; }
-  .caja-login select, .caja-login input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-  .error { color: #9C0006; font-size: 13px; margin-top: 6px; }
+  .caja-login p.subtitulo { font-size: 13px; color: #666; margin-top: -8px; margin-bottom: 18px; }
+  .caja-login input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+  .error { color: #9C0006; font-size: 13px; margin-top: 6px; min-height: 16px; }
 
   #app-screen { display: none; }
   .contenedor { padding: 20px; max-width: 1300px; margin: 0 auto; }
   .panel { background: white; border-radius: 10px; padding: 18px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
   .panel h2 { margin-top: 0; font-size: 16px; color: var(--azul-ces); }
+  .aviso-tiempo-real { font-size: 12px; color: #888; display: flex; align-items: center; gap: 6px; }
+  .punto-vivo { width: 8px; height: 8px; border-radius: 50%; background: #2e7d32; display: inline-block; animation: latido 2s infinite; }
+  @keyframes latido { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
 
-  .controles-cuadricula { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; margin-bottom: 16px; }
+  .controles-cuadricula { display: flex; gap: 14px; align-items: end; flex-wrap: wrap; margin-bottom: 16px; }
   .controles-cuadricula label { font-size: 12px; color: #555; display: block; margin-bottom: 3px; }
-  .controles-cuadricula input, .controles-cuadricula label.check { padding: 8px; border: 1px solid #ccc; border-radius: 5px; min-width: 160px; }
-  .controles-cuadricula label.check { display: flex; align-items: center; gap: 6px; min-width: auto; cursor: pointer; }
+  .controles-cuadricula select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; min-width: 200px; font-size: 14px; }
 
   .contenedor-scroll-cuadricula { max-height: 68vh; overflow: auto; border: 1px solid #e2e2e2; border-radius: 6px; }
-  .caja-sugerencias { display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #ccc; border-radius:0 0 6px 6px; max-height:220px; overflow-y:auto; z-index:50; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
-  .caja-sugerencias div { padding:8px 10px; cursor:pointer; font-size:13px; }
-  .caja-sugerencias div:hover { background:#f0f2f5; }
   table.cuadricula { border-collapse: collapse; width: 100%; font-size: 12px; }
   table.cuadricula th, table.cuadricula td { border: 1px solid #e2e2e2; padding: 0; text-align: center; }
   table.cuadricula thead th { background: #f0f2f5; padding: 8px 4px; font-size: 11px; color: #555; white-space: nowrap; position: sticky; top: 0; z-index: 2; }
@@ -54,39 +50,26 @@
   table.cuadricula th.esquina { position: sticky; left: 0; z-index: 3; text-align: left; background: #f0f2f5; }
   table.cuadricula td.col-residente { text-align: left; padding: 8px; white-space: nowrap; background: #fafbfc; font-weight: 600; position: sticky; left: 0; z-index: 1; }
   tr.fila-grupo td { background: var(--azul-ces); color: white; font-weight: 700; padding: 6px 10px !important; text-align: left; position: sticky; left: 0; }
-  .celda { width: 110px; height: 52px; cursor: pointer; padding: 4px !important; font-size: 11px; line-height: 1.25; }
-  .celda:hover { outline: 2px solid var(--azul-ces); outline-offset: -2px; }
+  .celda { width: 110px; height: 52px; padding: 4px !important; font-size: 11px; line-height: 1.25; cursor: default; }
   .celda-vacia { color: #ccc; }
-  .celda-oculta { color: #bbb; font-size: 16px; background: #f7f7f7 !important; }
-  .celda-alerta { font-weight: 700; font-size: 10px; }
+  .icono-comentario { position: absolute; top: 2px; right: 3px; font-size: 10px; line-height: 1; }
 
-  table.lista { width: 100%; border-collapse: collapse; font-size: 13px; }
-  table.lista th, table.lista td { text-align: left; padding: 8px; border-bottom: 1px solid #eee; vertical-align: top; }
-  table.lista th { color: #666; font-weight: 600; font-size: 12px; text-transform: uppercase; }
-  .pastilla { padding: 3px 9px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; }
-  .fila-acciones { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-  .obs-interna { font-size: 11px; color: #888; margin-top: 3px; white-space: pre-line; }
-
-  #overlay-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); align-items: center; justify-content: center; z-index: 100; }
-  #caja-modal { background: white; border-radius: 10px; padding: 22px; width: 380px; max-width: 90vw; }
-  #caja-modal h3 { margin-top: 0; font-size: 15px; color: var(--azul-ces); }
-  #caja-modal label { font-size: 12px; color: #555; display: block; margin: 8px 0 3px; }
-  #caja-modal input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
-  #caja-modal .fila-botones { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
-  #caja-modal .cerrar { float: right; cursor: pointer; color: #999; font-size: 18px; }
-
-  #mensaje-flotante { position: fixed; bottom: 20px; right: 20px; padding: 12px 18px; border-radius: 8px; background: #333; color: white; font-size: 14px; display: none; max-width: 320px; z-index: 200; }
-  #mensaje-flotante.ok { background: var(--gestionado-tx); }
-  #mensaje-flotante.error { background: var(--cambio-tx); }
+  .leyenda { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 12px; color: #555; }
+  .leyenda span.punto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
+  .mensaje-vacio { color: #999; padding: 20px 4px; }
+  .mensaje-flotante { position: fixed; bottom: 18px; right: 18px; background: #333; color: white; padding: 10px 16px; border-radius: 6px; font-size: 13px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; }
+  .mensaje-flotante.visible { opacity: 1; }
+  .mensaje-flotante.error { background: #9C0006; }
+  .mensaje-flotante.ok { background: #1F4E79; }
 </style>
 </head>
 <body>
 
 <div id="login-screen">
   <div class="caja-login">
-    <h2>Gestión Operativa · Posgrados Clínicos</h2>
-    <select id="login-usuario"><option value="">Selecciona tu usuario</option></select>
-    <input type="password" id="login-password" placeholder="Contraseña">
+    <h2>Cronograma de Rotaciones</h2>
+    <p class="subtitulo">Acceso para coordinadores de programa · Posgrados Clínicos CES</p>
+    <input type="password" id="login-password" placeholder="Clave de acceso" autocomplete="current-password">
     <button class="btn-primario" style="width:100%; margin-top:8px;" onclick="intentarLogin()">Entrar</button>
     <div class="error" id="login-error"></div>
   </div>
@@ -94,309 +77,59 @@
 
 <div id="app-screen">
   <header>
-    <h1>Gestión Operativa · Posgrados Clínicos</h1>
+    <h1>📅 Cronograma de Rotaciones</h1>
     <div class="usuario">
-      <span id="nombre-usuario"></span>
-      <button class="btn-secundario btn-pequeno" onclick="cerrarSesion()">Salir</button>
+      <span class="aviso-tiempo-real"><span class="punto-vivo"></span> Actualizado en tiempo real</span>
+      <span id="nombre-usuario-header"></span>
+      <button class="btn-secundario" onclick="cerrarSesion()">Cerrar sesión</button>
     </div>
   </header>
 
-  <div id="banner-respaldo" style="display:none; background:#FFF3CD; color:#664d03; padding:10px 20px; font-size:13px; text-align:center; border-bottom:1px solid #ffe69c;">
-    📦 <strong>Alerta:</strong> recuerda descargar una copia de respaldo del histórico este mes (Archivo → Descargar → Excel, guárdala en Drive con el nombre del periodo que cierra).
-  </div>
-
   <div class="contenedor">
+    <p id="bienvenida" style="font-size:15px; color:#444; margin: 4px 0 16px;"></p>
+    <div class="panel">
+      <h2 id="titulo-programa">Cargando programa…</h2>
 
-    <div class="tabs" id="tabs-coordinadora" style="display:none; margin-bottom:16px;">
-      <button class="btn-primario btn-pequeno" id="tab-btn-dashboard" onclick="cambiarTab('dashboard')">Dashboard</button>
-      <button class="btn-secundario btn-pequeno" id="tab-btn-gestion" onclick="cambiarTab('gestion')">Gestión operativa <span id="badge-comentarios" style="display:none; background:#9C0006; color:white; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:4px;"></span></button>
-      <button class="btn-secundario btn-pequeno" id="tab-btn-cuadricula" onclick="cambiarTab('cuadricula')">Cuadro de rotaciones</button>
-      <button class="btn-secundario btn-pequeno" id="tab-btn-historico" onclick="cambiarTab('historico')">Histórico</button>
-      <button class="btn-secundario btn-pequeno" id="tab-btn-movilidad" onclick="cambiarTab('movilidad')" style="display:none;">Movilidad <span id="badge-movilidad" style="display:none; background:var(--confirmado-tx); color:white; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:4px;"></span></button>
-      <button class="btn-secundario btn-pequeno" id="boton-publicar-github" onclick="publicarAlMicrositioPublico()" style="display:none; margin-left:auto; background:#003865; color:white;" title="Sube ahora mismo lo más reciente al micrositio público, sin esperar al disparador de las 9 PM">📤 Publicar al micrositio público</button>
-    </div>
-
-    <div class="panel" id="panel-cuadricula" style="display:none;">
-      <h2>Cuadro de rotaciones</h2>
       <div class="controles-cuadricula">
-        <div style="position:relative;">
+        <div id="selector-programa-wrap" style="display:none;">
           <label>Programa</label>
-          <input id="cg-programa" autocomplete="off" placeholder="Escribe para buscar..." oninput="mostrarSugerenciasPrograma()" onfocus="mostrarSugerenciasPrograma()">
-          <div id="sugerencias-programa" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #ccc; border-radius:0 0 6px 6px; max-height:220px; overflow-y:auto; z-index:50; box-shadow:0 4px 10px rgba(0,0,0,0.1);"></div>
-        </div>
-        <div style="position:relative;"><label>Año académico (inicio, ej: 2027)</label><input id="cg-periodo" autocomplete="off" placeholder="2027" oninput="mostrarSugerencias('cg-periodo')" onfocus="mostrarSugerencias('cg-periodo')"><div id="sug-cg-periodo" class="caja-sugerencias"></div></div>
-        <div><label>Hasta (opcional, para ver varios años)</label><input id="cg-periodo-hasta" autocomplete="off" placeholder="ej: 2028"></div>
-        <div><button class="btn-primario" id="boton-cargar-cuadricula" onclick="cargarCuadricula()">Cargar cuadrícula</button></div>
-        <div><button class="btn-secundario" id="boton-agregar-residente" onclick="abrirModalAgregarResidente()">+ Agregar residente</button></div>
-        <div><button class="btn-secundario" id="boton-copiar-filas" onclick="copiarFilasSeleccionadas()">📋 Copiar seleccionados</button></div>
-        <div><button class="btn-primario" id="boton-pegar-filas" onclick="abrirModalPegarFilas()" style="display:none;">📌 Pegar residentes copiados</button></div>
-        <div><button class="btn-secundario" id="boton-importar-excel" onclick="document.getElementById('input-excel').click()">📥 Importar Excel</button>
-          <input type="file" id="input-excel" accept=".xlsx" style="display:none;" onchange="procesarArchivoExcel(event)">
-        </div>
-        <div><button class="btn-secundario" onclick="descargarCuadriculaExcel()">📤 Descargar Excel</button></div>
-        <div><button class="btn-secundario" onclick="actualizarCuadriculaActual()">🔄 Actualizar</button></div>
-        <div><button class="btn-secundario" id="boton-archivar-periodo" style="display:none; border-color:#888; color:#555;" onclick="abrirArchivarPeriodo()">🗄 Archivar periodo académico</button></div>
-      </div>
-      <div id="contenedor-cuadricula"><p style="color:#999;">Escribe programa y año académico, luego "Cargar cuadrícula".</p></div>
-      <p style="font-size:12px; color:#888; margin-top:8px;">
-        <span style="color:#C00000; font-weight:600;">■ Rojo</span> = Pendiente/Cambio ·
-        <span style="color:#000; font-weight:600;">■ Negro</span> = Confirmado ·
-        <span style="color:#7030A0; font-weight:600;">■ Morado</span> = Negado
-      </p>
-    </div>
-
-    <div class="panel" id="panel-dashboard" style="display:none;">
-      <div id="db-barra-datos" style="background:#eef4fb; border:1px solid #d6e4f5; border-radius:8px; padding:10px 16px; font-size:13px; color:#1F4E79; margin-bottom:20px;"></div>
-
-      <h2 style="margin-bottom:2px;">Panel ejecutivo</h2>
-      <p id="db-resumen-periodo" style="font-size:12px; color:#888; margin-top:0; margin-bottom:14px;"></p>
-
-      <p style="font-size:11px; color:#888; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; margin-bottom:6px;">Ver semestre:</p>
-      <div id="db-chips-periodo" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;"></div>
-
-      <div id="db-kpis" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:24px;"></div>
-
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
-        <div>
-          <h3 style="font-size:13px; color:white; background:var(--azul-ces); padding:10px 14px; border-radius:6px 6px 0 0; margin:0; display:flex; justify-content:space-between; align-items:center;">
-            <span>Residentes por programa</span><span style="font-size:11px; font-weight:400; opacity:0.85;">Clic para ver residentes</span>
-          </h3>
-          <div id="db-lista-programas" style="max-height:260px; overflow-y:auto; border:1px solid #eef1f5; border-top:none; border-radius:0 0 6px 6px;"></div>
+          <select id="sel-programa" onchange="cambiarPrograma()"></select>
         </div>
         <div>
-          <h3 style="font-size:13px; color:white; background:#0d6e5f; padding:10px 14px; border-radius:6px 6px 0 0; margin:0; display:flex; justify-content:space-between; align-items:center;">
-            <span>Campos de rotación</span><span style="font-size:11px; font-weight:400; opacity:0.85;">Clic para ver residentes</span>
-          </h3>
-          <div id="db-lista-campos" style="max-height:260px; overflow-y:auto; border:1px solid #eef1f5; border-top:none; border-radius:0 0 6px 6px;"></div>
+          <label>Año académico</label>
+          <select id="sel-anio-academico" onchange="cambiarAnioAcademico()"></select>
+        </div>
+        <div>
+          <button class="btn-primario" id="btn-descargar" onclick="descargarCuadriculaExcel()">📥 Descargar Excel</button>
         </div>
       </div>
 
-      <div class="panel" style="background:#fafbfc; box-shadow:none; border:1px solid #eef1f5;">
-        <h3 style="font-size:13px; color:var(--azul-ces); margin-top:0;">Buscar campo de rotación</h3>
-        <div class="controles-cuadricula">
-          <div style="position:relative;"><label>Institución/campo (puedes elegir varios)</label><input id="db-b1-campo" autocomplete="off" placeholder="Escribe y selecciona..." oninput="mostrarSugerencias('db-b1-campo')" onfocus="mostrarSugerencias('db-b1-campo')"><div id="sug-db-b1-campo" class="caja-sugerencias"></div><div id="chips-db-b1-campo" style="margin-top:4px;"></div></div>
-          <div style="position:relative;"><label>Mes (puedes elegir varios)</label><input id="db-b1-mes" autocomplete="off" placeholder="Todos los meses" oninput="mostrarSugerencias('db-b1-mes')" onfocus="mostrarSugerencias('db-b1-mes')"><div id="sug-db-b1-mes" class="caja-sugerencias"></div><div id="chips-db-b1-mes" style="margin-top:4px;"></div></div>
-          <div style="position:relative;"><label>Año (puedes elegir varios)</label><input id="db-b1-anio" autocomplete="off" placeholder="Todos los años" oninput="mostrarSugerencias('db-b1-anio')" onfocus="mostrarSugerencias('db-b1-anio')"><div id="sug-db-b1-anio" class="caja-sugerencias"></div><div id="chips-db-b1-anio" style="margin-top:4px;"></div></div>
-          <div style="position:relative;"><label>Especialidad (puedes elegir varias)</label><input id="db-b1-programa" autocomplete="off" placeholder="Todas" oninput="mostrarSugerencias('db-b1-programa')" onfocus="mostrarSugerencias('db-b1-programa')"><div id="sug-db-b1-programa" class="caja-sugerencias"></div><div id="chips-db-b1-programa" style="margin-top:4px;"></div></div>
-          <div><button class="btn-primario" onclick="buscarPorCampo()">Buscar</button></div>
-          <div><button class="btn-secundario" onclick="limpiarBusquedaCampo()">🧹 Limpiar</button></div>
-        </div>
-        <div id="db-resultado-campo" style="margin-top:10px;"></div>
-      </div>
+      <div id="contenedor-cuadricula"><p class="mensaje-vacio">Cargando cronograma…</p></div>
 
-      <div class="panel" style="background:#fafbfc; box-shadow:none; border:1px solid #eef1f5;">
-        <h3 style="font-size:13px; color:var(--azul-ces); margin-top:0;">Buscar por rotación</h3>
-        <div class="controles-cuadricula">
-          <div style="position:relative;"><label>Nombre de la rotación</label><input id="db-b2-rotacion" autocomplete="off" placeholder="Escribe..." oninput="mostrarSugerencias('db-b2-rotacion')" onfocus="mostrarSugerencias('db-b2-rotacion')"><div id="sug-db-b2-rotacion" class="caja-sugerencias"></div></div>
-          <div style="position:relative;"><label>Especialidad (puedes elegir varias)</label><input id="db-b2-programa" autocomplete="off" placeholder="Todas" oninput="mostrarSugerencias('db-b2-programa')" onfocus="mostrarSugerencias('db-b2-programa')"><div id="sug-db-b2-programa" class="caja-sugerencias"></div><div id="chips-db-b2-programa" style="margin-top:4px;"></div></div>
-          <div style="position:relative;"><label>Mes (puedes elegir varios)</label><input id="db-b2-mes" autocomplete="off" placeholder="Todos los meses" oninput="mostrarSugerencias('db-b2-mes')" onfocus="mostrarSugerencias('db-b2-mes')"><div id="sug-db-b2-mes" class="caja-sugerencias"></div><div id="chips-db-b2-mes" style="margin-top:4px;"></div></div>
-          <div><button class="btn-primario" onclick="buscarPorRotacion()">Buscar</button></div>
-          <div><button class="btn-secundario" onclick="limpiarBusquedaRotacion()">🧹 Limpiar</button></div>
-        </div>
-        <div id="db-resultado-rotacion" style="margin-top:10px;"></div>
-      </div>
-
-      <div class="panel" style="background:#fafbfc; box-shadow:none; border:1px solid #eef1f5;">
-        <h3 style="font-size:13px; color:var(--azul-ces); margin-top:0;">Buscar residente</h3>
-        <div class="controles-cuadricula">
-          <div style="position:relative;"><label>Nombre</label><input id="db-b3-nombre" autocomplete="off" placeholder="Escribe..." oninput="mostrarSugerencias('db-b3-nombre')" onfocus="mostrarSugerencias('db-b3-nombre')"><div id="sug-db-b3-nombre" class="caja-sugerencias"></div></div>
-          <div style="position:relative;"><label>Programa (puedes elegir varios)</label><input id="db-b3-programa" autocomplete="off" placeholder="Todos" oninput="mostrarSugerencias('db-b3-programa')" onfocus="mostrarSugerencias('db-b3-programa')"><div id="sug-db-b3-programa" class="caja-sugerencias"></div><div id="chips-db-b3-programa" style="margin-top:4px;"></div></div>
-          <div style="position:relative;"><label>Semestre (puedes elegir varios)</label><input id="db-b3-semestre" autocomplete="off" placeholder="Todos" oninput="mostrarSugerencias('db-b3-semestre')" onfocus="mostrarSugerencias('db-b3-semestre')"><div id="sug-db-b3-semestre" class="caja-sugerencias"></div><div id="chips-db-b3-semestre" style="margin-top:4px;"></div></div>
-          <div><button class="btn-primario" onclick="buscarResidente()">Buscar</button></div>
-          <div><button class="btn-secundario" onclick="limpiarBusquedaResidente()">🧹 Limpiar</button></div>
-        </div>
-        <div id="db-resultado-residente" style="margin-top:10px;"></div>
+      <div class="leyenda">
+        <span><span class="punto" style="background:var(--pendiente-tx);"></span>Pendiente</span>
+        <span><span class="punto" style="background:var(--confirmado-tx);"></span>Confirmado</span>
+        <span><span class="punto" style="background:var(--negado-tx);"></span>Negado</span>
+        <span><span class="punto" style="background:var(--cambio-tx);"></span>Cambio</span>
+        <span>💬 Comentario del equipo interno (pasa el mouse para leerlo)</span>
       </div>
     </div>
-
-    <div class="panel" id="panel-gestion-operativa" style="display:none;">
-      <h2>Gestión operativa</h2>
-      <div id="alertas-comentarios"></div>
-
-      <!-- Vista auxiliares: cola simple con Gestionado/Negado -->
-      <div id="vista-gestion-auxiliar" style="display:none;">
-        <div class="controles-cuadricula" style="margin-bottom:10px;">
-          <div style="position:relative;"><label>Residente</label><input id="go-filtro-nombre" autocomplete="off" placeholder="Nombre..." onkeydown="if(event.key==='Enter') aplicarFiltrosGestion()"></div>
-          <div><label>Documento de ID</label><input id="go-filtro-documento" autocomplete="off" placeholder="Cédula..." onkeydown="if(event.key==='Enter') aplicarFiltrosGestion()"></div>
-          <div><label>Filtrar por asistente</label>
-            <select id="go-filtro-asistente" onchange="aplicarFiltroAsistente()">
-              <option value="">Todos los programas</option>
-              <option value="Eliana">Programas de Eliana</option>
-              <option value="Jeimy">Programas de Jeimy</option>
-            </select>
-          </div>
-          <div style="position:relative;"><label>Programa (puedes elegir varios)</label><input id="go-filtro-programa" autocomplete="off" placeholder="Escribe y selecciona..." oninput="mostrarSugerencias('go-filtro-programa')" onfocus="mostrarSugerencias('go-filtro-programa')"><div id="sug-go-filtro-programa" class="caja-sugerencias"></div><div id="chips-go-filtro-programa" style="margin-top:4px;"></div></div>
-          <div><label>Estado</label>
-            <select id="go-filtro-estado">
-              <option value="">Todos</option>
-              <option>Pendiente</option><option>Cambio</option>
-            </select>
-          </div>
-          <div><label>Mes</label>
-            <select id="go-filtro-mes"><option value="">Todos</option></select>
-          </div>
-          <div><label>Periodo académico</label>
-            <select id="go-filtro-periodo"><option value="">Todos</option></select>
-          </div>
-          <div><button class="btn-primario" onclick="aplicarFiltrosGestion()">Filtrar</button></div>
-          <div><button class="btn-secundario" onclick="limpiarFiltrosGestionOperativa()">🧹 Limpiar</button></div>
-          <div><button class="btn-secundario" onclick="descargarGestionOperativaExcel()">📤 Descargar Excel</button></div>
-          <div><button class="btn-secundario" onclick="actualizarGestionAuxiliar()">🔄 Actualizar</button></div>
-        </div>
-        <p style="font-size:11px; color:#888; margin-top:-6px; margin-bottom:12px;">Los registros Negados no aparecen aquí — su reasignación la maneja la coordinadora. Los Gestionados quedan confirmados y salen de esta cola automáticamente.</p>
-        <div id="kpis-gestion" style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;"></div>
-        <div id="barra-aplicar-gestion" style="display:none; align-items:center; justify-content:space-between; background:#eef4fb; border:1px solid #1F4E79; border-radius:8px; padding:10px 16px; margin-bottom:12px;">
-          <span id="resumen-seleccion-gestion" style="font-size:13px; color:#1F4E79; font-weight:600;"></span>
-          <div style="display:flex; gap:8px;">
-            <button class="btn-secundario btn-pequeno" onclick="cancelarSeleccionGestion()">Cancelar selección</button>
-            <button class="btn-primario btn-pequeno" id="boton-aplicar-gestion" onclick="aplicarSeleccionesGestion()">Aplicar cambios</button>
-          </div>
-        </div>
-        <table class="lista">
-          <thead><tr><th>Residente</th><th>Programa / Periodo / Mes</th><th>Campo / Rotación</th><th>Estado</th><th>Acciones</th></tr></thead>
-          <tbody id="tabla-gestion-completa"></tbody>
-        </table>
-      </div>
-
-      <!-- Vista coordinadoras: Validación mensual, estilo Excel original -->
-      <div id="vista-gestion-coordinadora" style="display:none;">
-        <div style="background:var(--azul-ces); color:white; padding:12px 16px; border-radius:8px 8px 0 0; font-weight:700; font-size:15px;">
-          VALIDACIÓN MENSUAL — CONTROL DE CAMPOS DE PRÁCTICA
-        </div>
-        <div style="border:1px solid #eef1f5; border-top:none; padding:16px; border-radius:0 0 8px 8px; margin-bottom:20px;">
-          <p id="vm-resumen" style="font-size:12px; color:#888; font-style:italic;"></p>
-          <div class="controles-cuadricula" style="margin-bottom:16px;">
-            <div style="position:relative;"><label>Residente</label><input id="vm-nombre" autocomplete="off" placeholder="Nombre..." onkeydown="if(event.key==='Enter') aplicarValidacionMensual()"></div>
-            <div><label>Documento de ID</label><input id="vm-documento" autocomplete="off" placeholder="Cédula..." onkeydown="if(event.key==='Enter') aplicarValidacionMensual()"></div>
-            <div style="position:relative;"><label>Programa (puedes elegir varios)</label><input id="vm-programa" autocomplete="off" placeholder="Escribe y selecciona..." oninput="mostrarSugerencias('vm-programa')" onfocus="mostrarSugerencias('vm-programa')"><div id="sug-vm-programa" class="caja-sugerencias"></div><div id="chips-vm-programa" style="margin-top:4px;"></div></div>
-            <div><label>Periodo académico</label><select id="vm-periodo"><option value="">Todos</option></select></div>
-            <div><label>Mes</label><select id="vm-mes"><option value="">Todos</option></select></div>
-            <div><button class="btn-primario" onclick="aplicarValidacionMensual()">Filtrar ></button></div>
-            <div><button class="btn-secundario" style="background:var(--negado-bg); color:var(--negado-tx); font-weight:600;" onclick="filtrarVmPorEstado('Negado')">Negados</button></div>
-            <div><button class="btn-secundario" onclick="limpiarFiltrosVm()">🧹 Limpiar</button></div>
-            <div><button class="btn-secundario" onclick="aplicarValidacionMensual(true)">🔄 Actualizar</button></div>
-          </div>
-          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0; margin-bottom:16px; text-align:center;">
-            <div class="vm-kpi" data-estado="Confirmado" onclick="filtrarVmPorEstado('Confirmado')" style="background:var(--confirmado-bg); color:var(--confirmado-tx); padding:16px; cursor:pointer; border-radius:6px 0 0 6px;">
-              <div style="font-size:11px; text-transform:uppercase; font-weight:600;">Confirmados</div>
-              <div id="vm-count-confirmado" style="font-size:32px; font-weight:700;">0</div>
-            </div>
-            <div class="vm-kpi" data-estado="Pendiente" onclick="filtrarVmPorEstado('Pendiente')" style="background:var(--pendiente-bg); color:var(--pendiente-tx); padding:16px; cursor:pointer;">
-              <div style="font-size:11px; text-transform:uppercase; font-weight:600;">Pendientes</div>
-              <div id="vm-count-pendiente" style="font-size:32px; font-weight:700;">0</div>
-            </div>
-            <div class="vm-kpi" data-estado="Negado" onclick="filtrarVmPorEstado('Negado')" style="background:var(--negado-bg); color:var(--negado-tx); padding:16px; cursor:pointer; border-radius:0 6px 6px 0;">
-              <div style="font-size:11px; text-transform:uppercase; font-weight:600;">Negados (alerta)</div>
-              <div id="vm-count-negado" style="font-size:32px; font-weight:700;">0</div>
-            </div>
-          </div>
-          <table class="lista">
-            <thead><tr><th>Programa</th><th>Residente</th><th>Periodo / Mes</th><th>Campo de rotación</th><th>Rotación</th><th>Estado</th><th>Observación</th><th>Alerta</th><th>Acciones</th></tr></thead>
-            <tbody id="tabla-validacion-mensual"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel" style="display:none;">
-      <h2 id="titulo-lista">Cola de gestión <button class="btn-secundario btn-pequeno" onclick="cargarCola()" style="float:right;">Actualizar</button></h2>
-      <table class="lista">
-        <thead><tr><th>Residente</th><th>Programa / Periodo / Mes</th><th>Campo / Rotación</th><th>Estado</th><th>Acciones</th></tr></thead>
-        <tbody id="tabla-cola"></tbody>
-      </table>
-    </div>
-
-    <!-- Histórico de rotaciones — SOLO LECTURA, visible para auxiliares y coordinadoras -->
-    <div class="panel" id="panel-historico" style="display:none;">
-      <h2>Histórico de rotaciones</h2>
-      <p style="font-size:12px; color:#888; font-style:italic; margin-top:-8px;">Vista de solo consulta — aquí no se puede editar ni gestionar nada.</p>
-      <div class="controles-cuadricula" style="margin-bottom:10px;">
-        <div style="position:relative;"><label>Residente</label><input id="hist-filtro-nombre" autocomplete="off" placeholder="Nombre..." onkeydown="if(event.key==='Enter') aplicarFiltrosHistorico()"></div>
-        <div><label>Documento de ID</label><input id="hist-filtro-id" autocomplete="off" placeholder="Cédula..." onkeydown="if(event.key==='Enter') aplicarFiltrosHistorico()"></div>
-        <div style="position:relative;"><label>Programa / Especialidad</label><input id="hist-filtro-programa" autocomplete="off" placeholder="Todos" oninput="mostrarSugerencias('hist-filtro-programa')" onfocus="mostrarSugerencias('hist-filtro-programa')" onkeydown="if(event.key==='Enter') aplicarFiltrosHistorico()"><div id="sug-hist-filtro-programa" class="caja-sugerencias"></div></div>
-        <div><button class="btn-primario" onclick="aplicarFiltrosHistorico()">🔍 Buscar</button></div>
-        <div><button class="btn-secundario" onclick="limpiarFiltrosHistorico()">🧹 Limpiar</button></div>
-        <div><button class="btn-secundario" onclick="cargarHistorico(true)">🔄 Actualizar datos</button></div>
-      </div>
-      <p id="hist-resumen" style="font-size:12px; color:#888;"></p>
-      <div style="overflow-x:auto;">
-        <table class="lista">
-          <thead><tr><th>Residente</th><th>ID</th><th>Programa</th><th>Periodo</th><th>Mes</th><th>Campo de rotación</th><th>Rotación</th><th>Estado</th></tr></thead>
-          <tbody id="tabla-historico"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Movilidad — solo coordinadora. -->
-    <div class="panel" id="panel-movilidad" style="display:none;">
-      <h2>Movilidad académica <button class="btn-secundario btn-pequeno" onclick="cargarMovilidad(true)" style="float:right;">🔄 Actualizar</button></h2>
-      <p style="font-size:12px; color:#888; font-style:italic; margin-top:-8px;">Residentes de Movilidad entrante — para gestionar sus permisos con base en si quedaron aceptados o negados.</p>
-      <div id="kpis-movilidad" style="display:flex; gap:12px; margin:12px 0; flex-wrap:wrap;"></div>
-      <div class="controles-cuadricula" style="margin-bottom:10px;">
-        <div><label>Nombre</label><input id="mov-filtro-nombre" autocomplete="off" placeholder="Escribe..." oninput="buscarMovilidad()"></div>
-        <div><label>Documento de ID</label><input id="mov-filtro-documento" autocomplete="off" placeholder="Cédula..." oninput="buscarMovilidad()"></div>
-        <div><label>Especialidad</label><input id="mov-filtro-programa" autocomplete="off" placeholder="Escribe..." oninput="buscarMovilidad()"></div>
-        <div><label>Lugar de rotación</label><input id="mov-filtro-lugar" autocomplete="off" placeholder="Escribe..." oninput="buscarMovilidad()"></div>
-        <div style="align-self:flex-end;"><button class="btn-secundario" onclick="limpiarFiltrosMovilidad()">🧹 Limpiar</button></div>
-      </div>
-      <div style="overflow-x:auto;">
-        <table class="lista">
-          <thead><tr><th>Residente</th><th>ID</th><th>Programa</th><th>Periodo</th><th>Mes</th><th>Campo de rotación</th><th>Rotación</th><th>Estado</th><th>Acciones</th></tr></thead>
-          <tbody id="tabla-movilidad"></tbody>
-        </table>
-      </div>
-    </div>
-
   </div>
 </div>
 
-<div id="overlay-modal">
-  <div id="caja-modal">
-    <span class="cerrar" onclick="cerrarModal()">✕</span>
-    <div id="contenido-modal"></div>
-  </div>
-</div>
-
-<div id="mensaje-flotante"></div>
+<div class="mensaje-flotante" id="mensaje-flotante"></div>
 
 <script>
+// ============================================================
+// CONFIGURACIÓN — misma Web App que ya usa Gestión Operativa (mismo backend, mismo Sheet)
+// ============================================================
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwgzWT4TQgmE87Kbc2vIypW_QNhcpWtONQC5ssrZmtTGABfBuXMZBkmRVcc_mHPId7hxg/exec';
 
-// Solo nombres para mostrar en el desplegable de login — NINGÚN hash ni rol vive aquí.
-// El servidor es quien valida la contraseña y decide el rol; el navegador nunca lo decide.
-const USUARIOS_DISPLAY = {
-  'Sara': 'Sara Bedoya',
-  'Ana': 'Ana Maria Palacio',
-  'Laura': 'Laura Libreros',
-  'Jeimy': 'Jeimy Saldarriaga',
-  'Eliana': 'Eliana Ramirez'
-  // Perfil "Coordinador de Programa" retirado de este micrositio operativo (ver nota en Code.gs).
-};
-
-const COLORES_ESTADO = {
-  'Pendiente':  { bg: 'var(--pendiente-bg)',  tx: 'var(--pendiente-tx)' },
-  'Confirmado': { bg: 'var(--confirmado-bg)', tx: 'var(--confirmado-tx)' },
-  'Negado':     { bg: 'var(--negado-bg)',     tx: 'var(--negado-tx)' },
-  'Cambio':     { bg: 'var(--cambio-bg)',     tx: 'var(--cambio-tx)' },
-  'Gestionado': { bg: 'var(--gestionado-bg)', tx: 'var(--gestionado-tx)' }
-};
-
-// Orden de meses según el corte de año académico (julio -> junio). Cambiar aquí si el orden real es distinto.
 const MESES = ['Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre','Enero','Febrero','Marzo','Abril','Mayo','Junio'];
-
-// "Vacaciones" son columnas fijas más, aparte de los 12 meses académicos — hasta 2 por si tienen dos periodos de vacaciones
 const MESES_VACACIONES = ['Vacaciones 1', 'Vacaciones 2'];
+const COLOR_TEXTO_ESTADO = { 'Pendiente': '#C00000', 'Confirmado': '#000000', 'Negado': '#7030A0', 'Cambio': '#C00000' };
+const NIVELES_ORDEN = ['R1', 'R2', 'R3', 'R4', 'R5', 'Movilidad Académica'];
 
-// En el CUADRO (no en Gestión Operativa) el color lo lleva el TEXTO, igual que en el Excel original con colores de fuente
-const COLOR_TEXTO_ESTADO = {
-  'Pendiente':  '#C00000',
-  'Confirmado': '#000000',
-  'Negado':     '#7030A0',
-  'Cambio':     '#C00000'
-};
-
-// Color de FONDO automático por rotación específica (agrupación visual, igual que en tu Excel — pero sin pintar a mano).
-// Genera el color con HSL en vez de una paleta fija corta, para que con 200+ rotaciones distintas casi no se repitan.
 const cacheColorCampo = {};
 function colorDeFondoPorCampo(campo, rotacion) {
   const clave = (String(campo || '').trim() + '|' + String(rotacion || '').trim()).toUpperCase();
@@ -404,70 +137,47 @@ function colorDeFondoPorCampo(campo, rotacion) {
   if (cacheColorCampo[clave]) return cacheColorCampo[clave];
   let hash = 0;
   for (let i = 0; i < clave.length; i++) hash = (hash * 31 + clave.charCodeAt(i)) >>> 0;
-  const tono = hash % 360;
-  const color = `hsl(${tono}, 62%, 83%)`;
+  const color = `hsl(${hash % 360}, 62%, 83%)`;
   cacheColorCampo[clave] = color;
   return color;
 }
 
-// Función compartida de búsqueda por nombre/documento — la usan Gestión Operativa, Validación
-// Mensual y Movilidad, para no repetir la misma comparación tres veces por separado.
-function coincideNombreDocumento(registro, nombre, documento) {
-  return (!nombre || (registro.ResidenteNombre || '').toLowerCase().includes(nombre)) &&
-         (!documento || String(registro.ResidenteID || '').toLowerCase().includes(documento));
-}
-
-let usuarioActual = null;
-
-// Escapa texto antes de insertarlo en el HTML — evita que un nombre, observación o campo con
-// código malicioso guardado en la Hoja se ejecute en el navegador de quien lo vea (XSS almacenado).
 function esc(valor) {
-  const div = document.createElement('div');
-  div.textContent = (valor === null || valor === undefined) ? '' : String(valor);
-  return div.innerHTML;
+  return String(valor === null || valor === undefined ? '' : valor)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// Estado actual de la cuadrícula en pantalla (todo vive en el navegador, no hay lista maestra)
-let contextoGrid = { programa: '', periodo: '', anioAcademico: '', semestre: '' };
-let filasGridActual = [];   // [{id, nombre, nivel}]
-let registrosGridActual = []; // registros de HistoricoBaseGeneral para el programa+periodo actual
-
-// ============================================================
-// LOGIN
-// ============================================================
-window.onload = function() {
-  poblarSelectorUsuarios();
-  iniciarMonitorInactividad();
-  if (!restaurarSesionSiVigente()) {
-    document.getElementById('login-screen').style.display = 'flex';
-  }
-};
-
-function poblarSelectorUsuarios() {
-  const select = document.getElementById('login-usuario');
-  // Orden alfabético por nombre completo (no por rol/coordinadora-auxiliar como estaba antes).
-  const nombresOrdenados = Object.keys(USUARIOS_DISPLAY)
-    .sort((a, b) => USUARIOS_DISPLAY[a].localeCompare(USUARIOS_DISPLAY[b], 'es'));
-  nombresOrdenados.forEach(nombre => {
-    const opt = document.createElement('option');
-    opt.value = nombre; opt.textContent = USUARIOS_DISPLAY[nombre];
-    select.appendChild(opt);
+function agruparPorNivel(filas) {
+  const grupos = { 'R1': [], 'R2': [], 'R3': [], 'R4': [], 'R5': [], 'Movilidad Académica': [] };
+  filas.forEach(f => {
+    const nivelLimpio = String(f.nivel || '').trim().toUpperCase();
+    const clave = grupos.hasOwnProperty(nivelLimpio) ? nivelLimpio : 'Movilidad Académica';
+    grupos[clave].push(f);
   });
+  return grupos;
 }
 
 // ============================================================
-// SESIÓN — se mantiene mientras haya actividad; se cierra sola tras 20 min sin uso.
-// sessionStorage (no localStorage): se borra solo al cerrar la pestaña/navegador, que es el
-// comportamiento correcto para no dejar una sesión abierta "para siempre" en un compu compartido.
+// SESIÓN — sessionStorage propio de esta pantalla (independiente del de Gestión Operativa),
+// se borra solo al cerrar la pestaña, y expira tras 20 min sin actividad.
 // ============================================================
-const CLAVE_SESION = 'sesionGestionRotaciones';
+const CLAVE_SESION = 'sesionCronogramaCoordinador';
 const MINUTOS_INACTIVIDAD = 20;
+let usuarioActual = null;      // { usuarioCorto, claveHash, nombreCompleto }
+let programasPermitidos = [];  // array de nombres de programa que puede ver este usuario
+let programaSeleccionado = null;
+let anioSeleccionado = null;   // "2026" (año de inicio del académico 2026-2027)
+let datosCompletos = [];       // todo lo que devolvió el backend (ya filtrado server-side)
 let ultimaActividadMs = Date.now();
+let ultimoGuardadoActividadMs = 0;
+let intervaloRefresco = null;
 
 function guardarSesion() {
   try {
-    sessionStorage.setItem(CLAVE_SESION, JSON.stringify({ usuarioActual, actividad: Date.now() }));
-  } catch (err) { /* si el navegador bloquea sessionStorage, la sesión simplemente no persiste entre recargas */ }
+    sessionStorage.setItem(CLAVE_SESION, JSON.stringify({
+      usuarioActual, programaSeleccionado, anioSeleccionado, actividad: Date.now()
+    }));
+  } catch (err) { /* si el navegador bloquea sessionStorage, simplemente no persiste entre recargas */ }
 }
 
 function restaurarSesionSiVigente() {
@@ -482,14 +192,13 @@ function restaurarSesionSiVigente() {
   }
 
   usuarioActual = guardado.usuarioActual;
+  programaSeleccionado = guardado.programaSeleccionado;
+  anioSeleccionado = guardado.anioSeleccionado;
   ultimaActividadMs = guardado.actividad;
   entrarAlApp();
   return true;
 }
 
-// Marca actividad reciente (clic, tecla, o llamada al backend). Se limita a escribir en
-// sessionStorage como máximo una vez cada 10s para no golpear el disco en cada movimiento.
-let ultimoGuardadoActividadMs = 0;
 function marcarActividad() {
   if (!usuarioActual) return;
   ultimaActividadMs = Date.now();
@@ -510,7 +219,7 @@ function iniciarMonitorInactividad() {
       cerrarSesion();
       document.getElementById('login-error').textContent = 'Se cerró tu sesión por inactividad (20 min). Ingresa de nuevo.';
     }
-  }, 30000); // revisa cada 30s — suficiente margen frente al límite de 20 min
+  }, 30000);
 }
 
 async function sha256Hex(texto) {
@@ -519,42 +228,41 @@ async function sha256Hex(texto) {
   return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// ============================================================
+// LOGIN
+// ============================================================
 async function intentarLogin() {
-  const usuarioCorto = document.getElementById('login-usuario').value;
   const password = document.getElementById('login-password').value;
-  const errorEl = document.getElementById('login-error');
-  errorEl.textContent = '';
-  if (!usuarioCorto || !password) { errorEl.textContent = 'Selecciona tu usuario y escribe tu contraseña.'; return; }
+  const errorDiv = document.getElementById('login-error');
+  errorDiv.textContent = '';
+
+  if (!password) { errorDiv.textContent = 'Ingresa tu clave de acceso.'; return; }
 
   const claveHash = await sha256Hex(password);
 
-  let respuesta;
+  let resultado;
   try {
-    const r = await fetch(WEB_APP_URL, {
+    // usuario vacío a propósito: el backend identifica a la persona (y sus programas)
+    // solo por el hash de la clave, sin necesidad de un usuario aparte.
+    const respuesta = await fetch(WEB_APP_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ accion: 'login', credencial: { usuario: usuarioCorto, claveHash } })
+      body: JSON.stringify({ accion: 'login', credencial: { usuario: '', claveHash } })
     });
-    respuesta = await r.json();
+    resultado = await respuesta.json();
   } catch (err) {
-    errorEl.textContent = 'No se pudo conectar con el servidor. Intenta de nuevo.';
+    errorDiv.textContent = 'No se pudo conectar. Revisa tu conexión e intenta de nuevo.';
     return;
   }
 
-  if (!respuesta.ok) { errorEl.textContent = respuesta.error || 'Usuario o contraseña incorrectos.'; return; }
+  if (!resultado.ok) { errorDiv.textContent = resultado.error || 'Clave incorrecta.'; return; }
 
-  // El rol y el nombre vienen confirmados por el servidor — el navegador nunca los decide.
-  usuarioActual = { nombre: respuesta.nombreCompleto, rol: respuesta.rol, usuarioCorto, claveHash };
-
-  if (usuarioActual.rol !== 'coordinadora' && usuarioActual.rol !== 'auxiliar') {
-    // Cualquier rol que no sea coordinadora o auxiliar no está soportado en este micrositio
-    // operativo (el perfil "Coordinador de Programa" se retiró — irá en el micrositio público).
-    errorEl.textContent = 'Este perfil no está disponible en este micrositio.';
-    usuarioActual = null;
+  if (resultado.rol !== 'coordinador_programa') {
+    errorDiv.textContent = 'Esta clave no corresponde a un acceso de coordinador de programa.';
     return;
   }
 
-  ultimaActividadMs = Date.now();
+  usuarioActual = { usuarioCorto: '', claveHash, nombreCompleto: resultado.nombreCompleto };
   guardarSesion();
   entrarAlApp();
 }
@@ -562,1473 +270,201 @@ async function intentarLogin() {
 function entrarAlApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-screen').style.display = 'block';
-  document.getElementById('nombre-usuario').textContent = usuarioActual.nombre + ' (' + usuarioActual.rol + ')';
-
-  document.getElementById('tabs-coordinadora').style.display = 'flex';
-  document.getElementById('tabs-coordinadora').style.gap = '8px';
-
-  if (usuarioActual.rol === 'coordinadora') {
-    document.getElementById('boton-agregar-residente').style.display = 'inline-block';
-    document.getElementById('boton-copiar-filas').style.display = 'inline-block';
-    document.getElementById('boton-importar-excel').style.display = 'inline-block';
-    document.getElementById('boton-archivar-periodo').style.display = 'inline-block';
-    document.getElementById('vista-gestion-coordinadora').style.display = 'block';
-    document.getElementById('vista-gestion-auxiliar').style.display = 'none';
-    document.getElementById('tab-btn-gestion').style.display = 'inline-block';
-    document.getElementById('tab-btn-dashboard').style.display = 'inline-block';
-    document.getElementById('tab-btn-historico').style.display = 'inline-block';
-    document.getElementById('tab-btn-movilidad').style.display = 'inline-block';
-    document.getElementById('boton-publicar-github').style.display = 'inline-block';
-    cargarProgramasConocidos();
-    cargarMesesFiltro();
-    mostrarBannerRespaldoSiAplica();
-    cargarCola();
-    cambiarTab('dashboard');
-  } else if (usuarioActual.rol === 'auxiliar') {
-    document.getElementById('boton-agregar-residente').style.display = 'none';
-    document.getElementById('boton-copiar-filas').style.display = 'none';
-    document.getElementById('boton-importar-excel').style.display = 'none';
-    document.getElementById('boton-archivar-periodo').style.display = 'none';
-    document.getElementById('vista-gestion-coordinadora').style.display = 'none';
-    document.getElementById('vista-gestion-auxiliar').style.display = 'block';
-    document.getElementById('tab-btn-gestion').style.display = 'inline-block';
-    document.getElementById('tab-btn-dashboard').style.display = 'inline-block';
-    document.getElementById('tab-btn-historico').style.display = 'inline-block';
-    cargarProgramasConocidos();
-    cargarMesesFiltro();
-    cargarCola();
-    cambiarTab('dashboard');
-  }
-  iniciarRefrescoAutomatico();
-}
-
-// Junio (mes 5, 0-indexado) y Julio (mes 6) — recordatorio de respaldo anual, solo coordinadoras
-function mostrarBannerRespaldoSiAplica() {
-  const mesActual = new Date().getMonth(); // 5 = junio, 6 = julio
-  if (mesActual === 5 || mesActual === 6) {
-    document.getElementById('banner-respaldo').style.display = 'block';
-  }
-}
-
-// ============================================================
-// REFRESCO AUTOMÁTICO — cada 2 minutos, en silencio, sin interrumpir si hay un modal abierto
-// ============================================================
-let intervaloRefrescoAutomatico = null;
-
-function iniciarRefrescoAutomatico() {
-  if (intervaloRefrescoAutomatico) clearInterval(intervaloRefrescoAutomatico);
-  intervaloRefrescoAutomatico = setInterval(refrescoAutomatico, 2 * 60 * 1000); // 2 minutos
-}
-
-function detenerRefrescoAutomatico() {
-  if (intervaloRefrescoAutomatico) clearInterval(intervaloRefrescoAutomatico);
-  intervaloRefrescoAutomatico = null;
-}
-
-async function refrescoAutomatico() {
-  if (!usuarioActual) return;
-  if (document.getElementById('overlay-modal').style.display === 'flex') return; // no interrumpir una edición en curso
-
-  await cargarCola(); // liviano: cola, alertas de comentarios y su badge
-
-  const res = await leerBackend('listarHistorico');
-  if (!res.ok) return;
-  cacheHistoricoCompleto = res.datos;
-
-  if (document.getElementById('panel-dashboard').style.display === 'block') {
-    llenarSelectoresBusqueda();
-    dibujarChipsPeriodo();
-    aplicarPeriodoDb(periodoSeleccionadoDb);
-  }
-  if (document.getElementById('panel-cuadricula').style.display === 'block' && contextoGrid.programa) {
-    cargarCuadricula(true);
-  }
-  if (document.getElementById('panel-gestion-operativa').style.display === 'block') {
-    if (usuarioActual.rol === 'coordinadora') {
-      aplicarValidacionMensual();
-    } else if (usuarioActual.rol === 'auxiliar') {
-      aplicarFiltrosGestion();
-    }
-  }
-  if (document.getElementById('panel-historico').style.display === 'block') {
-    const hayFiltroActivo = document.getElementById('hist-filtro-nombre').value.trim() ||
-      document.getElementById('hist-filtro-id').value.trim() || document.getElementById('hist-filtro-programa').value.trim();
-    if (hayFiltroActivo) aplicarFiltrosHistorico();
-  }
-  if (document.getElementById('panel-movilidad').style.display === 'block') {
-    cargarMovilidad();
-  }
-}
-
-// Sube al micrositio público en este mismo instante, sin esperar al disparador de las 9 PM.
-async function publicarAlMicrositioPublico() {
-  const boton = document.getElementById('boton-publicar-github');
-  const textoOriginal = boton.textContent;
-  boton.disabled = true;
-  boton.textContent = '⏳ Publicando...';
-
-  try {
-    const resultado = await llamarBackend('publicarEnGitHub', {});
-    if (resultado.ok) {
-      mostrarMensaje('Publicado — ' + resultado.totalFilas + ' filas actualizadas en el micrositio público.', 'ok');
-    } else {
-      mostrarMensaje('Error al publicar: ' + resultado.error, 'error');
-    }
-  } catch (err) {
-    mostrarMensaje('Error al publicar: ' + err.message, 'error');
-  }
-
-  boton.disabled = false;
-  boton.textContent = textoOriginal;
+  document.getElementById('nombre-usuario-header').textContent = usuarioActual.nombreCompleto;
+  document.getElementById('bienvenida').textContent = 'Bienvenido/a Dr(a). ' + usuarioActual.nombreCompleto;
+  iniciarMonitorInactividad();
+  cargarCronograma(false);
+  if (!intervaloRefresco) intervaloRefresco = setInterval(() => cargarCronograma(true), 60000); // silencioso, cada 60s
 }
 
 function cerrarSesion() {
   usuarioActual = null;
-  sessionStorage.removeItem(CLAVE_SESION);
-  document.getElementById('login-password').value = '';
+  programasPermitidos = [];
+  datosCompletos = [];
+  if (intervaloRefresco) { clearInterval(intervaloRefresco); intervaloRefresco = null; }
+  try { sessionStorage.removeItem(CLAVE_SESION); } catch (err) {}
   document.getElementById('app-screen').style.display = 'none';
-  document.getElementById('panel-cuadricula').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
-  detenerRefrescoAutomatico();
-}
-
-function mostrarMensaje(texto, tipo) {
-  const el = document.getElementById('mensaje-flotante');
-  el.textContent = texto; el.className = tipo; el.style.display = 'block';
-  setTimeout(() => { el.style.display = 'none'; }, 4000);
+  document.getElementById('login-password').value = '';
 }
 
 // ============================================================
-// BACKEND
+// CARGA DE DATOS — filtrado en el servidor (solo su(s) programa(s), nunca confía en el navegador)
 // ============================================================
-// Corta cualquier petición al backend que lleve más de 30 segundos sin responder — Apps Script
-// normalmente responde en 1-3 segundos, así que 30s ya es una señal clara de que algo se colgó
-// (sobrecarga, cold start, etc.). Sin este límite, una petición atascada dejaba el "Cargando..."
-// congelado para siempre, sin ninguna forma de que el usuario supiera que debía reintentar.
-const TIMEOUT_BACKEND_MS = 30000;
-
-async function fetchConTimeout_(url, opciones) {
-  const controlador = new AbortController();
-  const timeoutId = setTimeout(() => controlador.abort(), TIMEOUT_BACKEND_MS);
-  try {
-    return await fetch(url, Object.assign({}, opciones, { signal: controlador.signal }));
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
-async function llamarBackend(accion, datos) {
-  let resultado;
-  try {
-    const respuesta = await fetchConTimeout_(WEB_APP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ accion, datos, credencial: { usuario: usuarioActual.usuarioCorto, claveHash: usuarioActual.claveHash } })
-    });
-    resultado = await respuesta.json();
-  } catch (err) {
-    // Puede pasar cuando llegan varias peticiones casi al mismo tiempo (ej. al guardar una
-    // celda, que dispara guardar + recargar cuadrícula + recargar cola seguidas) y Apps Script
-    // responde con una página de error en vez de JSON, o simplemente no responde a tiempo —
-    // sin este manejo, esto tumbaba la pantalla o la dejaba colgada en vez de mostrar un aviso.
-    const mensaje = err.name === 'AbortError'
-      ? 'El servidor tardó demasiado en responder. Intenta de nuevo.'
-      : 'No se pudo conectar con el servidor (puede ser una sobrecarga momentánea). Intenta de nuevo en unos segundos.';
-    return { ok: false, error: mensaje };
-  }
-  if (!resultado.ok && resultado.error === 'No autorizado. Vuelve a iniciar sesión.') {
-    mostrarMensaje('Tu sesión expiró o no es válida. Por favor vuelve a iniciar sesión.', 'error');
-    cerrarSesion();
-  }
-  return resultado;
-}
-
 async function leerBackend(accion, extraParams) {
   let url = WEB_APP_URL + '?accion=' + accion + '&usuario=' + encodeURIComponent(usuarioActual.usuarioCorto) + '&claveHash=' + encodeURIComponent(usuarioActual.claveHash);
   if (extraParams) {
-    Object.keys(extraParams).forEach(clave => {
-      url += '&' + encodeURIComponent(clave) + '=' + encodeURIComponent(extraParams[clave]);
-    });
+    Object.keys(extraParams).forEach(clave => { url += '&' + encodeURIComponent(clave) + '=' + encodeURIComponent(extraParams[clave]); });
   }
-  let resultado;
-  try {
-    const respuesta = await fetchConTimeout_(url);
-    resultado = await respuesta.json();
-  } catch (err) {
-    // Mismo caso que en llamarBackend: una respuesta no-JSON o una petición que nunca responde
-    // ya no cuelga la pantalla — se convierte en un error manejable con opción de reintentar.
-    const mensaje = err.name === 'AbortError'
-      ? 'El servidor tardó demasiado en responder. Intenta de nuevo.'
-      : 'No se pudo conectar con el servidor (puede ser una sobrecarga momentánea). Intenta de nuevo en unos segundos.';
-    return { ok: false, error: mensaje };
-  }
+  const respuesta = await fetch(url);
+  const resultado = await respuesta.json();
   if (!resultado.ok && resultado.error === 'No autorizado. Vuelve a iniciar sesión.') {
-    mostrarMensaje('Tu sesión expiró o no es válida. Por favor vuelve a iniciar sesión.', 'error');
+    mostrarMensaje('Tu sesión expiró o no es válida. Vuelve a iniciar sesión.', 'error');
     cerrarSesion();
   }
   return resultado;
 }
 
-let listaProgramasConocidos = [];
-
-async function cargarProgramasConocidos() {
-  if (cacheHistoricoCompleto.length === 0) {
-    const res = await leerBackend('listarHistorico');
-    if (!res.ok) { mostrarMensaje('Error cargando programas: ' + res.error, 'error'); return; }
-    cacheHistoricoCompleto = res.datos;
-  }
-  listaProgramasConocidos = [...new Set(cacheHistoricoCompleto.map(r => r.Programa).filter(Boolean))].sort();
-  listasSugerencias['go-filtro-programa'] = listaProgramasConocidos;
-  listasSugerencias['vm-programa'] = listaProgramasConocidos;
-  listasSugerencias['hist-filtro-programa'] = listaProgramasConocidos;
-
-  // Antes se mostraba solo el año suelto de inicio (ej. "2026"), que había que traducir de
-  // memoria al año académico real. Ahora se muestran los DOS semestres reales de cada año
-  // académico (ej. "2026-2" y "2027-1"), en el mismo formato que ya usan Periodo/Semestre en el
-  // resto del sistema — al elegir cualquiera de los dos, el campo igual se llena con el año de
-  // inicio correcto ("2026"), que es lo que espera cargarCuadricula().
-  const aniosInicioUnicos = [...new Set(cacheHistoricoCompleto.map(r => r.AnioAcademico).filter(Boolean).map(rango => rango.split('-')[0]))].sort();
-  const sugerenciasPeriodo = [];
-  mapaAnioPeriodoAInicio = {};
-  aniosInicioUnicos.forEach(anioInicio => {
-    const semestreUno = anioInicio + '-2';
-    const semestreDos = (Number(anioInicio) + 1) + '-1';
-    sugerenciasPeriodo.push(semestreUno, semestreDos);
-    mapaAnioPeriodoAInicio[semestreUno] = anioInicio;
-    mapaAnioPeriodoAInicio[semestreDos] = anioInicio;
+async function llamarBackend(accion, datos) {
+  const respuesta = await fetch(WEB_APP_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ accion, datos, credencial: { usuario: usuarioActual.usuarioCorto, claveHash: usuarioActual.claveHash } })
   });
-  listasSugerencias['cg-periodo'] = sugerenciasPeriodo;
-}
-
-function mostrarSugerenciasPrograma() {
-  const input = document.getElementById('cg-programa');
-  const caja = document.getElementById('sugerencias-programa');
-  const texto = input.value.trim().toLowerCase();
-
-  const coincidencias = texto
-    ? listaProgramasConocidos.filter(p => p.toLowerCase().includes(texto))
-    : listaProgramasConocidos;
-
-  if (coincidencias.length === 0) { caja.style.display = 'none'; return; }
-
-  caja.innerHTML = coincidencias.slice(0, 15).map(p =>
-    `<div style="padding:8px 10px; cursor:pointer;" onmousedown="seleccionarPrograma('${p.replace(/'/g, "\\'")}')" onmouseover="this.style.background='#f0f2f5'" onmouseout="this.style.background='white'">${p}</div>`
-  ).join('');
-  caja.style.display = 'block';
-}
-
-function seleccionarPrograma(nombre) {
-  document.getElementById('cg-programa').value = nombre;
-  document.getElementById('sugerencias-programa').style.display = 'none';
-}
-
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('#cg-programa') && !e.target.closest('#sugerencias-programa')) {
-    const caja = document.getElementById('sugerencias-programa');
-    if (caja) caja.style.display = 'none';
+  const resultado = await respuesta.json();
+  if (!resultado.ok && resultado.error === 'No autorizado. Vuelve a iniciar sesión.') {
+    mostrarMensaje('Tu sesión expiró o no es válida. Vuelve a iniciar sesión.', 'error');
+    cerrarSesion();
   }
-});
-
-let cacheColaCompleta = [];
-
-async function cargarCola() {
-  const resultado = await leerBackend('listarGestionOperativa');
-  if (!resultado.ok) { mostrarMensaje('Error cargando la cola: ' + resultado.error, 'error'); return; }
-  cacheColaCompleta = resultado.datos;
-  dibujarLista(resultado.datos, 'tabla-cola');
-  dibujarAlertasComentarios(resultado.datos);
+  return resultado;
 }
 
-// Botón "Actualizar" de auxiliares: refresca los datos Y la tabla visible (cargarCola por sí
-// sola solo actualiza una tabla oculta que ya no se usa para mostrar nada).
-async function actualizarGestionAuxiliar() {
-  await cargarCola();
-  aplicarFiltrosGestion();
-}
+async function cargarCronograma(silencioso) {
+  if (!silencioso) document.getElementById('contenedor-cuadricula').innerHTML = '<p class="mensaje-vacio">⏳ Cargando cronograma…</p>';
 
-// Actualiza cacheColaCompleta / cacheHistoricoCompleto / registrosGridActual EN MEMORIA con el
-// resultado ya conocido de una acción, en vez de volver a pedirle al servidor la lista completa
-// (2000+ filas) solo para reflejar el cambio de UNA fila. Esto es lo que hace que un clic
-// individual (Gestionado, X de un aviso, comentar) sea instantáneo en vez de recargar todo cada
-// vez — el refetch completo queda solo para el auto-refresco cada 2 minutos y el botón Actualizar.
-function actualizarCacheLocal(clave, { eliminarDeOp = false, op = null, hist = null } = {}) {
-  if (eliminarDeOp) {
-    const idx = cacheColaCompleta.findIndex(f => f.ClaveUnica === clave);
-    if (idx !== -1) cacheColaCompleta.splice(idx, 1);
-  } else if (op) {
-    const fila = cacheColaCompleta.find(f => f.ClaveUnica === clave);
-    if (fila) Object.assign(fila, op);
-  }
-  if (hist) {
-    [cacheHistoricoCompleto, registrosGridActual].forEach(lista => {
-      const fila = lista.find(f => f.ClaveUnica === clave);
-      if (fila) Object.assign(fila, hist);
-    });
-  }
-}
-
-// Redibuja lo que esté visible usando la caché que ya hay en memoria — sin pedirle nada nuevo
-// al servidor. Se usa después de actualizarCacheLocal.
-function redibujarVistaActual() {
-  if (document.getElementById('vista-gestion-auxiliar').style.display === 'block') {
-    aplicarFiltrosGestion();
-  }
-  if (document.getElementById('vista-gestion-coordinadora').style.display === 'block') {
-    aplicarValidacionMensual(); // sin forzar recarga: usa la caché ya actualizada
-  }
-  if (contextoGrid.programa) {
-    redibujarCuadricula();
-  }
-  dibujarAlertasComentarios(cacheColaCompleta);
-}
-
-// Se llama tras cualquier acción individual (editar, gestionar, negar, reasignar, comentar)
-// para que la vista que esté activa en ese momento — auxiliar o coordinadora — se redibuje con
-// los datos frescos. Antes cada acción solo refrescaba una tabla oculta y la vista visible se
-// quedaba con los datos viejos hasta que alguien le diera Actualizar a mano.
-async function refrescarVistasGestion() {
-  await cargarCola();
-  if (document.getElementById('vista-gestion-auxiliar').style.display === 'block') {
-    aplicarFiltrosGestion();
-  }
-  if (document.getElementById('vista-gestion-coordinadora').style.display === 'block') {
-    await aplicarValidacionMensual(true);
-  }
-  if (contextoGrid.programa) {
-    cargarCuadricula();
-  }
-}
-
-function cambiarTab(tab) {
-  const btnCuad = document.getElementById('tab-btn-cuadricula');
-  const btnGes = document.getElementById('tab-btn-gestion');
-  const btnDb = document.getElementById('tab-btn-dashboard');
-  const btnHist = document.getElementById('tab-btn-historico');
-  const btnMov = document.getElementById('tab-btn-movilidad');
-  const panelCuad = document.getElementById('panel-cuadricula');
-  const panelGes = document.getElementById('panel-gestion-operativa');
-  const panelDb = document.getElementById('panel-dashboard');
-  const panelHist = document.getElementById('panel-historico');
-  const panelMov = document.getElementById('panel-movilidad');
-
-  panelCuad.style.display = 'none'; panelGes.style.display = 'none'; panelDb.style.display = 'none';
-  panelHist.style.display = 'none'; panelMov.style.display = 'none';
-  btnCuad.className = 'btn-secundario btn-pequeno'; btnGes.className = 'btn-secundario btn-pequeno';
-  btnDb.className = 'btn-secundario btn-pequeno'; btnHist.className = 'btn-secundario btn-pequeno';
-  btnMov.className = 'btn-secundario btn-pequeno';
-
-  if (tab === 'cuadricula') {
-    panelCuad.style.display = 'block'; btnCuad.className = 'btn-primario btn-pequeno';
-  } else if (tab === 'gestion') {
-    panelGes.style.display = 'block'; btnGes.className = 'btn-primario btn-pequeno';
-    if (usuarioActual.rol === 'coordinadora') aplicarValidacionMensual();
-    else aplicarFiltrosGestion();
-  } else if (tab === 'dashboard') {
-    panelDb.style.display = 'block'; btnDb.className = 'btn-primario btn-pequeno';
-    cargarPanelEjecutivo();
-  } else if (tab === 'historico') {
-    panelHist.style.display = 'block'; btnHist.className = 'btn-primario btn-pequeno';
-    cargarHistorico();
-  } else if (tab === 'movilidad') {
-    panelMov.style.display = 'block'; btnMov.className = 'btn-primario btn-pequeno';
-    cargarMovilidad();
-  }
-}
-
-// ============================================================
-// VALIDACIÓN MENSUAL (vista de coordinadoras en Gestión Operativa)
-// ============================================================
-let vmFiltroEstado = null; // null = todos los estados en la tabla
-
-function cargarMesesVm() {
-  const select = document.getElementById('vm-mes');
-  if (select.options.length > 1) return; // ya cargado
-  [...MESES, ...MESES_VACACIONES].forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; select.appendChild(o); });
-}
-
-function cargarPeriodosVm() {
-  const select = document.getElementById('vm-periodo');
-  const PATRON_PERIODO_VALIDO = /^\d{4}-[12]$/;
-  const periodosPresentes = [...new Set(
-    cacheHistoricoCompleto.map(r => String(r.Semestre || '').trim()).filter(p => PATRON_PERIODO_VALIDO.test(p))
-  )].sort();
-  const valorActual = select.value;
-  select.innerHTML = '<option value="">Todos</option>';
-  periodosPresentes.forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p; opt.textContent = p;
-    select.appendChild(opt);
-  });
-  if (periodosPresentes.includes(valorActual)) select.value = valorActual;
-}
-
-// ============================================================
-// ARCHIVAR PERIODO ACADÉMICO — solo coordinadora. Saca el periodo de la cola activa
-// (GestionOperativa: Gestión Operativa / Validación Mensual) para dejar de verlo en el día a
-// día. El historial completo NO se toca — sigue disponible siempre en "Histórico de rotaciones".
-// ============================================================
-function abrirArchivarPeriodo() {
-  const PATRON_PERIODO_VALIDO = /^\d{4}-[12]$/;
-  const periodos = [...new Set(
-    cacheHistoricoCompleto.map(r => String(r.Semestre || '').trim()).filter(p => PATRON_PERIODO_VALIDO.test(p))
-  )].sort();
-  if (periodos.length === 0) { mostrarMensaje('No hay periodos académicos cargados todavía. Visita el Dashboard o el Histórico primero para que se carguen los datos.', 'error'); return; }
-
-  const opcionesPeriodo = periodos.map(p => `<option value="${p}">${p}</option>`).join('');
-  const opcionesPrograma = ['<option value="">Todos los programas</option>']
-    .concat(listaProgramasConocidos.map(p => `<option value="${esc(p)}">${esc(p)}</option>`))
-    .join('');
-
-  const html = `
-    <h3>🗄 Archivar periodo académico</h3>
-    <p style="font-size:12px; color:#888;">Esto SOLO saca el periodo de la cola activa (Gestión Operativa / Validación Mensual). El historial completo de ese periodo sigue disponible siempre en "Histórico de rotaciones" — nada se borra de ahí, y el Cuadro tampoco se ve afectado.</p>
-    <label>Periodo académico</label>
-    <select id="modal-archivar-periodo">${opcionesPeriodo}</select>
-    <label>Programa (opcional — vacío = todos los programas)</label>
-    <select id="modal-archivar-programa">${opcionesPrograma}</select>
-    <div id="modal-archivar-resultado" style="margin-top:12px; font-size:13px; min-height:20px;"></div>
-    <div class="fila-botones">
-      <button class="btn-secundario" onclick="cerrarModal()">Cancelar</button>
-      <button class="btn-primario" onclick="consultarArchivarPeriodo()">Consultar</button>
-      <button class="btn-primario" id="boton-confirmar-archivar" style="display:none; background:#9C0006;" onclick="ejecutarArchivarPeriodo()">Archivar</button>
-    </div>`;
-  document.getElementById('contenido-modal').innerHTML = html;
-  document.getElementById('overlay-modal').style.display = 'flex';
-}
-
-async function consultarArchivarPeriodo() {
-  const periodo = document.getElementById('modal-archivar-periodo').value;
-  const programa = document.getElementById('modal-archivar-programa').value;
-  const resultadoEl = document.getElementById('modal-archivar-resultado');
-  const botonArchivar = document.getElementById('boton-confirmar-archivar');
-  botonArchivar.style.display = 'none';
-  resultadoEl.textContent = 'Consultando...';
-
-  const res = await leerBackend('contarPeriodoOperativa', { periodo, programa });
-  if (!res.ok) { resultadoEl.textContent = 'Error: ' + res.error; return; }
-
-  if (res.total === 0) {
-    resultadoEl.innerHTML = 'No hay filas de <b>' + esc(periodo) + '</b>' + (programa ? ' en ' + esc(programa) : '') + ' en la cola activa — no hay nada que archivar.';
+  const resultado = await leerBackend('listarHistoricoCoordinador');
+  if (!resultado.ok) {
+    if (!silencioso) document.getElementById('contenedor-cuadricula').innerHTML = '<p class="mensaje-vacio">' + esc(resultado.error || 'No se pudo cargar el cronograma.') + '</p>';
     return;
   }
 
-  const detalle = Object.entries(res.porEstado).map(([estado, n]) => esc(estado) + ': ' + n).join(' · ');
-  resultadoEl.innerHTML = '<b>' + res.total + '</b> fila(s) se archivarían de la cola activa (' + detalle + '). El historial de este periodo NO se toca.';
-  botonArchivar.style.display = 'inline-block';
-  botonArchivar.dataset.periodo = periodo;
-  botonArchivar.dataset.programa = programa;
-}
+  programasPermitidos = resultado.programas || [];
+  datosCompletos = resultado.datos || [];
 
-async function ejecutarArchivarPeriodo() {
-  const boton = document.getElementById('boton-confirmar-archivar');
-  const periodo = boton.dataset.periodo;
-  const programa = boton.dataset.programa;
-  const destino = programa ? ('de "' + programa + '"') : 'de TODOS los programas';
-  if (!confirm('¿Archivar el periodo ' + periodo + ' ' + destino + ' de la cola activa?\n\nEl historial no se pierde, pero esta acción no se puede deshacer desde aquí (habría que recargar ese periodo).')) return;
-
-  boton.disabled = true;
-  boton.textContent = 'Archivando...';
-  const res = await llamarBackend('archivarPeriodoOperativa', { periodo, programa });
-  if (!res.ok) {
-    mostrarMensaje('Error: ' + res.error, 'error');
-    boton.disabled = false;
-    boton.textContent = 'Archivar';
-    return;
+  if (!programaSeleccionado || !programasPermitidos.includes(programaSeleccionado)) {
+    programaSeleccionado = programasPermitidos[0] || null;
   }
 
-  mostrarMensaje('Archivado: ' + res.eliminadas + ' fila(s) de "' + periodo + '" salieron de la cola activa. El historial sigue completo.', 'ok');
-  cerrarModal();
-  cargarCola();
-  aplicarValidacionMensual(true);
-}
-
-function limpiarFiltrosVm() {
-  limpiarFiltros({
-    textos: ['vm-nombre', 'vm-documento'],
-    selects: ['vm-periodo', 'vm-mes'],
-    multis: ['vm-programa']
-  });
-  aplicarValidacionMensual();
-}
-
-async function aplicarValidacionMensual(forzarRecarga) {
-  cargarMesesVm();
-  if (cacheHistoricoCompleto.length === 0 || forzarRecarga) {
-    const res = await leerBackend('listarHistorico');
-    if (res.ok) cacheHistoricoCompleto = res.datos;
-  }
-  cargarPeriodosVm();
-
-  const programasSel = seleccionesMulti['vm-programa'] || [];
-  const periodo = document.getElementById('vm-periodo').value.trim();
-  const mes = document.getElementById('vm-mes').value;
-  const nombre = document.getElementById('vm-nombre').value.trim().toLowerCase();
-  const documento = document.getElementById('vm-documento').value.trim().toLowerCase();
-
-  const baseConPrograma = programasSel.length > 0
-    ? cacheHistoricoCompleto.filter(r => programasSel.includes(r.Programa))
-    : cacheHistoricoCompleto;
-
-  let datos = baseConPrograma;
-  let etiqueta;
-
-  const hayBusquedaNombre = nombre || documento;
-  if (hayBusquedaNombre) datos = datos.filter(r => coincideNombreDocumento(r, nombre, documento));
-
-  if (!periodo && !mes && programasSel.length === 0 && !hayBusquedaNombre) {
-    // Vista inicial por defecto: todos los Negados, de todos los programas/periodos/meses
-    datos = datos.filter(r => r.Estado === 'Negado');
-    etiqueta = 'Vista actual: TODOS los Negados (todos los periodos y meses) — ' + datos.length + ' encontrados';
-    vmFiltroEstado = 'Negado';
-  } else {
-    if (periodo) datos = datos.filter(r => r.Semestre === periodo);
-    if (mes) datos = datos.filter(r => r.Mes === mes);
-    etiqueta = 'Vista actual: ' + (programasSel.length > 0 ? programasSel.join(' + ') + ' · ' : '') +
-      (periodo || 'todos los periodos') + ' · ' + (mes || 'todos los meses') +
-      (hayBusquedaNombre ? ' · búsqueda por residente' : '') + ' — ' + datos.length + ' registros';
-    vmFiltroEstado = null;
-  }
-
-  document.getElementById('vm-resumen').textContent = etiqueta;
-  let baseKpi = periodo || mes ? baseConPrograma.filter(r => (!periodo || r.Semestre === periodo) && (!mes || r.Mes === mes)) : baseConPrograma;
-  if (hayBusquedaNombre) baseKpi = baseKpi.filter(r => coincideNombreDocumento(r, nombre, documento));
-  dibujarKpisValidacionMensual(baseKpi);
-  dibujarTablaValidacionMensual(vmFiltroEstado ? datos : datos.filter(r => !vmFiltroEstado || r.Estado === vmFiltroEstado));
-}
-
-function dibujarKpisValidacionMensual(baseDatos) {
-  document.getElementById('vm-count-confirmado').textContent = baseDatos.filter(r => r.Estado === 'Confirmado').length;
-  document.getElementById('vm-count-pendiente').textContent = baseDatos.filter(r => r.Estado === 'Pendiente' || r.Estado === 'Cambio').length;
-  document.getElementById('vm-count-negado').textContent = baseDatos.filter(r => r.Estado === 'Negado').length;
-}
-
-function filtrarVmPorEstado(estado) {
-  const programasSel = seleccionesMulti['vm-programa'] || [];
-  const periodo = document.getElementById('vm-periodo').value.trim();
-  const mes = document.getElementById('vm-mes').value;
-  const nombre = document.getElementById('vm-nombre').value.trim().toLowerCase();
-  const documento = document.getElementById('vm-documento').value.trim().toLowerCase();
-  let datos = cacheHistoricoCompleto;
-  if (programasSel.length > 0) datos = datos.filter(r => programasSel.includes(r.Programa));
-  if (periodo) datos = datos.filter(r => r.Semestre === periodo);
-  if (mes) datos = datos.filter(r => r.Mes === mes);
-  if (nombre) datos = datos.filter(r => coincideNombreDocumento(r, nombre, ''));
-  if (documento) datos = datos.filter(r => coincideNombreDocumento(r, '', documento));
-
-  const estadosIncluidos = estado === 'Pendiente' ? ['Pendiente', 'Cambio'] : [estado];
-  datos = datos.filter(r => estadosIncluidos.includes(r.Estado));
-
-  document.getElementById('vm-resumen').textContent = 'Vista actual: TODOS los ' + estado + 's (' + (periodo || 'todos los periodos') + ' · ' + (mes || 'todos los meses') + ') — ' + datos.length + ' encontrados';
-  dibujarTablaValidacionMensual(datos);
-}
-
-const ORDEN_ESTADO_VM = { 'Negado': 0, 'Pendiente': 1, 'Cambio': 1, 'Confirmado': 2 };
-
-function dibujarTablaValidacionMensual(filas) {
-  const cuerpo = document.getElementById('tabla-validacion-mensual');
-  if (filas.length === 0) { cuerpo.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#999; padding:20px;">Sin registros para este filtro.</td></tr>'; return; }
-
-  filas = [...filas].sort((a, b) => (ORDEN_ESTADO_VM[a.Estado] ?? 3) - (ORDEN_ESTADO_VM[b.Estado] ?? 3));
-
-  cuerpo.innerHTML = filas.slice(0, 300).map(f => {
-    const colores = COLORES_ESTADO[f.Estado] || { bg: '#eee', tx: '#333' };
-    const filaOp = cacheColaCompleta.find(g => g.ClaveUnica === f.ClaveUnica);
-    let acciones;
-    if (f.Estado === 'Negado') {
-      acciones = `
-        <div class="fila-acciones">
-          <button class="btn-gestionado btn-pequeno" onclick="ejecutarEstado('${f.ClaveUnica}','Gestionado')">✅ Confirmar</button>
-          <button class="btn-secundario btn-pequeno" onclick="abrirReasignarNegado('${f.ClaveUnica}')">🔁 Cambiar</button>
-          <button class="btn-secundario btn-pequeno" onclick="abrirComentario('${f.ClaveUnica}')">💬</button>
-          <button class="btn-secundario btn-pequeno" onclick="abrirNotificarAsistente('${f.ClaveUnica}')" title="Enviar aviso urgente por correo">🔔</button>
-        </div>`;
-    } else if (f.Estado === 'Pendiente' || f.Estado === 'Cambio') {
-      acciones = `
-        <div class="fila-acciones">
-          <button class="btn-gestionado btn-pequeno" onclick="ejecutarEstado('${f.ClaveUnica}','Gestionado')">Gestionado</button>
-          <button class="btn-negado btn-pequeno" onclick="ejecutarEstado('${f.ClaveUnica}','Negado')">Negado</button>
-          <button class="btn-secundario btn-pequeno" onclick="abrirComentario('${f.ClaveUnica}')">💬</button>
-          <button class="btn-secundario btn-pequeno" onclick="abrirNotificarAsistente('${f.ClaveUnica}')" title="Enviar aviso urgente por correo">🔔</button>
-        </div>`;
-    } else {
-      acciones = `<button class="btn-secundario btn-pequeno" onclick="abrirComentario('${f.ClaveUnica}')">💬</button>`;
-    }
-
-    return `<tr>
-      <td>${esc(f.Programa)}</td>
-      <td>${esc(f.ResidenteNombre)}<br><span style="color:#888;">${esc(f.ResidenteID)}</span></td>
-      <td>${esc(f.Semestre || '')}<br><span style="color:#888;">${esc(f.Mes || '')}</span></td>
-      <td>${esc(f.CampoRotacion)}</td>
-      <td>${esc(f.Rotacion)}</td>
-      <td><span class="pastilla" style="background:${colores.bg}; color:${colores.tx};">${esc(f.Estado)}</span></td>
-      <td style="font-size:12px;">${esc(f.Observacion || '')}${f.ObservacionInterna ? '<div style="background:#FFF3CD; padding:2px 6px; border-radius:4px; margin-top:2px;">💬 ' + esc(f.ObservacionInterna) + '</div>' : ''}</td>
-      <td style="font-size:12px; color:#7030A0; font-weight:600;">${filaOp && filaOp.Alerta ? '⚠ ' + esc(filaOp.Alerta) : ''}</td>
-      <td>${acciones}</td>
-    </tr>`;
-  }).join('') + (filas.length > 300 ? `<tr><td colspan="8" style="font-size:11px; color:#999;">Mostrando 300 de ${filas.length}.</td></tr>` : '');
-}
-
-// ============================================================
-// PANEL EJECUTIVO (dashboard) — usa el histórico completo de todos los programas
-// ============================================================
-let cacheHistoricoCompleto = [];
-let periodoSeleccionadoDb = 'todos';
-
-async function cargarPanelEjecutivo(forzarRecarga) {
-  if (cacheHistoricoCompleto.length === 0 || forzarRecarga) {
-    document.getElementById('db-barra-datos').textContent = '⏳ Cargando datos...';
-    const res = await leerBackend('listarHistorico');
-    if (!res.ok) {
-      mostrarMensaje('Error cargando el panel: ' + res.error, 'error');
-      // Antes esto dejaba el aviso "Cargando datos..." congelado para siempre si la petición
-      // fallaba — ahora muestra el error ahí mismo, con un botón para reintentar sin tener que
-      // recargar toda la página.
-      document.getElementById('db-barra-datos').innerHTML = '⚠️ No se pudieron cargar los datos: ' + esc(res.error) +
-        ' <button class="btn-secundario btn-pequeno" onclick="cargarPanelEjecutivo(true)" style="margin-left:10px;">Reintentar</button>';
-      return;
-    }
-    cacheHistoricoCompleto = res.datos;
-    llenarSelectoresBusqueda();
-    dibujarChipsPeriodo();
-  }
-
-  const ahora = new Date();
-  const hora = ahora.getHours().toString().padStart(2, '0') + ':' + ahora.getMinutes().toString().padStart(2, '0');
-  document.getElementById('db-barra-datos').innerHTML = '🔄 Datos cargados · ' + cacheHistoricoCompleto.length + ' registros · Última actualización: ' + hora +
-    ' <button class="btn-secundario btn-pequeno" onclick="cargarPanelEjecutivo(true)" style="margin-left:10px;">Actualizar ahora</button>';
-
-  aplicarPeriodoDb(periodoSeleccionadoDb || 'todos');
-}
-
-// ============================================================
-// HISTÓRICO DE ROTACIONES — vista de solo consulta (auxiliares y coordinadoras)
-// ============================================================
-async function cargarHistorico(forzarRecarga) {
-  const cuerpo = document.getElementById('tabla-historico');
-  if (cacheHistoricoCompleto.length === 0 || forzarRecarga) {
-    cuerpo.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888; padding:20px;">⏳ Cargando...</td></tr>';
-    const res = await leerBackend('listarHistorico');
-    if (!res.ok) { mostrarMensaje('Error cargando el histórico: ' + res.error, 'error'); return; }
-    cacheHistoricoCompleto = res.datos;
-  }
-  cargarProgramasConocidos(); // por si el desplegable de programa todavía no tenía datos
-  document.getElementById('hist-resumen').textContent = '';
-  cuerpo.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999; padding:24px;">Escribe un filtro (o varios) y dale "🔍 Buscar".</td></tr>';
-}
-
-function limpiarFiltrosHistorico() {
-  limpiarFiltros({ textos: ['hist-filtro-nombre', 'hist-filtro-id', 'hist-filtro-programa'] });
-  document.getElementById('hist-resumen').textContent = '';
-  document.getElementById('tabla-historico').innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999; padding:24px;">Escribe un filtro (o varios) y dale "🔍 Buscar".</td></tr>';
-}
-
-function aplicarFiltrosHistorico() {
-  const nombre = document.getElementById('hist-filtro-nombre').value.trim().toLowerCase();
-  const id = document.getElementById('hist-filtro-id').value.trim().toLowerCase();
-  const programa = document.getElementById('hist-filtro-programa').value.trim().toLowerCase();
-
-  const filtrado = cacheHistoricoCompleto.filter(r =>
-    (!nombre || (r.ResidenteNombre || '').toLowerCase().includes(nombre)) &&
-    (!id || String(r.ResidenteID || '').toLowerCase().includes(id)) &&
-    (!programa || (r.Programa || '').toLowerCase().includes(programa))
-  );
-
-  document.getElementById('hist-resumen').textContent = filtrado.length + ' registro' + (filtrado.length === 1 ? '' : 's') +
-    (filtrado.length > 300 ? ' (mostrando los primeros 300 — afina el filtro para ver menos)' : '');
-
-  const cuerpo = document.getElementById('tabla-historico');
-  if (filtrado.length === 0) {
-    cuerpo.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999; padding:20px;">Sin resultados para este filtro.</td></tr>';
-    return;
-  }
-
-  cuerpo.innerHTML = filtrado.slice(0, 300).map(r => {
-    const colores = COLORES_ESTADO[r.Estado] || { bg: '#eee', tx: '#333' };
-    return `<tr>
-      <td>${esc(r.ResidenteNombre || '')}</td>
-      <td>${esc(r.ResidenteID || '')}</td>
-      <td>${esc(r.Programa || '')}</td>
-      <td>${esc(r.Semestre || '')}</td>
-      <td>${esc(r.Mes || '')}</td>
-      <td>${esc(r.CampoRotacion || '')}</td>
-      <td>${esc(r.Rotacion || '')}</td>
-      <td><span class="pastilla" style="background:${colores.bg}; color:${colores.tx};">${esc(r.Estado || '')}</span></td>
-    </tr>`;
-  }).join('');
-}
-
-// ============================================================
-// MOVILIDAD ACADÉMICA — solo coordinadora. Se carga sola (no requiere buscar), justo para que
-// no tenga que salir a buscar quién quedó aceptado o negado.
-// ============================================================
-let movilidadFiltroActivo = null; // null = nada elegido todavía; 'Confirmado' | 'Negado' | 'Pendiente'
-let cacheMovilidad = [];
-
-async function cargarMovilidad(forzarRecarga) {
-  if (cacheHistoricoCompleto.length === 0 || forzarRecarga) {
-    document.getElementById('tabla-movilidad').innerHTML = '<tr><td colspan="9" style="text-align:center; color:#888; padding:20px;">⏳ Cargando...</td></tr>';
-    const res = await leerBackend('listarHistorico');
-    if (!res.ok) { mostrarMensaje('Error cargando movilidad: ' + res.error, 'error'); return; }
-    cacheHistoricoCompleto = res.datos;
-  }
-
-  cacheMovilidad = cacheHistoricoCompleto.filter(r => r.Tipo === 'Movilidad entrante');
-  actualizarKpisMovilidad();
-  buscarMovilidad();
-}
-
-// Se dispara al escribir en Nombre/Documento/Especialidad/Lugar y también al elegir una
-// categoría (Aceptados/Negados/Pendientes). Si ya escribiste algo en un filtro de texto pero
-// todavía no elegiste categoría, busca en TODOS los estados — así no queda la sensación de que
-// el residente "no aparece" solo porque faltó dar clic en una de las tres tarjetas.
-function buscarMovilidad() {
-  const hayTexto = ['mov-filtro-nombre', 'mov-filtro-documento', 'mov-filtro-programa', 'mov-filtro-lugar']
-    .some(id => document.getElementById(id).value.trim() !== '');
-
-  if (movilidadFiltroActivo) {
-    dibujarTablaMovilidad(movilidadFiltroActivo);
-  } else if (hayTexto) {
-    dibujarTablaMovilidad('Todos');
-  } else {
-    document.getElementById('tabla-movilidad').innerHTML = '<tr><td colspan="9" style="text-align:center; color:#999; padding:24px;">Elige "Aceptados", "Negados" o "Pendientes" arriba, o escribe un nombre/documento para buscar en todos los estados.</td></tr>';
-  }
-}
-
-function limpiarFiltrosMovilidad() {
-  limpiarFiltros({ textos: ['mov-filtro-nombre', 'mov-filtro-documento', 'mov-filtro-programa', 'mov-filtro-lugar'] });
-  movilidadFiltroActivo = null;
-  actualizarKpisMovilidad();
-  buscarMovilidad();
-}
-
-function actualizarKpisMovilidad() {
-  const aceptados = cacheMovilidad.filter(r => r.Estado === 'Confirmado');
-  const negados = cacheMovilidad.filter(r => r.Estado === 'Negado');
-  const pendientes = cacheMovilidad.filter(r => r.Estado !== 'Confirmado' && r.Estado !== 'Negado');
-
-  // Recién aprobados = Confirmados a los que todavía no les marcaste la X (carta enviada).
-  // El aviso vive solo aquí (el badge de esta pestaña), no en el panel general de Avisos, y
-  // NO se limpia solo por abrir la pestaña — se limpia cuando tú le das la X a cada uno.
-  const nuevosAprobados = aceptados.filter(r => String(r.MovilidadNotificada || '').trim() !== 'Si');
-
-  const badge = document.getElementById('badge-movilidad');
-  badge.textContent = nuevosAprobados.length > 0 ? nuevosAprobados.length : '';
-  badge.style.display = nuevosAprobados.length > 0 ? 'inline-block' : 'none';
-
-  document.getElementById('kpis-movilidad').innerHTML = `
-    <div onclick="filtrarMovilidadPorEstado('Confirmado')" style="cursor:pointer; background:var(--confirmado-bg); color:var(--confirmado-tx); padding:14px 20px; border-radius:8px; ${movilidadFiltroActivo === 'Confirmado' ? 'outline:3px solid var(--confirmado-tx);' : ''}">
-      <div style="font-size:11px; text-transform:uppercase; font-weight:600;">Aceptados ${nuevosAprobados.length > 0 ? '🆕 ' + nuevosAprobados.length + ' nuevo(s)' : ''}</div>
-      <div style="font-size:26px; font-weight:700;">${aceptados.length}</div>
-    </div>
-    <div onclick="filtrarMovilidadPorEstado('Negado')" style="cursor:pointer; background:var(--negado-bg); color:var(--negado-tx); padding:14px 20px; border-radius:8px; ${movilidadFiltroActivo === 'Negado' ? 'outline:3px solid var(--negado-tx);' : ''}">
-      <div style="font-size:11px; text-transform:uppercase; font-weight:600;">Negados</div>
-      <div style="font-size:26px; font-weight:700;">${negados.length}</div>
-    </div>
-    <div onclick="filtrarMovilidadPorEstado('Pendiente')" style="cursor:pointer; background:var(--pendiente-bg); color:var(--pendiente-tx); padding:14px 20px; border-radius:8px; ${movilidadFiltroActivo === 'Pendiente' ? 'outline:3px solid var(--pendiente-tx);' : ''}">
-      <div style="font-size:11px; text-transform:uppercase; font-weight:600;">Pendientes</div>
-      <div style="font-size:26px; font-weight:700;">${pendientes.length}</div>
-    </div>`;
-}
-
-function filtrarMovilidadPorEstado(estado) {
-  // Clic de nuevo sobre la misma tarjeta ya activa = quitar el filtro de categoría (vuelve a
-  // "Todos" si hay texto escrito, o al mensaje inicial si no hay nada).
-  movilidadFiltroActivo = (movilidadFiltroActivo === estado) ? null : estado;
-  actualizarKpisMovilidad(); // resalta el elegido
-  buscarMovilidad();
-}
-
-function dibujarTablaMovilidad(estado) {
-  const cuerpo = document.getElementById('tabla-movilidad');
-  if (!estado) return;
-
-  const nombre = document.getElementById('mov-filtro-nombre').value.trim().toLowerCase();
-  const documento = document.getElementById('mov-filtro-documento').value.trim().toLowerCase();
-  const programa = document.getElementById('mov-filtro-programa').value.trim().toLowerCase();
-  const lugar = document.getElementById('mov-filtro-lugar').value.trim().toLowerCase();
-
-  let filtrado;
-  if (estado === 'Todos') {
-    filtrado = cacheMovilidad;
-  } else if (estado === 'Pendiente') {
-    filtrado = cacheMovilidad.filter(r => r.Estado !== 'Confirmado' && r.Estado !== 'Negado');
-  } else {
-    filtrado = cacheMovilidad.filter(r => r.Estado === estado);
-  }
-
-  filtrado = filtrado.filter(r =>
-    coincideNombreDocumento(r, nombre, documento) &&
-    (!programa || (r.Programa || '').toLowerCase().includes(programa)) &&
-    (!lugar || (r.CampoRotacion || '').toLowerCase().includes(lugar))
-  );
-
-  if (filtrado.length === 0) {
-    cuerpo.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#999; padding:20px;">Sin registros en esta categoría.</td></tr>';
-    return;
-  }
-
-  cuerpo.innerHTML = filtrado.map(r => {
-    const colores = COLORES_ESTADO[r.Estado] || { bg: '#eee', tx: '#333' };
-    const esNuevo = r.Estado === 'Confirmado' && String(r.MovilidadNotificada || '').trim() !== 'Si';
-    const claveEsc = r.ClaveUnica.replace(/'/g, "\\'");
-    const programaEsc = (r.Programa || '').replace(/'/g, "\\'");
-    return `<tr>
-      <td>${esNuevo ? '<span title="Recién aprobado, sin marcar" style="margin-right:4px;">🆕</span>' : ''}${esc(r.ResidenteNombre || '')}</td>
-      <td>${esc(r.ResidenteID || '')}</td>
-      <td>${esc(r.Programa || '')}</td>
-      <td>${esc(r.Semestre || '')}</td>
-      <td>${esc(r.Mes || '')}</td>
-      <td>${esc(r.CampoRotacion || '')}</td>
-      <td>${esc(r.Rotacion || '')}</td>
-      <td><span class="pastilla" style="background:${colores.bg}; color:${colores.tx};">${esc(r.Estado || '')}</span></td>
-      <td style="white-space:nowrap;">
-        ${esNuevo ? `<button title="Marcar carta de movilidad enviada" style="background:var(--confirmado-bg); color:var(--confirmado-tx); border:none; border-radius:5px; padding:4px 10px; cursor:pointer; font-size:12px; font-weight:600; margin-right:4px;" onclick="marcarCartaEnviada('${claveEsc}')">✕ Carta enviada</button>` : ''}
-        <button class="btn-secundario btn-pequeno" title="Ver esta rotación en el cuadro" onclick="irACeldaDesdeComentario('${claveEsc}', '${programaEsc}', '${r.Semestre || ''}')">🔗 Ver en cuadro</button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-// Marca que ya se envió la carta de movilidad para este residente — deja de contar como
-// "nuevo" y desaparece del badge de la pestaña.
-async function marcarCartaEnviada(clave) {
-  const resultado = await llamarBackend('marcarMovilidadNotificada', { claves: [clave] });
-  if (!resultado.ok) { mostrarMensaje('Error: ' + resultado.error, 'error'); return; }
-  const fila = cacheMovilidad.find(r => r.ClaveUnica === clave);
-  if (fila) fila.MovilidadNotificada = 'Si';
-  const filaHist = cacheHistoricoCompleto.find(r => r.ClaveUnica === clave);
-  if (filaHist) filaHist.MovilidadNotificada = 'Si';
-  actualizarKpisMovilidad();
-  dibujarTablaMovilidad(movilidadFiltroActivo);
-  mostrarMensaje('Marcado — carta enviada.', 'ok');
-}
-
-// Un periodo válido siempre tiene forma AAAA-N (ej: 2026-2). Cualquier otra cosa (como un mes suelto) es dato corrupto y se ignora aquí.
-function esPeriodoValido(valor) {
-  return /^\d{4}-[12]$/.test(String(valor || '').trim());
-}
-
-function periodoMasReciente() {
-  const semestres = [...new Set(cacheHistoricoCompleto.map(r => r.Semestre).filter(esPeriodoValido))];
-  semestres.sort();
-  return semestres[semestres.length - 1] || '';
-}
-
-function dibujarChipsPeriodo() {
-  const semestres = [...new Set(cacheHistoricoCompleto.map(r => r.Semestre).filter(esPeriodoValido))].sort();
-  const contenedor = document.getElementById('db-chips-periodo');
-  const chip = (valor, etiqueta) => `<button class="btn-pequeno chip-periodo" data-valor="${valor}" onclick="aplicarPeriodoDb('${valor}')" style="border-radius:16px; border:1px solid #ccc; background:white; color:#333;">${etiqueta}</button>`;
-  let html = chip('todos', 'Todos');
-  semestres.forEach(s => { html += chip(s, s); });
-  contenedor.innerHTML = html;
-}
-
-function aplicarPeriodoDb(valor) {
-  periodoSeleccionadoDb = valor;
-  document.querySelectorAll('.chip-periodo').forEach(b => {
-    const activo = b.dataset.valor === valor;
-    b.style.background = activo ? 'var(--azul-ces)' : 'white';
-    b.style.color = activo ? 'white' : '#333';
-  });
-
-  let datos = cacheHistoricoCompleto;
-  let etiqueta = 'Todos los periodos';
-  if (valor !== 'todos') {
-    datos = cacheHistoricoCompleto.filter(r => r.Semestre === valor);
-    etiqueta = valor;
-  }
-
-  document.getElementById('db-resumen-periodo').textContent = etiqueta + ' — ' + datos.length + ' registros';
-  dibujarKpisEjecutivo(datos);
-  dibujarListasEjecutivo(datos);
-}
-
-function dibujarKpisEjecutivo(datos) {
-  const residentesActivos = new Set(datos.filter(r => r.Tipo === 'Residente CES').map(r => r.ResidenteID)).size;
-  const movilidad = new Set(datos.filter(r => r.Tipo === 'Movilidad entrante').map(r => r.ResidenteID)).size;
-  const programas = new Set(datos.map(r => r.Programa).filter(Boolean)).size;
-  const campos = new Set(datos.flatMap(r => separarCampos(r.CampoRotacion))).size;
-  const pendientes = datos.filter(r => r.Estado === 'Pendiente' || r.Estado === 'Cambio').length;
-  const negados = datos.filter(r => r.Estado === 'Negado').length;
-
-  const tarjetas = [
-    { valor: residentesActivos, etiqueta: 'Residentes CES', color: '#003865' },
-    { valor: movilidad, etiqueta: 'Movilidad entrante', color: '#1F4E79' },
-    { valor: programas, etiqueta: 'Programas', color: '#006100' },
-    { valor: campos, etiqueta: 'Campos de rotación', color: '#5b7fa6' },
-    { valor: pendientes, etiqueta: 'Pendientes de confirmar', color: '#823C00' },
-    { valor: negados, etiqueta: 'Negados (requieren reasignación)', color: '#7030A0' }
-  ];
-
-  document.getElementById('db-kpis').innerHTML = tarjetas.map(t => `
-    <div style="background:white; border:1px solid #eef1f5; border-left:4px solid ${t.color}; border-radius:8px; padding:14px 16px; text-align:left;">
-      <div style="font-size:26px; font-weight:700; color:${t.color};">${t.valor}</div>
-      <div style="font-size:11px; color:#888; margin-top:2px; text-transform:uppercase; letter-spacing:0.3px;">${t.etiqueta}</div>
-    </div>`).join('');
-}
-
-// Un CampoRotacion como "C. CES - HPTU - SOMER" representa 3 campos distintos, no uno solo — se separa siempre así.
-function separarCampos(campoStr) {
-  return String(campoStr || '').split('-').map(s => s.trim()).filter(Boolean);
-}
-
-function dibujarListasEjecutivo(datos) {
-  const porPrograma = {};
-  datos.forEach(r => {
-    if (!r.Programa) return;
-    porPrograma[r.Programa] = porPrograma[r.Programa] || {};
-    porPrograma[r.Programa][r.ResidenteNombre] = r.Nivel || '';
-  });
-  const listaProgramas = Object.keys(porPrograma).map(p => ({ nombre: p, residentes: porPrograma[p] })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
-  document.getElementById('db-lista-programas').innerHTML = listaProgramas.map((p, i) => `
-    <div>
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 12px; border-bottom:1px solid #f4f4f4; font-size:13px; cursor:pointer;" onclick="toggleExpandirLista('prog-${i}')">
-        <span>${esc(p.nombre)}</span><span><strong>${Object.keys(p.residentes).length}</strong> <span style="color:#aaa;">▶</span></span>
-      </div>
-      <div id="prog-${i}" style="display:none; background:#fafbfc;">
-        <div style="padding:6px 16px; font-size:11px; font-weight:700; color:var(--azul-ces); text-transform:uppercase;">Residentes en ${esc(p.nombre)}</div>
-        ${Object.keys(p.residentes).sort((a, b) => a.localeCompare(b, 'es')).map(nombre => `
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 16px; border-top:1px solid #eee; font-size:12px;">
-            <span>${esc(nombre)}</span><span class="pastilla" style="background:#eef1f5; color:#555;">${esc(p.residentes[nombre])}</span>
-          </div>`).join('')}
-      </div>
-    </div>`).join('') || '<div style="padding:12px; color:#999; font-size:13px;">Sin datos.</div>';
-
-  const porCampo = {};
-  datos.forEach(r => {
-    separarCampos(r.CampoRotacion).forEach(campoIndividual => {
-      porCampo[campoIndividual] = porCampo[campoIndividual] || {};
-      porCampo[campoIndividual][r.ResidenteNombre] = r.Nivel || '';
-    });
-  });
-  const listaCampos = Object.keys(porCampo).map(c => ({ nombre: c, residentes: porCampo[c] })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
-  document.getElementById('db-lista-campos').innerHTML = listaCampos.map((c, i) => `
-    <div>
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 12px; border-bottom:1px solid #f4f4f4; font-size:13px; cursor:pointer;" onclick="toggleExpandirLista('campo-${i}')">
-        <span>${esc(c.nombre)}</span><span><strong>${Object.keys(c.residentes).length}</strong> <span style="color:#aaa;">▶</span></span>
-      </div>
-      <div id="campo-${i}" style="display:none; background:#fafbfc;">
-        <div style="padding:6px 16px; font-size:11px; font-weight:700; color:#0d6e5f; text-transform:uppercase;">Residentes en ${esc(c.nombre)}</div>
-        ${Object.keys(c.residentes).sort((a, b) => a.localeCompare(b, 'es')).map(nombre => `
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 16px; border-top:1px solid #eee; font-size:12px;">
-            <span>${esc(nombre)}</span><span class="pastilla" style="background:#eef1f5; color:#555;">${esc(c.residentes[nombre])}</span>
-          </div>`).join('')}
-      </div>
-    </div>`).join('') || '<div style="padding:12px; color:#999; font-size:13px;">Sin datos.</div>';
-}
-
-function toggleExpandirLista(id) {
-  const el = document.getElementById(id);
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
-
-// Salta desde un comentario en Gestión Operativa directo a la celda correspondiente en el Cuadro
-async function irACeldaDesdeComentario(clave, programa, periodo) {
-  // El Semestre "2027-1" (Enero-Junio) pertenece al año académico que EMPEZÓ en 2026
-  // (2026-2027), no al que empieza en 2027 — hay que restar 1 en ese caso, o "Cargar
-  // cuadrícula" abriría el año siguiente al que realmente tiene el registro.
-  const partes = String(periodo || '').split('-');
-  const anioBase = partes[0];
-  const numeroSemestre = partes[1];
-  const anioInicio = (anioBase && numeroSemestre === '1') ? String(Number(anioBase) - 1) : anioBase;
-
-  if (!programa || !anioInicio || anioInicio === 'NaN') { mostrarMensaje('No se pudo ubicar la celda (faltan datos de programa o periodo).', 'error'); return; }
-
-  document.getElementById('cg-programa').value = programa;
-  document.getElementById('cg-periodo').value = anioInicio;
-  document.getElementById('cg-periodo-hasta').value = '';
-  cambiarTab('cuadricula');
-  await cargarCuadricula();
-  abrirCelda(clave);
-}
-
-// Listas de valores conocidos por campo, para el autocompletado genérico
-let listasSugerencias = {};
-// Traduce lo que se ve en la sugerencia de "Año académico" (ej. "2026-2" o "2027-1", formato
-// semestre real de la hoja) al año de inicio que en realidad necesita el campo cg-periodo
-// (ej. "2026") — ambos semestres de un mismo año académico apuntan al mismo año de inicio.
-let mapaAnioPeriodoAInicio = {};
-
-function llenarSelectoresBusqueda() {
-  const semestresValidos = [...new Set(cacheHistoricoCompleto.map(r => r.Semestre).filter(esPeriodoValido))].sort();
-  const anios = [...new Set(semestresValidos.map(s => s.split('-')[0]))].sort();
-  const programas = [...new Set(cacheHistoricoCompleto.map(r => r.Programa).filter(Boolean))].sort();
-  const campos = [...new Set(cacheHistoricoCompleto.flatMap(r => separarCampos(r.CampoRotacion)))].sort();
-  const rotaciones = [...new Set(cacheHistoricoCompleto.map(r => r.Rotacion).filter(Boolean))].sort();
-  const residentes = [...new Set(cacheHistoricoCompleto.map(r => r.ResidenteNombre).filter(Boolean))].sort();
-  const meses = [...MESES, ...MESES_VACACIONES];
-
-  // Object.assign en vez de reemplazar: si se reemplaza el objeto completo, se borran las
-  // listas de sugerencias que cargarProgramasConocidos() ya había puesto ahí para los filtros
-  // de Programa de Gestión Operativa/Validación Mensual/Histórico — eso fue justo lo que hacía
-  // que esos campos se quedaran sin ninguna opción después de visitar el Dashboard.
-  Object.assign(listasSugerencias, {
-    'db-b1-campo': campos, 'db-b1-mes': meses, 'db-b1-anio': anios, 'db-b1-programa': programas,
-    'db-b2-rotacion': rotaciones, 'db-b2-programa': programas, 'db-b2-mes': meses,
-    'db-b3-nombre': residentes, 'db-b3-programa': programas, 'db-b3-semestre': semestresValidos
-  });
-}
-
-// Campos que permiten elegir VARIOS valores a la vez (chips), en vez de uno solo como los
-// demás campos con autocompletado.
-const CAMPOS_MULTI = new Set([
-  'go-filtro-programa', 'vm-programa',
-  'db-b1-campo', 'db-b1-mes', 'db-b1-anio', 'db-b1-programa',
-  'db-b2-programa', 'db-b2-mes',
-  'db-b3-programa', 'db-b3-semestre'
-]);
-let seleccionesMulti = {};
-CAMPOS_MULTI.forEach(id => { seleccionesMulti[id] = []; });
-
-function mostrarSugerencias(idInput) {
-  const input = document.getElementById(idInput);
-  const caja = document.getElementById('sug-' + idInput);
-  const lista = listasSugerencias[idInput] || [];
-  const texto = input.value.trim().toLowerCase();
-  const esMulti = CAMPOS_MULTI.has(idInput);
-
-  // En los campos de varios, no repetir sugerencias de lo que ya está elegido.
-  const listaDisponible = esMulti
-    ? lista.filter(v => !(seleccionesMulti[idInput] || []).includes(v))
-    : lista;
-
-  const coincidencias = texto ? listaDisponible.filter(v => v.toLowerCase().includes(texto)) : listaDisponible;
-  if (coincidencias.length === 0) { caja.style.display = 'none'; return; }
-
-  const funcionSeleccion = esMulti ? 'seleccionarValorMulti' : 'seleccionarSugerencia';
-  caja.innerHTML = coincidencias.slice(0, 15).map(v =>
-    `<div onmousedown="${funcionSeleccion}('${idInput}', '${v.replace(/'/g, "\\'")}')">${v}</div>`
-  ).join('');
-  caja.style.display = 'block';
-}
-
-function seleccionarSugerencia(idInput, valor) {
-  // cg-periodo es especial: lo que se ve en la lista es el semestre real ("2026-2", "2027-1"),
-  // pero el campo necesita el año de inicio ("2026") — mapaAnioPeriodoAInicio hace esa traducción.
-  const valorReal = (idInput === 'cg-periodo' && mapaAnioPeriodoAInicio[valor]) ? mapaAnioPeriodoAInicio[valor] : valor;
-  document.getElementById(idInput).value = valorReal;
-  document.getElementById('sug-' + idInput).style.display = 'none';
-}
-
-// Agrega un valor como "chip" a la selección (en vez de reemplazar el texto), limpia el campo
-// para poder seguir escribiendo el siguiente, y vuelve a filtrar de inmediato.
-function seleccionarValorMulti(idInput, valor) {
-  if (!seleccionesMulti[idInput].includes(valor)) {
-    seleccionesMulti[idInput].push(valor);
-  }
-  document.getElementById(idInput).value = '';
-  document.getElementById('sug-' + idInput).style.display = 'none';
-  renderizarChips(idInput);
-  aplicarFiltroTrasCambioChips(idInput);
-}
-
-function quitarChip(idInput, valor) {
-  seleccionesMulti[idInput] = seleccionesMulti[idInput].filter(v => v !== valor);
-  renderizarChips(idInput);
-  aplicarFiltroTrasCambioChips(idInput);
-}
-
-// Limpia un grupo de filtros (texto plano, selects y campos de selección múltiple) y opcionalmente
-// vuelve a correr la función que redibuja la vista, para que quede en su estado "normal" — sin
-// dejar la tabla congelada con el último resultado de una búsqueda que ya no aplica.
-function limpiarFiltros({ textos = [], selects = [], multis = [], resultado = null, funcionAplicar = null }) {
-  textos.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  selects.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  multis.forEach(id => {
-    seleccionesMulti[id] = [];
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-    renderizarChips(id);
-  });
-  if (resultado) { const el = document.getElementById(resultado); if (el) el.innerHTML = ''; }
-  if (funcionAplicar) funcionAplicar();
-}
-
-function renderizarChips(idInput) {
-  const contenedor = document.getElementById('chips-' + idInput);
-  if (!contenedor) return;
-  const seleccionados = seleccionesMulti[idInput] || [];
-  contenedor.innerHTML = seleccionados.map(v => `
-    <span style="display:inline-flex; align-items:center; gap:4px; background:#e8eef5; color:#003865; font-size:12px; font-weight:600; padding:3px 9px; border-radius:10px; margin:2px 4px 2px 0;">
-      ${esc(v)}
-      <span style="cursor:pointer; font-weight:700;" onclick="quitarChip('${idInput}', '${v.replace(/'/g, "\\'")}')">✕</span>
-    </span>`).join('');
-}
-
-// Qué función de filtrado hay que volver a correr cuando cambian los chips de un campo dado.
-const FILTRO_POR_CAMPO_MULTI = {
-  'go-filtro-programa': () => aplicarFiltrosGestion(),
-  'vm-programa': () => aplicarValidacionMensual(),
-  'db-b1-campo': () => buscarPorCampo(), 'db-b1-mes': () => buscarPorCampo(),
-  'db-b1-anio': () => buscarPorCampo(), 'db-b1-programa': () => buscarPorCampo(),
-  'db-b2-programa': () => buscarPorRotacion(), 'db-b2-mes': () => buscarPorRotacion(),
-  'db-b3-programa': () => buscarResidente(), 'db-b3-semestre': () => buscarResidente()
-};
-
-function aplicarFiltroTrasCambioChips(idInput) {
-  const fn = FILTRO_POR_CAMPO_MULTI[idInput];
-  if (fn) fn();
-}
-
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('.caja-sugerencias') && e.target.tagName !== 'INPUT') {
-    document.querySelectorAll('.caja-sugerencias').forEach(c => c.style.display = 'none');
-  }
-});
-
-function tablaResultados(filas) {
-  if (filas.length === 0) return '<p style="color:#999; font-size:13px;">Sin resultados.</p>';
-  return `<table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th>Mes</th><th>Campo / Rotación</th><th>Estado</th></tr></thead><tbody>
-    ${filas.slice(0, 100).map(f => {
-      const colores = COLORES_ESTADO[f.Estado] || { bg: '#eee', tx: '#333' };
-      return `<tr>
-        <td>${esc(f.ResidenteNombre)}<br><span style="color:#888;">${esc(f.ResidenteID)}</span></td>
-        <td>${esc(f.Programa)}</td><td>${esc(f.Mes)}</td>
-        <td>${esc(f.CampoRotacion)}<br><span style="color:#888;">${esc(f.Rotacion)}</span></td>
-        <td><span class="pastilla" style="background:${colores.bg}; color:${colores.tx};">${esc(f.Estado)}</span></td>
-      </tr>`;
-    }).join('')}
-  </tbody></table>${filas.length > 100 ? '<p style="font-size:11px; color:#999;">Mostrando 100 de ' + filas.length + ' resultados.</p>' : ''}`;
-}
-
-function datosDelPeriodoActual() {
-  if (periodoSeleccionadoDb === 'todos') return cacheHistoricoCompleto;
-  return cacheHistoricoCompleto.filter(r => r.Semestre === periodoSeleccionadoDb);
-}
-
-function buscarPorCampo() {
-  const camposSel = seleccionesMulti['db-b1-campo'] || [];
-  const mesesSel = seleccionesMulti['db-b1-mes'] || [];
-  const aniosSel = seleccionesMulti['db-b1-anio'] || [];
-  const programasSel = seleccionesMulti['db-b1-programa'] || [];
-  const resultado = datosDelPeriodoActual().filter(r =>
-    (camposSel.length === 0 || camposSel.some(c => (r.CampoRotacion || '').toLowerCase().includes(c.toLowerCase()))) &&
-    (mesesSel.length === 0 || mesesSel.includes(r.Mes)) &&
-    (aniosSel.length === 0 || aniosSel.some(a => String(r.Semestre || '').startsWith(a))) &&
-    (programasSel.length === 0 || programasSel.includes(r.Programa))
-  );
-  document.getElementById('db-resultado-campo').innerHTML = tablaResultados(resultado);
-}
-
-function buscarPorRotacion() {
-  const rotacion = document.getElementById('db-b2-rotacion').value.trim().toLowerCase();
-  const programasSel = seleccionesMulti['db-b2-programa'] || [];
-  const mesesSel = seleccionesMulti['db-b2-mes'] || [];
-  const resultado = datosDelPeriodoActual().filter(r =>
-    (!rotacion || (r.Rotacion || '').toLowerCase().includes(rotacion)) &&
-    (programasSel.length === 0 || programasSel.includes(r.Programa)) &&
-    (mesesSel.length === 0 || mesesSel.includes(r.Mes))
-  );
-  document.getElementById('db-resultado-rotacion').innerHTML = tablaResultados(resultado);
-}
-
-function buscarResidente() {
-  const nombre = document.getElementById('db-b3-nombre').value.trim().toLowerCase();
-  const programasSel = seleccionesMulti['db-b3-programa'] || [];
-  const semestresSel = seleccionesMulti['db-b3-semestre'] || [];
-  const resultado = datosDelPeriodoActual().filter(r =>
-    (!nombre || (r.ResidenteNombre || '').toLowerCase().includes(nombre)) &&
-    (programasSel.length === 0 || programasSel.includes(r.Programa)) &&
-    (semestresSel.length === 0 || semestresSel.includes(r.Semestre))
-  );
-  document.getElementById('db-resultado-residente').innerHTML = tablaResultados(resultado);
-}
-
-function limpiarBusquedaCampo() {
-  limpiarFiltros({ multis: ['db-b1-campo', 'db-b1-mes', 'db-b1-anio', 'db-b1-programa'], resultado: 'db-resultado-campo' });
-}
-function limpiarBusquedaRotacion() {
-  limpiarFiltros({ textos: ['db-b2-rotacion'], multis: ['db-b2-programa', 'db-b2-mes'], resultado: 'db-resultado-rotacion' });
-}
-function limpiarBusquedaResidente() {
-  limpiarFiltros({ textos: ['db-b3-nombre'], multis: ['db-b3-programa', 'db-b3-semestre'], resultado: 'db-resultado-residente' });
-}
-
-function cargarMesesFiltro() {
-  const select = document.getElementById('go-filtro-mes');
-  MESES.forEach(mes => {
-    const opt = document.createElement('option');
-    opt.value = mes; opt.textContent = mes;
-    select.appendChild(opt);
-  });
-}
-
-let ultimoFiltradoGestion = [];
-
-function cargarPeriodosFiltro() {
-  const select = document.getElementById('go-filtro-periodo');
-  const PATRON_PERIODO_VALIDO = /^\d{4}-[12]$/;
-  const periodosPresentes = [...new Set(
-    cacheColaCompleta.map(f => String(f.Periodo || '').trim()).filter(p => PATRON_PERIODO_VALIDO.test(p))
-  )].sort();
-  const valorActual = select.value;
-  select.innerHTML = '<option value="">Todos</option>';
-  periodosPresentes.forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p; opt.textContent = p;
-    select.appendChild(opt);
-  });
-  if (periodosPresentes.includes(valorActual)) select.value = valorActual;
-}
-
-// ============================================================
-// FILTRO POR ASISTENTE — atajo para que cada auxiliar vea de una sola vez solo los programas
-// que le corresponden a ella. No es una restricción real de acceso (cualquiera puede seguir
-// viendo y trabajando cualquier programa si hace falta) — es solo para agilizar el filtro.
-// Jeimy no tiene lista propia: se calcula como "todo lo que no es de Eliana", así no hay que
-// mantener dos listas sincronizadas si se agrega un programa nuevo al sistema.
-// ============================================================
-const PROGRAMAS_ELIANA = [
-  'Anestesia', 'Anestesia Cardiovascular y Torácica', 'Cirugía general', 'Cirugía Cardiovascular',
-  'Cirugía plástica, Reconstructiva y Estética', 'Dermatología', 'Dermatopatología',
-  'Dolor y Cuidado Paliativo', 'Ginecología y Obstetricia', 'Gastroenterología',
-  'Medicina de urgencias', 'Oftalmología', 'Radiología', 'Urología'
-];
-
-// Quita tildes/mayúsculas para comparar nombres de programa sin que un acento o una may/min
-// distinta rompa la coincidencia (ej. "Cirugía" en el sistema vs "Cirugia" tipeado aquí).
-function normalizarTextoPrograma(texto) {
-  return String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
-}
-
-function aplicarFiltroAsistente() {
-  const valor = document.getElementById('go-filtro-asistente').value;
-  const elianaNorm = PROGRAMAS_ELIANA.map(normalizarTextoPrograma);
-
-  if (!valor) {
-    seleccionesMulti['go-filtro-programa'] = [];
-  } else if (valor === 'Eliana') {
-    seleccionesMulti['go-filtro-programa'] = listaProgramasConocidos.filter(p => elianaNorm.includes(normalizarTextoPrograma(p)));
-  } else if (valor === 'Jeimy') {
-    seleccionesMulti['go-filtro-programa'] = listaProgramasConocidos.filter(p => !elianaNorm.includes(normalizarTextoPrograma(p)));
-  }
-  renderizarChips('go-filtro-programa');
-  aplicarFiltrosGestion();
-}
-
-function limpiarFiltrosGestionOperativa() {
-  limpiarFiltros({
-    textos: ['go-filtro-nombre', 'go-filtro-documento'],
-    selects: ['go-filtro-estado', 'go-filtro-mes', 'go-filtro-periodo', 'go-filtro-asistente'],
-    multis: ['go-filtro-programa'],
-    funcionAplicar: aplicarFiltrosGestion
-  });
-}
-
-function aplicarFiltrosGestion() {
-  cargarPeriodosFiltro();
-  const programasSel = seleccionesMulti['go-filtro-programa'] || [];
-  const estado = document.getElementById('go-filtro-estado').value;
-  const mes = document.getElementById('go-filtro-mes').value;
-  const periodo = document.getElementById('go-filtro-periodo').value;
-  const nombre = document.getElementById('go-filtro-nombre').value.trim().toLowerCase();
-  const documento = document.getElementById('go-filtro-documento').value.trim().toLowerCase();
-
-  // Los Negados no se muestran en la cola de auxiliares: ya fueron gestionados (con un "no"),
-  // y su reasignación es tarea de la coordinadora, no de la auxiliar. Siguen existiendo en
-  // GestionOperativa (la coordinadora los ve y los reasigna desde Validación Mensual), solo
-  // se ocultan aquí.
-  const filtrado = cacheColaCompleta.filter(fila => {
-    if (fila.Estado === 'Negado') return false;
-    if (programasSel.length > 0 && !programasSel.includes(fila.Programa)) return false;
-    if (estado && fila.Estado !== estado) return false;
-    if (mes && fila.Mes !== mes) return false;
-    if (periodo && fila.Periodo !== periodo) return false;
-    if (!coincideNombreDocumento(fila, nombre, documento)) return false;
-    return true;
-  });
-
-  ultimoFiltradoGestion = filtrado;
-  dibujarLista(filtrado, 'tabla-gestion-completa');
-  dibujarKpis(filtrado);
-
-  // Si alguna selección quedó marcada sobre una fila que ya no está en la lista (porque se
-  // aplicó, porque pasó a Negado, o porque cambiaste el filtro), se limpia — así la barra
-  // nunca queda pegada mostrando selecciones "fantasma".
-  const clavesVisibles = new Set(filtrado.map(f => f.ClaveUnica));
-  Object.keys(seleccionesGestion).forEach(clave => {
-    if (!clavesVisibles.has(clave)) delete seleccionesGestion[clave];
-  });
-  actualizarBarraAplicarGestion();
-}
-
-function descargarGestionOperativaExcel() {
-  if (ultimoFiltradoGestion.length === 0) {
-    mostrarMensaje('No hay datos filtrados para descargar. Da clic en "Filtrar" primero.', 'error');
-    return;
-  }
-
-  const filas = [['Residente', 'ID', 'Programa', 'Mes', 'Campo de rotación', 'Rotación', 'Estado', 'Observación']];
-  ultimoFiltradoGestion.forEach(f => {
-    filas.push([f.ResidenteNombre || '', f.ResidenteID || '', f.Programa || '', f.Mes || '', f.CampoRotacion || '', f.Rotacion || '', f.Estado || '', f.Observacion || '']);
-  });
-
-  const hoja = XLSX.utils.aoa_to_sheet(filas);
-  const libro = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(libro, hoja, 'Gestion Operativa');
-  XLSX.writeFile(libro, 'Gestion_Operativa_' + new Date().toISOString().slice(0, 10) + '.xlsx');
-}
-
-function dibujarKpis(filas) {
-  const contenedor = document.getElementById('kpis-gestion');
-  const conteos = { 'Pendiente':0, 'Gestionado':0, 'Negado':0, 'Cambio':0 };
-  filas.forEach(f => { if (conteos[f.Estado] !== undefined) conteos[f.Estado]++; });
-
-  contenedor.innerHTML = Object.keys(conteos).map(estado => {
-    const colores = COLORES_ESTADO[estado];
-    return `<div style="background:${colores.bg}; color:${colores.tx}; padding:10px 16px; border-radius:8px; font-size:13px;">
-      <strong style="font-size:20px; display:block;">${conteos[estado]}</strong>${estado}
-    </div>`;
-  }).join('') + `<div style="background:#eee; color:#333; padding:10px 16px; border-radius:8px; font-size:13px;">
-    <strong style="font-size:20px; display:block;">${filas.length}</strong>Total filtrado
-  </div>`;
-}
-
-// ============================================================
-// CUADRÍCULA
-// ============================================================
-// Tu convención real: AnioAcademico = rango (ej "2026-2027"), Semestre = periodo (ej "2026-2" o "2027-1")
-function calcularAnioSemestre(mes, anioInicio) {
-  const anioAcademico = anioInicio + '-' + (Number(anioInicio) + 1);
-  const mesesEneroJunio = ['Enero','Febrero','Marzo','Abril','Mayo','Junio'];
-  const semestre = mesesEneroJunio.includes(mes)
-    ? (Number(anioInicio) + 1) + '-1'
-    : anioInicio + '-2';
-  return { anioAcademico, semestre };
-}
-
-// silencioso=true se usa en el refresco automático de fondo: actualiza los datos SIN pasar por
-// el mensaje "⏳ Cargando..." — así la cuadrícula que ya estás viendo no desaparece un momento
-// y reaparece; simplemente se reemplaza de una vez por la versión actualizada cuando ya está lista.
-async function cargarCuadricula(silencioso) {
-  const programa = document.getElementById('cg-programa').value.trim();
-  const anioDesde = document.getElementById('cg-periodo').value.trim();
-  const anioHastaTexto = document.getElementById('cg-periodo-hasta').value.trim();
-  if (!programa || !anioDesde) { mostrarMensaje('Escribe programa y año académico.', 'error'); return; }
-
-  const desde = Number(anioDesde);
-  const hasta = anioHastaTexto ? Number(anioHastaTexto) : desde;
-  if (isNaN(desde) || (anioHastaTexto && isNaN(hasta))) { mostrarMensaje('El año académico debe ser un número, ej: 2027.', 'error'); return; }
-  if (hasta < desde) { mostrarMensaje('El año "Hasta" debe ser igual o posterior al año "Desde".', 'error'); return; }
-  if (hasta - desde > 5) { mostrarMensaje('Máximo 6 años académicos a la vez, para que la cuadrícula no quede demasiado ancha.', 'error'); return; }
-
-  // Un "bloque" es un año académico completo (Julio a Junio + sus 2 vacaciones). Con Hasta vacío
-  // queda un solo bloque, igual que antes.
-  const bloques = [];
-  for (let y = desde; y <= hasta; y++) {
-    bloques.push({ anioInicio: String(y), anioSiguiente: String(y + 1), anioAcademico: y + '-' + (y + 1) });
-  }
-  const anioAcademicosBuscados = new Set(bloques.map(b => b.anioAcademico));
-
-  const boton = document.getElementById('boton-cargar-cuadricula');
-  const textoOriginalBoton = boton.textContent;
-  if (!silencioso) {
-    boton.textContent = 'Cargando...';
-    boton.disabled = true;
-    document.getElementById('contenedor-cuadricula').innerHTML = '<p style="color:#888;">⏳ Cargando datos, un momento...</p>';
-  }
-
-  const resHistorico = await leerBackend('listarHistorico');
-
-  if (!silencioso) {
-    boton.textContent = textoOriginalBoton;
-    boton.disabled = false;
-  }
-
-  if (!resHistorico.ok) { if (!silencioso) mostrarMensaje('Error cargando histórico: ' + resHistorico.error, 'error'); return; }
-
-  registrosGridActual = resHistorico.datos.filter(r =>
-    r.Programa === programa && anioAcademicosBuscados.has(String(r.AnioAcademico))
-  );
-  // anioInicio/anioSiguiente se conservan (primer/último bloque) por compatibilidad con código
-  // que solo mira un año; el detalle real para dibujar/editar está en "bloques".
-  contextoGrid = { programa, anioInicio: bloques[0].anioInicio, anioSiguiente: bloques[bloques.length - 1].anioSiguiente, bloques };
-
-  // Los residentes de esta cuadrícula salen de lo que ya está registrado para este programa+periodo(s).
-  // Si no hay ninguno todavía (cuadro nuevo), usa "+ Agregar residente" para empezar a llenarlo.
-  const vistos = new Set();
-  filasGridActual = [];
-  registrosGridActual.forEach(r => {
-    if (!vistos.has(r.ResidenteID)) {
-      vistos.add(r.ResidenteID);
-      filasGridActual.push({ id: r.ResidenteID, nombre: r.ResidenteNombre, nivel: r.Nivel });
-    }
-  });
-
+  poblarSelectorProgramas();
+  poblarSelectorAniosAcademicos();
   redibujarCuadricula();
+  guardarSesion();
 }
 
-// Agrupa las filas por nivel: R1, R2, R3, R4, R5 y todo lo demás como "Movilidad Académica"
-function agruparPorNivel(filas) {
-  const grupos = { 'R1': [], 'R2': [], 'R3': [], 'R4': [], 'R5': [], 'Movilidad Académica': [] };
-  filas.forEach(f => {
-    const nivelLimpio = String(f.nivel || '').trim().toUpperCase();
-    const clave = grupos.hasOwnProperty(nivelLimpio) ? nivelLimpio : 'Movilidad Académica';
-    grupos[clave].push(f);
+function poblarSelectorProgramas() {
+  const wrap = document.getElementById('selector-programa-wrap');
+  const select = document.getElementById('sel-programa');
+  if (programasPermitidos.length <= 1) { wrap.style.display = 'none'; return; }
+
+  wrap.style.display = 'block';
+  select.innerHTML = '';
+  programasPermitidos.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p; opt.textContent = p;
+    if (p === programaSeleccionado) opt.selected = true;
+    select.appendChild(opt);
   });
-  return grupos;
 }
 
-function redibujarCuadricula() {
-  const contenedor = document.getElementById('contenedor-cuadricula');
+function cambiarPrograma() {
+  programaSeleccionado = document.getElementById('sel-programa').value;
+  anioSeleccionado = null; // el año disponible puede variar de un programa a otro
+  poblarSelectorAniosAcademicos();
+  redibujarCuadricula();
+  guardarSesion();
+}
 
-  if (filasGridActual.length === 0) {
-    contenedor.innerHTML = '<p style="color:#999;">Todavía no hay residentes en esta cuadrícula. Usa "+ Agregar residente" para empezar.</p>';
+// Arma la lista de años académicos (AnioAcademico, ej. "2026-2027") que efectivamente tienen
+// datos para el programa seleccionado, más recientes primero.
+function poblarSelectorAniosAcademicos() {
+  const select = document.getElementById('sel-anio-academico');
+  const registrosPrograma = datosCompletos.filter(r => r.Programa === programaSeleccionado);
+  const aniosDisponibles = [...new Set(registrosPrograma.map(r => String(r.AnioAcademico)))]
+    .filter(a => /^\d{4}-\d{4}$/.test(a))
+    .sort((a, b) => b.localeCompare(a));
+
+  select.innerHTML = '';
+  if (aniosDisponibles.length === 0) {
+    const opt = document.createElement('option');
+    opt.value = ''; opt.textContent = 'Sin datos';
+    select.appendChild(opt);
+    anioSeleccionado = null;
     return;
   }
 
-  const grupos = agruparPorNivel(filasGridActual);
-  const bloques = contextoGrid.bloques || [{ anioInicio: contextoGrid.anioInicio, anioSiguiente: contextoGrid.anioSiguiente, anioAcademico: contextoGrid.anioInicio + '-' + contextoGrid.anioSiguiente }];
-  const totalColumnas = (MESES.length + MESES_VACACIONES.length) * bloques.length + 1;
+  aniosDisponibles.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a; opt.textContent = a;
+    select.appendChild(opt);
+  });
+
+  if (!anioSeleccionado || !aniosDisponibles.includes(anioSeleccionado)) anioSeleccionado = aniosDisponibles[0];
+  select.value = anioSeleccionado;
+}
+
+function cambiarAnioAcademico() {
+  anioSeleccionado = document.getElementById('sel-anio-academico').value;
+  redibujarCuadricula();
+  guardarSesion();
+}
+
+// ============================================================
+// DIBUJO DE LA CUADRÍCULA — mismo formato visual que Gestión Operativa, solo lectura
+// ============================================================
+function redibujarCuadricula() {
+  document.getElementById('titulo-programa').textContent = programaSeleccionado
+    ? programaSeleccionado + (anioSeleccionado ? ' · ' + anioSeleccionado : '')
+    : 'Sin programa asignado';
+  document.getElementById('btn-descargar').disabled = !programaSeleccionado || !anioSeleccionado;
+
+  const contenedor = document.getElementById('contenedor-cuadricula');
+  if (!programaSeleccionado || !anioSeleccionado) {
+    contenedor.innerHTML = '<p class="mensaje-vacio">No hay cronograma disponible todavía.</p>';
+    return;
+  }
+
+  const registros = datosCompletos.filter(r => r.Programa === programaSeleccionado && String(r.AnioAcademico) === anioSeleccionado);
+  const partes = anioSeleccionado.split('-');
+  const anioInicio = partes[0], anioSiguiente = partes[1];
+
+  const vistos = new Set();
+  const filas = [];
+  registros.forEach(r => {
+    if (!vistos.has(r.ResidenteID)) { vistos.add(r.ResidenteID); filas.push({ id: r.ResidenteID, nombre: r.ResidenteNombre, nivel: r.Nivel }); }
+  });
+
+  if (filas.length === 0) {
+    contenedor.innerHTML = '<p class="mensaje-vacio">No hay residentes cargados para este año académico.</p>';
+    return;
+  }
+
+  const grupos = agruparPorNivel(filas);
+  const totalColumnas = MESES.length + MESES_VACACIONES.length + 1;
 
   let html = '<div class="contenedor-scroll-cuadricula"><table class="cuadricula"><thead>';
-  html += `<tr><th class="esquina" rowspan="2">Residente</th>`;
-  bloques.forEach(b => {
-    html += `<th colspan="6" style="background:#003865; color:white;">${b.anioInicio}-2</th>
-    <th colspan="6" style="background:#003865; color:white;">${b.anioSiguiente}-1</th>
-    <th rowspan="2" style="background:#5b7fa6; color:white;">Vacaciones 1<br><span style="font-weight:400; font-size:10px;">${b.anioAcademico}</span></th>
-    <th rowspan="2" style="background:#5b7fa6; color:white;">Vacaciones 2<br><span style="font-weight:400; font-size:10px;">${b.anioAcademico}</span></th>`;
-  });
-  html += '</tr><tr>';
-  bloques.forEach(() => { MESES.forEach(mes => html += `<th>${mes}</th>`); });
+  html += `<tr><th class="esquina" rowspan="2">Residente</th>
+    <th colspan="6" style="background:#003865; color:white;">${esc(anioInicio)}-2</th>
+    <th colspan="6" style="background:#003865; color:white;">${esc(anioSiguiente)}-1</th>
+    <th rowspan="2" style="background:#5b7fa6; color:white;">Vacaciones 1</th>
+    <th rowspan="2" style="background:#5b7fa6; color:white;">Vacaciones 2</th></tr><tr>`;
+  MESES.forEach(mes => html += `<th>${mes}</th>`);
   html += '</tr></thead><tbody>';
 
-  function renderCelda(res, mes, anioAcademico, anioInicioBloque) {
-    const registro = registrosGridActual.find(r => String(r.ResidenteID) === String(res.id) && r.Mes === mes && String(r.AnioAcademico) === anioAcademico);
-    if (registro) {
-      const colorTexto = COLOR_TEXTO_ESTADO[registro.Estado] || '#333';
-      const colorFondo = colorDeFondoPorCampo(registro.CampoRotacion, registro.Rotacion);
-      const claveEsc = registro.ClaveUnica.replace(/'/g, "\\'");
-      return `<td class="celda" style="color:${colorTexto}; background:${colorFondo};" onclick="abrirCelda('${claveEsc}')">
-        <strong>${esc(registro.CampoRotacion || '')}</strong><br>${esc(registro.Rotacion || '')}
-        ${registro.Alerta ? '<div class="celda-alerta">' + esc(registro.Alerta) + '</div>' : ''}
-        ${(registro.Observacion || registro.ObservacionInterna) ? '<div style="font-size:13px;">📝</div>' : ''}
-      </td>`;
-    } else if (usuarioActual.rol === 'coordinadora') {
-      return `<td class="celda celda-vacia" onclick="abrirCeldaVacia('${res.id}', '${mes}', '${anioInicioBloque}')">+ asignar</td>`;
+  function renderCelda(res, mes) {
+    const registro = registros.find(r => String(r.ResidenteID) === String(res.id) && r.Mes === mes);
+    if (!registro) return '<td class="celda celda-vacia" style="cursor:default;"></td>';
+    const colorTexto = COLOR_TEXTO_ESTADO[registro.Estado] || '#333';
+    const colorFondo = colorDeFondoPorCampo(registro.CampoRotacion, registro.Rotacion);
+    const comentario = String(registro.ObservacionInterna || '').trim();
+    let titulo = (registro.CampoRotacion || '') + ' — ' + (registro.Rotacion || '') + ' (' + (registro.Estado || '') + ')';
+    let iconoComentario = '';
+    if (comentario) {
+      titulo += '\n💬 ' + comentario + (registro.ComentarioPor ? ' — ' + registro.ComentarioPor : '');
+      iconoComentario = '<span class="icono-comentario">💬</span>';
     }
-    return `<td class="celda celda-vacia" style="cursor:default;"></td>`;
+    return `<td class="celda" style="color:${colorTexto}; background:${colorFondo}; position:relative;" title="${esc(titulo)}">
+      ${iconoComentario}<strong>${esc(registro.CampoRotacion || '')}</strong><br>${esc(registro.Rotacion || '')}
+    </td>`;
   }
 
-  Object.keys(grupos).forEach(nombreGrupo => {
+  NIVELES_ORDEN.forEach(nombreGrupo => {
     const filasGrupo = grupos[nombreGrupo];
-    if (filasGrupo.length === 0) return;
-
-    html += `<tr class="fila-grupo"><td colspan="${totalColumnas}">${nombreGrupo}</td></tr>`;
-
+    if (!filasGrupo || filasGrupo.length === 0) return;
+    html += `<tr class="fila-grupo"><td colspan="${totalColumnas}">${esc(nombreGrupo)}</td></tr>`;
     filasGrupo.forEach(res => {
-      const marcado = filasSeleccionadas.has(String(res.id)) ? 'checked' : '';
-      const checkboxHtml = usuarioActual.rol === 'coordinadora'
-        ? `<input type="checkbox" ${marcado} onchange="toggleSeleccionResidente('${res.id}', this.checked)" style="margin-right:6px;">`
-        : '';
-      const botonEliminar = usuarioActual.rol === 'coordinadora'
-        ? `<span title="Editar, o eliminar de esta cuadrícula" style="float:right; cursor:pointer;" onclick="abrirEditarResidente('${res.id}', '${res.nombre.replace(/'/g, "\\'")}', '${(res.nivel||'').replace(/'/g, "\\'")}')">✏️</span>`
-        : '';
-      html += `<tr><td class="col-residente">${checkboxHtml}${res.nombre}${botonEliminar}<br><span style="color:#888; font-weight:400; margin-left:${checkboxHtml ? '20px' : '0'};">${res.id} · ${res.nivel || ''}</span></td>`;
-      bloques.forEach(b => {
-        MESES.forEach(mes => { html += renderCelda(res, mes, b.anioAcademico, b.anioInicio); });
-        MESES_VACACIONES.forEach(mes => { html += renderCelda(res, mes, b.anioAcademico, b.anioInicio); });
-      });
+      html += `<tr><td class="col-residente">${esc(res.nombre)}<br><span style="color:#888; font-weight:400;">${esc(res.id)} · ${esc(res.nivel || '')}</span></td>`;
+      MESES.forEach(mes => { html += renderCelda(res, mes); });
+      MESES_VACACIONES.forEach(mes => { html += renderCelda(res, mes); });
       html += '</tr>';
     });
   });
@@ -2038,350 +474,30 @@ function redibujarCuadricula() {
 }
 
 // ============================================================
-// COPIAR / PEGAR RESIDENTES COMPLETOS (con todas sus celdas, tal cual, sin reglas automáticas)
-// ============================================================
-let filasSeleccionadas = new Set();
-let portapapelesFilas = [];
-
-function toggleSeleccionResidente(id, marcado) {
-  if (marcado) filasSeleccionadas.add(String(id));
-  else filasSeleccionadas.delete(String(id));
-}
-
-function copiarFilasSeleccionadas() {
-  if (filasSeleccionadas.size === 0) {
-    mostrarMensaje('Marca el checkbox de al menos un residente antes de copiar.', 'error');
-    return;
-  }
-
-  portapapelesFilas = [];
-  filasSeleccionadas.forEach(id => {
-    const res = filasGridActual.find(f => String(f.id) === String(id));
-    if (!res) return;
-    const celdas = {};
-    [...MESES, ...MESES_VACACIONES].forEach(mes => {
-      const registro = registrosGridActual.find(r => String(r.ResidenteID) === String(id) && r.Mes === mes);
-      if (registro) celdas[mes] = { campoRotacion: registro.CampoRotacion, rotacion: registro.Rotacion, tipo: registro.Tipo || 'Residente CES' };
-    });
-    portapapelesFilas.push({ id: res.id, nombre: res.nombre, nivel: res.nivel, celdas });
-  });
-
-  document.getElementById('boton-pegar-filas').style.display = 'inline-block';
-  mostrarMensaje(portapapelesFilas.length + ' residente(s) copiados con sus rotaciones. Ve a la cuadrícula destino y pega.', 'ok');
-}
-
-function abrirModalPegarFilas() {
-  if (portapapelesFilas.length === 0) { mostrarMensaje('No hay nada copiado.', 'error'); return; }
-  if (!contextoGrid.programa || !contextoGrid.anioInicio) { mostrarMensaje('Primero carga la cuadrícula destino.', 'error'); return; }
-
-  const variosAnios = contextoGrid.bloques && contextoGrid.bloques.length > 1;
-  const html = `
-    <h3>Pegar ${portapapelesFilas.length} residente(s) aquí</h3>
-    <p style="font-size:12px; color:#888;">Destino: ${contextoGrid.programa} — ${contextoGrid.anioInicio}-${contextoGrid.anioSiguiente}. Ajusta el nivel de cada uno si corresponde (por ejemplo, para pasarlos de R1 a R2). Las rotaciones se copian tal cual, quedan como Pendiente para volver a confirmarse.</p>
-    ${variosAnios ? '<p style="font-size:12px; color:#9C0006; font-weight:600;">⚠️ Tienes varios años académicos cargados a la vez — esto va a pegar únicamente en el primero (' + contextoGrid.anioInicio + '-' + contextoGrid.bloques[0].anioSiguiente + '). Si quieres pegar en otro año, carga la cuadrícula con solo ese año y vuelve a intentar.</p>' : ''}
-    <div style="max-height:260px; overflow-y:auto;">
-      ${portapapelesFilas.map((p, i) => `
-        <div style="display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid #eee;">
-          <span style="flex:1; font-size:13px;">${p.nombre}</span>
-          <input id="pegar-nivel-${i}" value="${p.nivel || ''}" style="width:70px; padding:5px; border:1px solid #ccc; border-radius:4px;">
-        </div>`).join('')}
-    </div>
-    <div class="fila-botones"><button class="btn-primario" onclick="confirmarPegarFilas()">Pegar aquí</button></div>`;
-  document.getElementById('contenido-modal').innerHTML = html;
-  document.getElementById('overlay-modal').style.display = 'flex';
-}
-
-async function confirmarPegarFilas() {
-  mostrarMensaje('Pegando, un momento...', 'ok');
-  cerrarModal();
-
-  // Pegar siempre usa el PRIMER año académico cargado como destino (ver aviso en el modal si
-  // hay varios cargados a la vez).
-  const anioDestino = (contextoGrid.bloques && contextoGrid.bloques[0]) || { anioInicio: contextoGrid.anioInicio };
-
-  const omitidosDeAntemano = [];
-  const items = [];
-
-  for (let i = 0; i < portapapelesFilas.length; i++) {
-    const p = portapapelesFilas[i];
-    const nivelNuevo = document.getElementById('pegar-nivel-' + i) ? document.getElementById('pegar-nivel-' + i).value : p.nivel;
-
-    if (!filasGridActual.some(f => String(f.id) === String(p.id))) {
-      filasGridActual.push({ id: p.id, nombre: p.nombre, nivel: nivelNuevo });
-    }
-
-    for (const mes of Object.keys(p.celdas)) {
-      const celda = p.celdas[mes];
-      if (!celda.campoRotacion && !celda.rotacion) continue;
-
-      const { anioAcademico, semestre } = calcularAnioSemestre(mes, anioDestino.anioInicio);
-
-      // Nunca se sobrescribe: si ya existe algo para este residente/mes/AÑO ACADÉMICO, se salta
-      // y se avisa. Compara también por año académico — si no, con varios años cargados a la
-      // vez podría creer que la celda está ocupada por un registro de OTRO año.
-      const yaExiste = registrosGridActual.some(r => String(r.ResidenteID) === String(p.id) && r.Mes === mes && String(r.AnioAcademico) === anioAcademico);
-      if (yaExiste) {
-        omitidosDeAntemano.push(p.nombre + ' — ' + mes);
-        continue;
-      }
-
-      items.push({
-        residenteId: p.id, residenteNombre: p.nombre, nivel: nivelNuevo, mes,
-        programa: contextoGrid.programa, semestre, anioAcademico,
-        tipo: celda.tipo, campoRotacion: celda.campoRotacion, rotacion: celda.rotacion
-      });
-    }
-  }
-
-  let resultado = { ok: true, creados: 0, omitidos: [] };
-  if (items.length > 0) {
-    resultado = await llamarBackend('guardarPendienteLote', { items });
-  }
-  const omitidos = omitidosDeAntemano.concat((resultado.omitidos || []));
-
-  filasSeleccionadas.clear();
-  portapapelesFilas = [];
-  document.getElementById('boton-pegar-filas').style.display = 'none';
-  await cargarCuadricula();
-  cargarCola();
-
-  if (omitidos.length > 0) {
-    mostrarMensaje('Listo, pero ' + omitidos.length + ' celda(s) ya tenían datos y NO se tocaron: ' + omitidos.slice(0, 3).join(', ') + (omitidos.length > 3 ? '...' : ''), 'error');
-  } else {
-    mostrarMensaje('Listo, residentes pegados con sus rotaciones.', 'ok');
-  }
-}
-
-// ============================================================
-// IMPORTAR EXCEL (botón, solo coordinadoras) — lee el archivo directo del computador
-// ============================================================
-async function procesarArchivoExcel(evento) {
-  const archivo = evento.target.files[0];
-  if (!archivo) return;
-
-  mostrarMensaje('Leyendo archivo...', 'ok');
-
-  const buffer = await archivo.arrayBuffer();
-  const libro = XLSX.read(buffer, { type: 'array' });
-
-  const nombreHoja = libro.SheetNames.includes('Importar_Cuadro') ? 'Importar_Cuadro' : libro.SheetNames[libro.SheetNames.length - 1];
-  const hoja = libro.Sheets[nombreHoja];
-  const filasCrudas = XLSX.utils.sheet_to_json(hoja, { header: 1, defval: '' });
-
-  // B1 = Programa (fila 1, columna 2), B2 = Año de inicio (fila 2, columna 2)
-  const programa = String((filasCrudas[0] && filasCrudas[0][1]) || '').trim();
-  const anioInicio = String((filasCrudas[1] && filasCrudas[1][1]) || '').trim();
-
-  if (!programa || !anioInicio) {
-    mostrarMensaje('El archivo no tiene Programa (B1) o Año de inicio (B2) llenos.', 'error');
-    evento.target.value = '';
-    return;
-  }
-
-  const COLUMNAS_MES = ['Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre','Enero','Febrero','Marzo','Abril','Mayo','Junio','Vacaciones 1','Vacaciones 2'];
-
-  // Fila 4 (índice 3) = encabezados, fila 5 (índice 4) en adelante = datos
-  const filasDatos = filasCrudas.slice(4);
-
-  const filasParaEnviar = [];
-  filasDatos.forEach(fila => {
-    const id = fila[0], nombre = fila[1], nivel = fila[2];
-    if (!id) return;
-
-    const meses = {};
-    COLUMNAS_MES.forEach((mes, i) => {
-      const contenido = String(fila[3 + i] || '').trim();
-      if (!contenido) return;
-      const partes = contenido.split('\n');
-      meses[mes] = { campo: (partes[0] || '').trim(), rotacion: (partes[1] || '').trim() };
-    });
-
-    if (Object.keys(meses).length > 0) {
-      filasParaEnviar.push({ id: String(id), nombre: String(nombre), nivel: String(nivel), meses });
-    }
-  });
-
-  if (filasParaEnviar.length === 0) {
-    mostrarMensaje('No se encontraron residentes con datos desde la fila 5.', 'error');
-    evento.target.value = '';
-    return;
-  }
-
-  mostrarMensaje('Subiendo ' + filasParaEnviar.length + ' residentes de "' + programa + '"...', 'ok');
-
-  const resultado = await llamarBackend('importarCuadro', { programa, anioInicio, filas: filasParaEnviar });
-  evento.target.value = '';
-
-  if (!resultado.ok) { mostrarMensaje('Error: ' + resultado.error, 'error'); return; }
-
-  let mensaje = 'Importado: ' + resultado.importadas + ' celdas nuevas para "' + programa + '".';
-  if (resultado.omitidas && resultado.omitidas.length > 0) {
-    mensaje += ' Se saltaron ' + resultado.omitidas.length + ' porque ya existían: ' + resultado.omitidas.slice(0, 3).join(', ') + (resultado.omitidas.length > 3 ? '...' : '');
-  }
-  mostrarMensaje(mensaje, resultado.omitidas && resultado.omitidas.length > 0 ? 'error' : 'ok');
-
-  const bloquesActuales = contextoGrid.bloques || (contextoGrid.anioInicio ? [{ anioInicio: contextoGrid.anioInicio }] : []);
-  if (contextoGrid.programa === programa && bloquesActuales.some(b => b.anioInicio === anioInicio)) {
-    cargarCuadricula();
-  }
-  cargarCola();
-}
-
-// ============================================================
-// ELIMINAR RESIDENTE DE LA CUADRÍCULA (solo coordinadoras)
-// ============================================================
-// Abre el modal para corregir Nombre / Cédula / Nivel de un residente. Cambia TODAS sus filas
-// dentro de este programa, no solo la celda donde se dio clic.
-function abrirEditarResidente(residenteId, nombreActual, nivelActual) {
-  const html = `
-    <h3>✏️ Editar datos del residente</h3>
-    <p style="font-size:12px; color:#888;">${esc(contextoGrid.programa)} — se corrige en todos los meses de este residente en este programa, no solo en una celda.</p>
-    <label>Nombre completo</label>
-    <input id="modal-editar-nombre" value="${esc(nombreActual)}">
-    <label>Cédula (ID)</label>
-    <input id="modal-editar-id" value="${esc(residenteId)}">
-    <p style="font-size:11px; color:#9C0006; margin-top:2px;">⚠️ Cambiar la cédula reconstruye la clave de todas sus rotaciones. Se revisa antes que no choque con la de otro residente ya existente.</p>
-    <label>Nivel (R1, R2, R3...)</label>
-    <input id="modal-editar-nivel" value="${esc(nivelActual)}">
-    <div class="fila-botones">
-      <button class="btn-secundario" onclick="cerrarModal()">Cancelar</button>
-      <button class="btn-primario" onclick="ejecutarEditarResidente('${residenteId}')">Guardar</button>
-    </div>
-    <div class="fila-botones" style="border-top:1px solid #eee; margin-top:14px; padding-top:12px;">
-      <button style="background:none; border:1px solid #9C0006; color:#9C0006; border-radius:5px; padding:6px 12px; cursor:pointer; font-size:12px;" onclick="confirmarEliminarResidente('${residenteId}', '${nombreActual.replace(/'/g, "\\'")}')">🗑 Eliminar este residente de la cuadrícula</button>
-    </div>`;
-  document.getElementById('contenido-modal').innerHTML = html;
-  document.getElementById('overlay-modal').style.display = 'flex';
-}
-
-async function ejecutarEditarResidente(residenteIdViejo) {
-  const nuevoNombre = document.getElementById('modal-editar-nombre').value.trim();
-  const nuevoId = document.getElementById('modal-editar-id').value.trim();
-  const nuevoNivel = document.getElementById('modal-editar-nivel').value.trim();
-
-  const resultado = await llamarBackend('editarDatosResidente', {
-    residenteIdViejo, programa: contextoGrid.programa,
-    nuevoNombre, nuevoId, nuevoNivel
-  });
-
-  if (!resultado.ok) { mostrarMensaje('Error: ' + resultado.error, 'error'); return; }
-
-  mostrarMensaje('Datos actualizados (' + resultado.actualizadasHist + ' rotación(es)).', 'ok');
-  cerrarModal();
-
-  // Actualiza la caché local: nombre y nivel siempre, y si cambió la cédula, también las
-  // claves de todos los registros de este residente — así la cuadrícula se redibuja ya con el
-  // residente en su fila de nivel correcta, sin tener que recargar todo desde el servidor.
-  const idFinal = resultado.idNuevo;
-  [registrosGridActual, cacheHistoricoCompleto, cacheColaCompleta].forEach(lista => {
-    lista.forEach(r => {
-      if (String(r.ResidenteID) === residenteIdViejo && r.Programa === contextoGrid.programa) {
-        if (nuevoNombre) r.ResidenteNombre = nuevoNombre;
-        if (nuevoNivel) r.Nivel = nuevoNivel;
-        if (idFinal !== residenteIdViejo) {
-          r.ResidenteID = idFinal;
-          // La clave cambió en el servidor; como no la recalculamos aquí letra por letra,
-          // se refresca de una vez para que quede exacta.
-        }
-      }
-    });
-  });
-
-  filasGridActual.forEach(f => {
-    if (String(f.id) === residenteIdViejo) {
-      if (nuevoNombre) f.nombre = nuevoNombre;
-      if (nuevoNivel) f.nivel = nuevoNivel;
-      if (idFinal !== residenteIdViejo) f.id = idFinal;
-    }
-  });
-
-  if (idFinal !== residenteIdViejo) {
-    // Si cambió la cédula, las ClaveUnica del servidor ya no coinciden con lo que tenemos en
-    // memoria (no las recalculamos localmente para no arriesgar un desfase) — se recarga la
-    // cuadrícula fresca, es la única acción de esta pantalla que sí necesita ese paso extra.
-    cargarCuadricula();
-  } else {
-    redibujarCuadricula();
-  }
-}
-
-function confirmarEliminarResidente(residenteId, nombre) {
-  const registrosDelResidente = registrosGridActual.filter(r => String(r.ResidenteID) === String(residenteId));
-
-  if (registrosDelResidente.length === 0) {
-    const html = `
-      <h3>⚠️ Eliminar a ${esc(nombre)}</h3>
-      <p style="font-size:13px; color:#555;">Este residente todavía no tiene rotaciones guardadas en esta cuadrícula. ¿Seguro que quieres quitarlo de la lista?</p>
-      <div class="fila-botones">
-        <button class="btn-secundario" onclick="cerrarModal()">Cancelar</button>
-        <button class="btn-negado" onclick="ejecutarQuitarResidenteVacio('${residenteId}', '${nombre.replace(/'/g, "\\'")}')">Sí, quitarlo</button>
-      </div>`;
-    document.getElementById('contenido-modal').innerHTML = html;
-    document.getElementById('overlay-modal').style.display = 'flex';
-    return;
-  }
-
-  const html = `
-    <h3>⚠️ Eliminar a ${esc(nombre)}</h3>
-    <p style="font-size:13px; color:#555;">Este residente ya tiene <strong>${registrosDelResidente.length}</strong> rotación(es) guardada(s) en ${contextoGrid.programa} (${contextoGrid.anioInicio}-${contextoGrid.anioSiguiente}):</p>
-    <div style="max-height:150px; overflow-y:auto; font-size:12px; margin:10px 0; background:#fafbfc; padding:8px; border-radius:6px;">
-      ${registrosDelResidente.map(r => esc(r.Mes) + ': ' + esc(r.CampoRotacion || '') + ' / ' + esc(r.Rotacion || '')).join('<br>')}
-    </div>
-    <p style="font-size:13px; color:#9C0006; font-weight:600;">Esto borra esas rotaciones PERMANENTEMENTE del sistema, no solo de la pantalla. No se puede deshacer.</p>
-    <div class="fila-botones">
-      <button class="btn-secundario" onclick="cerrarModal()">Cancelar</button>
-      <button class="btn-negado" onclick="ejecutarEliminarResidente('${residenteId}')">Sí, eliminar permanentemente</button>
-    </div>`;
-  document.getElementById('contenido-modal').innerHTML = html;
-  document.getElementById('overlay-modal').style.display = 'flex';
-}
-
-function ejecutarQuitarResidenteVacio(residenteId, nombre) {
-  cerrarModal();
-  filasGridActual = filasGridActual.filter(f => String(f.id) !== String(residenteId));
-  redibujarCuadricula();
-  mostrarMensaje(nombre + ' eliminado de la cuadrícula.', 'ok');
-}
-
-async function ejecutarEliminarResidente(residenteId) {
-  cerrarModal();
-  mostrarMensaje('Eliminando...', 'ok');
-
-  const resultado = await llamarBackend('eliminarResidentePrograma', {
-    residenteId,
-    programa: contextoGrid.programa,
-    // Manda TODOS los años académicos cargados (uno o varios), no un solo rango compuesto —
-    // con varios años cargados a la vez, "anioInicio-anioSiguiente" no coincide con ninguno
-    // de verdad y no borraría nada.
-    bloques: contextoGrid.bloques || [{ anioInicio: contextoGrid.anioInicio, anioSiguiente: contextoGrid.anioSiguiente, anioAcademico: contextoGrid.anioInicio + '-' + contextoGrid.anioSiguiente }]
-  });
-
-  if (!resultado.ok) { mostrarMensaje('Error: ' + resultado.error, 'error'); return; }
-
-  filasGridActual = filasGridActual.filter(f => String(f.id) !== String(residenteId));
-  mostrarMensaje('Eliminado: ' + resultado.eliminadasHist + ' registro(s).', 'ok');
-  cargarCuadricula();
-  cargarCola();
-}
-
-// ============================================================
-// DESCARGAR CUADRÍCULA COMO EXCEL (con colores, tal como se ve en pantalla)
+// DESCARGAR EXCEL — reutiliza exportarCuadricula_ del backend (mismos colores, mismo formato)
 // ============================================================
 async function descargarCuadriculaExcel() {
-  if (!contextoGrid.programa || filasGridActual.length === 0) {
-    mostrarMensaje('Primero carga una cuadrícula con residentes.', 'error');
-    return;
-  }
+  if (!programaSeleccionado || !anioSeleccionado) return;
 
-  mostrarMensaje('Generando el Excel, un momento...', 'ok');
+  mostrarMensaje('Generando el Excel, un momento…', 'ok');
+
+  const registros = datosCompletos.filter(r => r.Programa === programaSeleccionado && String(r.AnioAcademico) === anioSeleccionado);
+  const vistos = new Set();
+  const filas = [];
+  registros.forEach(r => {
+    if (!vistos.has(r.ResidenteID)) { vistos.add(r.ResidenteID); filas.push({ id: r.ResidenteID, nombre: r.ResidenteNombre, nivel: r.Nivel }); }
+  });
+
+  const partes = anioSeleccionado.split('-');
+  const bloque = { anioInicio: partes[0], anioSiguiente: partes[1], anioAcademico: anioSeleccionado };
 
   const resultado = await llamarBackend('exportarCuadricula', {
-    programa: contextoGrid.programa,
-    anioInicio: contextoGrid.anioInicio,
-    anioSiguiente: contextoGrid.anioSiguiente,
-    bloques: contextoGrid.bloques || [{ anioInicio: contextoGrid.anioInicio, anioSiguiente: contextoGrid.anioSiguiente, anioAcademico: contextoGrid.anioInicio + '-' + contextoGrid.anioSiguiente }],
-    filas: filasGridActual,
-    registros: registrosGridActual
+    programa: programaSeleccionado,
+    anioInicio: bloque.anioInicio,
+    anioSiguiente: bloque.anioSiguiente,
+    bloques: [bloque],
+    filas,
+    registros
   });
 
   if (!resultado.ok) { mostrarMensaje('Error: ' + resultado.error, 'error'); return; }
@@ -2399,744 +515,23 @@ async function descargarCuadriculaExcel() {
   mostrarMensaje('Descargado.', 'ok');
 }
 
-function actualizarCuadriculaActual() {
-  if (!contextoGrid.programa || !contextoGrid.anioInicio) {
-    mostrarMensaje('Primero carga una cuadrícula.', 'error');
-    return;
-  }
-  cargarCuadricula();
-}
-
-function abrirModalAgregarResidente() {
-  if (!contextoGrid.programa || !contextoGrid.anioInicio) {
-    mostrarMensaje('Primero escribe programa y año académico, y da clic en "Cargar cuadrícula".', 'error');
-    return;
-  }
-  const html = `
-    <h3>Agregar residente</h3>
-    <p style="font-size:12px; color:#888;">${esc(contextoGrid.programa)} · ${esc(contextoGrid.anioInicio)}-${esc(contextoGrid.anioSiguiente)}</p>
-    <label>Tipo</label>
-    <select id="modal-res-tipo" onchange="actualizarCamposTipoResidente()" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">
-      <option value="Residente CES" selected>Residente CES</option>
-      <option value="Movilidad entrante">Movilidad académica (entrante)</option>
-    </select>
-    <label>Nombre</label><input id="modal-res-nombre">
-    <label>Documento de identidad</label><input id="modal-res-cc" placeholder="Cédula, pasaporte u otro — letras y números">
-    <div id="campos-residente-ces">
-      <label>Nivel</label><input id="modal-res-nivel" placeholder="R2">
-    </div>
-    <div id="campos-residente-movilidad" style="display:none;">
-      <label>Universidad de origen</label><input id="modal-res-universidad">
-      <label>Correo</label><input id="modal-res-correo" type="email">
-    </div>
-    <div class="fila-botones"><button class="btn-primario" onclick="confirmarAgregarResidente()">Agregar a la cuadrícula</button></div>`;
-  document.getElementById('contenido-modal').innerHTML = html;
-  document.getElementById('overlay-modal').style.display = 'flex';
-}
-
-// Cambia qué campos se piden según el tipo elegido: un Residente CES necesita Nivel, un
-// residente de Movilidad necesita Universidad de origen y Correo en su lugar (no Nivel).
-function actualizarCamposTipoResidente() {
-  const esMovilidad = document.getElementById('modal-res-tipo').value === 'Movilidad entrante';
-  document.getElementById('campos-residente-ces').style.display = esMovilidad ? 'none' : 'block';
-  document.getElementById('campos-residente-movilidad').style.display = esMovilidad ? 'block' : 'none';
-}
-
-function confirmarAgregarResidente() {
-  const tipo = document.getElementById('modal-res-tipo').value;
-  const nombre = document.getElementById('modal-res-nombre').value.trim();
-  const cc = document.getElementById('modal-res-cc').value.trim();
-  if (!nombre || !cc) { mostrarMensaje('Completa nombre y documento.', 'error'); return; }
-
-  let nivel = '', universidadOrigen = '', correo = '';
-  if (tipo === 'Movilidad entrante') {
-    universidadOrigen = document.getElementById('modal-res-universidad').value.trim();
-    correo = document.getElementById('modal-res-correo').value.trim();
-    if (!universidadOrigen) { mostrarMensaje('Completa la universidad de origen.', 'error'); return; }
-  } else {
-    nivel = document.getElementById('modal-res-nivel').value.trim();
-  }
-
-  if (filasGridActual.some(f => String(f.id) === String(cc))) {
-    mostrarMensaje('Ese residente ya está en la cuadrícula.', 'error');
-    return;
-  }
-
-  filasGridActual.push({ id: cc, nombre, nivel, tipo, universidadOrigen, correo });
-  cerrarModal();
-  redibujarCuadricula();
-  mostrarMensaje('Residente agregado. Ahora asigna sus rotaciones dando clic en cada mes.', 'ok');
+// ============================================================
+// MENSAJES FLOTANTES
+// ============================================================
+let temporizadorMensaje = null;
+function mostrarMensaje(texto, tipo) {
+  const div = document.getElementById('mensaje-flotante');
+  div.textContent = texto;
+  div.className = 'mensaje-flotante visible' + (tipo === 'error' ? ' error' : tipo === 'ok' ? ' ok' : '');
+  if (temporizadorMensaje) clearTimeout(temporizadorMensaje);
+  temporizadorMensaje = setTimeout(() => { div.classList.remove('visible'); }, 3500);
 }
 
 // ============================================================
-// MODAL — celda vacía (crear pendiente)
+// INICIO
 // ============================================================
-// Cuando hay varios años académicos cargados a la vez, una celda vacía puede pertenecer a
-// cualquiera de ellos (todas usan los mismos nombres de mes). Se guarda aquí cuál, para que
-// guardarCeldaNueva calcule el AnioAcademico/Semestre correctos.
-let anioInicioBloqueCeldaVacia = null;
-
-function abrirCeldaVacia(residenteId, mes, anioInicioBloque) {
-  anioInicioBloqueCeldaVacia = anioInicioBloque || contextoGrid.anioInicio;
-  const residente = filasGridActual.find(f => String(f.id) === String(residenteId));
-  const esVacaciones = MESES_VACACIONES.includes(mes);
-  // Si el residente ya quedó marcado como Movilidad entrante al agregarlo, se respeta ese tipo
-  // por defecto en cada mes — ya no hay que volver a elegirlo celda por celda.
-  const tipoDefault = esVacaciones ? 'Vacaciones' : (residente.tipo || 'Residente CES');
-  const infoExtra = residente.tipo === 'Movilidad entrante' && residente.universidadOrigen
-    ? ' · ' + esc(residente.universidadOrigen) : '';
-  const html = `
-    <h3>${residente.nombre} — ${mes}</h3>
-    <p style="font-size:12px; color:#888;">${contextoGrid.programa} · ${anioInicioBloqueCeldaVacia}-${Number(anioInicioBloqueCeldaVacia) + 1}${infoExtra}</p>
-    <label>Tipo</label>
-    <select id="modal-tipo" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">
-      <option${tipoDefault === 'Residente CES' ? ' selected' : ''}>Residente CES</option>
-      <option${tipoDefault === 'Movilidad entrante' ? ' selected' : ''}>Movilidad entrante</option>
-      <option${tipoDefault === 'Vacaciones' ? ' selected' : ''}>Vacaciones</option>
-    </select>
-    <label>Campo de rotación</label><input id="modal-campo" value="${esVacaciones ? 'VACACIONES' : ''}">
-    <label>Nombre de la rotación</label><input id="modal-rotacion" value="${esVacaciones ? mes : ''}">
-    ${portapapelesCelda ? `<div class="fila-botones"><button class="btn-secundario" onclick="pegarEnFormulario()">📌 Pegar rotación copiada (${portapapelesCelda.campoRotacion})</button></div>` : ''}
-    <div class="fila-botones"><button class="btn-primario" onclick="guardarCeldaNueva('${residenteId}','${mes}')">Guardar</button></div>`;
-  document.getElementById('contenido-modal').innerHTML = html;
-  document.getElementById('overlay-modal').style.display = 'flex';
-}
-
-async function guardarCeldaNueva(residenteId, mes) {
-  const residente = filasGridActual.find(f => String(f.id) === String(residenteId));
-  const campoRotacion = document.getElementById('modal-campo').value;
-  const rotacion = document.getElementById('modal-rotacion').value;
-  const tipo = document.getElementById('modal-tipo').value;
-  if (!campoRotacion || !rotacion) { mostrarMensaje('Completa campo y rotación.', 'error'); return; }
-
-  const { anioAcademico, semestre } = calcularAnioSemestre(mes, anioInicioBloqueCeldaVacia || contextoGrid.anioInicio);
-  const resultado = await llamarBackend('guardarPendiente', {
-    residenteId: residente.id, residenteNombre: residente.nombre, nivel: residente.nivel,
-    universidadOrigen: residente.universidadOrigen || '', correo: residente.correo || '',
-    mes, programa: contextoGrid.programa, periodo: semestre,
-    anioAcademico, semestre,
-    tipo, campoRotacion, rotacion
-  });
-
-  if (resultado.ok) { mostrarMensaje('Guardado.', 'ok'); cerrarModal(); anioInicioBloqueCeldaVacia = null; cargarCuadricula(); cargarCola(); }
-  else { mostrarMensaje('Error: ' + resultado.error, 'error'); }
-}
-
-// ============================================================
-// MODAL — celda existente
-// ============================================================
-let portapapelesCelda = null; // {campoRotacion, rotacion, tipo, texto}
-
-function copiarCelda(campoRotacion, rotacion) {
-  portapapelesCelda = { campoRotacion, rotacion };
-  mostrarMensaje('Copiado: "' + campoRotacion + ' / ' + rotacion + '". Ahora abre la celda destino y pega.', 'ok');
-  cerrarModal();
-}
-
-function pegarEnFormulario() {
-  if (!portapapelesCelda) return;
-  document.getElementById('modal-campo').value = portapapelesCelda.campoRotacion;
-  document.getElementById('modal-rotacion').value = portapapelesCelda.rotacion;
-}
-
-function abrirCelda(clave) {
-  if (usuarioActual.rol === 'coordinadora') abrirCeldaExistente(clave);
-  else if (usuarioActual.rol === 'auxiliar') abrirCeldaAuxiliar(clave);
-  else abrirCeldaSoloLectura(clave); // resguardo defensivo — no debería llegar ningún otro rol
-}
-
-// Modal de solo lectura, por si algún día vuelve a existir un rol de solo-consulta: ni edita, ni cambia estado, ni comenta.
-function abrirCeldaSoloLectura(clave) {
-  const registro = registrosGridActual.find(r => r.ClaveUnica === clave);
-  if (!registro) { mostrarMensaje('No se encontró el registro.', 'error'); return; }
-
-  const colores = COLORES_ESTADO[registro.Estado] || { bg: '#eee', tx: '#333' };
-  const html = `
-    <h3>${esc(registro.ResidenteNombre)} — ${esc(registro.Mes)}</h3>
-    <p style="font-size:12px; color:#888;">${esc(registro.Programa)}</p>
-    <p><strong>${esc(registro.CampoRotacion || '')}</strong><br>${esc(registro.Rotacion || '')}</p>
-    <p><span class="pastilla" style="background:${colores.bg}; color:${colores.tx};">${esc(registro.Estado)}</span></p>
-    ${registro.Observacion ? '<p style="font-size:13px; color:#555;"><strong>Observación:</strong> ' + esc(registro.Observacion) + '</p>' : ''}
-  `;
-  document.getElementById('contenido-modal').innerHTML = html;
-  document.getElementById('overlay-modal').style.display = 'flex';
-}
-
-// mostrarBotonPropio=false suprime el botón "Guardar observaciones" propio del bloque — se usa
-// cuando el llamador ya va a poner un único botón "Guardar cambios" combinado más abajo (celda
-// editable), para que no queden dos botones de guardar por separado en el mismo modal.
-function bloqueObservaciones(registro, clave, mostrarBotonPropio = true) {
-  return `
-    <hr style="margin:16px 0; border:none; border-top:1px solid #eee;">
-    <label>Observación interna (solo equipo)</label>
-    <textarea id="modal-obs-interna" rows="2" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">${esc(registro.ObservacionInterna || '')}</textarea>
-    <label>Observación pública (visible a residentes)</label>
-    <textarea id="modal-obs-publica" rows="2" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">${esc(registro.Observacion || '')}</textarea>
-    ${mostrarBotonPropio ? `<div class="fila-botones"><button class="btn-secundario" onclick="ejecutarGuardarObservaciones('${clave}')">Guardar observaciones</button></div>` : ''}`;
-}
-
-function abrirCeldaExistente(clave) {
-  const registro = registrosGridActual.find(r => r.ClaveUnica === clave);
-  if (!registro) { mostrarMensaje('No se encontró el registro.', 'error'); return; }
-
-  let html = `<h3>${esc(registro.ResidenteNombre)} — ${esc(registro.Mes)}</h3>
-    <p style="font-size:12px; color:#888;">${esc(registro.Programa)} · Estado actual: <strong>${esc(registro.Estado)}</strong></p>
-    ${registro.Tipo === 'Movilidad entrante' ? `<p style="font-size:12px; color:#888;">🎓 ${esc(registro.UniversidadOrigen || 'Universidad no registrada')}${registro.Correo ? ' · ' + esc(registro.Correo) : ''}</p>` : ''}
-    <div class="fila-botones">
-      <button class="btn-secundario" onclick="abrirNotificarAsistente('${clave}')" title="Enviar un correo urgente a una asistente sobre este registro">🔔 Notificar Asistente</button>
-    </div>`;
-
-  if (registro.Estado === 'Negado') {
-    html += `
-      <p style="font-size:12px; color:#7030A0; background:#EBDAE9; padding:8px 10px; border-radius:6px;">Este cupo fue negado. Si la institución cambió de decisión y lo confirma con el MISMO sitio, usa "Confirmar". Si va a un sitio distinto, usa "Cambiar".</p>
-      <div class="fila-botones">
-        <button class="btn-gestionado" onclick="ejecutarEstado('${clave}','Gestionado')">✅ Confirmar (mismo sitio)</button>
-      </div>
-      <label>Nuevo campo de rotación</label><input id="modal-nuevo-campo">
-      <label>Nueva rotación</label><input id="modal-nueva-rotacion">
-      <div class="fila-botones"><button class="btn-primario" onclick="ejecutarReasignar('${clave}')">🔁 Cambiar a otro sitio</button></div>`;
-    html += bloqueObservaciones(registro, clave);
-  } else {
-    html += `
-      <label>Campo de rotación</label><input id="modal-campo" value="${esc(registro.CampoRotacion || '')}">
-      <label>Nombre de la rotación</label><input id="modal-rotacion" value="${esc(registro.Rotacion || '')}">
-      <div class="fila-botones">
-        <button class="btn-gestionado" onclick="ejecutarEstado('${clave}','Gestionado')">Gestionado</button>
-        <button class="btn-negado" onclick="ejecutarEstado('${clave}','Negado')">Negado</button>
-      </div>
-      <div class="fila-botones">
-        <button class="btn-secundario" onclick="copiarCelda('${(registro.CampoRotacion||'').replace(/'/g,"\\'")}', '${(registro.Rotacion||'').replace(/'/g,"\\'")}')">📋 Copiar esta rotación</button>
-        ${portapapelesCelda ? `<button class="btn-secundario" onclick="pegarEnFormulario()">📌 Pegar aquí (${esc(portapapelesCelda.campoRotacion)})</button>` : ''}
-      </div>`;
-    html += bloqueObservaciones(registro, clave, false);
-    html += `<div class="fila-botones"><button class="btn-primario" onclick="ejecutarGuardarCambiosCelda('${clave}')">💾 Guardar cambios</button></div>`;
-  }
-  html += `<div class="fila-botones" style="border-top:1px solid #eee; margin-top:14px; padding-top:12px;">
-    <button style="background:none; border:1px solid #9C0006; color:#9C0006; border-radius:5px; padding:6px 12px; cursor:pointer; font-size:12px;" onclick="confirmarEliminarCelda('${clave}')">🗑 Eliminar esta rotación</button>
-  </div>`;
-  document.getElementById('contenido-modal').innerHTML = html;
-  document.getElementById('overlay-modal').style.display = 'flex';
-}
-
-// Pide confirmación antes de eliminar una sola rotación (una celda) por completo — no se
-// puede deshacer, así que hay un paso intermedio explícito antes de borrar de verdad.
-function confirmarEliminarCelda(clave) {
-  const registro = registrosGridActual.find(r => r.ClaveUnica === clave);
-  if (!registro) { mostrarMensaje('No se encontró el registro.', 'error'); return; }
-
-  const html = `
-    <h3>⚠️ Eliminar esta rotación</h3>
-    <p style="font-size:13px; color:#555;">
-      <strong>${esc(registro.ResidenteNombre)}</strong> — ${esc(registro.Mes)} (${esc(registro.Programa)})<br>
-      ${esc(registro.CampoRotacion || '')} / ${esc(registro.Rotacion || '')}<br>
-      Estado actual: <strong>${esc(registro.Estado)}</strong>
-    </p>
-    <p style="font-size:13px; color:#9C0006; font-weight:600;">Esto borra este mes PERMANENTEMENTE del sistema (Histórico y cola). No se puede deshacer. Los demás meses de este residente no se tocan.</p>
-    <div class="fila-botones">
-      <button class="btn-secundario" onclick="abrirCeldaExistente('${clave}')">Cancelar</button>
-      <button class="btn-negado" onclick="ejecutarEliminarCelda('${clave}')">Sí, eliminar permanentemente</button>
-    </div>`;
-  document.getElementById('contenido-modal').innerHTML = html;
-  document.getElementById('overlay-modal').style.display = 'flex';
-}
-
-async function ejecutarEliminarCelda(clave) {
-  const resultado = await llamarBackend('eliminarCelda', { clave });
-  if (resultado.ok) {
-    mostrarMensaje('Rotación eliminada.', 'ok');
-    cerrarModal();
-    registrosGridActual = registrosGridActual.filter(r => r.ClaveUnica !== clave);
-    cacheHistoricoCompleto = cacheHistoricoCompleto.filter(r => r.ClaveUnica !== clave);
-    cacheColaCompleta = cacheColaCompleta.filter(r => r.ClaveUnica !== clave);
-    redibujarCuadricula();
-    cargarCola();
-  } else {
-    mostrarMensaje('Error: ' + resultado.error, 'error');
-  }
-}
-
-// Modal reducido para auxiliares: sin editar campo/rotación, sin reasignar — solo estado y observaciones
-function abrirCeldaAuxiliar(clave) {
-  const registro = registrosGridActual.find(r => r.ClaveUnica === clave);
-  if (!registro) { mostrarMensaje('No se encontró el registro.', 'error'); return; }
-
-  let html = `<h3>${esc(registro.ResidenteNombre)} — ${esc(registro.Mes)}</h3>
-    <p style="font-size:12px; color:#888;">${esc(registro.Programa)}</p>
-    ${registro.Tipo === 'Movilidad entrante' ? `<p style="font-size:12px; color:#888;">🎓 ${esc(registro.UniversidadOrigen || 'Universidad no registrada')}${registro.Correo ? ' · ' + esc(registro.Correo) : ''}</p>` : ''}
-    <p><strong>${esc(registro.CampoRotacion || '')}</strong><br>${esc(registro.Rotacion || '')}</p>
-    <p style="font-size:12px; color:#888;">Estado actual: <strong>${esc(registro.Estado)}</strong></p>`;
-
-  if (registro.Estado === 'Pendiente' || registro.Estado === 'Cambio') {
-    html += `
-      <div class="fila-botones">
-        <button class="btn-gestionado" onclick="ejecutarEstado('${clave}','Gestionado')">Gestionado</button>
-        <button class="btn-negado" onclick="ejecutarEstado('${clave}','Negado')">Negado</button>
-      </div>`;
-  } else if (registro.Estado === 'Negado') {
-    html += `
-      <p style="font-size:12px; color:#7030A0; background:#EBDAE9; padding:8px 10px; border-radius:6px;">Si la institución cambió de decisión y confirma con el MISMO sitio, puedes confirmarlo aquí. Para cambiar a otro sitio distinto, avísale a una coordinadora.</p>
-      <div class="fila-botones">
-        <button class="btn-gestionado" onclick="ejecutarEstado('${clave}','Gestionado')">✅ Confirmar (mismo sitio)</button>
-      </div>`;
-  }
-
-  html += bloqueObservaciones(registro, clave);
-  document.getElementById('contenido-modal').innerHTML = html;
-  document.getElementById('overlay-modal').style.display = 'flex';
-}
-
-async function ejecutarGuardarObservaciones(clave) {
-  const observacionInterna = document.getElementById('modal-obs-interna').value;
-  const observacionPublica = document.getElementById('modal-obs-publica').value;
-  const resultado = await llamarBackend('actualizarObservaciones', { clave, observacionInterna, observacionPublica });
-  if (resultado.ok) {
-    mostrarMensaje('Observaciones guardadas.', 'ok');
-    cerrarModal();
-    const cambiosOp = { ObservacionInterna: observacionInterna, Observacion: observacionPublica };
-    if (observacionInterna.trim() !== '') cambiosOp.AlertaDescartada = '';
-    actualizarCacheLocal(clave, {
-      op: cambiosOp,
-      hist: { Observacion: observacionPublica, ObservacionInterna: observacionInterna }
-    });
-    redibujarVistaActual();
-  } else { mostrarMensaje('Error: ' + resultado.error, 'error'); }
-}
-
-// Aplica en memoria el resultado de 'editarCampoRotacion' sin volver a pedirle la lista
-// completa al servidor. tipo 'cambio' = el registro seguía Pendiente y solo se actualizó el
-// campo/rotación. tipo 'cancelar' = pasó (o ya estaba) por Confirmado→Cambio; si la fila no
-// existía todavía en la cola (primera vez que se cancela algo Confirmado) se reconstruye igual
-// que la crea el backend, en vez de tener que refrescar todo solo por esa fila nueva.
-function aplicarResultadoEdicionEnCache(clave, resultado, campoRotacion, rotacion) {
-  if (resultado.tipo === 'cambio') {
-    actualizarCacheLocal(clave, {
-      op: { CampoRotacion: campoRotacion, Rotacion: rotacion, Alerta: 'CAMBIO', AlertaDescartada: '' },
-      hist: { CampoRotacion: campoRotacion, Rotacion: rotacion }
-    });
-    return;
-  }
-  const alertaTxt = 'CANCELAR EN ' + resultado.sitioAnterior;
-  const existeEnOp = cacheColaCompleta.some(f => f.ClaveUnica === clave);
-  if (existeEnOp) {
-    actualizarCacheLocal(clave, {
-      op: { CampoRotacion: campoRotacion, Rotacion: rotacion, Estado: 'Cambio', Alerta: alertaTxt, AlertaDescartada: '' },
-      hist: { CampoRotacion: campoRotacion, Rotacion: rotacion, Estado: 'Cambio' }
-    });
-  } else {
-    const base = registrosGridActual.find(r => r.ClaveUnica === clave) || cacheHistoricoCompleto.find(r => r.ClaveUnica === clave);
-    if (base) {
-      cacheColaCompleta.push({
-        ClaveUnica: clave, Programa: base.Programa, Periodo: base.Semestre, Tipo: base.Tipo, Nivel: base.Nivel,
-        ResidenteID: base.ResidenteID, ResidenteNombre: base.ResidenteNombre, Mes: base.Mes,
-        CampoRotacion: campoRotacion, Rotacion: rotacion, Estado: 'Cambio',
-        Observacion: 'Confirmado previamente en: ' + resultado.sitioAnterior, Alerta: alertaTxt,
-        ObservacionInterna: base.ObservacionInterna || '', ComentarioPor: base.ComentarioPor || '', AlertaDescartada: ''
-      });
-    }
-    actualizarCacheLocal(clave, { hist: { CampoRotacion: campoRotacion, Rotacion: rotacion, Estado: 'Cambio' } });
-  }
-}
-
-// Botón único "💾 Guardar cambios" del modal de celda: guarda la rotación (si cambió) y las
-// observaciones (si cambiaron) en una sola acción — antes había que guardar cada cosa por
-// separado, y a veces el usuario solo hacía una de las dos por error.
-async function ejecutarGuardarCambiosCelda(clave) {
-  const campoRotacion = document.getElementById('modal-campo').value;
-  const rotacion = document.getElementById('modal-rotacion').value;
-  const observacionInterna = document.getElementById('modal-obs-interna').value;
-  const observacionPublica = document.getElementById('modal-obs-publica').value;
-
-  const registro = registrosGridActual.find(r => r.ClaveUnica === clave) || {};
-  const cambioRotacion = campoRotacion !== (registro.CampoRotacion || '') || rotacion !== (registro.Rotacion || '');
-  const cambioObs = observacionInterna !== (registro.ObservacionInterna || '') || observacionPublica !== (registro.Observacion || '');
-
-  if (!cambioRotacion && !cambioObs) { mostrarMensaje('No hay cambios para guardar.', 'error'); return; }
-
-  const mensajes = [];
-
-  if (cambioRotacion) {
-    const resultadoEdicion = await llamarBackend('editarCampoRotacion', { clave, campoRotacion, rotacion });
-    if (!resultadoEdicion.ok) { mostrarMensaje('Error guardando la rotación: ' + resultadoEdicion.error, 'error'); return; }
-    aplicarResultadoEdicionEnCache(clave, resultadoEdicion, campoRotacion, rotacion);
-    mensajes.push(resultadoEdicion.tipo === 'cancelar' ? 'rotación cambiada (marcada para cancelar en ' + resultadoEdicion.sitioAnterior + ')' : 'rotación actualizada');
-  }
-
-  if (cambioObs) {
-    const resultadoObs = await llamarBackend('actualizarObservaciones', { clave, observacionInterna, observacionPublica });
-    if (!resultadoObs.ok) { mostrarMensaje('Error guardando observaciones: ' + resultadoObs.error, 'error'); return; }
-    const cambiosOp = { ObservacionInterna: observacionInterna, Observacion: observacionPublica };
-    if (observacionInterna.trim() !== '') cambiosOp.AlertaDescartada = '';
-    actualizarCacheLocal(clave, { op: cambiosOp, hist: { Observacion: observacionPublica, ObservacionInterna: observacionInterna } });
-    mensajes.push('observaciones guardadas');
-  }
-
-  mostrarMensaje('Guardado: ' + mensajes.join(' · ') + '.', 'ok');
-  cerrarModal();
-  redibujarVistaActual();
-}
-
-async function ejecutarEstado(clave, nuevoEstado) {
-  const resultado = await llamarBackend('aplicarEstado', { clave, nuevoEstado });
-  if (resultado.ok) {
-    mostrarMensaje('Marcado como ' + nuevoEstado + '.', 'ok');
-    cerrarModal();
-    if (nuevoEstado === 'Gestionado') {
-      actualizarCacheLocal(clave, { eliminarDeOp: true, hist: { Estado: 'Confirmado' } });
-    } else {
-      actualizarCacheLocal(clave, {
-        op: { Estado: 'Negado', Alerta: 'REASIGNAR', AccionRequerida: 'Reasignar campo de práctica', Observacion: 'CUPO NEGADO — pendiente de reasignación', AlertaDescartada: '' },
-        hist: { Estado: 'Negado' }
-      });
-    }
-    redibujarVistaActual();
-  }
-  else { mostrarMensaje('Error: ' + resultado.error, 'error'); }
-}
-
-async function ejecutarReasignar(clave) {
-  const nuevoCampo = document.getElementById('modal-nuevo-campo').value;
-  const nuevaRotacion = document.getElementById('modal-nueva-rotacion').value;
-  if (!nuevoCampo || !nuevaRotacion) { mostrarMensaje('Completa los dos campos.', 'error'); return; }
-  const resultado = await llamarBackend('reasignarNegado', { clave, nuevoCampo, nuevaRotacion });
-  if (resultado.ok) {
-    mostrarMensaje('Reasignado — vuelve a quedar Pendiente para confirmar.', 'ok');
-    cerrarModal();
-    actualizarCacheLocal(clave, {
-      op: { Estado: 'Pendiente', CampoRotacion: nuevoCampo, Rotacion: nuevaRotacion, Alerta: '', AccionRequerida: '', Antes: '', Ahora: '' },
-      hist: { Estado: 'Pendiente', CampoRotacion: nuevoCampo, Rotacion: nuevaRotacion }
-    });
-    redibujarVistaActual();
-  }
-  else { mostrarMensaje('Error: ' + resultado.error, 'error'); }
-}
-
-// Modal ligero de "Cambiar a otro sitio" para un Negado, invocable directamente desde la tabla
-// de Validación Mensual (sin tener que ir hasta la celda en el Cuadro de rotaciones).
-function abrirReasignarNegado(clave) {
-  const registro = cacheHistoricoCompleto.find(r => r.ClaveUnica === clave) || cacheColaCompleta.find(r => r.ClaveUnica === clave);
-  const html = `
-    <h3>🔁 Cambiar a otro sitio</h3>
-    <p style="font-size:12px; color:#888;">${registro ? esc(registro.ResidenteNombre) + ' — ' + esc(registro.Mes) : ''}</p>
-    <label>Nuevo campo de rotación</label><input id="modal-nuevo-campo">
-    <label>Nueva rotación</label><input id="modal-nueva-rotacion">
-    <div class="fila-botones">
-      <button class="btn-secundario" onclick="cerrarModal()">Cancelar</button>
-      <button class="btn-primario" onclick="ejecutarReasignar('${clave}')">Confirmar reasignación</button>
-    </div>`;
-  document.getElementById('contenido-modal').innerHTML = html;
-  document.getElementById('overlay-modal').style.display = 'flex';
-}
-
-function cerrarModal() { document.getElementById('overlay-modal').style.display = 'none'; }
-
-// ============================================================
-// LISTA (auxiliares y alertas cruzadas de coordinadoras)
-// ============================================================
-// seleccionesGestion: { claveUnica: 'Gestionado' | 'Negado' } — lo que la auxiliar va marcando
-// con las casillas antes de darle "Aplicar cambios". No se toca el servidor hasta que aplica.
-let seleccionesGestion = {};
-
-function dibujarLista(filas, idTabla) {
-  const cuerpo = document.getElementById(idTabla || 'tabla-cola');
-  cuerpo.innerHTML = '';
-  if (filas.length === 0) {
-    cuerpo.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999; padding:20px;">No hay registros pendientes de gestión.</td></tr>';
-    return;
-  }
-  filas.forEach(fila => {
-    const colores = COLORES_ESTADO[fila.Estado] || { bg: '#eee', tx: '#333' };
-    const tr = document.createElement('tr');
-    const claveEsc = fila.ClaveUnica.replace(/'/g, "\\'");
-    const seleccionActual = seleccionesGestion[fila.ClaveUnica];
-    const acciones = `
-      <div class="fila-acciones">
-        <label class="check-accion" style="display:flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:${COLORES_ESTADO['Gestionado'].tx}; background:${COLORES_ESTADO['Gestionado'].bg}; padding:4px 10px; border-radius:12px; cursor:pointer;">
-          <input type="checkbox" ${seleccionActual === 'Gestionado' ? 'checked' : ''} onchange="marcarSeleccionGestion('${claveEsc}', 'Gestionado', this)"> Gestionado
-        </label>
-        <label class="check-accion" style="display:flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:${COLORES_ESTADO['Negado'].tx}; background:${COLORES_ESTADO['Negado'].bg}; padding:4px 10px; border-radius:12px; cursor:pointer;">
-          <input type="checkbox" ${seleccionActual === 'Negado' ? 'checked' : ''} onchange="marcarSeleccionGestion('${claveEsc}', 'Negado', this)"> Negado
-        </label>
-        <button class="btn-secundario btn-pequeno" onclick="abrirComentario('${claveEsc}')">💬 Comentar</button>
-        ${usuarioActual && usuarioActual.rol === 'coordinadora' ? `<button class="btn-secundario btn-pequeno" onclick="abrirNotificarAsistente('${claveEsc}')" title="Enviar aviso urgente por correo">🔔 Notificar</button>` : ''}
-      </div>`;
-    tr.dataset.clave = fila.ClaveUnica;
-    if (seleccionActual) tr.style.background = seleccionActual === 'Gestionado' ? '#eafaf0' : '#f7edf9';
-    tr.innerHTML = `
-      <td><strong>${esc(fila.ResidenteNombre || '')}</strong><br><span style="color:#888;">${esc(fila.ResidenteID || '')}</span></td>
-      <td>${esc(fila.Programa || '')}<br><span style="color:#888;">${esc(fila.Periodo || '')} · ${esc(fila.Mes || '')}</span></td>
-      <td>${esc(fila.CampoRotacion || '')}<br><span style="color:#888;">${esc(fila.Rotacion || '')}</span></td>
-      <td>
-        <span class="pastilla" style="background:${colores.bg}; color:${colores.tx};">${esc(fila.Estado)}</span>
-        ${fila.Alerta ? '<div style="margin-top:4px; font-size:11px; font-weight:600; color:' + colores.tx + ';">' + esc(fila.Alerta) + '</div>' : ''}
-        ${fila.Observacion ? '<div class="obs-interna">' + esc(fila.Observacion) + '</div>' : ''}
-        ${fila.ObservacionInterna ? '<div style="margin-top:4px; font-size:12px; background:#FFF3CD; color:#664d03; padding:4px 8px; border-radius:5px;">💬 ' + esc(fila.ObservacionInterna) + '</div>' : ''}
-      </td>
-      <td>${acciones}</td>`;
-    cuerpo.appendChild(tr);
-  });
-}
-
-// Marca/desmarca una fila para aplicar en lote. Gestionado y Negado son mutuamente excluyentes
-// en la misma fila (marcar uno desmarca el otro automáticamente).
-function marcarSeleccionGestion(clave, estado, checkboxEl) {
-  const fila = checkboxEl.closest('tr');
-
-  if (checkboxEl.checked) {
-    seleccionesGestion[clave] = estado;
-    fila.querySelectorAll('input[type="checkbox"]').forEach(cb => { if (cb !== checkboxEl) cb.checked = false; });
-    fila.style.background = estado === 'Gestionado' ? '#eafaf0' : '#f7edf9';
-  } else {
-    delete seleccionesGestion[clave];
-    fila.style.background = '';
-  }
-  actualizarBarraAplicarGestion();
-}
-
-function actualizarBarraAplicarGestion() {
-  const barra = document.getElementById('barra-aplicar-gestion');
-  if (!barra) return;
-  const total = Object.keys(seleccionesGestion).length;
-  if (total === 0) { barra.style.display = 'none'; return; }
-  const gestionados = Object.values(seleccionesGestion).filter(v => v === 'Gestionado').length;
-  const negados = total - gestionados;
-  document.getElementById('resumen-seleccion-gestion').textContent =
-    total + ' seleccionado' + (total > 1 ? 's' : '') + ' (' + gestionados + ' Gestionado, ' + negados + ' Negado)';
-  barra.style.display = 'flex';
-}
-
-function cancelarSeleccionGestion() {
-  seleccionesGestion = {};
-  aplicarFiltrosGestion(); // vuelve a dibujar la tabla limpia, sin casillas marcadas
-}
-
-async function aplicarSeleccionesGestion() {
-  const entradas = Object.entries(seleccionesGestion);
-  if (entradas.length === 0) return;
-
-  const boton = document.getElementById('boton-aplicar-gestion');
-  boton.disabled = true;
-  boton.textContent = 'Aplicando...';
-
-  const cambios = entradas.map(([clave, nuevoEstado]) => ({ clave, nuevoEstado }));
-  let resultado;
-  try {
-    resultado = await llamarBackend('aplicarEstadoLote', { cambios });
-  } catch (err) {
-    resultado = { ok: false, error: err.message };
-  }
-
-  boton.disabled = false;
-  boton.textContent = 'Aplicar cambios';
-
-  if (!resultado.ok) {
-    mostrarMensaje('Error: ' + resultado.error, 'error');
-  } else if (resultado.errores && resultado.errores.length > 0) {
-    mostrarMensaje(resultado.exitosos + ' aplicados, ' + resultado.errores.length + ' con error: ' + resultado.errores[0], 'error');
-  } else {
-    mostrarMensaje(resultado.exitosos + ' cambio' + (resultado.exitosos > 1 ? 's' : '') + ' aplicado' + (resultado.exitosos > 1 ? 's' : '') + ' correctamente.', 'ok');
-  }
-
-  // Las que fallaron (si alguna) quedan reportadas en el error de arriba, pero no sabemos cuál
-  // clave específica falló — así que solo se actualiza localmente la caché con lo que el propio
-  // resultado.exitosos confirma en conjunto: se aplica el cambio local a TODAS las seleccionadas
-  // que no aparezcan mencionadas en un error (aproximación razonable; si algo quedó desalineado,
-  // el auto-refresco de 2 minutos lo corrige).
-  cambios.forEach(({ clave, nuevoEstado }) => {
-    if (nuevoEstado === 'Gestionado') {
-      actualizarCacheLocal(clave, { eliminarDeOp: true, hist: { Estado: 'Confirmado' } });
-    } else {
-      actualizarCacheLocal(clave, {
-        op: { Estado: 'Negado', Alerta: 'REASIGNAR', AccionRequerida: 'Reasignar campo de práctica', Observacion: 'CUPO NEGADO — pendiente de reasignación', AlertaDescartada: '' },
-        hist: { Estado: 'Negado' }
-      });
-    }
-  });
-  seleccionesGestion = {};
-  redibujarVistaActual();
-}
-
-// ============================================================
-// COMENTARIOS INTERNOS (desde la lista, sin entrar a la cuadrícula)
-// ============================================================
-function abrirComentario(clave) {
-  const fila = cacheColaCompleta.find(f => f.ClaveUnica === clave);
-  const html = `
-    <h3>${fila ? esc(fila.ResidenteNombre) : ''} — ${fila ? esc(fila.Mes) : ''}</h3>
-    <p style="font-size:12px; color:#888;">${fila ? esc(fila.Programa) : ''}</p>
-    <label>Comentario interno <span style="font-weight:400; color:#888;">(solo lo ve el equipo, aquí adentro)</span></label>
-    <textarea id="modal-comentario" rows="3" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">${esc((fila && fila.ObservacionInterna) || '')}</textarea>
-    <label style="margin-top:10px; display:block;">Mensaje al residente <span style="font-weight:400; color:#888;">(se ve en el micrositio público)</span></label>
-    <textarea id="modal-comentario-publico" rows="3" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">${esc((fila && fila.Observacion) || '')}</textarea>
-    <p style="font-size:11px; color:#9C0006; margin-top:4px;">⚠️ Este mensaje lo puede ver el residente (y su coordinador de programa) en el micrositio público — solo aparece ahí cuando se publique (automático a las 9 PM, o manual).</p>
-    <div class="fila-botones"><button class="btn-primario" onclick="guardarComentario('${clave}')">Guardar</button></div>`;
-  document.getElementById('contenido-modal').innerHTML = html;
-  document.getElementById('overlay-modal').style.display = 'flex';
-}
-
-async function guardarComentario(clave) {
-  const observacionInterna = document.getElementById('modal-comentario').value;
-  const observacionPublica = document.getElementById('modal-comentario-publico').value;
-  const resultado = await llamarBackend('actualizarObservaciones', { clave, observacionInterna, observacionPublica });
-  if (resultado.ok) {
-    mostrarMensaje('Comentario guardado.', 'ok');
-    cerrarModal();
-    const cambiosOp = { ObservacionInterna: observacionInterna, Observacion: observacionPublica };
-    if (observacionInterna.trim() !== '') cambiosOp.AlertaDescartada = '';
-    actualizarCacheLocal(clave, { op: cambiosOp, hist: { ObservacionInterna: observacionInterna, Observacion: observacionPublica } });
-    redibujarVistaActual();
-  }
-  else { mostrarMensaje('Error: ' + resultado.error, 'error'); }
-}
-
-// ============================================================
-// ALERTAS — cada rol ve solo lo que le corresponde a él, para no saturar la pantalla:
-//   - Coordinadora ve: Negados (siempre) + comentarios escritos por auxiliares.
-//   - Auxiliar ve: Cambios de rotación / cancelaciones (para avisar con tiempo al sitio) +
-//     comentarios escritos por coordinación.
-// NO entran aquí notas automáticas del sistema como "Confirmado previamente en..." — esas van
-// al campo Observación público, no a esta lista.
-// ============================================================
-
-// Decide qué tipo de aviso es esta fila PARA EL ROL ACTUAL (o null si no le corresponde nada).
-function determinarAviso_(f, esCoordinadora) {
-  const tieneComentario = f.ObservacionInterna && f.ObservacionInterna.trim() !== '';
-  const rolQueEspera = esCoordinadora ? 'auxiliar' : 'coordinadora';
-  const comentarioLeCorresponde = tieneComentario && (f.ComentarioPorRol || '') === rolQueEspera;
-
-  if (esCoordinadora) {
-    if (f.Estado === 'Negado') return { tipo: 'negado', texto: 'Cupo negado — pendiente de reasignación' };
-    if (comentarioLeCorresponde) return { tipo: 'comentario', texto: f.ObservacionInterna };
-  } else {
-    const alerta = String(f.Alerta || '');
-    if (alerta.startsWith('CAMBIO') || alerta.startsWith('CANCELAR')) {
-      return { tipo: 'cambio', texto: 'Se modificó la rotación — avisa con tiempo al sitio anterior si aplica' };
-    }
-    if (comentarioLeCorresponde) return { tipo: 'comentario', texto: f.ObservacionInterna };
-  }
-  return null;
-}
-
-const ESTILO_AVISO = {
-  negado: { fondo: '#f3e6f5', borde: '#e0c3e6', color: 'var(--negado-tx)', titulo: '🔔 Avisos — Negados', pastilla: { bg: 'var(--negado-bg)', tx: 'var(--negado-tx)', texto: 'Negado' } },
-  cambio: { fondo: '#fbe4e4', borde: '#f3c6c6', color: '#9C0006', titulo: '🔔 Avisos — Cambios de rotación', pastilla: { bg: '#F8D7DA', tx: '#9C0006', texto: 'Cambio de rotación' } },
-  comentario: { fondo: '#FFF3CD', borde: '#ffe69c', color: '#664d03', titulo: '🔔 Avisos — Comentarios', pastilla: null }
-};
-
-function dibujarAlertasComentarios(filas) {
-  const esCoordinadora = usuarioActual.rol === 'coordinadora';
-
-  const avisos = filas
-    .filter(f => String(f.AlertaDescartada || '').trim() !== 'Si')
-    .map(f => ({ fila: f, info: determinarAviso_(f, esCoordinadora) }))
-    .filter(a => a.info !== null);
-
-  const badge = document.getElementById('badge-comentarios');
-  if (badge) badge.textContent = avisos.length > 0 ? avisos.length : '';
-  if (badge) badge.style.display = avisos.length > 0 ? 'inline-block' : 'none';
-
-  const contenedor = document.getElementById('alertas-comentarios');
-  if (!contenedor) return;
-
-  if (avisos.length === 0) { contenedor.innerHTML = ''; return; }
-
-  // Se agrupan por tipo (Negados / Cambios / Comentarios), cada grupo con su propio color,
-  // para que de un vistazo se distinga qué tipo de aviso es cada cosa.
-  const grupos = { negado: [], cambio: [], comentario: [] };
-  avisos.forEach(a => grupos[a.info.tipo].push(a));
-
-  contenedor.innerHTML = Object.keys(grupos).filter(t => grupos[t].length > 0).map(tipo => {
-    const estilo = ESTILO_AVISO[tipo];
-    const items = grupos[tipo];
-    return `
-    <div style="background:${estilo.fondo}; border:1px solid ${estilo.borde}; border-radius:8px; padding:12px 16px; margin-bottom:12px;">
-      <strong style="color:${estilo.color};">${estilo.titulo} (${items.length})</strong>
-      <div style="margin-top:8px;">
-        ${items.map(({ fila: f, info }) => {
-          const claveEsc = f.ClaveUnica.replace(/'/g, "\\'");
-          return `
-          <div style="padding:6px 0; border-top:1px solid ${estilo.borde}; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-            <div>
-              <strong>${esc(f.ResidenteNombre)}</strong> — ${esc(f.Programa)} · ${esc(f.Mes)}:
-              <span style="color:${estilo.color};">${esc(info.texto)}</span>
-              ${estilo.pastilla ? '<span class="pastilla" style="background:' + estilo.pastilla.bg + '; color:' + estilo.pastilla.tx + '; margin-left:6px;">' + estilo.pastilla.texto + '</span>' : ''}
-              ${info.tipo === 'comentario' ? '<div style="font-size:11px; color:#8a6d1f; margin-top:2px;">✍️ ' + esc(f.ComentarioPor || 'Desconocido') + '</div>' : ''}
-            </div>
-            <div style="display:flex; gap:6px; align-items:center;">
-              <button class="btn-secundario btn-pequeno" style="white-space:nowrap;" onclick="irACeldaDesdeComentario('${claveEsc}', '${(f.Programa||'').replace(/'/g,"\\'")}', '${f.Periodo || ''}')">🔗 Abrir en cuadro</button>
-              <button title="Descartar este aviso" style="background:none; border:none; color:${estilo.color}; font-size:16px; cursor:pointer; padding:0 4px; line-height:1;" onclick="descartarAlerta('${claveEsc}')">✕</button>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// Descarta un aviso (comentario o Negado) del panel. No borra el comentario ni cambia el
-// estado — solo lo oculta de esta lista hasta que haya novedad (un comentario nuevo, o vuelva
-// a quedar Negado, lo hacen reaparecer automáticamente).
-// ============================================================
-// NOTIFICAR ASISTENTE — aviso urgente puntual por correo (coordinadora). No cambia nada del
-// registro, solo dispara un correo marcado como urgente a la(s) asistente(s) elegida(s), para
-// los casos que no pueden esperar a la revisión normal de la cola (ej. un cambio en un periodo
-// lejano que no van a ver hasta dentro de mucho).
-// ============================================================
-function abrirNotificarAsistente(clave) {
-  const registro = registrosGridActual.find(r => r.ClaveUnica === clave)
-    || cacheColaCompleta.find(r => r.ClaveUnica === clave)
-    || cacheHistoricoCompleto.find(r => r.ClaveUnica === clave);
-  if (!registro) { mostrarMensaje('No se encontró el registro.', 'error'); return; }
-
-  const html = `
-    <h3>🔔 Notificar a una asistente</h3>
-    <p style="font-size:12px; color:#888;">${esc(registro.ResidenteNombre || '')} — ${esc(registro.Mes || '')} (${esc(registro.Programa || '')})</p>
-    <p style="font-size:12px; color:#555;">Se enviará un correo marcado como urgente para que lo revise cuanto antes en la Gestión Operativa.</p>
-    <label style="display:flex; align-items:center; gap:8px; margin:10px 0 6px;">
-      <input type="checkbox" id="notif-jeimy" checked> Jeimy Saldarriaga (jsaldarriagaa@ces.edu.co)
-    </label>
-    <label style="display:flex; align-items:center; gap:8px; margin:0 0 10px;">
-      <input type="checkbox" id="notif-eliana"> Eliana Ramirez (earamirez@ces.edu.co)
-    </label>
-    <label>Mensaje (opcional)</label>
-    <textarea id="notif-mensaje" rows="3" placeholder="Ej: Cambio urgente, por favor revisar antes de mañana" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;"></textarea>
-    <div class="fila-botones">
-      <button class="btn-secundario" onclick="cerrarModal()">Cancelar</button>
-      <button class="btn-primario" onclick="ejecutarNotificarAsistente('${clave}')">📧 Enviar notificación urgente</button>
-    </div>`;
-  document.getElementById('contenido-modal').innerHTML = html;
-  document.getElementById('overlay-modal').style.display = 'flex';
-}
-
-async function ejecutarNotificarAsistente(clave) {
-  const destinatarios = [];
-  if (document.getElementById('notif-jeimy').checked) destinatarios.push('Jeimy');
-  if (document.getElementById('notif-eliana').checked) destinatarios.push('Eliana');
-  if (destinatarios.length === 0) { mostrarMensaje('Selecciona al menos una asistente.', 'error'); return; }
-
-  const mensaje = document.getElementById('notif-mensaje').value;
-  const boton = document.querySelector('#contenido-modal .btn-primario');
-  if (boton) { boton.disabled = true; boton.textContent = '⏳ Enviando...'; }
-
-  const resultado = await llamarBackend('notificarAsistente', { clave, destinatarios, mensaje });
-  if (resultado.ok) {
-    mostrarMensaje('Notificación urgente enviada a ' + resultado.enviadosA.join(' y ') + '.', 'ok');
-    cerrarModal();
-  } else {
-    mostrarMensaje('Error al notificar: ' + resultado.error, 'error');
-    if (boton) { boton.disabled = false; boton.textContent = '📧 Enviar notificación urgente'; }
-  }
-}
-
-async function descartarAlerta(clave) {
-  const resultado = await llamarBackend('descartarAlerta', { clave });
-  if (resultado.ok) {
-    actualizarCacheLocal(clave, { op: { AlertaDescartada: 'Si' } });
-    dibujarAlertasComentarios(cacheColaCompleta);
-  } else {
-    mostrarMensaje('Error: ' + resultado.error, 'error');
-  }
-}
-
+document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') intentarLogin(); });
+restaurarSesionSiVigente();
 </script>
 </body>
 </html>
