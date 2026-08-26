@@ -456,12 +456,12 @@ function poblarSelectorUsuarios() {
 }
 
 // ============================================================
-// SESIÓN — se mantiene mientras haya actividad; se cierra sola tras 20 min sin uso.
+// SESIÓN — se mantiene mientras haya actividad; se cierra sola tras 60 min sin uso.
 // sessionStorage (no localStorage): se borra solo al cerrar la pestaña/navegador, que es el
 // comportamiento correcto para no dejar una sesión abierta "para siempre" en un compu compartido.
 // ============================================================
 const CLAVE_SESION = 'sesionGestionRotaciones';
-const MINUTOS_INACTIVIDAD = 20;
+const MINUTOS_INACTIVIDAD = 60;
 let ultimaActividadMs = Date.now();
 
 function guardarSesion() {
@@ -508,9 +508,9 @@ function iniciarMonitorInactividad() {
     const minutosInactivo = (Date.now() - ultimaActividadMs) / 60000;
     if (minutosInactivo >= MINUTOS_INACTIVIDAD) {
       cerrarSesion();
-      document.getElementById('login-error').textContent = 'Se cerró tu sesión por inactividad (20 min). Ingresa de nuevo.';
+      document.getElementById('login-error').textContent = 'Se cerró tu sesión por inactividad (60 min). Ingresa de nuevo.';
     }
-  }, 30000); // revisa cada 30s — suficiente margen frente al límite de 20 min
+  }, 30000); // revisa cada 30s — suficiente margen frente al límite de 60 min
 }
 
 async function sha256Hex(texto) {
@@ -701,13 +701,41 @@ function mostrarMensaje(texto, tipo) {
 // ============================================================
 // BACKEND
 // ============================================================
+// Corta cualquier petición al backend que lleve más de 30 segundos sin responder — Apps Script
+// normalmente responde en 1-3 segundos, así que 30s ya es una señal clara de que algo se colgó
+// (sobrecarga, cold start, etc.). Sin este límite, una petición atascada dejaba el "Cargando..."
+// congelado para siempre, sin ninguna forma de que el usuario supiera que debía reintentar.
+const TIMEOUT_BACKEND_MS = 30000;
+
+async function fetchConTimeout_(url, opciones) {
+  const controlador = new AbortController();
+  const timeoutId = setTimeout(() => controlador.abort(), TIMEOUT_BACKEND_MS);
+  try {
+    return await fetch(url, Object.assign({}, opciones, { signal: controlador.signal }));
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 async function llamarBackend(accion, datos) {
-  const respuesta = await fetch(WEB_APP_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ accion, datos, credencial: { usuario: usuarioActual.usuarioCorto, claveHash: usuarioActual.claveHash } })
-  });
-  const resultado = await respuesta.json();
+  let resultado;
+  try {
+    const respuesta = await fetchConTimeout_(WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ accion, datos, credencial: { usuario: usuarioActual.usuarioCorto, claveHash: usuarioActual.claveHash } })
+    });
+    resultado = await respuesta.json();
+  } catch (err) {
+    // Puede pasar cuando llegan varias peticiones casi al mismo tiempo (ej. al guardar una
+    // celda, que dispara guardar + recargar cuadrícula + recargar cola seguidas) y Apps Script
+    // responde con una página de error en vez de JSON, o simplemente no responde a tiempo —
+    // sin este manejo, esto tumbaba la pantalla o la dejaba colgada en vez de mostrar un aviso.
+    const mensaje = err.name === 'AbortError'
+      ? 'El servidor tardó demasiado en responder. Intenta de nuevo.'
+      : 'No se pudo conectar con el servidor (puede ser una sobrecarga momentánea). Intenta de nuevo en unos segundos.';
+    return { ok: false, error: mensaje };
+  }
   if (!resultado.ok && resultado.error === 'No autorizado. Vuelve a iniciar sesión.') {
     mostrarMensaje('Tu sesión expiró o no es válida. Por favor vuelve a iniciar sesión.', 'error');
     cerrarSesion();
@@ -722,8 +750,18 @@ async function leerBackend(accion, extraParams) {
       url += '&' + encodeURIComponent(clave) + '=' + encodeURIComponent(extraParams[clave]);
     });
   }
-  const respuesta = await fetch(url);
-  const resultado = await respuesta.json();
+  let resultado;
+  try {
+    const respuesta = await fetchConTimeout_(url);
+    resultado = await respuesta.json();
+  } catch (err) {
+    // Mismo caso que en llamarBackend: una respuesta no-JSON o una petición que nunca responde
+    // ya no cuelga la pantalla — se convierte en un error manejable con opción de reintentar.
+    const mensaje = err.name === 'AbortError'
+      ? 'El servidor tardó demasiado en responder. Intenta de nuevo.'
+      : 'No se pudo conectar con el servidor (puede ser una sobrecarga momentánea). Intenta de nuevo en unos segundos.';
+    return { ok: false, error: mensaje };
+  }
   if (!resultado.ok && resultado.error === 'No autorizado. Vuelve a iniciar sesión.') {
     mostrarMensaje('Tu sesión expiró o no es válida. Por favor vuelve a iniciar sesión.', 'error');
     cerrarSesion();
@@ -1140,7 +1178,15 @@ async function cargarPanelEjecutivo(forzarRecarga) {
   if (cacheHistoricoCompleto.length === 0 || forzarRecarga) {
     document.getElementById('db-barra-datos').textContent = '⏳ Cargando datos...';
     const res = await leerBackend('listarHistorico');
-    if (!res.ok) { mostrarMensaje('Error cargando el panel: ' + res.error, 'error'); return; }
+    if (!res.ok) {
+      mostrarMensaje('Error cargando el panel: ' + res.error, 'error');
+      // Antes esto dejaba el aviso "Cargando datos..." congelado para siempre si la petición
+      // fallaba — ahora muestra el error ahí mismo, con un botón para reintentar sin tener que
+      // recargar toda la página.
+      document.getElementById('db-barra-datos').innerHTML = '⚠️ No se pudieron cargar los datos: ' + esc(res.error) +
+        ' <button class="btn-secundario btn-pequeno" onclick="cargarPanelEjecutivo(true)" style="margin-left:10px;">Reintentar</button>';
+      return;
+    }
     cacheHistoricoCompleto = res.datos;
     llenarSelectoresBusqueda();
     dibujarChipsPeriodo();
@@ -1426,12 +1472,27 @@ function separarCampos(campoStr) {
   return String(campoStr || '').split('-').map(s => s.trim()).filter(Boolean);
 }
 
+// Fila de un residente dentro de una lista expandible del Dashboard (por Programa o por
+// Campo) — muestra el nombre, el correo si lo tiene, el Nivel, y un botón para notificarlo
+// directamente si hay correo registrado.
+function filaResidenteExpandible_(nombre, info) {
+  const correoEsc = String(info.correo || '').replace(/'/g, "\\'");
+  const idEsc = String(info.id || '').replace(/'/g, "\\'");
+  const nombreEsc = String(nombre || '').replace(/'/g, "\\'");
+  return `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 16px; border-top:1px solid #eee; font-size:12px; gap:8px;">
+      <span style="flex:1;">${esc(nombre)}${info.correo ? '<br><span style="color:#888; font-size:11px;">✉ ' + esc(info.correo) + '</span>' : ''}</span>
+      <span class="pastilla" style="background:#eef1f5; color:#555;">${esc(info.nivel)}</span>
+      ${info.correo ? `<button class="btn-secundario btn-pequeno" onclick="abrirNotificarResidentePorDatos('${idEsc}','${nombreEsc}','${correoEsc}')" title="Enviar aviso urgente por correo">📧</button>` : ''}
+    </div>`;
+}
+
 function dibujarListasEjecutivo(datos) {
   const porPrograma = {};
   datos.forEach(r => {
     if (!r.Programa) return;
     porPrograma[r.Programa] = porPrograma[r.Programa] || {};
-    porPrograma[r.Programa][r.ResidenteNombre] = r.Nivel || '';
+    porPrograma[r.Programa][r.ResidenteNombre] = { nivel: r.Nivel || '', correo: r.Correo || '', id: r.ResidenteID || '' };
   });
   const listaProgramas = Object.keys(porPrograma).map(p => ({ nombre: p, residentes: porPrograma[p] })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
   document.getElementById('db-lista-programas').innerHTML = listaProgramas.map((p, i) => `
@@ -1441,10 +1502,7 @@ function dibujarListasEjecutivo(datos) {
       </div>
       <div id="prog-${i}" style="display:none; background:#fafbfc;">
         <div style="padding:6px 16px; font-size:11px; font-weight:700; color:var(--azul-ces); text-transform:uppercase;">Residentes en ${esc(p.nombre)}</div>
-        ${Object.keys(p.residentes).sort((a, b) => a.localeCompare(b, 'es')).map(nombre => `
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 16px; border-top:1px solid #eee; font-size:12px;">
-            <span>${esc(nombre)}</span><span class="pastilla" style="background:#eef1f5; color:#555;">${esc(p.residentes[nombre])}</span>
-          </div>`).join('')}
+        ${Object.keys(p.residentes).sort((a, b) => a.localeCompare(b, 'es')).map(nombre => filaResidenteExpandible_(nombre, p.residentes[nombre])).join('')}
       </div>
     </div>`).join('') || '<div style="padding:12px; color:#999; font-size:13px;">Sin datos.</div>';
 
@@ -1452,7 +1510,7 @@ function dibujarListasEjecutivo(datos) {
   datos.forEach(r => {
     separarCampos(r.CampoRotacion).forEach(campoIndividual => {
       porCampo[campoIndividual] = porCampo[campoIndividual] || {};
-      porCampo[campoIndividual][r.ResidenteNombre] = r.Nivel || '';
+      porCampo[campoIndividual][r.ResidenteNombre] = { nivel: r.Nivel || '', correo: r.Correo || '', id: r.ResidenteID || '' };
     });
   });
   const listaCampos = Object.keys(porCampo).map(c => ({ nombre: c, residentes: porCampo[c] })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
@@ -1463,10 +1521,7 @@ function dibujarListasEjecutivo(datos) {
       </div>
       <div id="campo-${i}" style="display:none; background:#fafbfc;">
         <div style="padding:6px 16px; font-size:11px; font-weight:700; color:#0d6e5f; text-transform:uppercase;">Residentes en ${esc(c.nombre)}</div>
-        ${Object.keys(c.residentes).sort((a, b) => a.localeCompare(b, 'es')).map(nombre => `
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 16px; border-top:1px solid #eee; font-size:12px;">
-            <span>${esc(nombre)}</span><span class="pastilla" style="background:#eef1f5; color:#555;">${esc(c.residentes[nombre])}</span>
-          </div>`).join('')}
+        ${Object.keys(c.residentes).sort((a, b) => a.localeCompare(b, 'es')).map(nombre => filaResidenteExpandible_(nombre, c.residentes[nombre])).join('')}
       </div>
     </div>`).join('') || '<div style="padding:12px; color:#999; font-size:13px;">Sin datos.</div>';
 }
@@ -1976,7 +2031,7 @@ function redibujarCuadricula() {
         ? `<input type="checkbox" ${marcado} onchange="toggleSeleccionResidente('${res.id}', this.checked)" style="margin-right:6px;">`
         : '';
       const botonEliminar = usuarioActual.rol === 'coordinadora'
-        ? `<span title="Editar, o eliminar de esta cuadrícula" style="float:right; cursor:pointer;" onclick="abrirEditarResidente('${res.id}', '${res.nombre.replace(/'/g, "\\'")}', '${(res.nivel||'').replace(/'/g, "\\'")}')">✏️</span>`
+        ? `<span title="Editar, o eliminar de esta cuadrícula" style="float:right; cursor:pointer;" onclick="abrirEditarResidente('${res.id}', '${res.nombre.replace(/'/g, "\\'")}', '${(res.nivel||'').replace(/'/g, "\\'")}', '${(res.correo||'').replace(/'/g, "\\'")}')">✏️</span>`
         : '';
       html += `<tr><td class="col-residente">${checkboxHtml}${res.nombre}${botonEliminar}<br><span style="color:#888; font-weight:400; margin-left:${checkboxHtml ? '20px' : '0'};">${res.id} · ${res.nivel || ''}</span></td>`;
       bloques.forEach(b => {
@@ -2186,7 +2241,7 @@ async function procesarArchivoExcel(evento) {
 // ============================================================
 // Abre el modal para corregir Nombre / Cédula / Nivel de un residente. Cambia TODAS sus filas
 // dentro de este programa, no solo la celda donde se dio clic.
-function abrirEditarResidente(residenteId, nombreActual, nivelActual) {
+function abrirEditarResidente(residenteId, nombreActual, nivelActual, correoActual) {
   const html = `
     <h3>✏️ Editar datos del residente</h3>
     <p style="font-size:12px; color:#888;">${esc(contextoGrid.programa)} — se corrige en todos los meses de este residente en este programa, no solo en una celda.</p>
@@ -2197,6 +2252,8 @@ function abrirEditarResidente(residenteId, nombreActual, nivelActual) {
     <p style="font-size:11px; color:#9C0006; margin-top:2px;">⚠️ Cambiar la cédula reconstruye la clave de todas sus rotaciones. Se revisa antes que no choque con la de otro residente ya existente.</p>
     <label>Nivel (R1, R2, R3...)</label>
     <input id="modal-editar-nivel" value="${esc(nivelActual)}">
+    <label>Correo electrónico</label>
+    <input id="modal-editar-correo" type="email" value="${esc(correoActual || '')}" placeholder="para poder notificarle desde el sistema">
     <div class="fila-botones">
       <button class="btn-secundario" onclick="cerrarModal()">Cancelar</button>
       <button class="btn-primario" onclick="ejecutarEditarResidente('${residenteId}')">Guardar</button>
@@ -2212,10 +2269,11 @@ async function ejecutarEditarResidente(residenteIdViejo) {
   const nuevoNombre = document.getElementById('modal-editar-nombre').value.trim();
   const nuevoId = document.getElementById('modal-editar-id').value.trim();
   const nuevoNivel = document.getElementById('modal-editar-nivel').value.trim();
+  const nuevoCorreo = document.getElementById('modal-editar-correo').value.trim();
 
   const resultado = await llamarBackend('editarDatosResidente', {
     residenteIdViejo, programa: contextoGrid.programa,
-    nuevoNombre, nuevoId, nuevoNivel
+    nuevoNombre, nuevoId, nuevoNivel, nuevoCorreo
   });
 
   if (!resultado.ok) { mostrarMensaje('Error: ' + resultado.error, 'error'); return; }
@@ -2232,6 +2290,7 @@ async function ejecutarEditarResidente(residenteIdViejo) {
       if (String(r.ResidenteID) === residenteIdViejo && r.Programa === contextoGrid.programa) {
         if (nuevoNombre) r.ResidenteNombre = nuevoNombre;
         if (nuevoNivel) r.Nivel = nuevoNivel;
+        if (nuevoCorreo) r.Correo = nuevoCorreo;
         if (idFinal !== residenteIdViejo) {
           r.ResidenteID = idFinal;
           // La clave cambió en el servidor; como no la recalculamos aquí letra por letra,
@@ -2245,6 +2304,7 @@ async function ejecutarEditarResidente(residenteIdViejo) {
     if (String(f.id) === residenteIdViejo) {
       if (nuevoNombre) f.nombre = nuevoNombre;
       if (nuevoNivel) f.nivel = nuevoNivel;
+      if (nuevoCorreo) f.correo = nuevoCorreo;
       if (idFinal !== residenteIdViejo) f.id = idFinal;
     }
   });
@@ -2381,8 +2441,8 @@ function abrirModalAgregarResidente() {
     </div>
     <div id="campos-residente-movilidad" style="display:none;">
       <label>Universidad de origen</label><input id="modal-res-universidad">
-      <label>Correo</label><input id="modal-res-correo" type="email">
     </div>
+    <label>Correo electrónico</label><input id="modal-res-correo" type="email" placeholder="para poder notificarle desde el sistema">
     <div class="fila-botones"><button class="btn-primario" onclick="confirmarAgregarResidente()">Agregar a la cuadrícula</button></div>`;
   document.getElementById('contenido-modal').innerHTML = html;
   document.getElementById('overlay-modal').style.display = 'flex';
@@ -2402,10 +2462,10 @@ function confirmarAgregarResidente() {
   const cc = document.getElementById('modal-res-cc').value.trim();
   if (!nombre || !cc) { mostrarMensaje('Completa nombre y documento.', 'error'); return; }
 
-  let nivel = '', universidadOrigen = '', correo = '';
+  let nivel = '', universidadOrigen = '';
+  const correo = document.getElementById('modal-res-correo').value.trim();
   if (tipo === 'Movilidad entrante') {
     universidadOrigen = document.getElementById('modal-res-universidad').value.trim();
-    correo = document.getElementById('modal-res-correo').value.trim();
     if (!universidadOrigen) { mostrarMensaje('Completa la universidad de origen.', 'error'); return; }
   } else {
     nivel = document.getElementById('modal-res-nivel').value.trim();
@@ -2811,12 +2871,13 @@ function dibujarLista(filas, idTabla) {
           <input type="checkbox" ${seleccionActual === 'Negado' ? 'checked' : ''} onchange="marcarSeleccionGestion('${claveEsc}', 'Negado', this)"> Negado
         </label>
         <button class="btn-secundario btn-pequeno" onclick="abrirComentario('${claveEsc}')">💬 Comentar</button>
-        ${usuarioActual.rol === 'coordinadora' ? `<button class="btn-secundario btn-pequeno" onclick="abrirNotificarAsistente('${claveEsc}')" title="Enviar aviso urgente por correo">🔔 Notificar</button>` : ''}
+        ${usuarioActual && usuarioActual.rol === 'coordinadora' ? `<button class="btn-secundario btn-pequeno" onclick="abrirNotificarAsistente('${claveEsc}')" title="Enviar aviso urgente por correo">🔔 Notificar</button>` : ''}
+        ${fila.Correo ? `<button class="btn-secundario btn-pequeno" onclick="abrirNotificarResidente('${claveEsc}')" title="Enviar aviso urgente al residente por correo">📧 Notificar Residente</button>` : ''}
       </div>`;
     tr.dataset.clave = fila.ClaveUnica;
     if (seleccionActual) tr.style.background = seleccionActual === 'Gestionado' ? '#eafaf0' : '#f7edf9';
     tr.innerHTML = `
-      <td><strong>${esc(fila.ResidenteNombre || '')}</strong><br><span style="color:#888;">${esc(fila.ResidenteID || '')}</span></td>
+      <td><strong>${esc(fila.ResidenteNombre || '')}</strong><br><span style="color:#888;">${esc(fila.ResidenteID || '')}</span>${fila.Correo ? '<br><span style="color:#888; font-size:11px;">✉ ' + esc(fila.Correo) + '</span>' : ''}</td>
       <td>${esc(fila.Programa || '')}<br><span style="color:#888;">${esc(fila.Periodo || '')} · ${esc(fila.Mes || '')}</span></td>
       <td>${esc(fila.CampoRotacion || '')}<br><span style="color:#888;">${esc(fila.Rotacion || '')}</span></td>
       <td>
@@ -3030,16 +3091,94 @@ function dibujarAlertasComentarios(filas) {
 // estado — solo lo oculta de esta lista hasta que haya novedad (un comentario nuevo, o vuelva
 // a quedar Negado, lo hacen reaparecer automáticamente).
 // ============================================================
+// GUARDAR + NOTIFICAR EN UN SOLO PASO — antes había que guardar (Aplicar cambios en la Cola, o
+// Guardar cambios en el modal de celda) y LUEGO, por separado, notificar; si se notificaba
+// primero, cualquier edición sin guardar (una casilla marcada en la Cola, o un campo/rotación/
+// observación editado en el modal de celda) se perdía. Estas funciones hacen que un solo clic
+// en "Enviar notificación urgente" guarde eso automáticamente antes de mandar el correo.
+// ============================================================
+let pendienteAntesDeNotificar = null;
+
+// Se llama justo antes de reemplazar el modal por el formulario de notificación, para capturar
+// lo que hubiera escrito en los campos del modal de celda (si los hay) antes de que desaparezcan.
+function capturarPendienteAntesDeNotificar(clave) {
+  const campoEl = document.getElementById('modal-campo');
+  const rotacionEl = document.getElementById('modal-rotacion');
+  const obsInternaEl = document.getElementById('modal-obs-interna');
+  const obsPublicaEl = document.getElementById('modal-obs-publica');
+  const hayCampos = campoEl || rotacionEl || obsInternaEl || obsPublicaEl;
+  pendienteAntesDeNotificar = hayCampos ? {
+    clave,
+    campoRotacion: campoEl ? campoEl.value : null,
+    rotacion: rotacionEl ? rotacionEl.value : null,
+    observacionInterna: obsInternaEl ? obsInternaEl.value : null,
+    observacionPublica: obsPublicaEl ? obsPublicaEl.value : null
+  } : null;
+}
+
+async function guardarPendientesAntesDeNotificar(clave) {
+  const mensajes = [];
+
+  // 1) Casilla Gestionado/Negado marcada en la Cola de Gestión Operativa, sin aplicar todavía.
+  if (seleccionesGestion[clave]) {
+    const nuevoEstado = seleccionesGestion[clave];
+    const resultado = await llamarBackend('aplicarEstado', { clave, nuevoEstado });
+    if (!resultado.ok) return { error: resultado.error, mensajes };
+    if (nuevoEstado === 'Gestionado') {
+      actualizarCacheLocal(clave, { eliminarDeOp: true, hist: { Estado: 'Confirmado' } });
+    } else {
+      actualizarCacheLocal(clave, {
+        op: { Estado: 'Negado', Alerta: 'REASIGNAR', AccionRequerida: 'Reasignar campo de práctica', Observacion: 'CUPO NEGADO — pendiente de reasignación', AlertaDescartada: '' },
+        hist: { Estado: 'Negado' }
+      });
+    }
+    delete seleccionesGestion[clave];
+    mensajes.push('marcado como ' + nuevoEstado);
+  }
+
+  // 2) Edición sin guardar del modal de celda (campo/rotación y/u observaciones).
+  const pendiente = (pendienteAntesDeNotificar && pendienteAntesDeNotificar.clave === clave) ? pendienteAntesDeNotificar : null;
+  pendienteAntesDeNotificar = null;
+  if (pendiente) {
+    const registro = registrosGridActual.find(r => r.ClaveUnica === clave) || {};
+    const cambioRotacion = pendiente.campoRotacion !== null &&
+      (pendiente.campoRotacion !== (registro.CampoRotacion || '') || pendiente.rotacion !== (registro.Rotacion || ''));
+    const cambioObs = pendiente.observacionInterna !== null &&
+      (pendiente.observacionInterna !== (registro.ObservacionInterna || '') || pendiente.observacionPublica !== (registro.Observacion || ''));
+
+    if (cambioRotacion) {
+      const resultadoEdicion = await llamarBackend('editarCampoRotacion', { clave, campoRotacion: pendiente.campoRotacion, rotacion: pendiente.rotacion });
+      if (!resultadoEdicion.ok) return { error: resultadoEdicion.error, mensajes };
+      aplicarResultadoEdicionEnCache(clave, resultadoEdicion, pendiente.campoRotacion, pendiente.rotacion);
+      mensajes.push(resultadoEdicion.tipo === 'cancelar' ? 'rotación cambiada (marcada para cancelar en ' + resultadoEdicion.sitioAnterior + ')' : 'rotación actualizada');
+    }
+    if (cambioObs) {
+      const resultadoObs = await llamarBackend('actualizarObservaciones', { clave, observacionInterna: pendiente.observacionInterna, observacionPublica: pendiente.observacionPublica });
+      if (!resultadoObs.ok) return { error: resultadoObs.error, mensajes };
+      const cambiosOp = { ObservacionInterna: pendiente.observacionInterna, Observacion: pendiente.observacionPublica };
+      if (pendiente.observacionInterna.trim() !== '') cambiosOp.AlertaDescartada = '';
+      actualizarCacheLocal(clave, { op: cambiosOp, hist: { Observacion: pendiente.observacionPublica, ObservacionInterna: pendiente.observacionInterna } });
+      mensajes.push('observaciones guardadas');
+    }
+  }
+
+  return { mensajes };
+}
+
+// ============================================================
 // NOTIFICAR ASISTENTE — aviso urgente puntual por correo (coordinadora). No cambia nada del
-// registro, solo dispara un correo marcado como urgente a la(s) asistente(s) elegida(s), para
-// los casos que no pueden esperar a la revisión normal de la cola (ej. un cambio en un periodo
-// lejano que no van a ver hasta dentro de mucho).
+// registro (más allá de lo que ya estuviera pendiente de guardar, ver arriba), solo dispara un
+// correo marcado como urgente a la(s) asistente(s) elegida(s), para los casos que no pueden
+// esperar a la revisión normal de la cola (ej. un cambio en un periodo lejano que no van a ver
+// hasta dentro de mucho).
 // ============================================================
 function abrirNotificarAsistente(clave) {
   const registro = registrosGridActual.find(r => r.ClaveUnica === clave)
     || cacheColaCompleta.find(r => r.ClaveUnica === clave)
     || cacheHistoricoCompleto.find(r => r.ClaveUnica === clave);
   if (!registro) { mostrarMensaje('No se encontró el registro.', 'error'); return; }
+
+  capturarPendienteAntesDeNotificar(clave);
 
   const html = `
     <h3>🔔 Notificar a una asistente</h3>
@@ -3071,9 +3210,104 @@ async function ejecutarNotificarAsistente(clave) {
   const boton = document.querySelector('#contenido-modal .btn-primario');
   if (boton) { boton.disabled = true; boton.textContent = '⏳ Enviando...'; }
 
+  const guardado = await guardarPendientesAntesDeNotificar(clave);
+  if (guardado.error) {
+    mostrarMensaje('Error guardando cambios previos: ' + guardado.error, 'error');
+    if (boton) { boton.disabled = false; boton.textContent = '📧 Enviar notificación urgente'; }
+    return;
+  }
+
   const resultado = await llamarBackend('notificarAsistente', { clave, destinatarios, mensaje });
   if (resultado.ok) {
-    mostrarMensaje('Notificación urgente enviada a ' + resultado.enviadosA.join(' y ') + '.', 'ok');
+    const extra = guardado.mensajes.length ? ' (' + guardado.mensajes.join(' · ') + ')' : '';
+    mostrarMensaje('Notificación urgente enviada a ' + resultado.enviadosA.join(' y ') + '.' + extra, 'ok');
+    cerrarModal();
+    redibujarVistaActual();
+  } else {
+    mostrarMensaje('Error al notificar: ' + resultado.error, 'error');
+    if (boton) { boton.disabled = false; boton.textContent = '📧 Enviar notificación urgente'; }
+  }
+}
+
+// ============================================================
+// NOTIFICAR RESIDENTE — igual que Notificar Asistente, pero directo al correo del propio
+// residente (CES o Movilidad), para pedirle que revise el sistema. Guarda cualquier cambio
+// pendiente antes de enviar, igual que arriba.
+// ============================================================
+function abrirNotificarResidente(clave) {
+  const registro = registrosGridActual.find(r => r.ClaveUnica === clave)
+    || cacheColaCompleta.find(r => r.ClaveUnica === clave)
+    || cacheHistoricoCompleto.find(r => r.ClaveUnica === clave);
+  if (!registro) { mostrarMensaje('No se encontró el registro.', 'error'); return; }
+  if (!registro.Correo) { mostrarMensaje('Este residente todavía no tiene correo registrado — agrégalo con el lápiz ✏️ en el Cuadro de Rotaciones.', 'error'); return; }
+
+  capturarPendienteAntesDeNotificar(clave);
+
+  const html = `
+    <h3>📧 Notificar al residente</h3>
+    <p style="font-size:12px; color:#888;">${esc(registro.ResidenteNombre || '')} — ${esc(registro.Mes || '')} (${esc(registro.Programa || '')})</p>
+    <p style="font-size:12px; color:#555;">Se enviará un correo marcado como urgente a <strong>${esc(registro.Correo)}</strong> para que revise el sistema cuanto antes.</p>
+    <label>Mensaje (opcional)</label>
+    <textarea id="notif-res-mensaje" rows="3" placeholder="Ej: Por favor revisa tu rotación, hay un cambio pendiente." style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;"></textarea>
+    <div class="fila-botones">
+      <button class="btn-secundario" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-primario" onclick="ejecutarNotificarResidente('${clave}')">📧 Enviar notificación urgente</button>
+    </div>`;
+  document.getElementById('contenido-modal').innerHTML = html;
+  document.getElementById('overlay-modal').style.display = 'flex';
+}
+
+async function ejecutarNotificarResidente(clave) {
+  const mensaje = document.getElementById('notif-res-mensaje').value;
+  const boton = document.querySelector('#contenido-modal .btn-primario');
+  if (boton) { boton.disabled = true; boton.textContent = '⏳ Enviando...'; }
+
+  const guardado = await guardarPendientesAntesDeNotificar(clave);
+  if (guardado.error) {
+    mostrarMensaje('Error guardando cambios previos: ' + guardado.error, 'error');
+    if (boton) { boton.disabled = false; boton.textContent = '📧 Enviar notificación urgente'; }
+    return;
+  }
+
+  const resultado = await llamarBackend('notificarResidente', { clave, mensaje });
+  if (resultado.ok) {
+    const extra = guardado.mensajes.length ? ' (' + guardado.mensajes.join(' · ') + ')' : '';
+    mostrarMensaje('Notificación urgente enviada al residente.' + extra, 'ok');
+    cerrarModal();
+    redibujarVistaActual();
+  } else {
+    mostrarMensaje('Error al notificar: ' + resultado.error, 'error');
+    if (boton) { boton.disabled = false; boton.textContent = '📧 Enviar notificación urgente'; }
+  }
+}
+
+// Variante para el panel Ejecutivo (Dashboard): ahí no hay una rotación puntual (ClaveUnica) —
+// solo el residente en sí, así que no hay nada pendiente que guardar antes de enviar.
+function abrirNotificarResidentePorDatos(residenteId, nombre, correo) {
+  const nombreEsc = nombre.replace(/'/g, "\\'");
+  const correoEsc = correo.replace(/'/g, "\\'");
+  const html = `
+    <h3>📧 Notificar al residente</h3>
+    <p style="font-size:12px; color:#888;">${esc(nombre)}</p>
+    <p style="font-size:12px; color:#555;">Se enviará un correo marcado como urgente a <strong>${esc(correo)}</strong> para que revise el sistema cuanto antes.</p>
+    <label>Mensaje (opcional)</label>
+    <textarea id="notif-res-mensaje" rows="3" placeholder="Ej: Por favor revisa tu cronograma, hay novedades." style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;"></textarea>
+    <div class="fila-botones">
+      <button class="btn-secundario" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-primario" onclick="ejecutarNotificarResidentePorDatos('${residenteId}', '${nombreEsc}', '${correoEsc}')">📧 Enviar notificación urgente</button>
+    </div>`;
+  document.getElementById('contenido-modal').innerHTML = html;
+  document.getElementById('overlay-modal').style.display = 'flex';
+}
+
+async function ejecutarNotificarResidentePorDatos(residenteId, nombre, correo) {
+  const mensaje = document.getElementById('notif-res-mensaje').value;
+  const boton = document.querySelector('#contenido-modal .btn-primario');
+  if (boton) { boton.disabled = true; boton.textContent = '⏳ Enviando...'; }
+
+  const resultado = await llamarBackend('notificarResidente', { residenteId, nombre, correo, mensaje });
+  if (resultado.ok) {
+    mostrarMensaje('Notificación urgente enviada al residente.', 'ok');
     cerrarModal();
   } else {
     mostrarMensaje('Error al notificar: ' + resultado.error, 'error');
