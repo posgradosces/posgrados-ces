@@ -2596,8 +2596,10 @@ function abrirCeldaExistente(clave) {
   let html = `<h3>${esc(registro.ResidenteNombre)} — ${esc(registro.Mes)}</h3>
     <p style="font-size:12px; color:#888;">${esc(registro.Programa)} · Estado actual: <strong>${esc(registro.Estado)}</strong></p>
     ${registro.Tipo === 'Movilidad entrante' ? `<p style="font-size:12px; color:#888;">🎓 ${esc(registro.UniversidadOrigen || 'Universidad no registrada')}${registro.Correo ? ' · ' + esc(registro.Correo) : ''}</p>` : ''}
+    ${registro.Tipo !== 'Movilidad entrante' && registro.Correo ? `<p style="font-size:12px; color:#888;">✉ ${esc(registro.Correo)}</p>` : ''}
     <div class="fila-botones">
       <button class="btn-secundario" onclick="abrirNotificarAsistente('${clave}')" title="Enviar un correo urgente a una asistente sobre este registro">🔔 Notificar Asistente</button>
+      ${registro.Correo ? `<button class="btn-secundario" onclick="abrirNotificarResidente('${clave}')" title="Enviar un correo urgente al residente sobre este registro">📧 Notificar Residente</button>` : ''}
     </div>`;
 
   if (registro.Estado === 'Negado') {
