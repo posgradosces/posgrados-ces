@@ -1960,7 +1960,7 @@ async function cargarCuadricula(silencioso) {
   registrosGridActual.forEach(r => {
     if (!vistos.has(r.ResidenteID)) {
       vistos.add(r.ResidenteID);
-      filasGridActual.push({ id: r.ResidenteID, nombre: r.ResidenteNombre, nivel: r.Nivel });
+      filasGridActual.push({ id: r.ResidenteID, nombre: r.ResidenteNombre, nivel: r.Nivel, correo: r.Correo || '' });
     }
   });
 
@@ -2072,7 +2072,7 @@ function copiarFilasSeleccionadas() {
       const registro = registrosGridActual.find(r => String(r.ResidenteID) === String(id) && r.Mes === mes);
       if (registro) celdas[mes] = { campoRotacion: registro.CampoRotacion, rotacion: registro.Rotacion, tipo: registro.Tipo || 'Residente CES' };
     });
-    portapapelesFilas.push({ id: res.id, nombre: res.nombre, nivel: res.nivel, celdas });
+    portapapelesFilas.push({ id: res.id, nombre: res.nombre, nivel: res.nivel, correo: res.correo || '', celdas });
   });
 
   document.getElementById('boton-pegar-filas').style.display = 'inline-block';
@@ -2116,7 +2116,7 @@ async function confirmarPegarFilas() {
     const nivelNuevo = document.getElementById('pegar-nivel-' + i) ? document.getElementById('pegar-nivel-' + i).value : p.nivel;
 
     if (!filasGridActual.some(f => String(f.id) === String(p.id))) {
-      filasGridActual.push({ id: p.id, nombre: p.nombre, nivel: nivelNuevo });
+      filasGridActual.push({ id: p.id, nombre: p.nombre, nivel: nivelNuevo, correo: p.correo || '' });
     }
 
     for (const mes of Object.keys(p.celdas)) {
@@ -2137,7 +2137,8 @@ async function confirmarPegarFilas() {
       items.push({
         residenteId: p.id, residenteNombre: p.nombre, nivel: nivelNuevo, mes,
         programa: contextoGrid.programa, semestre, anioAcademico,
-        tipo: celda.tipo, campoRotacion: celda.campoRotacion, rotacion: celda.rotacion
+        tipo: celda.tipo, campoRotacion: celda.campoRotacion, rotacion: celda.rotacion,
+        correo: p.correo || ''
       });
     }
   }
