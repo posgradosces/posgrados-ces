@@ -127,6 +127,7 @@
         <div style="position:relative;"><label>Año académico (inicio, ej: 2027)</label><input id="cg-periodo" autocomplete="off" placeholder="2027" oninput="mostrarSugerencias('cg-periodo')" onfocus="mostrarSugerencias('cg-periodo')"><div id="sug-cg-periodo" class="caja-sugerencias"></div></div>
         <div><label>Hasta (opcional, para ver varios años)</label><input id="cg-periodo-hasta" autocomplete="off" placeholder="ej: 2028"></div>
         <div><button class="btn-primario" id="boton-cargar-cuadricula" onclick="cargarCuadricula()">Cargar cuadrícula</button></div>
+        <div><button class="btn-secundario" id="boton-notas-programa" onclick="abrirPanelNotasPrograma()">📝 Notas <span id="badge-notas-programa" style="display:none; background:#1F4E79; color:white; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:4px;"></span></button></div>
         <div><button class="btn-secundario" id="boton-agregar-residente" onclick="abrirModalAgregarResidente()">+ Agregar residente</button></div>
         <div><button class="btn-secundario" id="boton-copiar-filas" onclick="copiarFilasSeleccionadas()">📋 Copiar seleccionados</button></div>
         <div><button class="btn-primario" id="boton-pegar-filas" onclick="abrirModalPegarFilas()" style="display:none;">📌 Pegar residentes copiados</button></div>
@@ -1965,6 +1966,86 @@ async function cargarCuadricula(silencioso) {
   });
 
   redibujarCuadricula();
+  actualizarBadgeNotasPrograma();
+}
+
+// ============================================================
+// NOTAS DEL CUADRO DE ROTACIONES — observaciones generales por Programa (no por año académico:
+// aplican siempre, ej. "esta rotación solo la reciben en julio-agosto"). Coordinadoras pueden
+// agregar/borrar; auxiliares las ven en modo lectura. Se cargan cada vez que se carga un
+// programa en la cuadrícula (cargarCuadricula) y se cachean aquí para no volver a pedirlas al
+// abrir/cerrar el panel.
+// ============================================================
+let notasProgramaActual = [];
+
+async function actualizarBadgeNotasPrograma() {
+  const badge = document.getElementById('badge-notas-programa');
+  if (!contextoGrid.programa) { badge.style.display = 'none'; return; }
+
+  const resultado = await leerBackend('listarNotasPrograma', { programa: contextoGrid.programa });
+  if (!resultado.ok) { badge.style.display = 'none'; return; }
+
+  notasProgramaActual = resultado.notas || [];
+  if (notasProgramaActual.length > 0) {
+    badge.textContent = notasProgramaActual.length;
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function abrirPanelNotasPrograma() {
+  if (!contextoGrid.programa) {
+    mostrarMensaje('Primero escribe programa y año académico, y da clic en "Cargar cuadrícula".', 'error');
+    return;
+  }
+
+  const esCoordinadora = usuarioActual.rol === 'coordinadora';
+  const listaHtml = notasProgramaActual.length === 0
+    ? '<p style="color:#999; font-size:13px;">Todavía no hay notas para este programa.</p>'
+    : notasProgramaActual.map(n => `
+        <div style="border-bottom:1px solid #eee; padding:10px 0;">
+          <div style="white-space:pre-wrap; font-size:14px;">${esc(n.nota)}</div>
+          <div style="font-size:11px; color:#888; margin-top:4px; display:flex; justify-content:space-between; align-items:center;">
+            <span>${esc(n.autor)} — ${esc(n.fechaHora)}</span>
+            ${esCoordinadora ? `<button class="btn-secundario btn-pequeno" onclick="eliminarNotaPrograma('${esc(n.idNota)}')" style="color:#9C0006; border-color:#9C0006;">🗑 Borrar</button>` : ''}
+          </div>
+        </div>`).join('');
+
+  const html = `
+    <h3>📝 Notas — ${esc(contextoGrid.programa)}</h3>
+    <p style="font-size:12px; color:#888;">Observaciones generales del programa, sin importar el año académico cargado.</p>
+    <div style="max-height:320px; overflow-y:auto; margin:12px 0;">${listaHtml}</div>
+    ${esCoordinadora ? `
+      <label>Nueva nota</label>
+      <textarea id="modal-nueva-nota" rows="3" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;" placeholder="Ej: Esta rotación solo la reciben en julio-agosto."></textarea>
+      <div class="fila-botones"><button class="btn-primario" onclick="confirmarAgregarNotaPrograma()">Agregar nota</button></div>
+    ` : ''}`;
+  document.getElementById('contenido-modal').innerHTML = html;
+  document.getElementById('overlay-modal').style.display = 'flex';
+}
+
+async function confirmarAgregarNotaPrograma() {
+  const texto = document.getElementById('modal-nueva-nota').value.trim();
+  if (!texto) { mostrarMensaje('Escribe una nota antes de guardar.', 'error'); return; }
+
+  const resultado = await llamarBackend('agregarNotaPrograma', { programa: contextoGrid.programa, nota: texto });
+  if (!resultado.ok) { mostrarMensaje('Error: ' + resultado.error, 'error'); return; }
+
+  mostrarMensaje('Nota agregada.', 'ok');
+  await actualizarBadgeNotasPrograma();
+  abrirPanelNotasPrograma();
+}
+
+// Sin confirm(): borrar una nota es una acción sobre un solo registro, igual que el resto de
+// borrados de un solo elemento en este sistema.
+async function eliminarNotaPrograma(idNota) {
+  const resultado = await llamarBackend('eliminarNotaPrograma', { idNota });
+  if (!resultado.ok) { mostrarMensaje('Error: ' + resultado.error, 'error'); return; }
+
+  mostrarMensaje('Nota borrada.', 'ok');
+  await actualizarBadgeNotasPrograma();
+  abrirPanelNotasPrograma();
 }
 
 // Agrupa las filas por nivel: R1, R2, R3, R4, R5 y todo lo demás como "Movilidad Académica"
