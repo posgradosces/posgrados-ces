@@ -2319,24 +2319,26 @@ async function procesarArchivoExcel(evento) {
 
   const COLUMNAS_MES = ['Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre','Enero','Febrero','Marzo','Abril','Mayo','Junio','Vacaciones 1','Vacaciones 2'];
 
-  // Fila 4 (índice 3) = encabezados, fila 5 (índice 4) en adelante = datos
+  // Fila 4 (índice 3) = encabezados, fila 5 (índice 4) en adelante = datos.
+  // Columnas: A=ID, B=Nombre, C=Nivel, D=Correo, E en adelante=meses (Correo corrió los meses
+  // una columna a la derecha respecto a la plantilla anterior).
   const filasDatos = filasCrudas.slice(4);
 
   const filasParaEnviar = [];
   filasDatos.forEach(fila => {
-    const id = fila[0], nombre = fila[1], nivel = fila[2];
+    const id = fila[0], nombre = fila[1], nivel = fila[2], correo = String(fila[3] || '').trim();
     if (!id) return;
 
     const meses = {};
     COLUMNAS_MES.forEach((mes, i) => {
-      const contenido = String(fila[3 + i] || '').trim();
+      const contenido = String(fila[4 + i] || '').trim();
       if (!contenido) return;
       const partes = contenido.split('\n');
       meses[mes] = { campo: (partes[0] || '').trim(), rotacion: (partes[1] || '').trim() };
     });
 
     if (Object.keys(meses).length > 0) {
-      filasParaEnviar.push({ id: String(id), nombre: String(nombre), nivel: String(nivel), meses });
+      filasParaEnviar.push({ id: String(id), nombre: String(nombre), nivel: String(nivel), correo, meses });
     }
   });
 
