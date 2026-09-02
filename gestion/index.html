@@ -42,6 +42,21 @@
   .controles-cuadricula input, .controles-cuadricula label.check { padding: 8px; border: 1px solid #ccc; border-radius: 5px; min-width: 160px; }
   .controles-cuadricula label.check { display: flex; align-items: center; gap: 6px; min-width: auto; cursor: pointer; }
 
+  /* Fila de acciones del Cuadro de rotaciones, agrupadas por función con un separador entre
+     grupos y un color distintivo por grupo, para que cada botón se reconozca de un vistazo
+     en vez de perderse en una fila larga de botones grises iguales. */
+  .acciones-cuadricula { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+  .grupo-acciones { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .separador-acciones { width: 1px; height: 26px; background: #dcdcdc; }
+  .btn-crear { background: #E8F5E9; color: #2E7D32; border: 1.5px solid #A5D6A7; }
+  .btn-crear:hover { background: #C8E6C9; }
+  .btn-notas { background: #E0F2F1; color: #00695C; border: 1.5px solid #80CBC4; }
+  .btn-notas:hover { background: #B2DFDB; }
+  .btn-excel { background: #fff; color: #1F4E79; border: 1.5px solid #8FC1E8; }
+  .btn-excel:hover { background: #EAF3FB; }
+  .btn-mantenimiento { background: #f0f0f0; color: #666; border: 1px solid #ddd; }
+  .btn-mantenimiento:hover { background: #e6e6e6; }
+
   .contenedor-scroll-cuadricula { max-height: 68vh; overflow: auto; border: 1px solid #e2e2e2; border-radius: 6px; }
   .caja-sugerencias { display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #ccc; border-radius:0 0 6px 6px; max-height:220px; overflow-y:auto; z-index:50; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
   .caja-sugerencias div { padding:8px 10px; cursor:pointer; font-size:13px; }
@@ -126,17 +141,32 @@
         </div>
         <div style="position:relative;"><label>Año académico (inicio, ej: 2027)</label><input id="cg-periodo" autocomplete="off" placeholder="2027" oninput="mostrarSugerencias('cg-periodo')" onfocus="mostrarSugerencias('cg-periodo')"><div id="sug-cg-periodo" class="caja-sugerencias"></div></div>
         <div><label>Hasta (opcional, para ver varios años)</label><input id="cg-periodo-hasta" autocomplete="off" placeholder="ej: 2028"></div>
-        <div><button class="btn-primario" id="boton-cargar-cuadricula" onclick="cargarCuadricula()">Cargar cuadrícula</button></div>
-        <div><button class="btn-secundario" id="boton-notas-programa" onclick="abrirPanelNotasPrograma()">📝 Notas <span id="badge-notas-programa" style="display:none; background:#1F4E79; color:white; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:4px;"></span></button></div>
-        <div><button class="btn-secundario" id="boton-agregar-residente" onclick="abrirModalAgregarResidente()">+ Agregar residente</button></div>
-        <div><button class="btn-secundario" id="boton-copiar-filas" onclick="copiarFilasSeleccionadas()">📋 Copiar seleccionados</button></div>
-        <div><button class="btn-primario" id="boton-pegar-filas" onclick="abrirModalPegarFilas()" style="display:none;">📌 Pegar residentes copiados</button></div>
-        <div><button class="btn-secundario" id="boton-importar-excel" onclick="document.getElementById('input-excel').click()">📥 Importar Excel</button>
-          <input type="file" id="input-excel" accept=".xlsx" style="display:none;" onchange="procesarArchivoExcel(event)">
+      </div>
+      <div class="acciones-cuadricula">
+        <div class="grupo-acciones">
+          <button class="btn-primario" id="boton-cargar-cuadricula" onclick="cargarCuadricula()" title="Carga la cuadrícula de este programa y año académico">Cargar cuadrícula</button>
+          <button class="btn-secundario" onclick="actualizarCuadriculaActual()" title="Vuelve a traer los datos más recientes del servidor, sin perder lo que tienes en pantalla">🔄 Actualizar</button>
         </div>
-        <div><button class="btn-secundario" onclick="descargarCuadriculaExcel()">📤 Descargar Excel</button></div>
-        <div><button class="btn-secundario" onclick="actualizarCuadriculaActual()">🔄 Actualizar</button></div>
-        <div><button class="btn-secundario" id="boton-archivar-periodo" style="display:none; border-color:#888; color:#555;" onclick="abrirArchivarPeriodo()">🗄 Archivar periodo académico</button></div>
+        <div class="separador-acciones"></div>
+        <div class="grupo-acciones">
+          <button class="btn-crear" id="boton-agregar-residente" onclick="abrirModalAgregarResidente()" title="Agrega un residente nuevo a esta cuadrícula">+ Agregar residente</button>
+          <button class="btn-secundario" id="boton-copiar-filas" onclick="copiarFilasSeleccionadas()" title="Copia las filas de residentes marcadas, para pegarlas luego en otro programa o año académico">📋 Copiar seleccionados</button>
+          <button class="btn-primario" id="boton-pegar-filas" onclick="abrirModalPegarFilas()" style="display:none;" title="Pega aquí los residentes que copiaste">📌 Pegar residentes copiados</button>
+        </div>
+        <div class="separador-acciones"></div>
+        <div class="grupo-acciones">
+          <button class="btn-notas" id="boton-notas-programa" onclick="abrirPanelNotasPrograma()" title="Observaciones generales de este programa — aplican para cualquier año académico">📝 Notas <span id="badge-notas-programa" style="display:none; background:#00695C; color:white; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:4px;"></span></button>
+        </div>
+        <div class="separador-acciones"></div>
+        <div class="grupo-acciones">
+          <button class="btn-excel" id="boton-importar-excel" onclick="document.getElementById('input-excel').click()" title="Carga residentes y rotaciones de este programa desde un archivo Excel">📥 Importar Excel</button>
+          <input type="file" id="input-excel" accept=".xlsx" style="display:none;" onchange="procesarArchivoExcel(event)">
+          <button class="btn-excel" onclick="descargarCuadriculaExcel()" title="Descarga esta cuadrícula como archivo Excel">📤 Descargar Excel</button>
+        </div>
+        <div class="separador-acciones"></div>
+        <div class="grupo-acciones">
+          <button class="btn-mantenimiento" id="boton-archivar-periodo" style="display:none;" onclick="abrirArchivarPeriodo()" title="Oculta de las tablas activas un periodo académico ya resuelto — el histórico nunca se borra">🗄 Archivar periodo académico</button>
+        </div>
       </div>
       <div id="contenedor-cuadricula"><p style="color:#999;">Escribe programa y año académico, luego "Cargar cuadrícula".</p></div>
       <p style="font-size:12px; color:#888; margin-top:8px;">
