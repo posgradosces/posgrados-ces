@@ -2024,6 +2024,22 @@ async function actualizarBadgeNotasPrograma() {
   }
 }
 
+// Convierte la fecha de una nota a un texto legible en español ("2 sep 2026, 8:32 a. m."),
+// tolerando tanto el formato limpio que ya envía el backend ("2026-09-02 13:32") como un ISO
+// crudo con "T"/"Z" que pudo quedar guardado en notas creadas antes de fijar la columna
+// FechaHora como texto en el Sheets.
+const MESES_CORTOS_ = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function formatearFechaNotaVisible_(valor) {
+  const texto = String(valor || '').trim();
+  const m = texto.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+  if (!m) return texto;
+  const [, anio, mes, dia, hora24, min] = m;
+  const horaNum = Number(hora24);
+  const periodo = horaNum >= 12 ? 'p. m.' : 'a. m.';
+  const hora12 = ((horaNum % 12) || 12);
+  return `${Number(dia)} ${MESES_CORTOS_[Number(mes) - 1]} ${anio}, ${hora12}:${min} ${periodo}`;
+}
+
 function abrirPanelNotasPrograma() {
   if (!contextoGrid.programa) {
     mostrarMensaje('Primero escribe programa y año académico, y da clic en "Cargar cuadrícula".', 'error');
@@ -2034,11 +2050,11 @@ function abrirPanelNotasPrograma() {
   const listaHtml = notasProgramaActual.length === 0
     ? '<p style="color:#999; font-size:13px;">Todavía no hay notas para este programa.</p>'
     : notasProgramaActual.map(n => `
-        <div style="border-bottom:1px solid #eee; padding:10px 0;">
-          <div style="white-space:pre-wrap; font-size:14px;">${esc(n.nota)}</div>
-          <div style="font-size:11px; color:#888; margin-top:4px; display:flex; justify-content:space-between; align-items:center;">
-            <span>${esc(n.autor)} — ${esc(n.fechaHora)}</span>
-            ${esCoordinadora ? `<button class="btn-secundario btn-pequeno" onclick="eliminarNotaPrograma('${esc(n.idNota)}')" style="color:#9C0006; border-color:#9C0006;">🗑 Borrar</button>` : ''}
+        <div style="background:#F5FBFA; border:1px solid #D0EDEA; border-left:4px solid #26A69A; border-radius:8px; padding:14px 16px; margin-bottom:12px;">
+          <div style="white-space:pre-wrap; word-break:break-word; font-size:16px; line-height:1.5; color:#1a1a1a;">${esc(n.nota)}</div>
+          <div style="font-size:12px; color:#5b8a86; margin-top:10px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span>✍️ ${esc(n.autor)} · ${esc(formatearFechaNotaVisible_(n.fechaHora))}</span>
+            ${esCoordinadora ? `<button class="btn-secundario btn-pequeno" onclick="eliminarNotaPrograma('${esc(n.idNota)}')" style="color:#9C0006; border-color:#9C0006; flex-shrink:0;">🗑 Borrar</button>` : ''}
           </div>
         </div>`).join('');
 
