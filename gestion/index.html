@@ -2087,9 +2087,11 @@ async function confirmarAgregarNotaPrograma() {
 // borrados de un solo elemento en este sistema.
 async function eliminarNotaPrograma(idNota) {
   const resultado = await llamarBackend('eliminarNotaPrograma', { idNota });
-  if (!resultado.ok) { mostrarMensaje('Error: ' + resultado.error, 'error'); return; }
+  mostrarMensaje(resultado.ok ? 'Nota borrada.' : 'Error: ' + resultado.error, resultado.ok ? 'ok' : 'error');
 
-  mostrarMensaje('Nota borrada.', 'ok');
+  // Se refresca siempre, incluso si falló: si el error fue "no se encontró esa nota" (porque
+  // ya se había borrado por fuera, directo en el Sheets), esto la quita de la pantalla en vez
+  // de dejarla viéndose pegada como si aún existiera.
   await actualizarBadgeNotasPrograma();
   abrirPanelNotasPrograma();
 }
