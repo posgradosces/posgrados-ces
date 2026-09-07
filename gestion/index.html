@@ -1,3 +1,4 @@
+<!-- ARCHIVO: GESTIÓN OPERATIVA (panel interno) — subir SOLO a /gestion/ como index.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1975,7 +1976,16 @@ async function cargarCuadricula(silencioso) {
     boton.disabled = false;
   }
 
-  if (!resHistorico.ok) { if (!silencioso) mostrarMensaje('Error cargando histórico: ' + resHistorico.error, 'error'); return; }
+  if (!resHistorico.ok) {
+    if (!silencioso) {
+      mostrarMensaje('Error cargando histórico: ' + resHistorico.error, 'error');
+      // El mensaje flotante desaparece a los 4 segundos: el motivo también queda escrito aquí,
+      // para que nadie se quede mirando un "⏳ Cargando datos..." que ya no está cargando nada.
+      document.getElementById('contenedor-cuadricula').innerHTML =
+        '<p style="color:#9C0006;">No se pudo cargar la información: ' + esc(resHistorico.error) + '<br>Vuelve a dar clic en "Cargar cuadrícula".</p>';
+    }
+    return;
+  }
 
   registrosGridActual = resHistorico.datos.filter(r =>
     r.Programa === programa && anioAcademicosBuscados.has(String(r.AnioAcademico))
@@ -1995,7 +2005,16 @@ async function cargarCuadricula(silencioso) {
     }
   });
 
-  redibujarCuadricula();
+  try {
+    redibujarCuadricula();
+  } catch (err) {
+    // Red de seguridad: si alguna fila trae un dato inesperado y el dibujado falla, se ve el
+    // motivo en pantalla en vez de quedar el "⏳ Cargando datos..." congelado sin explicación.
+    document.getElementById('contenedor-cuadricula').innerHTML =
+      '<p style="color:#9C0006;">No se pudo dibujar la cuadrícula: ' + esc(err.message) + '<br>Vuelve a intentar; si sigue igual, avisa para revisar los datos de este programa.</p>';
+    if (!silencioso) mostrarMensaje('No se pudo dibujar la cuadrícula: ' + err.message, 'error');
+    return;
+  }
   actualizarBadgeNotasPrograma();
 }
 
@@ -2119,7 +2138,22 @@ function redibujarCuadricula() {
   const bloques = contextoGrid.bloques || [{ anioInicio: contextoGrid.anioInicio, anioSiguiente: contextoGrid.anioSiguiente, anioAcademico: contextoGrid.anioInicio + '-' + contextoGrid.anioSiguiente }];
   const totalColumnas = (MESES.length + MESES_VACACIONES.length) * bloques.length + 1;
 
-  let html = '<div class="contenedor-scroll-cuadricula"><table class="cuadricula"><thead>';
+  // Diagnóstico visible: filas cuyo ResidenteNombre no llegó como texto (celda vacía, guardada
+  // como número o como fecha). Es exactamente el dato que rompía el dibujado en el perfil de
+  // coordinadora, así que se señala aquí para poder corregirlo en la base de una vez.
+  const filasSinNombre = filasGridActual.filter(f => typeof f.nombre !== 'string' || f.nombre.trim() === '');
+  let avisoDatos = '';
+  if (filasSinNombre.length > 0) {
+    const detalle = filasSinNombre.map(f =>
+      esc(String(f.id === null || f.id === undefined ? '(sin ID)' : f.id)) +
+      ' → valor guardado: "' + esc(String(f.nombre === null || f.nombre === undefined ? '' : f.nombre)) + '"'
+    ).join(' · ');
+    avisoDatos = `<div style="background:#FFC7CE; color:#9C0006; border-radius:8px; padding:10px 14px; margin-bottom:10px; font-size:13px; line-height:1.5;">
+      ⚠️ ${filasSinNombre.length} residente(s) de este cuadro tienen el nombre vacío o guardado en un formato que no es texto en HistoricoBaseGeneral (columna ResidenteNombre). Corrígelo allá y vuelve a cargar: ${detalle}
+    </div>`;
+  }
+
+  let html = avisoDatos + '<div class="contenedor-scroll-cuadricula"><table class="cuadricula"><thead>';
   html += `<tr><th class="esquina" rowspan="2">Residente</th>`;
   bloques.forEach(b => {
     html += `<th colspan="6" style="background:#003865; color:white;">${b.anioInicio}-2</th>
@@ -2136,7 +2170,7 @@ function redibujarCuadricula() {
     if (registro) {
       const colorTexto = COLOR_TEXTO_ESTADO[registro.Estado] || '#333';
       const colorFondo = colorDeFondoPorCampo(registro.CampoRotacion, registro.Rotacion);
-      const claveEsc = registro.ClaveUnica.replace(/'/g, "\\'");
+      const claveEsc = String(registro.ClaveUnica === null || registro.ClaveUnica === undefined ? '' : registro.ClaveUnica).replace(/'/g, "\\'");
       return `<td class="celda" style="color:${colorTexto}; background:${colorFondo};" onclick="abrirCelda('${claveEsc}')">
         <strong>${esc(registro.CampoRotacion || '')}</strong><br>${esc(registro.Rotacion || '')}
         ${registro.Alerta ? '<div class="celda-alerta">' + esc(registro.Alerta) + '</div>' : ''}
@@ -2155,14 +2189,24 @@ function redibujarCuadricula() {
     html += `<tr class="fila-grupo"><td colspan="${totalColumnas}">${nombreGrupo}</td></tr>`;
 
     filasGrupo.forEach(res => {
-      const marcado = filasSeleccionadas.has(String(res.id)) ? 'checked' : '';
+      // Todo se convierte a texto ANTES de escaparlo. Si una fila del histórico llega con el
+      // nombre vacío (o en un formato que no es texto), esto ya no rompe el dibujado: antes
+      // tumbaba el render completo de la cuadrícula y dejaba el "⏳ Cargando datos..." congelado,
+      // y solo en el perfil de coordinadora, que es el único que dibuja el botón ✏️.
+      const idSeguro = String(res.id === null || res.id === undefined ? '' : res.id);
+      const nombreSeguro = String(res.nombre === null || res.nombre === undefined ? '' : res.nombre).trim();
+      const nivelSeguro = String(res.nivel === null || res.nivel === undefined ? '' : res.nivel).trim();
+      const correoSeguro = String(res.correo === null || res.correo === undefined ? '' : res.correo).trim();
+      const nombreVisible = nombreSeguro || '⚠️ (sin nombre en la base)';
+
+      const marcado = filasSeleccionadas.has(idSeguro) ? 'checked' : '';
       const checkboxHtml = usuarioActual.rol === 'coordinadora'
-        ? `<input type="checkbox" ${marcado} onchange="toggleSeleccionResidente('${res.id}', this.checked)" style="margin-right:6px;">`
+        ? `<input type="checkbox" ${marcado} onchange="toggleSeleccionResidente('${idSeguro.replace(/'/g, "\\'")}', this.checked)" style="margin-right:6px;">`
         : '';
       const botonEliminar = usuarioActual.rol === 'coordinadora'
-        ? `<span title="Editar, o eliminar de esta cuadrícula" style="float:right; cursor:pointer;" onclick="abrirEditarResidente('${res.id}', '${res.nombre.replace(/'/g, "\\'")}', '${(res.nivel||'').replace(/'/g, "\\'")}', '${(res.correo||'').replace(/'/g, "\\'")}')">✏️</span>`
+        ? `<span title="Editar, o eliminar de esta cuadrícula" style="float:right; cursor:pointer;" onclick="abrirEditarResidente('${idSeguro.replace(/'/g, "\\'")}', '${nombreSeguro.replace(/'/g, "\\'")}', '${nivelSeguro.replace(/'/g, "\\'")}', '${correoSeguro.replace(/'/g, "\\'")}')">✏️</span>`
         : '';
-      html += `<tr><td class="col-residente">${checkboxHtml}${res.nombre}${botonEliminar}<br><span style="color:#888; font-weight:400; margin-left:${checkboxHtml ? '20px' : '0'};">${res.id} · ${res.nivel || ''}</span></td>`;
+      html += `<tr><td class="col-residente">${checkboxHtml}${esc(nombreVisible)}${botonEliminar}<br><span style="color:#888; font-weight:400; margin-left:${checkboxHtml ? '20px' : '0'};">${esc(idSeguro)} · ${esc(nivelSeguro)}</span></td>`;
       bloques.forEach(b => {
         MESES.forEach(mes => { html += renderCelda(res, mes, b.anioAcademico, b.anioInicio); });
         MESES_VACACIONES.forEach(mes => { html += renderCelda(res, mes, b.anioAcademico, b.anioInicio); });
