@@ -91,6 +91,110 @@
   #caja-modal .fila-botones { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
   #caja-modal .cerrar { float: right; cursor: pointer; color: #999; font-size: 18px; }
 
+  /* Dashboard general — panorama de posgrados. Vista inicial compacta; cada gráfico e indicador
+     se puede tocar para desglosar más información debajo de él. */
+  .db-cabecera { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+  .db-barra-datos { font-size: 12px; color: #6b7684; margin-top: 2px; }
+  .db-barra-datos button { background: #e8edf3; color: #333; border-radius: 6px; padding: 3px 9px; font-size: 12px; margin-left: 6px; }
+  .db-fila { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .db-chip { border-radius: 16px; border: 1px solid #cfd6de; background: white; color: #333; padding: 5px 12px; font-size: 13px; }
+  .db-chip.activo { background: var(--azul-ces); color: white; border-color: var(--azul-ces); }
+  .db-chip .hoy { font-size: 10px; background: #e3f0e6; color: #006100; border-radius: 8px; padding: 1px 6px; margin-left: 5px; font-weight: 600; }
+  .db-caja { border: 1px solid #e3e8ee; border-radius: 10px; padding: 16px 18px; margin-bottom: 16px; background: white; min-width: 0; }
+  .db-caja h3 { font-size: 15px; color: var(--azul-ces); margin: 0 0 2px; }
+  .db-como { font-size: 12px; color: #6b7684; margin: 0 0 12px; }
+  .db-tabs-busqueda { display: flex; align-items: center; border-bottom: 1px solid #e3e8ee; margin: -4px 0 14px; flex-wrap: wrap; }
+  .db-tabs-busqueda button { background: none; border-bottom: 3px solid transparent; border-radius: 0; padding: 8px 14px; font-size: 14px; color: #6b7684; }
+  .db-tabs-busqueda button.activo { color: var(--azul-ces); border-bottom-color: var(--azul-ces); font-weight: 600; }
+  .db-todos { margin-left: auto; font-size: 13px; color: #555; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .db-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+  .db-kpi { text-align: left; background: white; border: 1px solid #e3e8ee; border-top: 4px solid; border-radius: 0 0 10px 10px; padding: 14px 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; color: #222; }
+  .db-kpi:hover { background: #fafbfc; }
+  .db-kpi.activo { background: #f3f7fb; box-shadow: inset 0 0 0 2px var(--azul-ces); }
+  .db-kpi .n { font-size: 34px; font-weight: 700; line-height: 1; }
+  .db-kpi .t { font-size: 13px; font-weight: 600; margin-top: 6px; }
+  .db-kpi .d { font-size: 12px; margin-top: 4px; }
+  .db-kpi .ver { font-size: 11px; color: #6b7684; margin-top: 6px; }
+  .db-sube { color: #006100; } .db-baja { color: #9C0006; } .db-igual { color: #6b7684; }
+  .db-relato { font-size: 12px; color: #8a929c; margin: 10px 2px 16px; line-height: 1.5; }
+  .db-desglose { border: 1px solid #d6e4f5; background: #f7fafd; border-radius: 10px; padding: 14px 16px; margin: -4px 0 16px; }
+  .db-desglose-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .db-desglose-top b { color: var(--azul-ces); font-size: 14px; }
+  .db-cerrar { background: #eef1f5; color: #333; border-radius: 6px; padding: 4px 10px; font-size: 12px; }
+  .db-dos { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  .db-barras button { display: grid; grid-template-columns: 200px minmax(0, 1fr) 34px; gap: 10px; align-items: center; width: 100%; background: none; border-radius: 6px; padding: 4px 6px; text-align: left; font-size: 12px; color: #333; }
+  .db-barras button:hover { background: #f3f6f9; }
+  .db-barras button.activo { background: #e8eef5; }
+  .db-nom { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .db-apilada { display: flex; height: 14px; border-radius: 3px; overflow: hidden; }
+  .db-apilada i { display: block; height: 100%; }
+  .db-leyenda { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: #6b7684; margin-top: 10px; }
+  .db-leyenda i { display: inline-block; width: 12px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  .db-panel-detalle { border: 1px solid #e3e8ee; border-radius: 8px; margin-top: 14px; overflow: hidden; }
+  .db-panel-detalle .top { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 14px; background: #fafbfc; border-bottom: 1px solid #e3e8ee; flex-wrap: wrap; }
+  .db-panel-detalle .cuerpo { padding: 10px 14px; }
+  .db-nivel-titulo { font-size: 12px; font-weight: 700; margin: 8px 0 6px; display: flex; align-items: center; gap: 6px; }
+  .db-nivel-titulo i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .db-personas { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 6px; margin-bottom: 6px; }
+  .db-persona { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; background: white; border: 1px solid #e3e8ee; border-radius: 8px; padding: 7px 10px; font-size: 12px; }
+  .db-persona:hover { border-color: #9fb3c8; }
+  .db-link { background: none; padding: 0; color: var(--azul-ces); font-size: 13px; font-weight: 600; text-align: left; border-radius: 0; }
+  .db-link:hover { text-decoration: underline; }
+  .db-mini { background: #eef1f5; color: #333; border-radius: 6px; padding: 3px 7px; font-size: 12px; white-space: nowrap; }
+  .db-treemap { position: relative; width: 100%; height: 400px; }
+  .db-tm { position: absolute; border: 2px solid white; border-radius: 6px; padding: 6px 8px; color: white; overflow: hidden; text-align: left; font-size: 12px; line-height: 1.25; }
+  .db-tm b { display: block; font-size: 16px; }
+  .db-tm:hover { filter: brightness(1.12); }
+  .db-tm.activo { box-shadow: inset 0 0 0 3px var(--pendiente-bg); }
+  .db-migas { font-size: 12px; margin-bottom: 8px; min-height: 4px; }
+  .db-columnas { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; align-items: end; height: 230px; padding: 0 6px; border-bottom: 1px solid #e3e8ee; }
+  .db-col { display: flex; flex-direction: column; justify-content: flex-end; height: 100%; background: none; padding: 0; border-radius: 0; }
+  .db-col .pila { display: flex; flex-direction: column-reverse; border-radius: 5px 5px 0 0; overflow: hidden; width: 100%; }
+  .db-col .pct { text-align: center; font-size: 12px; font-weight: 700; color: var(--confirmado-tx); margin-bottom: 4px; }
+  .db-col:hover .pila { filter: brightness(.96); }
+  .db-col.hoy .pila { outline: 2px solid var(--azul-ces); outline-offset: 2px; }
+  .db-col.activo .pila { outline: 3px solid var(--pendiente-tx); outline-offset: 2px; }
+  .db-etq-col { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; padding: 6px 6px 0; font-size: 12px; text-align: center; color: #6b7684; }
+  .db-etq-col .hoy { color: var(--azul-ces); font-weight: 700; }
+  .db-insight { background: #f3f7fb; border-left: 4px solid var(--azul-ces); padding: 10px 14px; font-size: 13px; color: #333; margin-top: 14px; }
+  .db-mov { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 16px; align-items: center; }
+  .db-mov-fila { display: flex; justify-content: space-between; align-items: center; width: 100%; background: none; border-radius: 6px; padding: 7px 8px; border-bottom: 1px solid #f0f2f5; font-size: 13px; color: #222; text-align: left; }
+  .db-mov-fila:hover { background: #f3f6f9; }
+  .db-mov-fila.activo { background: #e8eef5; }
+  .db-matriz td, .db-matriz th { text-align: center !important; }
+  .db-matriz td:first-child, .db-matriz th:first-child { text-align: left !important; }
+  .db-celda-n { min-width: 34px; background: #f3f6f9; color: #222; border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; }
+  .db-celda-n.activo { background: var(--azul-ces); color: white; }
+  .db-fila-clic { cursor: pointer; }
+  .db-fila-clic:hover td { background: #f3f7fb; }
+  .db-linea-t { display: grid; grid-template-columns: 70px repeat(6, minmax(0, 1fr)); gap: 3px; margin-bottom: 3px; font-size: 11px; }
+  .db-linea-t > div, .db-linea-t > button { border-radius: 4px; padding: 5px; min-height: 42px; overflow-wrap: anywhere; text-align: left; font-size: 11px; line-height: 1.25; }
+  @media (max-width: 1000px) { .db-kpis { grid-template-columns: 1fr 1fr; } .db-dos { grid-template-columns: 1fr; } .db-barras button { grid-template-columns: 130px minmax(0, 1fr) 30px; } }
+
+  /* Foco del mes — Gestión Operativa de auxiliares: tarjetas de pendientes y pendientes por mes.
+     Todo lo que se toca aquí solo llena los filtros de siempre. */
+  .foco-tarjetas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
+  .foco-tarjeta { text-align: left; background: white; border: 1px solid #e3e8ee; border-radius: 10px; padding: 12px 14px; color: #222; }
+  .foco-tarjeta:hover { background: #fafbfc; }
+  .foco-tarjeta.activo { border-width: 2px; padding: 11px 13px; }
+  .foco-tarjeta .n { font-size: 26px; font-weight: 700; line-height: 1.1; }
+  .foco-tarjeta .t { font-size: 13px; font-weight: 600; margin-top: 3px; }
+  .foco-tarjeta .s { font-size: 12px; color: #6b7684; margin-top: 3px; }
+  .foco-barra { height: 6px; border-radius: 3px; background: var(--pendiente-bg); overflow: hidden; margin-top: 8px; }
+  .foco-barra i { display: block; height: 100%; background: var(--confirmado-tx); }
+  .foco-meses { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  .foco-meses .rotulo { font-size: 12px; color: #6b7684; font-weight: 600; margin-right: 2px; }
+  .foco-chip { border-radius: 16px; border: 1px solid #cfd6de; background: white; color: #333; padding: 5px 11px; font-size: 13px; }
+  .foco-chip.activo { background: var(--azul-ces); color: white; border-color: var(--azul-ces); }
+  .foco-chip .cnt { display: inline-block; min-width: 18px; margin-left: 5px; padding: 0 6px; border-radius: 9px; font-size: 11px; font-weight: 700; background: var(--pendiente-bg); color: var(--pendiente-tx); }
+  .foco-chip .cnt.cero { background: #eef1f5; color: #8a929c; }
+  .foco-chip .hoy { font-size: 10px; background: #e3f0e6; color: #006100; border-radius: 8px; padding: 1px 6px; margin-left: 5px; font-weight: 600; }
+  .foco-separador { width: 1px; height: 22px; background: #dcdcdc; margin: 0 4px; }
+  .foco-activos { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .foco-activos span { display: inline-flex; align-items: center; gap: 6px; background: #e8eef5; color: var(--azul-ces); font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px; }
+  .foco-activos span b { cursor: pointer; }
+  @media (max-width: 900px) { .foco-tarjetas { grid-template-columns: 1fr 1fr; } }
+
   #mensaje-flotante { position: fixed; bottom: 20px; right: 20px; padding: 12px 18px; border-radius: 8px; background: #333; color: white; font-size: 14px; display: none; max-width: 320px; z-index: 200; }
   #mensaje-flotante.ok { background: var(--gestionado-tx); }
   #mensaje-flotante.error { background: var(--cambio-tx); }
@@ -178,66 +282,96 @@
     </div>
 
     <div class="panel" id="panel-dashboard" style="display:none;">
-      <div id="db-barra-datos" style="background:#eef4fb; border:1px solid #d6e4f5; border-radius:8px; padding:10px 16px; font-size:13px; color:#1F4E79; margin-bottom:20px;"></div>
-
-      <h2 style="margin-bottom:2px;">Panel ejecutivo</h2>
-      <p id="db-resumen-periodo" style="font-size:12px; color:#888; margin-top:0; margin-bottom:14px;"></p>
-
-      <p style="font-size:11px; color:#888; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; margin-bottom:6px;">Ver semestre:</p>
-      <div id="db-chips-periodo" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;"></div>
-
-      <div id="db-kpis" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:24px;"></div>
-
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
+      <div class="db-cabecera">
         <div>
-          <h3 style="font-size:13px; color:white; background:var(--azul-ces); padding:10px 14px; border-radius:6px 6px 0 0; margin:0; display:flex; justify-content:space-between; align-items:center;">
-            <span>Residentes por programa</span><span style="font-size:11px; font-weight:400; opacity:0.85;">Clic para ver residentes</span>
-          </h3>
-          <div id="db-lista-programas" style="max-height:260px; overflow-y:auto; border:1px solid #eef1f5; border-top:none; border-radius:0 0 6px 6px;"></div>
+          <h2 style="margin-bottom:2px;">Panorama de posgrados clínicos</h2>
+          <div id="db-barra-datos" class="db-barra-datos"></div>
         </div>
-        <div>
-          <h3 style="font-size:13px; color:white; background:#0d6e5f; padding:10px 14px; border-radius:6px 6px 0 0; margin:0; display:flex; justify-content:space-between; align-items:center;">
-            <span>Campos de rotación</span><span style="font-size:11px; font-weight:400; opacity:0.85;">Clic para ver residentes</span>
-          </h3>
-          <div id="db-lista-campos" style="max-height:260px; overflow-y:auto; border:1px solid #eef1f5; border-top:none; border-radius:0 0 6px 6px;"></div>
+        <div id="db-chips-periodo" class="db-fila"></div>
+      </div>
+
+      <!-- BUSCADORES — van primero: los mismos tres de siempre, en pestañas -->
+      <div class="db-caja" id="db-buscadores">
+        <div class="db-tabs-busqueda">
+          <button id="db-tab-residente" class="activo" onclick="cambiarTabBusquedaDb('residente')">🔍 Buscar residente</button>
+          <button id="db-tab-campo" onclick="cambiarTabBusquedaDb('campo')">Buscar campo de rotación</button>
+          <button id="db-tab-rotacion" onclick="cambiarTabBusquedaDb('rotacion')">Buscar por rotación</button>
+          <label class="db-todos"><input type="checkbox" id="db-buscar-todos" checked onchange="rebuscarDb()"> Buscar en todos los periodos</label>
+        </div>
+        <div id="db-busq-residente">
+          <div class="controles-cuadricula">
+            <div style="position:relative;"><label>Nombre o cédula</label><input id="db-b3-nombre" autocomplete="off" placeholder="Escribe..." oninput="mostrarSugerencias('db-b3-nombre')" onfocus="mostrarSugerencias('db-b3-nombre')" onkeydown="if(event.key==='Enter') buscarResidente()"><div id="sug-db-b3-nombre" class="caja-sugerencias"></div></div>
+            <div style="position:relative;"><label>Programa (puedes elegir varios)</label><input id="db-b3-programa" autocomplete="off" placeholder="Todos" oninput="mostrarSugerencias('db-b3-programa')" onfocus="mostrarSugerencias('db-b3-programa')"><div id="sug-db-b3-programa" class="caja-sugerencias"></div><div id="chips-db-b3-programa" style="margin-top:4px;"></div></div>
+            <div style="position:relative;"><label>Semestre (puedes elegir varios)</label><input id="db-b3-semestre" autocomplete="off" placeholder="Todos" oninput="mostrarSugerencias('db-b3-semestre')" onfocus="mostrarSugerencias('db-b3-semestre')"><div id="sug-db-b3-semestre" class="caja-sugerencias"></div><div id="chips-db-b3-semestre" style="margin-top:4px;"></div></div>
+            <div><button class="btn-primario" onclick="buscarResidente()">Buscar</button></div>
+            <div><button class="btn-secundario" onclick="limpiarBusquedaResidente()">🧹 Limpiar</button></div>
+          </div>
+          <div id="db-resultado-residente"></div>
+        </div>
+        <div id="db-busq-campo" style="display:none;">
+          <div class="controles-cuadricula">
+            <div style="position:relative;"><label>Institución/campo (puedes elegir varios)</label><input id="db-b1-campo" autocomplete="off" placeholder="Escribe y selecciona..." oninput="mostrarSugerencias('db-b1-campo')" onfocus="mostrarSugerencias('db-b1-campo')"><div id="sug-db-b1-campo" class="caja-sugerencias"></div><div id="chips-db-b1-campo" style="margin-top:4px;"></div></div>
+            <div style="position:relative;"><label>Mes (puedes elegir varios)</label><input id="db-b1-mes" autocomplete="off" placeholder="Todos los meses" oninput="mostrarSugerencias('db-b1-mes')" onfocus="mostrarSugerencias('db-b1-mes')"><div id="sug-db-b1-mes" class="caja-sugerencias"></div><div id="chips-db-b1-mes" style="margin-top:4px;"></div></div>
+            <div style="position:relative;"><label>Año (puedes elegir varios)</label><input id="db-b1-anio" autocomplete="off" placeholder="Todos los años" oninput="mostrarSugerencias('db-b1-anio')" onfocus="mostrarSugerencias('db-b1-anio')"><div id="sug-db-b1-anio" class="caja-sugerencias"></div><div id="chips-db-b1-anio" style="margin-top:4px;"></div></div>
+            <div style="position:relative;"><label>Especialidad (puedes elegir varias)</label><input id="db-b1-programa" autocomplete="off" placeholder="Todas" oninput="mostrarSugerencias('db-b1-programa')" onfocus="mostrarSugerencias('db-b1-programa')"><div id="sug-db-b1-programa" class="caja-sugerencias"></div><div id="chips-db-b1-programa" style="margin-top:4px;"></div></div>
+            <div><button class="btn-primario" onclick="buscarPorCampo()">Buscar</button></div>
+            <div><button class="btn-secundario" onclick="limpiarBusquedaCampo()">🧹 Limpiar</button></div>
+          </div>
+          <div id="db-resultado-campo"></div>
+        </div>
+        <div id="db-busq-rotacion" style="display:none;">
+          <div class="controles-cuadricula">
+            <div style="position:relative;"><label>Nombre de la rotación</label><input id="db-b2-rotacion" autocomplete="off" placeholder="Escribe..." oninput="mostrarSugerencias('db-b2-rotacion')" onfocus="mostrarSugerencias('db-b2-rotacion')" onkeydown="if(event.key==='Enter') buscarPorRotacion()"><div id="sug-db-b2-rotacion" class="caja-sugerencias"></div></div>
+            <div style="position:relative;"><label>Especialidad (puedes elegir varias)</label><input id="db-b2-programa" autocomplete="off" placeholder="Todas" oninput="mostrarSugerencias('db-b2-programa')" onfocus="mostrarSugerencias('db-b2-programa')"><div id="sug-db-b2-programa" class="caja-sugerencias"></div><div id="chips-db-b2-programa" style="margin-top:4px;"></div></div>
+            <div style="position:relative;"><label>Mes (puedes elegir varios)</label><input id="db-b2-mes" autocomplete="off" placeholder="Todos los meses" oninput="mostrarSugerencias('db-b2-mes')" onfocus="mostrarSugerencias('db-b2-mes')"><div id="sug-db-b2-mes" class="caja-sugerencias"></div><div id="chips-db-b2-mes" style="margin-top:4px;"></div></div>
+            <div><button class="btn-primario" onclick="buscarPorRotacion()">Buscar</button></div>
+            <div><button class="btn-secundario" onclick="limpiarBusquedaRotacion()">🧹 Limpiar</button></div>
+          </div>
+          <div id="db-resultado-rotacion"></div>
         </div>
       </div>
 
-      <div class="panel" style="background:#fafbfc; box-shadow:none; border:1px solid #eef1f5;">
-        <h3 style="font-size:13px; color:var(--azul-ces); margin-top:0;">Buscar campo de rotación</h3>
-        <div class="controles-cuadricula">
-          <div style="position:relative;"><label>Institución/campo (puedes elegir varios)</label><input id="db-b1-campo" autocomplete="off" placeholder="Escribe y selecciona..." oninput="mostrarSugerencias('db-b1-campo')" onfocus="mostrarSugerencias('db-b1-campo')"><div id="sug-db-b1-campo" class="caja-sugerencias"></div><div id="chips-db-b1-campo" style="margin-top:4px;"></div></div>
-          <div style="position:relative;"><label>Mes (puedes elegir varios)</label><input id="db-b1-mes" autocomplete="off" placeholder="Todos los meses" oninput="mostrarSugerencias('db-b1-mes')" onfocus="mostrarSugerencias('db-b1-mes')"><div id="sug-db-b1-mes" class="caja-sugerencias"></div><div id="chips-db-b1-mes" style="margin-top:4px;"></div></div>
-          <div style="position:relative;"><label>Año (puedes elegir varios)</label><input id="db-b1-anio" autocomplete="off" placeholder="Todos los años" oninput="mostrarSugerencias('db-b1-anio')" onfocus="mostrarSugerencias('db-b1-anio')"><div id="sug-db-b1-anio" class="caja-sugerencias"></div><div id="chips-db-b1-anio" style="margin-top:4px;"></div></div>
-          <div style="position:relative;"><label>Especialidad (puedes elegir varias)</label><input id="db-b1-programa" autocomplete="off" placeholder="Todas" oninput="mostrarSugerencias('db-b1-programa')" onfocus="mostrarSugerencias('db-b1-programa')"><div id="sug-db-b1-programa" class="caja-sugerencias"></div><div id="chips-db-b1-programa" style="margin-top:4px;"></div></div>
-          <div><button class="btn-primario" onclick="buscarPorCampo()">Buscar</button></div>
-          <div><button class="btn-secundario" onclick="limpiarBusquedaCampo()">🧹 Limpiar</button></div>
+      <!-- INDICADORES — visuales primero; la lectura en texto va debajo, pequeña y en gris -->
+      <div id="db-kpis" class="db-kpis"></div>
+      <p id="db-relato" class="db-relato"></p>
+      <div id="db-desglose-kpi"></div>
+
+      <div class="db-dos">
+        <div class="db-caja" id="db-caja-programas">
+          <h3>Residentes por programa</h3>
+          <p class="db-como">Cada barra es un programa; el largo es el número de residentes y los tonos, el nivel. Clic en un programa para ver quiénes son; clic en un residente para ir a su cuadro de rotaciones.</p>
+          <div id="db-barras-prog" class="db-barras"></div>
+          <div class="db-leyenda"><span><i style="background:#BDD7EE"></i>R1</span><span><i style="background:#7FAEDB"></i>R2</span><span><i style="background:#2E6DA4"></i>R3</span><span><i style="background:#003865"></i>R4</span><span><i style="background:#F2B36B"></i>Movilidad entrante</span></div>
+          <div id="db-detalle-prog"></div>
         </div>
-        <div id="db-resultado-campo" style="margin-top:10px;"></div>
+        <div class="db-caja" id="db-caja-campos">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+            <div><h3>Dónde rotan</h3><p class="db-como">Cada bloque es un campo de rotación; entre más grande, más residentes recibe. Clic en un bloque para ver quiénes están ahí.</p></div>
+            <div class="db-fila" id="db-vista-campos" style="flex-wrap:nowrap;"></div>
+          </div>
+          <div id="db-migas" class="db-migas"></div>
+          <div id="db-campos-cuerpo"></div>
+          <div id="db-detalle-campo"></div>
+        </div>
       </div>
 
-      <div class="panel" style="background:#fafbfc; box-shadow:none; border:1px solid #eef1f5;">
-        <h3 style="font-size:13px; color:var(--azul-ces); margin-top:0;">Buscar por rotación</h3>
-        <div class="controles-cuadricula">
-          <div style="position:relative;"><label>Nombre de la rotación</label><input id="db-b2-rotacion" autocomplete="off" placeholder="Escribe..." oninput="mostrarSugerencias('db-b2-rotacion')" onfocus="mostrarSugerencias('db-b2-rotacion')"><div id="sug-db-b2-rotacion" class="caja-sugerencias"></div></div>
-          <div style="position:relative;"><label>Especialidad (puedes elegir varias)</label><input id="db-b2-programa" autocomplete="off" placeholder="Todas" oninput="mostrarSugerencias('db-b2-programa')" onfocus="mostrarSugerencias('db-b2-programa')"><div id="sug-db-b2-programa" class="caja-sugerencias"></div><div id="chips-db-b2-programa" style="margin-top:4px;"></div></div>
-          <div style="position:relative;"><label>Mes (puedes elegir varios)</label><input id="db-b2-mes" autocomplete="off" placeholder="Todos los meses" oninput="mostrarSugerencias('db-b2-mes')" onfocus="mostrarSugerencias('db-b2-mes')"><div id="sug-db-b2-mes" class="caja-sugerencias"></div><div id="chips-db-b2-mes" style="margin-top:4px;"></div></div>
-          <div><button class="btn-primario" onclick="buscarPorRotacion()">Buscar</button></div>
-          <div><button class="btn-secundario" onclick="limpiarBusquedaRotacion()">🧹 Limpiar</button></div>
+      <div class="db-dos">
+        <div class="db-caja" id="db-caja-meses">
+          <h3>Avance de confirmación, mes a mes</h3>
+          <p class="db-como">Cada columna es un mes del semestre: azul es lo confirmado por las instituciones y amarillo lo que falta. Clic en un mes para ver qué está pendiente.</p>
+          <div id="db-columnas" class="db-columnas"></div>
+          <div id="db-etq-col" class="db-etq-col"></div>
+          <div class="db-leyenda"><span><i style="background:var(--confirmado-bg)"></i>Confirmado</span><span><i style="background:var(--pendiente-bg)"></i>Pendiente</span><span><i style="background:var(--cambio-bg)"></i>Cambio</span><span><i style="background:var(--negado-bg)"></i>Negado</span></div>
+          <div id="db-insight-meses" class="db-insight"></div>
+          <div id="db-detalle-mes"></div>
         </div>
-        <div id="db-resultado-rotacion" style="margin-top:10px;"></div>
-      </div>
-
-      <div class="panel" style="background:#fafbfc; box-shadow:none; border:1px solid #eef1f5;">
-        <h3 style="font-size:13px; color:var(--azul-ces); margin-top:0;">Buscar residente</h3>
-        <div class="controles-cuadricula">
-          <div style="position:relative;"><label>Nombre</label><input id="db-b3-nombre" autocomplete="off" placeholder="Escribe..." oninput="mostrarSugerencias('db-b3-nombre')" onfocus="mostrarSugerencias('db-b3-nombre')"><div id="sug-db-b3-nombre" class="caja-sugerencias"></div></div>
-          <div style="position:relative;"><label>Programa (puedes elegir varios)</label><input id="db-b3-programa" autocomplete="off" placeholder="Todos" oninput="mostrarSugerencias('db-b3-programa')" onfocus="mostrarSugerencias('db-b3-programa')"><div id="sug-db-b3-programa" class="caja-sugerencias"></div><div id="chips-db-b3-programa" style="margin-top:4px;"></div></div>
-          <div style="position:relative;"><label>Semestre (puedes elegir varios)</label><input id="db-b3-semestre" autocomplete="off" placeholder="Todos" oninput="mostrarSugerencias('db-b3-semestre')" onfocus="mostrarSugerencias('db-b3-semestre')"><div id="sug-db-b3-semestre" class="caja-sugerencias"></div><div id="chips-db-b3-semestre" style="margin-top:4px;"></div></div>
-          <div><button class="btn-primario" onclick="buscarResidente()">Buscar</button></div>
-          <div><button class="btn-secundario" onclick="limpiarBusquedaResidente()">🧹 Limpiar</button></div>
+        <div class="db-caja" id="db-caja-movilidad">
+          <h3>Movilidad entrante</h3>
+          <p class="db-como">Residentes de otras universidades que rotan con nosotros en el periodo, según la respuesta de la institución. Clic en un estado para ver quiénes son.</p>
+          <div class="db-mov"><div id="db-dona-mov"></div><div id="db-lista-mov"></div></div>
+          <div id="db-insight-mov" class="db-insight"></div>
+          <div id="db-detalle-mov"></div>
         </div>
-        <div id="db-resultado-residente" style="margin-top:10px;"></div>
       </div>
     </div>
 
@@ -247,6 +381,9 @@
 
       <!-- Vista auxiliares: cola simple con Gestionado/Negado -->
       <div id="vista-gestion-auxiliar" style="display:none;">
+        <!-- Foco del mes: tarjetas y pendientes por mes. Al tocarlos solo se llenan los filtros de abajo. -->
+        <div id="foco-tarjetas" class="foco-tarjetas"></div>
+        <div id="foco-meses" class="foco-meses"></div>
         <div class="controles-cuadricula" style="margin-bottom:10px;">
           <div style="position:relative;"><label>Residente</label><input id="go-filtro-nombre" autocomplete="off" placeholder="Nombre..." onkeydown="if(event.key==='Enter') aplicarFiltrosGestion()"></div>
           <div><label>Documento de ID</label><input id="go-filtro-documento" autocomplete="off" placeholder="Cédula..." onkeydown="if(event.key==='Enter') aplicarFiltrosGestion()"></div>
@@ -277,6 +414,7 @@
         </div>
         <p style="font-size:11px; color:#888; margin-top:-6px; margin-bottom:12px;">Los registros Negados no aparecen aquí — su reasignación la maneja la coordinadora. Los Gestionados quedan confirmados y salen de esta cola automáticamente.</p>
         <div id="kpis-gestion" style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;"></div>
+        <div id="foco-activos" class="foco-activos"></div>
         <div id="barra-aplicar-gestion" style="display:none; align-items:center; justify-content:space-between; background:#eef4fb; border:1px solid #1F4E79; border-radius:8px; padding:10px 16px; margin-bottom:12px;">
           <span id="resumen-seleccion-gestion" style="font-size:13px; color:#1F4E79; font-weight:600;"></span>
           <div style="display:flex; gap:8px;">
@@ -1204,7 +1342,7 @@ function dibujarTablaValidacionMensual(filas) {
 // PANEL EJECUTIVO (dashboard) — usa el histórico completo de todos los programas
 // ============================================================
 let cacheHistoricoCompleto = [];
-let periodoSeleccionadoDb = 'todos';
+let periodoSeleccionadoDb = null; // null = aún no elegido: el panel abre en el semestre en curso
 
 async function cargarPanelEjecutivo(forzarRecarga) {
   if (cacheHistoricoCompleto.length === 0 || forzarRecarga) {
@@ -1226,10 +1364,10 @@ async function cargarPanelEjecutivo(forzarRecarga) {
 
   const ahora = new Date();
   const hora = ahora.getHours().toString().padStart(2, '0') + ':' + ahora.getMinutes().toString().padStart(2, '0');
-  document.getElementById('db-barra-datos').innerHTML = '🔄 Datos cargados · ' + cacheHistoricoCompleto.length + ' registros · Última actualización: ' + hora +
-    ' <button class="btn-secundario btn-pequeno" onclick="cargarPanelEjecutivo(true)" style="margin-left:10px;">Actualizar ahora</button>';
+  document.getElementById('db-barra-datos').innerHTML = cacheHistoricoCompleto.length.toLocaleString('es-CO') + ' registros cargados · actualizado ' + hora +
+    ' <button onclick="cargarPanelEjecutivo(true)">🔄 Actualizar ahora</button>';
 
-  aplicarPeriodoDb(periodoSeleccionadoDb || 'todos');
+  aplicarPeriodoDb(periodoSeleccionadoDb);
 }
 
 // ============================================================
@@ -1446,121 +1584,537 @@ function periodoMasReciente() {
   return semestres[semestres.length - 1] || '';
 }
 
-function dibujarChipsPeriodo() {
-  const semestres = [...new Set(cacheHistoricoCompleto.map(r => r.Semestre).filter(esPeriodoValido))].sort();
-  const contenedor = document.getElementById('db-chips-periodo');
-  const chip = (valor, etiqueta) => `<button class="btn-pequeno chip-periodo" data-valor="${valor}" onclick="aplicarPeriodoDb('${valor}')" style="border-radius:16px; border:1px solid #ccc; background:white; color:#333;">${etiqueta}</button>`;
-  let html = chip('todos', 'Todos');
-  semestres.forEach(s => { html += chip(s, s); });
-  contenedor.innerHTML = html;
-}
-
-function aplicarPeriodoDb(valor) {
-  periodoSeleccionadoDb = valor;
-  document.querySelectorAll('.chip-periodo').forEach(b => {
-    const activo = b.dataset.valor === valor;
-    b.style.background = activo ? 'var(--azul-ces)' : 'white';
-    b.style.color = activo ? 'white' : '#333';
-  });
-
-  let datos = cacheHistoricoCompleto;
-  let etiqueta = 'Todos los periodos';
-  if (valor !== 'todos') {
-    datos = cacheHistoricoCompleto.filter(r => r.Semestre === valor);
-    etiqueta = valor;
-  }
-
-  document.getElementById('db-resumen-periodo').textContent = etiqueta + ' — ' + datos.length + ' registros';
-  dibujarKpisEjecutivo(datos);
-  dibujarListasEjecutivo(datos);
-}
-
-function dibujarKpisEjecutivo(datos) {
-  const residentesActivos = new Set(datos.filter(r => r.Tipo === 'Residente CES').map(r => r.ResidenteID)).size;
-  const movilidad = new Set(datos.filter(r => r.Tipo === 'Movilidad entrante').map(r => r.ResidenteID)).size;
-  const programas = new Set(datos.map(r => r.Programa).filter(Boolean)).size;
-  const campos = new Set(datos.flatMap(r => separarCampos(r.CampoRotacion))).size;
-  const pendientes = datos.filter(r => r.Estado === 'Pendiente' || r.Estado === 'Cambio').length;
-  const negados = datos.filter(r => r.Estado === 'Negado').length;
-
-  const tarjetas = [
-    { valor: residentesActivos, etiqueta: 'Residentes CES', color: '#003865' },
-    { valor: movilidad, etiqueta: 'Movilidad entrante', color: '#1F4E79' },
-    { valor: programas, etiqueta: 'Programas', color: '#006100' },
-    { valor: campos, etiqueta: 'Campos de rotación', color: '#5b7fa6' },
-    { valor: pendientes, etiqueta: 'Pendientes de confirmar', color: '#823C00' },
-    { valor: negados, etiqueta: 'Negados (requieren reasignación)', color: '#7030A0' }
-  ];
-
-  document.getElementById('db-kpis').innerHTML = tarjetas.map(t => `
-    <div style="background:white; border:1px solid #eef1f5; border-left:4px solid ${t.color}; border-radius:8px; padding:14px 16px; text-align:left;">
-      <div style="font-size:26px; font-weight:700; color:${t.color};">${t.valor}</div>
-      <div style="font-size:11px; color:#888; margin-top:2px; text-transform:uppercase; letter-spacing:0.3px;">${t.etiqueta}</div>
-    </div>`).join('');
-}
-
 // Un CampoRotacion como "C. CES - HPTU - SOMER" representa 3 campos distintos, no uno solo — se separa siempre así.
 function separarCampos(campoStr) {
   return String(campoStr || '').split('-').map(s => s.trim()).filter(Boolean);
 }
 
-// Fila de un residente dentro de una lista expandible del Dashboard (por Programa o por
-// Campo) — muestra el nombre, el correo si lo tiene, el Nivel, y un botón para notificarlo
-// directamente si hay correo registrado.
-function filaResidenteExpandible_(nombre, info) {
-  const correoEsc = String(info.correo || '').replace(/'/g, "\\'");
-  const idEsc = String(info.id || '').replace(/'/g, "\\'");
-  const nombreEsc = String(nombre || '').replace(/'/g, "\\'");
-  return `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 16px; border-top:1px solid #eee; font-size:12px; gap:8px;">
-      <span style="flex:1;">${esc(nombre)}${info.correo ? '<br><span style="color:#888; font-size:11px;">✉ ' + esc(info.correo) + '</span>' : ''}</span>
-      <span class="pastilla" style="background:#eef1f5; color:#555;">${esc(info.nivel)}</span>
-      ${info.correo ? `<button class="btn-secundario btn-pequeno" onclick="abrirNotificarResidentePorDatos('${idEsc}','${nombreEsc}','${correoEsc}')" title="Enviar aviso urgente por correo">📧</button>` : ''}
-    </div>`;
+// Semestre que está corriendo hoy (julio a diciembre = AAAA-2; enero a junio = AAAA-1).
+function periodoEnCursoDb_() {
+  const f = new Date();
+  return f.getFullYear() + '-' + (f.getMonth() >= 6 ? '2' : '1');
 }
 
-function dibujarListasEjecutivo(datos) {
-  const porPrograma = {};
-  datos.forEach(r => {
-    if (!r.Programa) return;
-    porPrograma[r.Programa] = porPrograma[r.Programa] || {};
-    porPrograma[r.Programa][r.ResidenteNombre] = { nivel: r.Nivel || '', correo: r.Correo || '', id: r.ResidenteID || '' };
-  });
-  const listaProgramas = Object.keys(porPrograma).map(p => ({ nombre: p, residentes: porPrograma[p] })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
-  document.getElementById('db-lista-programas').innerHTML = listaProgramas.map((p, i) => `
-    <div>
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 12px; border-bottom:1px solid #f4f4f4; font-size:13px; cursor:pointer;" onclick="toggleExpandirLista('prog-${i}')">
-        <span>${esc(p.nombre)}</span><span><strong>${Object.keys(p.residentes).length}</strong> <span style="color:#aaa;">▶</span></span>
-      </div>
-      <div id="prog-${i}" style="display:none; background:#fafbfc;">
-        <div style="padding:6px 16px; font-size:11px; font-weight:700; color:var(--azul-ces); text-transform:uppercase;">Residentes en ${esc(p.nombre)}</div>
-        ${Object.keys(p.residentes).sort((a, b) => a.localeCompare(b, 'es')).map(nombre => filaResidenteExpandible_(nombre, p.residentes[nombre])).join('')}
-      </div>
-    </div>`).join('') || '<div style="padding:12px; color:#999; font-size:13px;">Sin datos.</div>';
+// El panel abre en el semestre en curso; si todavía no tiene datos, en el más reciente.
+function periodoPorDefectoDb_() {
+  const semestres = [...new Set(cacheHistoricoCompleto.map(r => r.Semestre).filter(esPeriodoValido))];
+  if (semestres.includes(periodoEnCursoDb_())) return periodoEnCursoDb_();
+  return periodoMasReciente() || 'todos';
+}
 
+function dibujarChipsPeriodo() {
+  const semestres = [...new Set(cacheHistoricoCompleto.map(r => r.Semestre).filter(esPeriodoValido))].sort();
+  const enCurso = periodoEnCursoDb_();
+  const chip = (valor, etiqueta) => `<button class="db-chip chip-periodo ${valor === periodoSeleccionadoDb ? 'activo' : ''}" data-valor="${valor}" onclick="aplicarPeriodoDb('${valor}')">${etiqueta}${valor === enCurso ? '<span class="hoy">en curso</span>' : ''}</button>`;
+  document.getElementById('db-chips-periodo').innerHTML = '<span style="font-size:12px; color:#6b7684; font-weight:600; margin-right:2px;">Periodo</span>' +
+    semestres.map(s => chip(s, s)).join('') + chip('todos', 'Histórico completo');
+}
+
+// Estado de lo que está abierto en el panel (desgloses). Se conserva en el refresco automático
+// de cada 2 minutos; solo se limpia cuando se cambia de periodo.
+const dbSel = { kpi: null, prog: null, campo: null, mes: null, mov: null, celdaNivel: null, otros: false, vistaCampos: 'mapa', filtroCampos: '', filtroTablaCampos: '' };
+// Registro de acciones: los botones del panel llaman dbAcc(n), así ningún nombre con comillas o
+// caracteres raros puede romper un onclick. Cada sección borra sus acciones viejas al redibujarse.
+const dbAcciones = new Map();
+const dbSecciones = {};
+let dbSigAccion = 0;
+function limpiarSeccionDb(seccion) { (dbSecciones[seccion] || []).forEach(id => dbAcciones.delete(id)); dbSecciones[seccion] = []; }
+function regDb(fn, seccion) { const id = ++dbSigAccion; dbAcciones.set(id, fn); (dbSecciones[seccion] = dbSecciones[seccion] || []).push(id); return id; }
+function dbAcc(id) { const fn = dbAcciones.get(id); if (fn) fn(); }
+
+function aplicarPeriodoDb(valor) {
+  const nuevo = valor || periodoSeleccionadoDb || periodoPorDefectoDb_();
+  if (nuevo !== periodoSeleccionadoDb) {
+    Object.assign(dbSel, { kpi: null, prog: null, campo: null, mes: null, mesProg: null, mov: null, celdaNivel: null, otros: false });
+  }
+  periodoSeleccionadoDb = nuevo;
+  document.querySelectorAll('.chip-periodo').forEach(b => b.classList.toggle('activo', b.dataset.valor === periodoSeleccionadoDb));
+  dibujarPanoramaDb();
+  rebuscarDb();
+}
+
+const COLOR_NIVEL_DB = { R1: '#BDD7EE', R2: '#7FAEDB', R3: '#2E6DA4', R4: '#003865', Movilidad: '#F2B36B', 'Sin nivel': '#cfd6de' };
+const ORDEN_NIVEL_DB = ['R1', 'R2', 'R3', 'R4', 'Movilidad', 'Sin nivel'];
+const ORDEN_ESTADO_DB = ['Confirmado', 'Pendiente', 'Cambio', 'Negado'];
+function nivelDb_(r) {
+  if (r.Tipo === 'Movilidad entrante') return 'Movilidad';
+  const m = /(\d)/.exec(String(r.Nivel || ''));
+  return m ? 'R' + m[1] : 'Sin nivel';
+}
+const unicosDb_ = (filas, fn) => new Set(filas.map(fn).filter(v => v !== '' && v !== undefined && v !== null)).size;
+const plDb_ = (n, uno, varios) => n + ' ' + (n === 1 ? uno : varios);
+function semestreAnteriorDb_(s) {
+  const m = /^(\d{4})-([12])$/.exec(String(s || ''));
+  if (!m) return '';
+  return m[2] === '2' ? m[1] + '-1' : (Number(m[1]) - 1) + '-2';
+}
+function mesesDeSemestreDb_(s) { return String(s).endsWith('-2') ? MESES.slice(0, 6) : MESES.slice(6); }
+function pastillaDb_(estado) {
+  const c = COLORES_ESTADO[estado] || { bg: '#eee', tx: '#333' };
+  return `<span class="pastilla" style="background:${c.bg}; color:${c.tx};">${esc(estado || '')}</span>`;
+}
+function etiquetaPeriodoDb_() { return periodoSeleccionadoDb === 'todos' ? 'todo el histórico' : periodoSeleccionadoDb; }
+
+function donaDb_(segmentos, tam, centro, sub) {
+  const total = segmentos.reduce((s, x) => s + x.v, 0) || 1, r = 15.915, c = 2 * Math.PI * r;
+  let acumulado = 0;
+  const arcos = segmentos.filter(s => s.v > 0).map(s => {
+    const largo = s.v / total * c, desfase = c - acumulado + c / 4; acumulado += largo;
+    return `<circle cx="21" cy="21" r="${r}" fill="none" stroke="${s.color}" stroke-width="6" stroke-dasharray="${largo.toFixed(2)} ${(c - largo).toFixed(2)}" stroke-dashoffset="${desfase.toFixed(2)}"></circle>`;
+  }).join('');
+  return `<svg viewBox="0 0 42 42" width="${tam}" height="${tam}" aria-hidden="true"><circle cx="21" cy="21" r="${r}" fill="none" stroke="#eef1f5" stroke-width="6"></circle>${arcos}
+    ${centro !== undefined ? `<text x="21" y="${sub ? 21.5 : 23}" text-anchor="middle" font-size="${sub ? 8 : 9}" font-weight="700" fill="#003865">${centro}</text>` : ''}
+    ${sub ? `<text x="21" y="27.5" text-anchor="middle" font-size="3.6" fill="#66717e">${esc(sub)}</text>` : ''}</svg>`;
+}
+
+function miniBarrasDb_(valores, color) {
+  const max = Math.max(1, ...valores);
+  return `<div style="display:flex; align-items:flex-end; gap:2px; height:44px;" aria-hidden="true">${valores.slice(0, 12).map(v =>
+    `<i style="display:block; width:5px; height:${Math.max(4, Math.round(v / max * 44))}px; background:${color}; border-radius:1px;"></i>`).join('')}</div>`;
+}
+
+function dibujarPanoramaDb() {
+  dibujarKpisDb();
+  dibujarDesgloseKpiDb();
+  dibujarProgramasDb();
+  dibujarCamposDb();
+  dibujarMesesDb();
+  dibujarMovilidadDb();
+}
+
+// ---------- Indicadores ----------
+function dibujarKpisDb() {
+  const d = datosDelPeriodoActual();
+  const P = periodoSeleccionadoDb;
+  const ces = d.filter(r => r.Tipo !== 'Movilidad entrante');
+  const mov = d.filter(r => r.Tipo === 'Movilidad entrante');
+  const nCes = unicosDb_(ces, r => r.ResidenteID), nMov = unicosDb_(mov, r => r.ResidenteID);
+  const nProg = unicosDb_(d, r => r.Programa);
   const porCampo = {};
-  datos.forEach(r => {
-    separarCampos(r.CampoRotacion).forEach(campoIndividual => {
-      porCampo[campoIndividual] = porCampo[campoIndividual] || {};
-      porCampo[campoIndividual][r.ResidenteNombre] = { nivel: r.Nivel || '', correo: r.Correo || '', id: r.ResidenteID || '' };
-    });
-  });
-  const listaCampos = Object.keys(porCampo).map(c => ({ nombre: c, residentes: porCampo[c] })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
-  document.getElementById('db-lista-campos').innerHTML = listaCampos.map((c, i) => `
-    <div>
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 12px; border-bottom:1px solid #f4f4f4; font-size:13px; cursor:pointer;" onclick="toggleExpandirLista('campo-${i}')">
-        <span>${esc(c.nombre)}</span><span><strong>${Object.keys(c.residentes).length}</strong> <span style="color:#aaa;">▶</span></span>
-      </div>
-      <div id="campo-${i}" style="display:none; background:#fafbfc;">
-        <div style="padding:6px 16px; font-size:11px; font-weight:700; color:#0d6e5f; text-transform:uppercase;">Residentes en ${esc(c.nombre)}</div>
-        ${Object.keys(c.residentes).sort((a, b) => a.localeCompare(b, 'es')).map(nombre => filaResidenteExpandible_(nombre, c.residentes[nombre])).join('')}
-      </div>
-    </div>`).join('') || '<div style="padding:12px; color:#999; font-size:13px;">Sin datos.</div>';
+  d.forEach(r => separarCampos(r.CampoRotacion).forEach(c => { (porCampo[c] = porCampo[c] || new Set()).add(r.ResidenteID); }));
+  const nCampos = Object.keys(porCampo).length;
+  const anterior = P !== 'todos' ? cacheHistoricoCompleto.filter(r => r.Semestre === semestreAnteriorDb_(P)) : [];
+  const delta = (actual, calcular) => {
+    if (!anterior.length) return '<div class="d db-igual">Sin periodo anterior para comparar</div>';
+    const dif = actual - calcular(anterior);
+    return `<div class="d ${dif > 0 ? 'db-sube' : dif < 0 ? 'db-baja' : 'db-igual'}">${dif > 0 ? '▲ ' + dif : dif < 0 ? '▼ ' + Math.abs(dif) : 'Igual'} frente a ${semestreAnteriorDb_(P)}</div>`;
+  };
+
+  const niveles = ['R1', 'R2', 'R3', 'R4'].map(n => ({ n, v: unicosDb_(ces.filter(r => nivelDb_(r) === n), r => r.ResidenteID), color: COLOR_NIVEL_DB[n] }));
+  const estadoMov = e => unicosDb_(mov.filter(r => e.includes(r.Estado)), r => r.ResidenteID);
+  const movSeg = [{ v: estadoMov(['Confirmado']), color: 'var(--confirmado-tx)' }, { v: estadoMov(['Pendiente', 'Cambio']), color: 'var(--pendiente-bg)' }, { v: estadoMov(['Negado']), color: 'var(--negado-tx)' }];
+  const porProg = {};
+  d.forEach(r => { if (r.Programa) (porProg[r.Programa] = porProg[r.Programa] || new Set()).add(r.ResidenteID); });
+
+  const tarjetas = [
+    { k: 'residentes', n: nCes, t: 'Residentes CES', color: '#003865', d: delta(nCes, f => unicosDb_(f.filter(r => r.Tipo !== 'Movilidad entrante'), r => r.ResidenteID)),
+      vis: donaDb_(niveles, 64), pie: niveles.map(x => x.n + ' ' + x.v).join(' · ') },
+    { k: 'movilidad', n: nMov, t: 'Movilidad entrante', color: '#C47A1E', d: delta(nMov, f => unicosDb_(f.filter(r => r.Tipo === 'Movilidad entrante'), r => r.ResidenteID)),
+      vis: donaDb_(movSeg, 64), pie: `${movSeg[0].v} aceptados · ${movSeg[1].v} pendientes · ${movSeg[2].v} negados` },
+    { k: 'programas', n: nProg, t: 'Programas con residentes', color: '#006100', d: delta(nProg, f => unicosDb_(f, r => r.Programa)),
+      vis: miniBarrasDb_(Object.values(porProg).map(s => s.size).sort((a, b) => b - a), 'var(--azul-ces)'), pie: 'Residentes por programa, de mayor a menor' },
+    { k: 'campos', n: nCampos, t: 'Campos de rotación en uso', color: '#0d6e5f', d: delta(nCampos, f => new Set(f.flatMap(r => separarCampos(r.CampoRotacion))).size),
+      vis: miniBarrasDb_(Object.values(porCampo).map(s => s.size).sort((a, b) => b - a), '#0d6e5f'), pie: 'Residentes por campo, de mayor a menor' }
+  ];
+  document.getElementById('db-kpis').innerHTML = tarjetas.map(t => `
+    <button class="db-kpi ${dbSel.kpi === t.k ? 'activo' : ''}" style="border-top-color:${t.color};" onclick="elegirKpiDb('${t.k}')">
+      <div><div class="n" style="color:${t.color};">${t.n}</div><div class="t">${t.t}</div>${t.d}
+        <div class="sub" style="font-size:12px; color:#8a929c; margin-top:4px;">${t.pie}</div>
+        <div class="ver">${dbSel.kpi === t.k ? 'Ocultar detalle ▴' : 'Ver detalle ▾'}</div></div>
+      <div>${t.vis}</div>
+    </button>`).join('');
+
+  // Lectura en texto: pequeña, en gris y debajo de los visuales, para que no les quite protagonismo.
+  const topProg = Object.entries(porProg).sort((a, b) => b[1].size - a[1].size)[0];
+  const topCampo = Object.entries(porCampo).sort((a, b) => b[1].size - a[1].size)[0];
+  const conf = d.length ? Math.round(d.filter(r => r.Estado === 'Confirmado').length / d.length * 100) : 0;
+  document.getElementById('db-relato').textContent = !d.length ? 'No hay registros en este periodo.' :
+    (P === 'todos'
+      ? `En todo el histórico han pasado ${nCes} residentes CES y ${nMov} de movilidad entrante, de ${nProg} programas, por ${nCampos} campos de rotación.`
+      : `En ${P} rotan ${nCes} residentes CES y ${nMov} de movilidad entrante, de ${nProg} programas, en ${nCampos} campos de rotación.` +
+        (topProg ? ` El programa con más residentes es ${topProg[0]} (${topProg[1].size})` : '') +
+        (topCampo ? ` y el campo que más recibe es ${topCampo[0]} (${topCampo[1].size}).` : '.') +
+        ` El ${conf}% de las rotaciones del periodo ya está confirmado.`);
 }
 
-function toggleExpandirLista(id) {
-  const el = document.getElementById(id);
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+function elegirKpiDb(k) {
+  dbSel.kpi = dbSel.kpi === k ? null : k;
+  dbSel.celdaNivel = null;
+  dibujarKpisDb();
+  dibujarDesgloseKpiDb();
+  dibujarProgramasDb(); dibujarCamposDb(); dibujarMesesDb(); dibujarMovilidadDb();
+}
+
+// Tarjeta de persona: el nombre lleva a su cuadro de rotaciones; el sobre abre el aviso por correo.
+function tarjetaPersonaDb_(p, detalle, accionNombre, seccion) {
+  const nAcc = regDb(accionNombre, seccion);
+  const nCorreo = p.correo ? regDb(() => abrirNotificarResidentePorDatos(p.id, p.nombre, p.correo), seccion) : null;
+  return `<div class="db-persona"><div style="min-width:0;"><button class="db-link" onclick="dbAcc(${nAcc})" title="Ir al cuadro de rotaciones">${esc(p.nombre)}</button>
+    <div style="color:#8a929c; margin-top:2px;">${detalle}</div></div>
+    ${nCorreo !== null ? `<button class="db-mini" onclick="dbAcc(${nCorreo})" title="Enviar aviso urgente por correo">📧</button>` : ''}</div>`;
+}
+
+// Agrupa registros por residente (un residente puede tener varios meses en el periodo).
+function personasDb_(filas) {
+  const porId = {};
+  filas.forEach(r => {
+    const id = r.ResidenteID;
+    if (!porId[id]) porId[id] = { id, nombre: r.ResidenteNombre || '', programa: r.Programa || '', nivel: nivelDb_(r), correo: r.Correo || '', semestre: r.Semestre, registros: [] };
+    porId[id].registros.push(r);
+  });
+  return Object.values(porId).sort((a, b) => ORDEN_NIVEL_DB.indexOf(a.nivel) - ORDEN_NIVEL_DB.indexOf(b.nivel) || a.nombre.localeCompare(b.nombre, 'es'));
+}
+
+function dibujarDesgloseKpiDb() {
+  const cont = document.getElementById('db-desglose-kpi');
+  limpiarSeccionDb('desglose');
+  if (!dbSel.kpi) { cont.innerHTML = ''; return; }
+  const d = datosDelPeriodoActual();
+  const cerrar = `<button class="db-cerrar" onclick="elegirKpiDb('${dbSel.kpi}')">Cerrar</button>`;
+  let html = '';
+
+  if (dbSel.kpi === 'residentes') {
+    const porProg = {};
+    d.forEach(r => { if (!r.Programa) return; porProg[r.Programa] = porProg[r.Programa] || {}; porProg[r.Programa][r.ResidenteID] = nivelDb_(r); });
+    const filas = Object.entries(porProg).map(([p, ids]) => { const v = Object.values(ids); return { p, total: v.length, n: ORDEN_NIVEL_DB.slice(0, 5).map(x => v.filter(y => y === x).length) }; })
+      .sort((a, b) => b.total - a.total || a.p.localeCompare(b.p, 'es'));
+    const totales = ORDEN_NIVEL_DB.slice(0, 5).map((_, i) => filas.reduce((s, f) => s + f.n[i], 0));
+    html = `<div class="db-desglose-top"><b>Residentes por programa y nivel · ${esc(etiquetaPeriodoDb_())}</b>${cerrar}</div>
+      <p class="db-como" style="margin-top:-6px;">Clic en cualquier número para ver quiénes son.</p>
+      <table class="lista db-matriz"><thead><tr><th>Programa</th>${ORDEN_NIVEL_DB.slice(0, 5).map(n => `<th>${n === 'Movilidad' ? 'Movilidad' : n}</th>`).join('')}<th>Total</th></tr></thead><tbody>
+      ${filas.map(f => `<tr><td>${esc(f.p)}</td>${f.n.map((v, i) => {
+        if (!v) return '<td style="color:#c3c9d0;">—</td>';
+        const activo = dbSel.celdaNivel && dbSel.celdaNivel.p === f.p && dbSel.celdaNivel.n === ORDEN_NIVEL_DB[i];
+        const nAcc = regDb(() => { dbSel.celdaNivel = activo ? null : { p: f.p, n: ORDEN_NIVEL_DB[i] }; dibujarDesgloseKpiDb(); }, 'desglose');
+        return `<td><button class="db-celda-n ${activo ? 'activo' : ''}" onclick="dbAcc(${nAcc})">${v}</button></td>`;
+      }).join('')}<td><b>${f.total}</b></td></tr>`).join('')}
+      <tr><td><b>Total</b></td>${totales.map(t => `<td><b>${t}</b></td>`).join('')}<td><b>${filas.reduce((s, f) => s + f.total, 0)}</b></td></tr>
+      </tbody></table>`;
+    if (dbSel.celdaNivel) {
+      const sel = dbSel.celdaNivel;
+      const personas = personasDb_(d.filter(r => r.Programa === sel.p && nivelDb_(r) === sel.n));
+      html += `<div class="db-panel-detalle"><div class="top"><b style="color:var(--azul-ces);">${esc(sel.p)} · ${esc(sel.n)} (${personas.length})</b></div><div class="cuerpo"><div class="db-personas">
+        ${personas.map(p => tarjetaPersonaDb_(p, esc([...new Set(p.registros.flatMap(r => separarCampos(r.CampoRotacion)))].slice(0, 3).join(', ')), () => irACuadroResidenteDb(p.programa, p.id, p.semestre), 'desglose')).join('')}
+      </div></div></div>`;
+    }
+  } else if (dbSel.kpi === 'movilidad') {
+    const mov = d.filter(r => r.Tipo === 'Movilidad entrante');
+    const grupos = [['Confirmado', 'Aceptados', ['Confirmado']], ['Pendiente', 'Esperando respuesta', ['Pendiente', 'Cambio']], ['Negado', 'Negados', ['Negado']]];
+    html = `<div class="db-desglose-top"><b>Movilidad entrante · ${esc(etiquetaPeriodoDb_())}</b><div class="db-fila">
+      ${usuarioActual && usuarioActual.rol === 'coordinadora' ? `<button class="db-mini" onclick="cambiarTab('movilidad')">Gestionar en la pestaña Movilidad</button>` : ''}${cerrar}</div></div>
+      <div style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:12px;">${grupos.map(([e, titulo, estados]) => {
+        const personas = personasDb_(mov.filter(r => estados.includes(r.Estado)));
+        const c = COLORES_ESTADO[e];
+        return `<div><div class="db-nivel-titulo" style="color:${c.tx};"><i style="background:${c.bg}; border:1px solid ${c.tx};"></i>${titulo} (${personas.length})</div>
+          ${personas.map(p => tarjetaPersonaDb_(p, esc(p.programa) + '<br>' + esc(p.registros.map(r => r.Mes + ' · ' + (r.CampoRotacion || '')).join(' / ')),
+            () => irACeldaDesdeComentario(p.registros[0].ClaveUnica, p.programa, p.registros[0].Semestre), 'desglose')).join('') || '<div style="font-size:12px; color:#999;">Nadie en este estado.</div>'}</div>`;
+      }).join('')}</div>`;
+  } else if (dbSel.kpi === 'programas') {
+    const porProg = {};
+    d.forEach(r => { if (!r.Programa) return; const p = porProg[r.Programa] = porProg[r.Programa] || { ids: new Set(), mov: new Set(), campos: new Set(), total: 0, conf: 0, pend: 0, neg: 0 };
+      p.ids.add(r.ResidenteID); if (r.Tipo === 'Movilidad entrante') p.mov.add(r.ResidenteID); separarCampos(r.CampoRotacion).forEach(c => p.campos.add(c));
+      p.total++; if (r.Estado === 'Confirmado') p.conf++; if (r.Estado === 'Pendiente' || r.Estado === 'Cambio') p.pend++; if (r.Estado === 'Negado') p.neg++; });
+    const filas = Object.entries(porProg).sort((a, b) => b[1].ids.size - a[1].ids.size || a[0].localeCompare(b[0], 'es'));
+    html = `<div class="db-desglose-top"><b>Programas · ${esc(etiquetaPeriodoDb_())}</b>${cerrar}</div>
+      <p class="db-como" style="margin-top:-6px;">Clic en un programa para ver sus residentes por nivel.</p>
+      <table class="lista"><thead><tr><th>Programa</th><th>Residentes</th><th>Movilidad</th><th>Campos</th><th>Confirmado</th><th>Por confirmar</th><th>Negados</th></tr></thead><tbody>
+      ${filas.map(([p, x]) => { const pct = x.total ? Math.round(x.conf / x.total * 100) : 0; const nAcc = regDb(() => elegirProgramaDb(p, true), 'desglose');
+        return `<tr class="db-fila-clic" onclick="dbAcc(${nAcc})"><td><b>${esc(p)}</b></td><td>${x.ids.size - x.mov.size}</td><td>${x.mov.size || '—'}</td><td>${x.campos.size}</td>
+          <td><div style="display:flex; align-items:center; gap:8px;"><div style="flex:1; height:6px; background:var(--pendiente-bg); border-radius:3px; overflow:hidden; min-width:60px;"><i style="display:block; height:100%; width:${pct}%; background:var(--confirmado-tx);"></i></div>${pct}%</div></td>
+          <td style="color:${x.pend ? 'var(--pendiente-tx)' : '#999'}; font-weight:600;">${x.pend || '—'}</td><td style="color:${x.neg ? 'var(--negado-tx)' : '#999'}; font-weight:600;">${x.neg || '—'}</td></tr>`; }).join('')}
+      </tbody></table>`;
+  } else if (dbSel.kpi === 'campos') {
+    html = `<div class="db-desglose-top"><b>Todos los campos de rotación · ${esc(etiquetaPeriodoDb_())}</b>${cerrar}</div>
+      <input id="db-filtro-tabla-campos" placeholder="Filtrar campo..." value="${esc(dbSel.filtroTablaCampos)}" oninput="dbSel.filtroTablaCampos = this.value; dibujarTablaCamposKpiDb();" style="padding:8px; border:1px solid #ccc; border-radius:5px; min-width:260px; margin-bottom:10px;">
+      <div id="db-tabla-campos-kpi"></div>`;
+  }
+  cont.innerHTML = `<div class="db-desglose">${html}</div>`;
+  if (dbSel.kpi === 'campos') dibujarTablaCamposKpiDb();
+}
+
+function resumenCamposDb_() {
+  const porCampo = {};
+  datosDelPeriodoActual().forEach(r => separarCampos(r.CampoRotacion).forEach(c => {
+    const x = porCampo[c] = porCampo[c] || { ids: new Set(), programas: new Set(), meses: new Set(), total: 0, conf: 0 };
+    x.ids.add(r.ResidenteID); if (r.Programa) x.programas.add(r.Programa); if (r.Mes) x.meses.add(r.Mes); x.total++; if (r.Estado === 'Confirmado') x.conf++;
+  }));
+  return Object.entries(porCampo).map(([k, x]) => ({ k, v: x.ids.size, programas: x.programas.size, meses: x.meses.size, pct: x.total ? Math.round(x.conf / x.total * 100) : 0 }))
+    .sort((a, b) => b.v - a.v || a.k.localeCompare(b.k, 'es'));
+}
+
+function tablaCamposDb_(lista, filtro, seccion) {
+  limpiarSeccionDb(seccion);
+  const t = String(filtro || '').trim().toLowerCase();
+  const filas = t ? lista.filter(c => c.k.toLowerCase().includes(t)) : lista;
+  if (!filas.length) return '<p style="color:#999; font-size:13px;">Ningún campo coincide.</p>';
+  return `<table class="lista"><thead><tr><th>#</th><th>Campo de rotación</th><th>Residentes</th><th>Programas</th><th>Meses con rotación</th><th>Confirmado</th></tr></thead><tbody>
+    ${filas.map((c, i) => { const nAcc = regDb(() => elegirCampoDb(c.k, true), seccion);
+      return `<tr class="db-fila-clic" onclick="dbAcc(${nAcc})"><td style="color:#999;">${i + 1}</td><td><b>${esc(c.k)}</b></td><td>${c.v}</td><td>${c.programas}</td><td>${c.meses}</td><td>${c.pct}%</td></tr>`; }).join('')}
+  </tbody></table>`;
+}
+function dibujarTablaCamposKpiDb() {
+  const el = document.getElementById('db-tabla-campos-kpi');
+  if (el) el.innerHTML = tablaCamposDb_(resumenCamposDb_(), dbSel.filtroTablaCampos, 'tablakpi');
+}
+
+// ---------- Residentes por programa ----------
+function dibujarProgramasDb() {
+  limpiarSeccionDb('prog');
+  const d = datosDelPeriodoActual(), porProg = {};
+  d.forEach(r => { if (!r.Programa) return; porProg[r.Programa] = porProg[r.Programa] || {}; porProg[r.Programa][r.ResidenteID] = nivelDb_(r); });
+  const lista = Object.entries(porProg).map(([p, ids]) => { const v = Object.values(ids); return { p, total: v.length, n: ORDEN_NIVEL_DB.map(x => v.filter(y => y === x).length) }; })
+    .sort((a, b) => b.total - a.total || a.p.localeCompare(b.p, 'es'));
+  const max = Math.max(1, ...lista.map(x => x.total));
+  document.getElementById('db-barras-prog').innerHTML = lista.length ? lista.map(x => {
+    const nAcc = regDb(() => elegirProgramaDb(x.p), 'prog');
+    return `<button class="${dbSel.prog === x.p ? 'activo' : ''}" onclick="dbAcc(${nAcc})" title="${esc(x.p)}: ${x.n.map((v, i) => v ? ORDEN_NIVEL_DB[i] + ' ' + v : '').filter(Boolean).join(', ')}">
+      <span class="db-nom">${esc(x.p)}</span>
+      <span class="db-apilada" style="width:${Math.round(x.total / max * 100)}%;">${x.n.map((v, i) => v ? `<i style="width:${v / x.total * 100}%; background:${COLOR_NIVEL_DB[ORDEN_NIVEL_DB[i]]};"></i>` : '').join('')}</span>
+      <b style="text-align:right;">${x.total}</b></button>`;
+  }).join('') : '<p style="color:#999; font-size:13px;">Sin datos en este periodo.</p>';
+
+  const det = document.getElementById('db-detalle-prog');
+  if (!dbSel.prog || !porProg[dbSel.prog]) { det.innerHTML = ''; return; }
+  const personas = personasDb_(d.filter(r => r.Programa === dbSel.prog));
+  const semCuadro = personas[0] ? personas[0].semestre : '';
+  const progActual = dbSel.prog;
+  const nCuadro = regDb(() => irACuadroResidenteDb(progActual, null, semCuadro), 'prog');
+  const nCerrar = regDb(() => elegirProgramaDb(progActual), 'prog');
+  det.innerHTML = `<div class="db-panel-detalle"><div class="top"><div><b style="color:var(--azul-ces);">${esc(dbSel.prog)}</b> <span style="font-size:12px; color:#8a929c;">· ${plDb_(personas.length, 'residente', 'residentes')} en ${esc(etiquetaPeriodoDb_())}</span></div>
+    <div class="db-fila"><button class="db-mini" onclick="dbAcc(${nCuadro})">Abrir cuadro del programa</button><button class="db-cerrar" onclick="dbAcc(${nCerrar})">Cerrar</button></div></div>
+    <div class="cuerpo">${ORDEN_NIVEL_DB.map(n => {
+      const grupo = personas.filter(p => p.nivel === n);
+      if (!grupo.length) return '';
+      return `<div class="db-nivel-titulo"><i style="background:${COLOR_NIVEL_DB[n]};"></i>${n === 'Movilidad' ? 'Movilidad entrante' : n} (${grupo.length})</div>
+        <div class="db-personas">${grupo.map(p => tarjetaPersonaDb_(p, esc([...new Set(p.registros.flatMap(r => separarCampos(r.CampoRotacion)))].slice(0, 3).join(', ')),
+          () => irACuadroResidenteDb(p.programa, p.id, p.semestre), 'prog')).join('')}</div>`;
+    }).join('')}</div></div>`;
+}
+
+function elegirProgramaDb(p, desplazar) {
+  dbSel.prog = (dbSel.prog === p && !desplazar) ? null : p;
+  dibujarProgramasDb();
+  if (desplazar) document.getElementById('db-caja-programas').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ---------- Dónde rotan (mapa de bloques + lista para validar todos) ----------
+function squarifyDb_(items, x, y, w, h) {
+  const salida = [], total = items.reduce((s, i) => s + i.v, 0) || 1;
+  let resto = items.map(i => Object.assign({}, i, { a: i.v * (w * h) / total }));
+  const peor = (fila, lado) => { const s = fila.reduce((t, i) => t + i.a, 0), mx = Math.max(...fila.map(i => i.a)), mn = Math.min(...fila.map(i => i.a)); return Math.max(lado * lado * mx / (s * s), (s * s) / (lado * lado * mn)); };
+  while (resto.length) {
+    const lado = Math.min(w, h); const fila = [resto[0]]; let i = 1;
+    while (i < resto.length && peor(fila.concat([resto[i]]), lado) <= peor(fila, lado)) { fila.push(resto[i]); i++; }
+    const s = fila.reduce((t, it) => t + it.a, 0);
+    if (w >= h) { const ancho = s / h; let yy = y; fila.forEach(it => { const alto = it.a / ancho; salida.push(Object.assign({}, it, { x, y: yy, w: ancho, h: alto })); yy += alto; }); x += ancho; w -= ancho; }
+    else { const alto = s / w; let xx = x; fila.forEach(it => { const ancho = it.a / alto; salida.push(Object.assign({}, it, { x: xx, y, w: ancho, h: alto })); xx += ancho; }); y += alto; h -= alto; }
+    resto = resto.slice(i);
+  }
+  return salida;
+}
+
+const BLOQUES_MAPA_DB = 16;
+function dibujarCamposDb() {
+  limpiarSeccionDb('campos');
+  const lista = resumenCamposDb_();
+  const top = lista.slice(0, BLOQUES_MAPA_DB), otros = lista.slice(BLOQUES_MAPA_DB);
+  const nMapa = regDb(() => { dbSel.vistaCampos = 'mapa'; dbSel.otros = false; dibujarCamposDb(); }, 'campos');
+  const nLista = regDb(() => { dbSel.vistaCampos = 'lista'; dbSel.otros = false; dibujarCamposDb(); }, 'campos');
+  document.getElementById('db-vista-campos').innerHTML = `<button class="db-chip ${dbSel.vistaCampos === 'mapa' ? 'activo' : ''}" onclick="dbAcc(${nMapa})">Mapa</button><button class="db-chip ${dbSel.vistaCampos === 'lista' ? 'activo' : ''}" onclick="dbAcc(${nLista})">Lista (${lista.length})</button>`;
+  const migas = document.getElementById('db-migas');
+  const cuerpo = document.getElementById('db-campos-cuerpo');
+
+  if (dbSel.vistaCampos === 'lista') {
+    const base = dbSel.otros ? otros : lista;
+    const nVolver = regDb(() => { dbSel.otros = false; dbSel.vistaCampos = 'mapa'; dibujarCamposDb(); }, 'campos');
+    migas.innerHTML = dbSel.otros
+      ? `<button class="db-link" style="font-size:12px;" onclick="dbAcc(${nVolver})">← Volver al mapa</button> <span style="color:#8a929c;">· Los ${otros.length} campos con menos residentes</span>`
+      : `<span style="color:#8a929c;">Todos los campos del periodo, de mayor a menor. Clic en uno para ver quiénes están ahí.</span>`;
+    cuerpo.innerHTML = `<input id="db-filtro-campos" placeholder="Filtrar campo..." value="${esc(dbSel.filtroCampos)}" style="padding:8px; border:1px solid #ccc; border-radius:5px; width:100%; margin-bottom:8px;"><div id="db-lista-campos-cuerpo"></div>`;
+    const pintar = () => { document.getElementById('db-lista-campos-cuerpo').innerHTML = tablaCamposDb_(base, dbSel.filtroCampos, 'listacampos'); };
+    document.getElementById('db-filtro-campos').addEventListener('input', e => { dbSel.filtroCampos = e.target.value; pintar(); });
+    pintar();
+  } else {
+    migas.innerHTML = '';
+    const bloques = top.slice();
+    if (otros.length) bloques.push({ k: 'Otros ' + otros.length + ' campos', v: otros.reduce((s, x) => s + x.v, 0), otros: true });
+    cuerpo.innerHTML = '<div class="db-treemap" id="db-treemap"></div><div style="font-size:12px; color:#8a929c; margin-top:8px;" id="db-nota-treemap"></div>';
+    const cont = document.getElementById('db-treemap');
+    const W = cont.clientWidth || 520, H = 400;
+    const max = Math.max(1, ...top.map(t => t.v));
+    cont.innerHTML = bloques.length ? squarifyDb_(bloques, 0, 0, W, H).map(t => {
+      const intensidad = t.otros ? 0 : t.v / max;
+      const fondo = t.otros ? '#8f99a4' : `hsl(170, ${45 + intensidad * 35}%, ${58 - intensidad * 34}%)`;
+      const chico = t.w < 72 || t.h < 44;
+      const nAcc = regDb(t.otros ? () => { dbSel.otros = true; dbSel.vistaCampos = 'lista'; dbSel.filtroCampos = ''; dibujarCamposDb(); } : () => elegirCampoDb(t.k), 'campos');
+      return `<button class="db-tm ${dbSel.campo === t.k ? 'activo' : ''}" onclick="dbAcc(${nAcc})" style="left:${t.x}px; top:${t.y}px; width:${t.w}px; height:${t.h}px; background:${fondo};" title="${esc(t.k)}: ${t.v} residentes${t.otros ? ' — clic para verlos y validarlos' : ''}">
+        ${chico ? `<b style="font-size:13px;">${t.v}</b>` : `<b>${t.v}</b>${esc(t.k)}${t.otros ? '<br><span style="font-size:11px;">Clic para ver la lista ›</span>' : ''}`}</button>`;
+    }).join('') : '<p style="color:#999; font-size:13px;">Sin datos en este periodo.</p>';
+    document.getElementById('db-nota-treemap').textContent = otros.length
+      ? `${lista.length} campos en uso. Los ${top.length} con más residentes tienen bloque propio; los otros ${otros.length} están en el bloque gris.`
+      : `${lista.length} campos en uso.`;
+  }
+  dibujarDetalleCampoDb();
+}
+
+function elegirCampoDb(c, desplazar) {
+  dbSel.campo = (dbSel.campo === c && !desplazar) ? null : c;
+  dibujarCamposDb();
+  if (desplazar) document.getElementById('db-caja-campos').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function dibujarDetalleCampoDb() {
+  limpiarSeccionDb('detcampo');
+  const det = document.getElementById('db-detalle-campo');
+  if (!dbSel.campo) { det.innerHTML = ''; return; }
+  const filas = datosDelPeriodoActual().filter(r => separarCampos(r.CampoRotacion).includes(dbSel.campo));
+  const personas = personasDb_(filas).sort((a, b) => a.programa.localeCompare(b.programa, 'es') || a.nombre.localeCompare(b.nombre, 'es'));
+  const campoActual = dbSel.campo;
+  const nCerrar = regDb(() => elegirCampoDb(campoActual), 'detcampo');
+  det.innerHTML = `<div class="db-panel-detalle"><div class="top"><div><b style="color:#0d6e5f;">${esc(dbSel.campo)}</b> <span style="font-size:12px; color:#8a929c;">· ${plDb_(personas.length, 'residente', 'residentes')} de ${unicosDb_(filas, r => r.Programa)} programas</span></div><button class="db-cerrar" onclick="dbAcc(${nCerrar})">Cerrar</button></div>
+    <table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th>Meses en este campo</th></tr></thead><tbody>
+    ${personas.map(p => { const nAcc = regDb(() => irACeldaDesdeComentario(p.registros[0].ClaveUnica, p.programa, p.registros[0].Semestre), 'detcampo');
+      return `<tr><td><button class="db-link" onclick="dbAcc(${nAcc})" title="Abrir la rotación en el cuadro">${esc(p.nombre)}</button><br><span style="color:#888; font-size:12px;">${esc(p.nivel)}</span></td><td>${esc(p.programa)}</td>
+        <td>${p.registros.map(r => `<span class="pastilla" style="background:${(COLORES_ESTADO[r.Estado] || { bg: '#eee' }).bg}; color:${(COLORES_ESTADO[r.Estado] || { tx: '#333' }).tx}; margin:1px;" title="${esc(r.Estado)} · ${esc(r.Rotacion || '')}">${esc(String(r.Mes || '').slice(0, 3))}</span>`).join('')}</td></tr>`; }).join('')}
+    </tbody></table></div>`;
+}
+
+// ---------- Avance de confirmación mes a mes ----------
+function dibujarMesesDb() {
+  limpiarSeccionDb('meses');
+  const sem = periodoSeleccionadoDb === 'todos' ? periodoEnCursoDb_() : periodoSeleccionadoDb;
+  const meses = mesesDeSemestreDb_(sem), enCurso = periodoEnCursoDb_(), mesHoy = MESES_CALENDARIO_[new Date().getMonth()];
+  const datosMes = meses.map(m => { const f = cacheHistoricoCompleto.filter(r => r.Semestre === sem && r.Mes === m); const c = {}; ORDEN_ESTADO_DB.forEach(e => { c[e] = f.filter(r => r.Estado === e).length; }); return { m, total: f.length, c }; });
+  const max = Math.max(1, ...datosMes.map(x => x.total));
+  document.getElementById('db-columnas').innerHTML = datosMes.map(x => {
+    const pct = x.total ? Math.round(x.c.Confirmado / x.total * 100) : 0;
+    const nAcc = regDb(() => { dbSel.mes = dbSel.mes === x.m ? null : x.m; dbSel.mesProg = null; dibujarMesesDb(); }, 'meses');
+    const esHoy = sem === enCurso && x.m === mesHoy;
+    return `<button class="db-col ${esHoy ? 'hoy' : ''} ${dbSel.mes === x.m ? 'activo' : ''}" onclick="dbAcc(${nAcc})" title="${x.m}: ${x.c.Confirmado} confirmadas, ${x.c.Pendiente} pendientes, ${x.c.Cambio} cambios, ${x.c.Negado} negadas">
+      <div class="pct">${x.total ? pct + '%' : '—'}</div>
+      <div class="pila" style="height:${Math.round(x.total / max * 190)}px;">${ORDEN_ESTADO_DB.map(e => x.c[e] ? `<i style="display:block; height:${x.c[e] / x.total * 100}%; background:${COLORES_ESTADO[e].bg};"></i>` : '').join('')}</div></button>`;
+  }).join('');
+  document.getElementById('db-etq-col').innerHTML = meses.map(m => { const esHoy = sem === enCurso && m === mesHoy; return `<div class="${esHoy ? 'hoy' : ''}">${m}${esHoy ? '<br>hoy' : ''}</div>`; }).join('');
+  const primeroBajo = datosMes.find(x => x.total && x.c.Confirmado / x.total < 0.8);
+  const pend = datosMes.reduce((s, x) => s + x.c.Pendiente + x.c.Cambio, 0), neg = datosMes.reduce((s, x) => s + x.c.Negado, 0);
+  document.getElementById('db-insight-meses').innerHTML = (periodoSeleccionadoDb === 'todos' ? 'Se muestra el semestre en curso. ' : '') +
+    (primeroBajo ? `Desde <b>${primeroBajo.m}</b> la confirmación baja del 80%. ` : 'Todos los meses con datos superan el 80% de confirmación. ') +
+    `En ${sem} faltan <b>${pend}</b> rotaciones por confirmar${neg ? ` y hay <b>${plDb_(neg, 'negada', 'negadas')}</b> por reasignar` : ''}.`;
+
+  const det = document.getElementById('db-detalle-mes');
+  if (!dbSel.mes) { det.innerHTML = ''; return; }
+  const todas = cacheHistoricoCompleto.filter(r => r.Semestre === sem && r.Mes === dbSel.mes && r.Estado !== 'Confirmado');
+  // Resumen por programa: se toca un programa para ver solo sus rotaciones sin confirmar.
+  const porProgMes = {};
+  todas.forEach(r => { porProgMes[r.Programa] = (porProgMes[r.Programa] || 0) + 1; });
+  const chipsProg = Object.entries(porProgMes).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'es')).map(([p, n]) => {
+    const nAcc = regDb(() => { dbSel.mesProg = dbSel.mesProg === p ? null : p; dibujarMesesDb(); }, 'meses');
+    return `<button class="db-chip ${dbSel.mesProg === p ? 'activo' : ''}" style="font-size:12px; padding:3px 10px;" onclick="dbAcc(${nAcc})">${esc(p)} <b>${n}</b></button>`;
+  }).join('');
+  const filas = todas.filter(r => !dbSel.mesProg || r.Programa === dbSel.mesProg)
+    .sort((a, b) => ORDEN_ESTADO_DB.indexOf(b.Estado) - ORDEN_ESTADO_DB.indexOf(a.Estado) || String(a.Programa).localeCompare(String(b.Programa), 'es'));
+  const nCerrar = regDb(() => { dbSel.mes = null; dbSel.mesProg = null; dibujarMesesDb(); }, 'meses');
+  det.innerHTML = `<div class="db-panel-detalle"><div class="top"><b style="color:var(--azul-ces);">${esc(dbSel.mes)} ${esc(sem)} · ${plDb_(todas.length, 'rotación sin confirmar', 'rotaciones sin confirmar')}</b><button class="db-cerrar" onclick="dbAcc(${nCerrar})">Cerrar</button></div>
+    ${todas.length ? `<div class="db-fila" style="padding:10px 14px 4px;"><span style="font-size:12px; color:#6b7684;">Por programa:</span>${chipsProg}</div>` : ''}
+    ${filas.length ? `<table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th>Campo / rotación</th><th>Estado</th><th></th></tr></thead><tbody>
+    ${filas.slice(0, 80).map(r => { const nAcc = regDb(() => irACeldaDesdeComentario(r.ClaveUnica, r.Programa, r.Semestre), 'meses');
+      return `<tr><td>${esc(r.ResidenteNombre)}<br><span style="color:#888; font-size:12px;">${esc(r.ResidenteID)}</span></td><td>${esc(r.Programa)}</td><td>${esc(r.CampoRotacion)}<br><span style="color:#888; font-size:12px;">${esc(r.Rotacion)}</span></td><td>${pastillaDb_(r.Estado)}</td><td><button class="db-mini" onclick="dbAcc(${nAcc})">🔗 Ver en cuadro</button></td></tr>`; }).join('')}
+    </tbody></table>${filas.length > 80 ? `<p style="font-size:12px; color:#999; padding:0 14px;">Mostrando 80 de ${filas.length}.</p>` : ''}` : '<p style="padding:12px 14px; color:#006100; font-size:13px;">Todo confirmado en este mes.</p>'}</div>`;
+}
+
+// ---------- Movilidad entrante (va de último) ----------
+function dibujarMovilidadDb() {
+  limpiarSeccionDb('mov');
+  const mov = datosDelPeriodoActual().filter(r => r.Tipo === 'Movilidad entrante');
+  const grupos = [['Confirmado', 'Aceptados', ['Confirmado'], 'var(--confirmado-tx)'], ['Pendiente', 'Esperando respuesta', ['Pendiente', 'Cambio'], 'var(--pendiente-bg)'], ['Negado', 'Negados', ['Negado'], 'var(--negado-tx)']];
+  const conteo = grupos.map(g => personasDb_(mov.filter(r => g[2].includes(r.Estado))));
+  const total = unicosDb_(mov, r => r.ResidenteID);
+  document.getElementById('db-dona-mov').innerHTML = donaDb_(grupos.map((g, i) => ({ v: conteo[i].length, color: g[3] })), 160, total, 'residentes');
+  const porProg = {}; mov.forEach(r => { (porProg[r.Programa] = porProg[r.Programa] || new Set()).add(r.ResidenteID); });
+  const topProg = Object.entries(porProg).sort((a, b) => b[1].size - a[1].size).slice(0, 4);
+  document.getElementById('db-lista-mov').innerHTML = grupos.map((g, i) => {
+    const nAcc = regDb(() => { dbSel.mov = dbSel.mov === g[0] ? null : g[0]; dibujarMovilidadDb(); }, 'mov');
+    return `<button class="db-mov-fila ${dbSel.mov === g[0] ? 'activo' : ''}" onclick="dbAcc(${nAcc})"><span><i style="display:inline-block; width:10px; height:10px; border-radius:50%; background:${g[3]}; margin-right:8px;"></i>${g[1]}</span><b>${conteo[i].length}</b></button>`;
+  }).join('') + `<div style="font-size:12px; color:#8a929c; margin-top:10px;">Programas que más reciben: ${topProg.map(x => esc(x[0]) + ' (' + x[1].size + ')').join(', ') || '—'}</div>`;
+  document.getElementById('db-insight-mov').innerHTML = total
+    ? `De cada 10 residentes de movilidad, <b>${Math.round(conteo[0].length / total * 10)}</b> ya tienen cupo aceptado.${conteo[1].length ? ` Hay <b>${conteo[1].length}</b> esperando respuesta de la institución.` : ''}`
+    : 'No hay residentes de movilidad entrante en este periodo.';
+  const det = document.getElementById('db-detalle-mov');
+  const i = grupos.findIndex(g => g[0] === dbSel.mov);
+  if (i === -1) { det.innerHTML = ''; return; }
+  det.innerHTML = `<div class="db-panel-detalle"><div class="top"><b style="color:var(--azul-ces);">${grupos[i][1]} (${conteo[i].length})</b>
+      ${usuarioActual && usuarioActual.rol === 'coordinadora' ? `<button class="db-mini" onclick="cambiarTab('movilidad')">Gestionar en Movilidad</button>` : ''}</div>
+    <div class="cuerpo"><div class="db-personas">${conteo[i].map(p => tarjetaPersonaDb_(p, esc(p.programa) + '<br>' + esc(p.registros.map(r => r.Mes + ' · ' + (r.CampoRotacion || '')).join(' / ')),
+      () => irACeldaDesdeComentario(p.registros[0].ClaveUnica, p.programa, p.registros[0].Semestre), 'mov')).join('') || '<span style="font-size:12px; color:#999;">Nadie en este estado.</span>'}</div></div></div>`;
+}
+
+// ---------- Ir al cuadro de rotaciones del programa (y resaltar al residente) ----------
+async function irACuadroResidenteDb(programa, residenteId, semestre) {
+  const sem = esPeriodoValido(semestre) ? semestre : (periodoSeleccionadoDb !== 'todos' ? periodoSeleccionadoDb : periodoEnCursoDb_());
+  const [anio, numero] = sem.split('-');
+  document.getElementById('cg-programa').value = programa;
+  document.getElementById('cg-periodo').value = numero === '1' ? String(Number(anio) - 1) : anio;
+  document.getElementById('cg-periodo-hasta').value = '';
+  cambiarTab('cuadricula');
+  await cargarCuadricula();
+  if (residenteId) resaltarResidenteEnCuadroDb_(residenteId);
+}
+
+function resaltarResidenteEnCuadroDb_(residenteId) {
+  const td = [...document.querySelectorAll('#contenedor-cuadricula td.col-residente')].find(c => c.textContent.includes(String(residenteId)));
+  if (!td) return;
+  td.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const fondoPrevio = td.style.background;
+  td.style.background = '#FFF3CD'; td.style.boxShadow = 'inset 0 0 0 2px #003865';
+  setTimeout(() => { td.style.background = fondoPrevio; td.style.boxShadow = ''; }, 4000);
+}
+
+window.addEventListener('resize', () => {
+  clearTimeout(window.temporizadorMapaDb_);
+  window.temporizadorMapaDb_ = setTimeout(() => {
+    if (document.getElementById('panel-dashboard').style.display === 'block' && cacheHistoricoCompleto.length) dibujarCamposDb();
+  }, 200);
+});
+
+// ---------- Buscadores (pestañas) ----------
+let tabBusquedaDb = 'residente';
+function cambiarTabBusquedaDb(tab) {
+  tabBusquedaDb = tab;
+  ['residente', 'campo', 'rotacion'].forEach(t => {
+    document.getElementById('db-busq-' + t).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('db-tab-' + t).classList.toggle('activo', t === tab);
+  });
+}
+
+// Los buscadores miran todos los periodos salvo que se desmarque la casilla; así un residente
+// de otro semestre no "desaparece" solo porque arriba está elegido el semestre en curso.
+function datosParaBuscadoresDb_() {
+  const casilla = document.getElementById('db-buscar-todos');
+  return (!casilla || casilla.checked) ? cacheHistoricoCompleto : datosDelPeriodoActual();
+}
+
+// Vuelve a correr la búsqueda de la pestaña activa solo si ya tenía resultados en pantalla.
+function rebuscarDb() {
+  const mapa = { residente: ['db-resultado-residente', buscarResidente], campo: ['db-resultado-campo', buscarPorCampo], rotacion: ['db-resultado-rotacion', buscarPorRotacion] };
+  const [idResultado, fn] = mapa[tabBusquedaDb];
+  const el = document.getElementById(idResultado);
+  if (el && el.innerHTML.trim()) fn();
+}
+
+// Ficha rápida de un residente: sus meses por semestre, con el color del estado. Cada mes abre la celda en el cuadro.
+function fichaResidenteDb_(filas) {
+  limpiarSeccionDb('ficha');
+  const r0 = filas[0];
+  const semestres = [...new Set(filas.map(r => r.Semestre).filter(esPeriodoValido))].sort();
+  return `<div class="db-panel-detalle" style="margin:0 0 12px;"><div class="top"><div><b style="color:var(--azul-ces);">${esc(r0.ResidenteNombre)}</b> <span style="font-size:12px; color:#8a929c;">· ${esc(r0.ResidenteID)} · ${esc(nivelDb_(r0))} · ${esc(r0.Programa)}</span></div><span style="font-size:12px; color:#8a929c;">${r0.Correo ? '✉ ' + esc(r0.Correo) : ''}</span></div>
+    <div class="cuerpo">${semestres.map(s => `<div class="db-linea-t"><div style="color:#8a929c; padding-top:12px;">${s}</div>${mesesDeSemestreDb_(s).map(m => {
+      const r = filas.find(x => x.Semestre === s && x.Mes === m);
+      if (!r) return `<div style="border:1px dashed #d5dce4; color:#9aa3ad;"><b>${m.slice(0, 3)}</b></div>`;
+      const c = COLORES_ESTADO[r.Estado] || { bg: '#eee', tx: '#333' };
+      const nAcc = regDb(() => irACeldaDesdeComentario(r.ClaveUnica, r.Programa, r.Semestre), 'ficha');
+      return `<button onclick="dbAcc(${nAcc})" style="background:${c.bg}; color:${c.tx};" title="${esc(r.Estado)} · ${esc(r.Rotacion || '')} — clic para abrir en el cuadro"><b>${m.slice(0, 3)}</b><br>${esc(r.CampoRotacion || '')}</button>`;
+    }).join('')}</div>`).join('')}
+    <div style="font-size:12px; color:#8a929c; margin-top:4px;">Clic en un mes para abrir esa rotación en el cuadro.</div></div></div>`;
 }
 
 // Salta desde un comentario en Gestión Operativa directo a la celda correspondiente en el Cuadro
@@ -1717,16 +2271,21 @@ document.addEventListener('click', function(e) {
   }
 });
 
-function tablaResultados(filas) {
-  if (filas.length === 0) return '<p style="color:#999; font-size:13px;">Sin resultados.</p>';
-  return `<table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th>Mes</th><th>Campo / Rotación</th><th>Estado</th></tr></thead><tbody>
-    ${filas.slice(0, 100).map(f => {
+function tablaResultados(filas, seccion) {
+  seccion = seccion || 'resultados';
+  limpiarSeccionDb(seccion);
+  if (filas.length === 0) return '<p style="color:#999; font-size:13px;">Sin resultados.' + (document.getElementById('db-buscar-todos') && !document.getElementById('db-buscar-todos').checked ? ' Prueba marcando "Buscar en todos los periodos".' : '') + '</p>';
+  const ordenadas = filas.slice().sort((a, b) => String(a.Semestre).localeCompare(String(b.Semestre)) || MESES.indexOf(a.Mes) - MESES.indexOf(b.Mes));
+  return `<p style="font-size:12px; color:#888; margin:0 0 6px;">${filas.length} resultado${filas.length === 1 ? '' : 's'}</p><table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th>Periodo / mes</th><th>Campo / Rotación</th><th>Estado</th><th></th></tr></thead><tbody>
+    ${ordenadas.slice(0, 100).map(f => {
       const colores = COLORES_ESTADO[f.Estado] || { bg: '#eee', tx: '#333' };
+      const nAcc = regDb(() => irACeldaDesdeComentario(f.ClaveUnica, f.Programa, f.Semestre), seccion);
       return `<tr>
         <td>${esc(f.ResidenteNombre)}<br><span style="color:#888;">${esc(f.ResidenteID)}</span></td>
-        <td>${esc(f.Programa)}</td><td>${esc(f.Mes)}</td>
+        <td>${esc(f.Programa)}</td><td>${esc(f.Semestre)}<br><span style="color:#888;">${esc(f.Mes)}</span></td>
         <td>${esc(f.CampoRotacion)}<br><span style="color:#888;">${esc(f.Rotacion)}</span></td>
         <td><span class="pastilla" style="background:${colores.bg}; color:${colores.tx};">${esc(f.Estado)}</span></td>
+        <td style="text-align:right;"><button class="db-mini" onclick="dbAcc(${nAcc})">🔗 Ver en cuadro</button></td>
       </tr>`;
     }).join('')}
   </tbody></table>${filas.length > 100 ? '<p style="font-size:11px; color:#999;">Mostrando 100 de ' + filas.length + ' resultados.</p>' : ''}`;
@@ -1742,37 +2301,41 @@ function buscarPorCampo() {
   const mesesSel = seleccionesMulti['db-b1-mes'] || [];
   const aniosSel = seleccionesMulti['db-b1-anio'] || [];
   const programasSel = seleccionesMulti['db-b1-programa'] || [];
-  const resultado = datosDelPeriodoActual().filter(r =>
+  const resultado = datosParaBuscadoresDb_().filter(r =>
     (camposSel.length === 0 || camposSel.some(c => (r.CampoRotacion || '').toLowerCase().includes(c.toLowerCase()))) &&
     (mesesSel.length === 0 || mesesSel.includes(r.Mes)) &&
     (aniosSel.length === 0 || aniosSel.some(a => String(r.Semestre || '').startsWith(a))) &&
     (programasSel.length === 0 || programasSel.includes(r.Programa))
   );
-  document.getElementById('db-resultado-campo').innerHTML = tablaResultados(resultado);
+  document.getElementById('db-resultado-campo').innerHTML = tablaResultados(resultado, 'res-campo');
 }
 
 function buscarPorRotacion() {
   const rotacion = document.getElementById('db-b2-rotacion').value.trim().toLowerCase();
   const programasSel = seleccionesMulti['db-b2-programa'] || [];
   const mesesSel = seleccionesMulti['db-b2-mes'] || [];
-  const resultado = datosDelPeriodoActual().filter(r =>
+  const resultado = datosParaBuscadoresDb_().filter(r =>
     (!rotacion || (r.Rotacion || '').toLowerCase().includes(rotacion)) &&
     (programasSel.length === 0 || programasSel.includes(r.Programa)) &&
     (mesesSel.length === 0 || mesesSel.includes(r.Mes))
   );
-  document.getElementById('db-resultado-rotacion').innerHTML = tablaResultados(resultado);
+  document.getElementById('db-resultado-rotacion').innerHTML = tablaResultados(resultado, 'res-rotacion');
 }
 
 function buscarResidente() {
   const nombre = document.getElementById('db-b3-nombre').value.trim().toLowerCase();
   const programasSel = seleccionesMulti['db-b3-programa'] || [];
   const semestresSel = seleccionesMulti['db-b3-semestre'] || [];
-  const resultado = datosDelPeriodoActual().filter(r =>
-    (!nombre || (r.ResidenteNombre || '').toLowerCase().includes(nombre)) &&
+  const resultado = datosParaBuscadoresDb_().filter(r =>
+    (!nombre || (r.ResidenteNombre || '').toLowerCase().includes(nombre) || String(r.ResidenteID || '').toLowerCase().includes(nombre)) &&
     (programasSel.length === 0 || programasSel.includes(r.Programa)) &&
     (semestresSel.length === 0 || semestresSel.includes(r.Semestre))
   );
-  document.getElementById('db-resultado-residente').innerHTML = tablaResultados(resultado);
+  // Si la búsqueda por nombre/cédula apunta a una sola persona, se muestra primero su ficha por meses.
+  const unSoloResidente = nombre && resultado.length > 0 && new Set(resultado.map(r => r.ResidenteID)).size === 1;
+  document.getElementById('db-resultado-residente').innerHTML = unSoloResidente
+    ? fichaResidenteDb_(resultado) + `<details><summary style="cursor:pointer; font-size:13px; color:var(--azul-ces); margin-bottom:8px;">Ver sus ${resultado.length} rotaciones en tabla</summary>${tablaResultados(resultado, 'res-residente')}</details>`
+    : tablaResultados(resultado, 'res-residente');
 }
 
 function limpiarBusquedaCampo() {
@@ -1848,6 +2411,7 @@ function aplicarFiltroAsistente() {
 }
 
 function limpiarFiltrosGestionOperativa() {
+  focoAtrasadosGestion = false;
   limpiarFiltros({
     textos: ['go-filtro-nombre', 'go-filtro-documento'],
     selects: ['go-filtro-estado', 'go-filtro-mes', 'go-filtro-periodo', 'go-filtro-asistente'],
@@ -1876,12 +2440,14 @@ function aplicarFiltrosGestion() {
     if (mes && fila.Mes !== mes) return false;
     if (periodo && fila.Periodo !== periodo) return false;
     if (!coincideNombreDocumento(fila, nombre, documento)) return false;
+    if (focoAtrasadosGestion && !esAtrasadoGestion(fila)) return false;
     return true;
   });
 
   ultimoFiltradoGestion = filtrado;
   dibujarLista(filtrado, 'tabla-gestion-completa');
   dibujarKpis(filtrado);
+  dibujarFocoGestion(filtrado);
 
   // Si alguna selección quedó marcada sobre una fila que ya no está en la lista (porque se
   // aplicó, porque pasó a Negado, o porque cambiaste el filtro), se limpia — así la barra
@@ -1891,6 +2457,141 @@ function aplicarFiltrosGestion() {
     if (!clavesVisibles.has(clave)) delete seleccionesGestion[clave];
   });
   actualizarBarraAplicarGestion();
+}
+
+// ============================================================
+// FOCO DEL MES — Gestión Operativa de auxiliares. Tarjetas (este mes, próximo mes, atrasados,
+// cambios) y pendientes por mes. No trae datos nuevos ni cambia
+// la cola: todo lo que se toca aquí solo llena los filtros de siempre y vuelve a filtrar.
+// ============================================================
+let focoAtrasadosGestion = false;  // tarjeta "Atrasados" activa
+const MESES_CALENDARIO_ = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+// Convierte Periodo + Mes en un número que se puede comparar (ej. 2026-2 Septiembre > 2026-2 Agosto).
+// Las vacaciones o un periodo mal escrito devuelven null y no cuentan como atrasados.
+function indiceMesGestion_(periodo, mes) {
+  const m = /^(\d{4})-([12])$/.exec(String(periodo || '').trim());
+  const i = MESES_CALENDARIO_.indexOf(String(mes || '').trim());
+  if (!m || i === -1) return null;
+  return Number(m[1]) * 12 + i;
+}
+
+function referenciaMes_(desplazamiento) {
+  const f = new Date();
+  const d = new Date(f.getFullYear(), f.getMonth() + (desplazamiento || 0), 1);
+  return { periodo: d.getFullYear() + '-' + (d.getMonth() >= 6 ? '2' : '1'), mes: MESES_CALENDARIO_[d.getMonth()], indice: d.getFullYear() * 12 + d.getMonth() };
+}
+
+function esAtrasadoGestion(fila) {
+  const i = indiceMesGestion_(fila.Periodo, fila.Mes);
+  return i !== null && i < referenciaMes_(0).indice && (fila.Estado === 'Pendiente' || fila.Estado === 'Cambio');
+}
+
+// Base de las tarjetas y del conteo por mes: la cola sin Negados, respetando solo el filtro de
+// programa/asistente — así cada auxiliar ve sus propios números aunque cambie mes o estado abajo.
+function baseFocoGestion_() {
+  const programasSel = seleccionesMulti['go-filtro-programa'] || [];
+  return cacheColaCompleta.filter(f => f.Estado !== 'Negado' && (programasSel.length === 0 || programasSel.includes(f.Programa)));
+}
+
+function porcentajeConfirmado_(periodo, mes) {
+  if (!cacheHistoricoCompleto.length) return null;
+  const programasSel = seleccionesMulti['go-filtro-programa'] || [];
+  const delMes = cacheHistoricoCompleto.filter(r => r.Semestre === periodo && r.Mes === mes && (programasSel.length === 0 || programasSel.includes(r.Programa)));
+  if (!delMes.length) return null;
+  return { pct: Math.round(delMes.filter(r => r.Estado === 'Confirmado').length / delMes.length * 100), total: delMes.length };
+}
+
+function dibujarFocoGestion(filtrado) {
+  const contTarjetas = document.getElementById('foco-tarjetas');
+  if (!contTarjetas) return;
+  const base = baseFocoGestion_();
+  const hoy = referenciaMes_(0);
+  const sig = referenciaMes_(1);
+  const estadoSel = document.getElementById('go-filtro-estado').value;
+  const mesSel = document.getElementById('go-filtro-mes').value;
+  const periodoSel = document.getElementById('go-filtro-periodo').value;
+
+  const tarjetas = [
+    { clave: 'hoy', n: base.filter(f => f.Periodo === hoy.periodo && f.Mes === hoy.mes && f.Estado === 'Pendiente').length,
+      titulo: 'Por confirmar en ' + hoy.mes, nota: 'Mes en curso · ' + hoy.periodo, color: 'var(--pendiente-tx)', ref: hoy,
+      activa: !focoAtrasadosGestion && estadoSel === 'Pendiente' && mesSel === hoy.mes && periodoSel === hoy.periodo },
+    { clave: 'sig', n: base.filter(f => f.Periodo === sig.periodo && f.Mes === sig.mes && f.Estado === 'Pendiente').length,
+      titulo: 'Por confirmar en ' + sig.mes, nota: 'Próximo mes · para adelantar', color: 'var(--pendiente-tx)', ref: sig,
+      activa: !focoAtrasadosGestion && estadoSel === 'Pendiente' && mesSel === sig.mes && periodoSel === sig.periodo },
+    { clave: 'atrasados', n: base.filter(esAtrasadoGestion).length,
+      titulo: 'Atrasados', nota: 'Meses que ya pasaron y siguen sin confirmar', color: 'var(--cambio-tx)', activa: focoAtrasadosGestion },
+    { clave: 'cambios', n: base.filter(f => f.Estado === 'Cambio').length,
+      titulo: 'Cambios por revisar', nota: 'Todos los periodos', color: 'var(--cambio-tx)',
+      activa: !focoAtrasadosGestion && estadoSel === 'Cambio' && !mesSel && !periodoSel }
+  ];
+  contTarjetas.innerHTML = tarjetas.map(t => {
+    let barra = '';
+    if (t.ref) {
+      const c = porcentajeConfirmado_(t.ref.periodo, t.ref.mes);
+      if (c) barra = `<div class="s">${c.pct}% confirmado de ${c.total} rotaciones</div><div class="foco-barra"><i style="width:${c.pct}%;"></i></div>`;
+    }
+    return `<button class="foco-tarjeta ${t.activa ? 'activo' : ''}" onclick="aplicarTarjetaFoco('${t.clave}')" style="border-left:4px solid ${t.color}; ${t.activa ? 'border-color:' + t.color + ';' : ''}">
+      <div class="n" style="color:${t.color};">${t.n}</div><div class="t">${esc(t.titulo)}</div><div class="s">${esc(t.nota)}</div>${barra}</button>`;
+  }).join('');
+
+  // Pendientes por mes del periodo elegido (o del periodo en curso si no hay ninguno elegido)
+  const periodosCola = [...new Set(cacheColaCompleta.map(f => String(f.Periodo || '').trim()).filter(p => /^\d{4}-[12]$/.test(p)))].sort();
+  const periodoTira = periodoSel || (periodosCola.includes(hoy.periodo) ? hoy.periodo : (periodosCola[0] || hoy.periodo));
+  const mesesTira = periodoTira.endsWith('-2') ? MESES_CALENDARIO_.slice(6) : MESES_CALENDARIO_.slice(0, 6);
+  const pendientesDe = (per, mes) => base.filter(f => f.Periodo === per && (!mes || f.Mes === mes) && f.Estado === 'Pendiente').length;
+  let tira = '<span class="rotulo">Pendientes por mes</span>';
+  tira += periodosCola.map(p => `<button class="foco-chip ${periodoSel === p && !mesSel ? 'activo' : ''}" onclick="aplicarMesFoco('${p}', '')" title="Ver todo el periodo ${p}">${p}${p === hoy.periodo ? '<span class="hoy">en curso</span>' : ''}<span class="cnt ${pendientesDe(p) ? '' : 'cero'}">${pendientesDe(p)}</span></button>`).join('');
+  tira += '<span class="foco-separador"></span>';
+  tira += mesesTira.map(m => {
+    const n = pendientesDe(periodoTira, m);
+    return `<button class="foco-chip ${periodoSel === periodoTira && mesSel === m ? 'activo' : ''}" onclick="aplicarMesFoco('${periodoTira}', '${m}')">${m}${periodoTira === hoy.periodo && m === hoy.mes ? '<span class="hoy">hoy</span>' : ''}<span class="cnt ${n ? '' : 'cero'}">${n}</span></button>`;
+  }).join('');
+  document.getElementById('foco-meses').innerHTML = tira;
+
+  const activos = [];
+  if (focoAtrasadosGestion) activos.push(`<span>Solo atrasados <b onclick="quitarFocoGestion('atrasados')" title="Quitar">✕</b></span>`);
+  document.getElementById('foco-activos').innerHTML = activos.join('');
+}
+
+function aplicarTarjetaFoco(clave) {
+  const estadoEl = document.getElementById('go-filtro-estado');
+  const mesEl = document.getElementById('go-filtro-mes');
+  const periodoEl = document.getElementById('go-filtro-periodo');
+  if (clave === 'hoy' || clave === 'sig') {
+    const ref = referenciaMes_(clave === 'hoy' ? 0 : 1);
+    const yaActiva = !focoAtrasadosGestion && estadoEl.value === 'Pendiente' && mesEl.value === ref.mes && periodoEl.value === ref.periodo;
+    focoAtrasadosGestion = false;
+    if (yaActiva) { estadoEl.value = ''; mesEl.value = ''; periodoEl.value = ''; }
+    else {
+      estadoEl.value = 'Pendiente'; mesEl.value = ref.mes;
+      if (![...periodoEl.options].some(o => o.value === ref.periodo)) periodoEl.add(new Option(ref.periodo, ref.periodo));
+      periodoEl.value = ref.periodo;
+    }
+  } else if (clave === 'atrasados') {
+    focoAtrasadosGestion = !focoAtrasadosGestion;
+    if (focoAtrasadosGestion) { estadoEl.value = ''; mesEl.value = ''; periodoEl.value = ''; }
+  } else if (clave === 'cambios') {
+    const yaActiva = !focoAtrasadosGestion && estadoEl.value === 'Cambio' && !mesEl.value && !periodoEl.value;
+    focoAtrasadosGestion = false;
+    estadoEl.value = yaActiva ? '' : 'Cambio'; mesEl.value = ''; periodoEl.value = '';
+  }
+  aplicarFiltrosGestion();
+}
+
+function aplicarMesFoco(periodo, mes) {
+  const mesEl = document.getElementById('go-filtro-mes');
+  const periodoEl = document.getElementById('go-filtro-periodo');
+  const yaActivo = periodoEl.value === periodo && mesEl.value === mes;
+  focoAtrasadosGestion = false;
+  if (yaActivo) { periodoEl.value = ''; mesEl.value = ''; }
+  else { periodoEl.value = periodo; mesEl.value = mes; }
+  aplicarFiltrosGestion();
+}
+
+function quitarFocoGestion(cual) {
+  if (cual === 'atrasados') focoAtrasadosGestion = false;
+  aplicarFiltrosGestion();
 }
 
 function descargarGestionOperativaExcel() {
@@ -3049,6 +3750,7 @@ function dibujarLista(filas, idTabla) {
           <input type="checkbox" ${seleccionActual === 'Negado' ? 'checked' : ''} onchange="marcarSeleccionGestion('${claveEsc}', 'Negado', this)"> Negado
         </label>
         <button class="btn-secundario btn-pequeno" onclick="abrirComentario('${claveEsc}')">💬 Comentar</button>
+        <button class="btn-secundario btn-pequeno" onclick="irACeldaDesdeComentario('${claveEsc}', '${String(fila.Programa || '').replace(/'/g, "\\'")}', '${String(fila.Periodo || '').replace(/'/g, "\\'")}')" title="Abrir esta rotación en el Cuadro de rotaciones">🔗 Ver en cuadro</button>
         ${usuarioActual && usuarioActual.rol === 'coordinadora' ? `<button class="btn-secundario btn-pequeno" onclick="abrirNotificarAsistente('${claveEsc}')" title="Enviar aviso urgente por correo">🔔 Notificar</button>` : ''}
         ${fila.Correo ? `<button class="btn-secundario btn-pequeno" onclick="abrirNotificarResidente('${claveEsc}')" title="Enviar aviso urgente al residente por correo">📧 Notificar Residente</button>` : ''}
       </div>`;
