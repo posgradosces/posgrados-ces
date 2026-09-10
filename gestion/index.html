@@ -171,6 +171,45 @@
   .db-linea-t > div, .db-linea-t > button { border-radius: 4px; padding: 5px; min-height: 42px; overflow-wrap: anywhere; text-align: left; font-size: 11px; line-height: 1.25; }
   @media (max-width: 1000px) { .db-kpis { grid-template-columns: 1fr 1fr; } .db-dos { grid-template-columns: 1fr; } .db-barras button { grid-template-columns: 130px minmax(0, 1fr) 30px; } }
 
+  /* Residentes — base maestra (solo coordinadoras): agrupada por programa, con ficha editable y novedades */
+  .res-barra { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 12px; }
+  .res-barra label { font-size: 12px; color: #555; display: block; margin-bottom: 3px; }
+  .res-barra input, .res-barra select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 13px; }
+  .res-resumen { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .res-resumen button { background: #f3f6f9; color: #555; border-radius: 8px; padding: 7px 12px; font-size: 12px; border: 1px solid transparent; }
+  .res-resumen button b { font-size: 17px; color: var(--azul-ces); margin-right: 4px; }
+  .res-resumen button.activo { border-color: var(--azul-ces); background: #e8eef5; }
+  .res-programa { border: 1px solid #e3e8ee; border-radius: 10px; margin-bottom: 10px; overflow: hidden; background: white; }
+  .res-programa > button { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; background: #fafbfc; color: #222; border-radius: 0; padding: 11px 14px; text-align: left; font-size: 14px; }
+  .res-programa > button:hover { background: #f3f6f9; }
+  .res-programa > button .nombre-prog { font-weight: 700; color: var(--azul-ces); }
+  .res-programa > button .conteos { display: flex; gap: 8px; align-items: center; font-size: 12px; color: #666; }
+  .res-programa .flecha { transition: transform .15s; display: inline-block; }
+  .res-programa.abierto .flecha { transform: rotate(90deg); }
+  .res-programa .cuerpo-prog { display: none; }
+  .res-programa.abierto .cuerpo-prog { display: block; }
+  .res-pend { display: inline-block; font-size: 11px; font-weight: 600; background: #FFE3E3; color: #9C0006; border-radius: 8px; padding: 1px 7px; margin: 2px 3px 0 0; }
+  .res-estado-Activo { background: var(--gestionado-bg); color: var(--gestionado-tx); }
+  .res-estado-Suspendido { background: var(--pendiente-bg); color: var(--pendiente-tx); }
+  .res-estado-Retirado { background: var(--cambio-bg); color: var(--cambio-tx); }
+  .res-estado-Egresado { background: var(--confirmado-bg); color: var(--confirmado-tx); }
+  #overlay-ficha-res { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); align-items: flex-start; justify-content: center; padding: 28px 16px; overflow-y: auto; z-index: 110; }
+  #caja-ficha-res { background: white; border-radius: 12px; width: 100%; max-width: 860px; box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+  .fres-top { padding: 16px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+  .fres-cuerpo { padding: 16px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .fres-grilla { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+  .fres-grilla label, .fres-nov label { font-size: 12px; color: #555; display: block; margin-bottom: 3px; }
+  .fres-grilla input, .fres-grilla select, .fres-nov input, .fres-nov select, .fres-nov textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 13px; font-family: inherit; }
+  .fres-grilla .obligatorio:after { content: ' *'; color: #9C0006; }
+  .fres-cumple { display: flex; align-items: center; gap: 8px; background: #fff0f6; border-radius: 6px; padding: 8px 10px; font-size: 13px; color: #b0306a; font-weight: 600; }
+  .fres-pendientes { background: #FFF5F5; border: 1px solid #F5C2C7; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #9C0006; margin-bottom: 12px; }
+  .fres-nov { background: #f7fafd; border: 1px solid #d6e4f5; border-radius: 8px; padding: 10px 12px; display: grid; gap: 8px; }
+  .fres-linea { border-left: 3px solid #e3e8ee; margin: 14px 0 0 6px; padding-left: 14px; }
+  .fres-evento { position: relative; margin-bottom: 12px; font-size: 13px; }
+  .fres-evento:before { content: ''; position: absolute; left: -21px; top: 3px; width: 11px; height: 11px; border-radius: 50%; background: var(--azul-ces); border: 2px solid white; }
+  .fres-evento .meta { font-size: 11px; color: #888; }
+  @media (max-width: 860px) { .fres-cuerpo { grid-template-columns: 1fr; } }
+
   /* Foco del mes — Gestión Operativa de auxiliares: tarjetas de pendientes y pendientes por mes.
      Todo lo que se toca aquí solo llena los filtros de siempre. */
   .foco-tarjetas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
@@ -233,6 +272,7 @@
       <button class="btn-secundario btn-pequeno" id="tab-btn-cuadricula" onclick="cambiarTab('cuadricula')">Cuadro de rotaciones</button>
       <button class="btn-secundario btn-pequeno" id="tab-btn-historico" onclick="cambiarTab('historico')">Histórico</button>
       <button class="btn-secundario btn-pequeno" id="tab-btn-movilidad" onclick="cambiarTab('movilidad')" style="display:none;">Movilidad <span id="badge-movilidad" style="display:none; background:var(--confirmado-tx); color:white; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:4px;"></span></button>
+      <button class="btn-secundario btn-pequeno" id="tab-btn-residentes" onclick="cambiarTab('residentes')" style="display:none;">Residentes</button>
       <button class="btn-secundario btn-pequeno" id="boton-publicar-github" onclick="publicarAlMicrositioPublico()" style="display:none; margin-left:auto; background:#003865; color:white;" title="Sube ahora mismo lo más reciente al micrositio público, sin esperar al disparador de las 9 PM">📤 Publicar al micrositio público</button>
     </div>
 
@@ -288,6 +328,14 @@
           <div id="db-barra-datos" class="db-barra-datos"></div>
         </div>
         <div id="db-chips-periodo" class="db-fila"></div>
+      </div>
+
+      <!-- RESIDENTES (primero): cumpleaños, novedades y finalizaciones de la base de residentes -->
+      <div class="db-caja" id="db-caja-residentes">
+        <h3>Residentes: cumpleaños y novedades</h3>
+        <p class="db-como">Clic en cada indicador para ver el detalle. De los cumpleaños solo se muestran el día y el mes.</p>
+        <div id="db-kpis-res" class="db-kpis" style="grid-template-columns:repeat(3, minmax(0, 1fr));"></div>
+        <div id="db-desglose-res"></div>
       </div>
 
       <!-- BUSCADORES — van primero: los mismos tres de siempre, en pestañas -->
@@ -373,6 +421,7 @@
           <div id="db-detalle-mov"></div>
         </div>
       </div>
+
     </div>
 
     <div class="panel" id="panel-gestion-operativa" style="display:none;">
@@ -497,6 +546,21 @@
       </div>
     </div>
 
+    <!-- Residentes — base maestra, solo coordinadoras. -->
+    <div class="panel" id="panel-residentes" style="display:none;">
+      <h2>Residentes <button class="btn-secundario btn-pequeno" onclick="cargarResidentes(true)" style="float:right;">🔄 Actualizar</button>
+        <button class="btn-primario btn-pequeno" onclick="abrirFichaResidente(null)" style="float:right; margin-right:8px;">+ Residente nuevo</button></h2>
+      <p style="font-size:12px; color:#888; margin-top:-8px;">Base maestra de residentes CES, organizada por programa. Clic en un residente para editar sus datos y registrar novedades.</p>
+      <div class="res-barra">
+        <div><label>Buscar</label><input id="res-q" autocomplete="off" placeholder="Nombre o cédula" oninput="pintarResidentes()" style="min-width:240px;"></div>
+        <div><label>Programa</label><select id="res-prog" onchange="pintarResidentes()"><option value="">Todos</option></select></div>
+        <div><label>Estado</label><select id="res-estado" onchange="pintarResidentes()"><option value="">Todos</option><option>Activo</option><option>Suspendido</option><option>Retirado</option><option>Egresado</option></select></div>
+        <div><button class="btn-secundario btn-pequeno" onclick="plegarProgramasRes(true)">Abrir todos</button> <button class="btn-secundario btn-pequeno" onclick="plegarProgramasRes(false)">Cerrar todos</button></div>
+      </div>
+      <div class="res-resumen" id="res-resumen"></div>
+      <div id="res-lista"></div>
+    </div>
+
     <!-- Movilidad — solo coordinadora. -->
     <div class="panel" id="panel-movilidad" style="display:none;">
       <h2>Movilidad académica <button class="btn-secundario btn-pequeno" onclick="cargarMovilidad(true)" style="float:right;">🔄 Actualizar</button></h2>
@@ -519,6 +583,8 @@
 
   </div>
 </div>
+
+<div id="overlay-ficha-res" onclick="if (event.target.id === 'overlay-ficha-res') cerrarFichaResidente();"><div id="caja-ficha-res" role="dialog" aria-modal="true"></div></div>
 
 <div id="overlay-modal">
   <div id="caja-modal">
@@ -748,6 +814,7 @@ function entrarAlApp() {
     document.getElementById('tab-btn-dashboard').style.display = 'inline-block';
     document.getElementById('tab-btn-historico').style.display = 'inline-block';
     document.getElementById('tab-btn-movilidad').style.display = 'inline-block';
+    document.getElementById('tab-btn-residentes').style.display = 'inline-block';
     document.getElementById('boton-publicar-github').style.display = 'inline-block';
     cargarProgramasConocidos();
     cargarMesesFiltro();
@@ -761,6 +828,7 @@ function entrarAlApp() {
     document.getElementById('boton-archivar-periodo').style.display = 'none';
     document.getElementById('vista-gestion-coordinadora').style.display = 'none';
     document.getElementById('vista-gestion-auxiliar').style.display = 'block';
+    document.getElementById('tab-btn-residentes').style.display = 'none';
     document.getElementById('tab-btn-gestion').style.display = 'inline-block';
     document.getElementById('tab-btn-dashboard').style.display = 'inline-block';
     document.getElementById('tab-btn-historico').style.display = 'inline-block';
@@ -1080,9 +1148,12 @@ function cambiarTab(tab) {
   const panelDb = document.getElementById('panel-dashboard');
   const panelHist = document.getElementById('panel-historico');
   const panelMov = document.getElementById('panel-movilidad');
+  const btnRes = document.getElementById('tab-btn-residentes');
+  const panelRes = document.getElementById('panel-residentes');
 
   panelCuad.style.display = 'none'; panelGes.style.display = 'none'; panelDb.style.display = 'none';
-  panelHist.style.display = 'none'; panelMov.style.display = 'none';
+  panelHist.style.display = 'none'; panelMov.style.display = 'none'; panelRes.style.display = 'none';
+  btnRes.className = 'btn-secundario btn-pequeno';
   btnCuad.className = 'btn-secundario btn-pequeno'; btnGes.className = 'btn-secundario btn-pequeno';
   btnDb.className = 'btn-secundario btn-pequeno'; btnHist.className = 'btn-secundario btn-pequeno';
   btnMov.className = 'btn-secundario btn-pequeno';
@@ -1102,6 +1173,9 @@ function cambiarTab(tab) {
   } else if (tab === 'movilidad') {
     panelMov.style.display = 'block'; btnMov.className = 'btn-primario btn-pequeno';
     cargarMovilidad();
+  } else if (tab === 'residentes') {
+    panelRes.style.display = 'block'; btnRes.className = 'btn-primario btn-pequeno';
+    pintarResidentes();
   }
 }
 
@@ -1368,6 +1442,7 @@ async function cargarPanelEjecutivo(forzarRecarga) {
     ' <button onclick="cargarPanelEjecutivo(true)">🔄 Actualizar ahora</button>';
 
   aplicarPeriodoDb(periodoSeleccionadoDb);
+  if (forzarRecarga) cargarResidentes(true); else dibujarKpisResidentesDb();
 }
 
 // ============================================================
@@ -2460,6 +2535,299 @@ function aplicarFiltrosGestion() {
 }
 
 // ============================================================
+// RESIDENTES — base maestra (hoja "Residentes" del Apps Script)
+// La fecha de nacimiento completa NUNCA llega al navegador: el servidor solo manda día y mes
+// (CumpleDiaMes, "DD-MM") y si la fecha está registrada. El año no se muestra en ninguna parte.
+// ============================================================
+let cacheResidentes = [];
+let residentesCargados = false;
+let cargandoResidentes = null;
+const programasResAbiertos = new Set();
+let filtroResumenRes = '';   // '', 'pendientes', o un estado
+const ESTADOS_RESIDENTE = ['Activo', 'Suspendido', 'Retirado', 'Egresado'];
+const TIPOS_NOVEDAD = ['Suspensión', 'Reintegro', 'Licencia', 'Incapacidad', 'Cambio de fecha de finalización', 'Retiro', 'Otra'];
+const NOMBRES_MES_RES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+async function cargarResidentes(forzar) {
+  if (residentesCargados && !forzar) { pintarResidentesSiVisible_(); return cacheResidentes; }
+  if (cargandoResidentes) return cargandoResidentes;
+  cargandoResidentes = (async () => {
+    const res = await leerBackend('listarResidentes');
+    cargandoResidentes = null;
+    if (!res.ok) { mostrarMensaje('No se pudo cargar la base de residentes: ' + res.error, 'error'); return cacheResidentes; }
+    cacheResidentes = res.datos || [];
+    residentesCargados = true;
+    llenarProgramasRes_();
+    pintarResidentesSiVisible_();
+    if (document.getElementById('panel-dashboard').style.display === 'block') dibujarKpisResidentesDb();
+    return cacheResidentes;
+  })();
+  return cargandoResidentes;
+}
+
+function pintarResidentesSiVisible_() {
+  if (document.getElementById('panel-residentes').style.display === 'block') pintarResidentes();
+}
+
+function llenarProgramasRes_() {
+  const sel = document.getElementById('res-prog');
+  const actual = sel.value;
+  const programas = [...new Set(cacheResidentes.map(r => r.Programa).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+  sel.innerHTML = '<option value="">Todos</option>' + programas.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  if (programas.includes(actual)) sel.value = actual;
+}
+
+// "2026-07" → "Julio 2026"
+function textoMesAnioRes(valor) {
+  const m = /^(\d{4})-(\d{2})$/.exec(String(valor || '').trim());
+  if (!m) return '';
+  const nombre = NOMBRES_MES_RES[Number(m[2]) - 1] || '';
+  return nombre.charAt(0).toUpperCase() + nombre.slice(1) + ' ' + m[1];
+}
+// "14-03" → "14 de marzo"
+function textoCumpleRes(diaMes) {
+  const m = /^(\d{2})-(\d{2})$/.exec(String(diaMes || ''));
+  return m ? Number(m[1]) + ' de ' + NOMBRES_MES_RES[Number(m[2]) - 1] : '';
+}
+function mesAbsRes_(valor) {
+  const m = /^(\d{4})-(\d{2})$/.exec(String(valor || '').trim());
+  return m ? Number(m[1]) * 12 + Number(m[2]) - 1 : null;
+}
+// Días que faltan para el próximo cumpleaños (0 = hoy). El 29 de febrero se celebra el 28 en años no bisiestos.
+function diasParaCumpleRes_(diaMes, hoy) {
+  const m = /^(\d{2})-(\d{2})$/.exec(String(diaMes || ''));
+  if (!m) return null;
+  const base = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+  for (let anio = hoy.getFullYear(); anio <= hoy.getFullYear() + 1; anio++) {
+    let dia = Number(m[1]);
+    const mes = Number(m[2]) - 1;
+    const bisiesto = (anio % 4 === 0 && anio % 100 !== 0) || anio % 400 === 0;
+    if (mes === 1 && dia === 29 && !bisiesto) dia = 28;
+    const fecha = new Date(anio, mes, dia);
+    const dif = Math.round((fecha - base) / 86400000);
+    if (dif >= 0) return dif;
+  }
+  return null;
+}
+
+function resumenResidentes_() {
+  const cuenta = e => cacheResidentes.filter(r => r.Estado === e).length;
+  return { Activo: cuenta('Activo'), Suspendido: cuenta('Suspendido'), Retirado: cuenta('Retirado'), Egresado: cuenta('Egresado'),
+    pendientes: cacheResidentes.filter(r => (r.Pendientes || []).length).length };
+}
+
+function pintarResidentes() {
+  const cont = document.getElementById('res-lista');
+  if (!residentesCargados) { cont.innerHTML = '<p style="color:#999;">⏳ Cargando residentes...</p>'; cargarResidentes(); return; }
+  const q = document.getElementById('res-q').value.trim().toLowerCase();
+  const prog = document.getElementById('res-prog').value;
+  const estado = document.getElementById('res-estado').value;
+  const s = resumenResidentes_();
+  const botonResumen = (clave, n, texto, color) => `<button class="${filtroResumenRes === clave ? 'activo' : ''}" onclick="filtroResumenRes = filtroResumenRes === '${clave}' ? '' : '${clave}'; pintarResidentes();"><b style="${color ? 'color:' + color : ''}">${n}</b>${texto}</button>`;
+  document.getElementById('res-resumen').innerHTML =
+    botonResumen('Activo', s.Activo, 'activos') + botonResumen('Suspendido', s.Suspendido, 'suspendidos') +
+    botonResumen('Retirado', s.Retirado, 'retirados') + botonResumen('Egresado', s.Egresado, 'egresados') +
+    botonResumen('pendientes', s.pendientes, 'con datos pendientes', '#9C0006');
+
+  const filas = cacheResidentes.filter(r =>
+    (!q || String(r.NombreCompleto || '').toLowerCase().includes(q) || String(r.ResidenteID || '').toLowerCase().includes(q)) &&
+    (!prog || r.Programa === prog) && (!estado || r.Estado === estado) &&
+    (!filtroResumenRes || (filtroResumenRes === 'pendientes' ? (r.Pendientes || []).length > 0 : r.Estado === filtroResumenRes)));
+  if (!filas.length) { cont.innerHTML = '<p style="color:#999; font-size:13px;">Ningún residente coincide con la búsqueda.</p>'; return; }
+
+  const porPrograma = {};
+  filas.forEach(r => { const p = r.Programa || 'Sin programa'; (porPrograma[p] = porPrograma[p] || []).push(r); });
+  const buscando = !!(q || filtroResumenRes || estado);
+  const ORDEN_NIVEL = n => { const d = /(\d)/.exec(String(n || '')); return d ? Number(d[1]) : 9; };
+  cont.innerHTML = Object.keys(porPrograma).sort((a, b) => a.localeCompare(b, 'es')).map(p => {
+    const lista = porPrograma[p].sort((a, b) => ORDEN_NIVEL(a.Nivel) - ORDEN_NIVEL(b.Nivel) || String(a.NombreCompleto).localeCompare(String(b.NombreCompleto), 'es'));
+    const conPend = lista.filter(r => (r.Pendientes || []).length).length;
+    const abierto = buscando || prog === p || programasResAbiertos.has(p);
+    const idProg = 'res-prog-' + Object.keys(porPrograma).sort((a, b) => a.localeCompare(b, 'es')).indexOf(p);
+    return `<div class="res-programa ${abierto ? 'abierto' : ''}" id="${idProg}">
+      <button onclick="alternarProgramaRes(this, ${JSON.stringify(p).replace(/"/g, '&quot;')})"><span><span class="flecha">▶</span> <span class="nombre-prog">${esc(p)}</span></span>
+        <span class="conteos"><span>${lista.length} residente${lista.length === 1 ? '' : 's'}</span>${conPend ? `<span class="res-pend">${conPend} con datos pendientes</span>` : ''}</span></button>
+      <div class="cuerpo-prog"><div style="overflow-x:auto;"><table class="lista"><thead><tr><th>Residente</th><th>Nivel</th><th>Inicio</th><th>Finalización</th><th>Grado probable</th><th>🎂 Cumpleaños</th><th>Estado</th><th>Última novedad</th></tr></thead><tbody>
+      ${lista.map(r => {
+        const u = (r.Novedades || [])[0];
+        return `<tr style="cursor:pointer;" onclick="abrirFichaResidente(${JSON.stringify(String(r.ResidenteID)).replace(/"/g, '&quot;')})">
+          <td><b>${esc(r.NombreCompleto)}</b><br><span style="color:#888; font-size:12px;">${esc(r.ResidenteID)}${r.Correo ? ' · ' + esc(r.Correo) : ''}</span>
+            ${(r.Pendientes || []).length ? `<div>${r.Pendientes.map(t => `<span class="res-pend">${esc(t)}</span>`).join('')}</div>` : ''}</td>
+          <td>${esc(r.Nivel) || '—'}</td><td>${textoMesAnioRes(r.FechaInicio) || '—'}</td><td>${textoMesAnioRes(r.FechaFinalizacion) || '—'}</td>
+          <td>${textoMesAnioRes(r.FechaGradoProbable) || '—'}</td><td>${textoCumpleRes(r.CumpleDiaMes) || '—'}</td>
+          <td><span class="pastilla res-estado-${esc(r.Estado)}">${esc(r.Estado || '—')}</span></td>
+          <td>${u ? `<b>${esc(u.Tipo)}</b><br><span style="color:#888; font-size:12px;">${esc(u.Fecha)}</span>` : '<span style="color:#bbb;">—</span>'}</td></tr>`;
+      }).join('')}
+      </tbody></table></div></div></div>`;
+  }).join('');
+}
+
+function alternarProgramaRes(boton, programa) {
+  const caja = boton.parentElement;
+  const abierto = caja.classList.toggle('abierto');
+  if (abierto) programasResAbiertos.add(programa); else programasResAbiertos.delete(programa);
+}
+function plegarProgramasRes(abrir) {
+  const programas = [...new Set(cacheResidentes.map(r => r.Programa || 'Sin programa'))];
+  programasResAbiertos.clear();
+  if (abrir) programas.forEach(p => programasResAbiertos.add(p));
+  pintarResidentes();
+}
+
+// ---------- Ficha del residente (crear / editar / novedades) ----------
+let fichaResidenteId = null;
+function abrirFichaResidente(residenteId) {
+  fichaResidenteId = residenteId;
+  pintarFichaResidente_();
+  document.getElementById('overlay-ficha-res').style.display = 'flex';
+}
+function cerrarFichaResidente() { document.getElementById('overlay-ficha-res').style.display = 'none'; }
+
+function pintarFichaResidente_() {
+  const r = fichaResidenteId ? cacheResidentes.find(x => String(x.ResidenteID) === String(fichaResidenteId)) : null;
+  const nuevo = !r;
+  const v = campo => esc(r ? (r[campo] || '') : '');
+  const programas = [...new Set(cacheResidentes.map(x => x.Programa).concat(typeof listaProgramasConocidos !== 'undefined' ? listaProgramasConocidos : []).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+  const cumple = r && r.CumpleDiaMes ? textoCumpleRes(r.CumpleDiaMes) : '';
+  document.getElementById('caja-ficha-res').innerHTML = `
+    <div class="fres-top"><div><h3 style="margin:0; font-size:17px; color:var(--azul-ces);">${nuevo ? 'Residente nuevo' : esc(r.NombreCompleto)}</h3>
+      <div style="font-size:12px; color:#888; margin-top:2px;">${nuevo ? 'Los campos con * son obligatorios.' : esc(r.ResidenteID) + ' · ' + esc(r.Programa)}</div></div>
+      <div style="display:flex; gap:8px; align-items:flex-start;">${nuevo ? '' : `<span class="pastilla res-estado-${esc(r.Estado)}">${esc(r.Estado)}</span>`}<button class="btn-secundario btn-pequeno" onclick="cerrarFichaResidente()">✕</button></div></div>
+    <div class="fres-cuerpo">
+      <div>
+        ${!nuevo && (r.Pendientes || []).length ? `<div class="fres-pendientes"><b>Datos pendientes por revisar:</b><br>${r.Pendientes.map(t => '• ' + esc(t)).join('<br>')}</div>` : ''}
+        <div class="fres-grilla">
+          <div><label class="obligatorio">Cédula / documento</label><input id="fres-id" value="${v('ResidenteID')}" ${nuevo ? '' : 'readonly style="background:#f3f6f9;" title="Para corregir la cédula usa ✏️ Editar residente en el Cuadro de rotaciones"'}></div>
+          <div><label>Estado</label><select id="fres-estado">${ESTADOS_RESIDENTE.map(e => `<option ${r ? (e === r.Estado ? 'selected' : '') : (e === 'Activo' ? 'selected' : '')}>${e}</option>`).join('')}</select></div>
+          <div style="grid-column:1/-1;"><label class="obligatorio">Nombre completo</label><input id="fres-nombre" value="${v('NombreCompleto')}"></div>
+          <div style="grid-column:1/-1;"><label class="obligatorio">Programa</label><input id="fres-programa" list="fres-lista-programas" value="${v('Programa')}"><datalist id="fres-lista-programas">${programas.map(p => `<option value="${esc(p)}">`).join('')}</datalist></div>
+          <div><label class="obligatorio">Nivel</label><input id="fres-nivel" value="${v('Nivel')}" placeholder="R1, R2..."></div>
+          <div><label class="obligatorio">Correo CES</label><input id="fres-correo" type="email" value="${v('Correo')}" placeholder="nombre@uces.edu.co"></div>
+          <div><label class="obligatorio">Fecha de inicio</label><input id="fres-inicio" type="month" value="${v('FechaInicio')}"></div>
+          <div><label class="obligatorio">Fecha de finalización</label><input id="fres-fin" type="month" value="${v('FechaFinalizacion')}"></div>
+          <div><label>Fecha probable de grado</label><input id="fres-grado" type="month" value="${v('FechaGradoProbable')}"></div>
+          <div><label class="${nuevo ? 'obligatorio' : ''}">Fecha de nacimiento</label>
+            ${cumple ? `<div class="fres-cumple">🎂 ${esc(cumple)} <span style="font-weight:400; color:#999; font-size:11px;">(el año no se muestra)</span></div>` : (nuevo ? '' : '<div class="fres-cumple" style="background:#FFF5F5; color:#9C0006;">Sin registrar</div>')}
+            <input id="fres-nacimiento" type="date" style="margin-top:4px;" title="${nuevo ? 'Fecha completa: se necesita para enviar la felicitación' : 'Solo para registrar o corregir la fecha completa'}"></div>
+        </div>
+        <p style="font-size:11px; color:#888; margin-top:8px;">${nuevo ? 'La fecha de nacimiento se pide completa para poder enviar la felicitación; después solo se muestran el día y el mes.' : 'Si cambias la fecha de finalización, queda registrada como novedad con la fecha anterior y la nueva.'}</p>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;"><button class="btn-secundario" onclick="cerrarFichaResidente()">Cancelar</button><button class="btn-primario" id="fres-guardar" onclick="guardarFichaResidente()">${nuevo ? 'Crear residente' : 'Guardar cambios'}</button></div>
+      </div>
+      <div>
+        <h3 style="margin:0 0 10px; font-size:15px; color:var(--azul-ces);">Novedades</h3>
+        ${nuevo ? '<p style="font-size:13px; color:#999;">Podrás registrar novedades después de crear el residente.</p>' : `
+        <div class="fres-nov">
+          <div class="fres-grilla"><div><label>Tipo</label><select id="fres-nov-tipo">${TIPOS_NOVEDAD.map(t => `<option>${t}</option>`).join('')}</select></div>
+            <div><label>Fecha</label><input id="fres-nov-fecha" type="date" value="${new Date().toISOString().slice(0, 10)}"></div></div>
+          <div><label>Detalle</label><textarea id="fres-nov-detalle" rows="3" placeholder="Qué pasó y qué se acordó"></textarea></div>
+          <div style="font-size:11px; color:#888;">Suspensión, reintegro y retiro cambian el estado automáticamente.</div>
+          <div style="text-align:right;"><button class="btn-primario btn-pequeno" onclick="agregarNovedadResidente()">+ Registrar novedad</button></div>
+        </div>
+        <div class="fres-linea">${(r.Novedades || []).map(n => `<div class="fres-evento"><b>${esc(n.Tipo)}</b>${n.Detalle ? `<div>${esc(n.Detalle)}</div>` : ''}
+          ${n.FinAnterior || n.FinNueva ? `<div style="font-size:12px; color:#555;">Finalización: ${esc(textoMesAnioRes(n.FinAnterior) || '—')} → <b>${esc(textoMesAnioRes(n.FinNueva) || '—')}</b></div>` : ''}
+          <div class="meta">${esc(n.Fecha)} · ${esc(n.Autor)}</div></div>`).join('') || '<div style="font-size:13px; color:#999;">Sin novedades registradas.</div>'}</div>`}
+      </div>
+    </div>`;
+}
+
+async function guardarFichaResidente() {
+  const r = fichaResidenteId ? cacheResidentes.find(x => String(x.ResidenteID) === String(fichaResidenteId)) : null;
+  const val = id => document.getElementById(id).value.trim();
+  const datos = {
+    nuevo: !r, residenteId: r ? String(r.ResidenteID) : val('fres-id'), nombre: val('fres-nombre'), programa: val('fres-programa'),
+    nivel: val('fres-nivel'), correo: val('fres-correo'), estado: val('fres-estado'),
+    fechaInicio: val('fres-inicio'), fechaFinalizacion: val('fres-fin'), fechaGradoProbable: val('fres-grado')
+  };
+  const nac = val('fres-nacimiento');
+  if (nac) datos.fechaNacimiento = nac;
+  const faltan = [];
+  if (!datos.residenteId) faltan.push('cédula'); if (!datos.nombre) faltan.push('nombre'); if (!datos.programa) faltan.push('programa');
+  if (!datos.nivel) faltan.push('nivel'); if (!datos.correo) faltan.push('correo');
+  if (!datos.fechaInicio) faltan.push('fecha de inicio'); if (!datos.fechaFinalizacion) faltan.push('fecha de finalización');
+  if (!r && !nac) faltan.push('fecha de nacimiento completa');
+  // Al crear, todo lo obligatorio debe estar; al editar se permite guardar aunque falten datos (quedan como pendientes).
+  if (!r && faltan.length) { mostrarMensaje('Falta: ' + faltan.join(', ') + '.', 'error'); return; }
+  if (!r && cacheResidentes.some(x => String(x.ResidenteID) === datos.residenteId)) { mostrarMensaje('Esa cédula ya está en la base de residentes.', 'error'); return; }
+  const boton = document.getElementById('fres-guardar');
+  boton.disabled = true; boton.textContent = 'Guardando...';
+  const res = await llamarBackend('guardarResidente', datos);
+  boton.disabled = false; boton.textContent = r ? 'Guardar cambios' : 'Crear residente';
+  if (!res.ok) { mostrarMensaje('Error: ' + res.error, 'error'); return; }
+  mostrarMensaje(r ? 'Datos del residente guardados.' : 'Residente creado.', 'ok');
+  fichaResidenteId = datos.residenteId;
+  await cargarResidentes(true);
+  pintarFichaResidente_();
+}
+
+async function agregarNovedadResidente() {
+  const detalle = document.getElementById('fres-nov-detalle').value.trim();
+  if (!detalle) { mostrarMensaje('Escribe el detalle de la novedad.', 'error'); return; }
+  const res = await llamarBackend('agregarNovedadResidente', {
+    residenteId: String(fichaResidenteId), tipo: document.getElementById('fres-nov-tipo').value,
+    fecha: document.getElementById('fres-nov-fecha').value, detalle
+  });
+  if (!res.ok) { mostrarMensaje('Error: ' + res.error, 'error'); return; }
+  mostrarMensaje('Novedad registrada.', 'ok');
+  await cargarResidentes(true);
+  pintarFichaResidente_();
+}
+
+// ---------- Dashboard: cumpleaños, novedades y finalizaciones (van al final del panel) ----------
+let kpiResidentesDb = null;
+function dibujarKpisResidentesDb() {
+  const cont = document.getElementById('db-kpis-res');
+  if (!cont) return;
+  if (!residentesCargados) { cont.innerHTML = '<p style="color:#999; font-size:13px;">⏳ Cargando residentes...</p>'; cargarResidentes(); return; }
+  limpiarSeccionDb('kpires');
+  const hoy = new Date();
+  const vigentes = cacheResidentes.filter(r => r.Estado === 'Activo' || r.Estado === 'Suspendido');
+  const cumpleHoy = vigentes.filter(r => diasParaCumpleRes_(r.CumpleDiaMes, hoy) === 0);
+  const cumpleProx = vigentes.filter(r => { const d = diasParaCumpleRes_(r.CumpleDiaMes, hoy); return d !== null && d > 0 && d <= 30; })
+    .sort((a, b) => diasParaCumpleRes_(a.CumpleDiaMes, hoy) - diasParaCumpleRes_(b.CumpleDiaMes, hoy));
+  const hace30 = new Date(hoy.getTime() - 30 * 86400000).toISOString().slice(0, 10);
+  const novedades = cacheResidentes.flatMap(r => (r.Novedades || []).map(n => Object.assign({ residente: r }, n)))
+    .filter(n => String(n.Fecha) >= hace30).sort((a, b) => String(b.Fecha).localeCompare(String(a.Fecha)));
+  const mesHoy = hoy.getFullYear() * 12 + hoy.getMonth();
+  const finalizan = cacheResidentes.filter(r => { const f = mesAbsRes_(r.FechaFinalizacion); return (r.Estado === 'Activo' || r.Estado === 'Suspendido') && f !== null && f >= mesHoy && f <= mesHoy + 3; })
+    .sort((a, b) => mesAbsRes_(a.FechaFinalizacion) - mesAbsRes_(b.FechaFinalizacion));
+  const esCoord = usuarioActual && usuarioActual.rol === 'coordinadora';
+
+  const tarjetas = [
+    { k: 'cumple', n: cumpleHoy.length, t: '🎂 Cumplen años hoy', color: '#b0306a', d: `${cumpleProx.length} en los próximos 30 días` },
+    { k: 'novedades', n: novedades.length, t: '📝 Novedades del último mes', color: '#823C00', d: 'Suspensiones, licencias, reintegros, retiros...' },
+    { k: 'finalizan', n: finalizan.length, t: '🏁 Finalizan en los próximos 3 meses', color: '#1F4E79', d: 'Según su fecha de finalización' }
+  ];
+  cont.innerHTML = tarjetas.map(t => `<button class="db-kpi ${kpiResidentesDb === t.k ? 'activo' : ''}" style="border-top-color:${t.color};" onclick="kpiResidentesDb = kpiResidentesDb === '${t.k}' ? null : '${t.k}'; dibujarKpisResidentesDb();">
+    <div><div class="n" style="color:${t.color};">${t.n}</div><div class="t">${t.t}</div><div class="d db-igual">${t.d}</div><div class="ver">${kpiResidentesDb === t.k ? 'Ocultar detalle ▴' : 'Ver detalle ▾'}</div></div></button>`).join('');
+
+  const det = document.getElementById('db-desglose-res');
+  const filaPersona = (r, derecha, extra) => {
+    const nAcc = esCoord ? regDb(() => { cambiarTab('residentes'); abrirFichaResidente(String(r.ResidenteID)); }, 'kpires') : null;
+    return `<tr><td>${esCoord ? `<button class="db-link" onclick="dbAcc(${nAcc})">${esc(r.NombreCompleto)}</button>` : `<b>${esc(r.NombreCompleto)}</b>`}${extra ? `<div style="font-size:12px; color:#666;">${extra}</div>` : ''}</td><td>${esc(r.Programa)}</td><td style="text-align:right;">${derecha}</td></tr>`;
+  };
+  let html = '';
+  if (kpiResidentesDb === 'cumple') {
+    html = `<div class="db-desglose-top"><b>🎂 Cumpleaños</b></div>
+      <table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th style="text-align:right;">Día</th></tr></thead><tbody>
+      ${cumpleHoy.map(r => filaPersona(r, `<span class="pastilla" style="background:#fff0f6; color:#b0306a;">Hoy · ${esc(textoCumpleRes(r.CumpleDiaMes))}</span>${r.FelicitadoHoy ? ' <span class="pastilla" style="background:var(--gestionado-bg); color:var(--gestionado-tx);">📧 Felicitación enviada</span>' : ''}`)).join('')}
+      ${cumpleProx.map(r => filaPersona(r, esc(textoCumpleRes(r.CumpleDiaMes)))).join('')}
+      </tbody></table>${!cumpleHoy.length && !cumpleProx.length ? '<p style="color:#999; font-size:13px;">Nadie cumple años en los próximos 30 días.</p>' : ''}
+      <p style="font-size:11px; color:#888; margin:8px 0 0;">Solo se muestran el día y el mes. El correo de felicitación sale automáticamente a las 7:00 a. m. del día del cumpleaños.</p>`;
+  } else if (kpiResidentesDb === 'novedades') {
+    html = `<div class="db-desglose-top"><b>📝 Novedades del último mes</b></div>
+      <table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th style="text-align:right;">Novedad</th></tr></thead><tbody>
+      ${novedades.map(n => filaPersona(n.residente, `<b>${esc(n.Tipo)}</b><br><span style="font-size:12px; color:#888;">${esc(n.Fecha)}</span>`, esCoord && n.Detalle ? esc(n.Detalle) : '')).join('')}
+      </tbody></table>${novedades.length ? '' : '<p style="color:#999; font-size:13px;">Sin novedades en el último mes.</p>'}`;
+  } else if (kpiResidentesDb === 'finalizan') {
+    html = `<div class="db-desglose-top"><b>🏁 Finalizan en los próximos 3 meses</b></div>
+      <table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th style="text-align:right;">Finalización</th></tr></thead><tbody>
+      ${finalizan.map(r => filaPersona(r, `<span class="pastilla" style="background:var(--confirmado-bg); color:var(--confirmado-tx);">${esc(textoMesAnioRes(r.FechaFinalizacion))}</span>`)).join('')}
+      </tbody></table>${finalizan.length ? '' : '<p style="color:#999; font-size:13px;">Nadie finaliza en los próximos 3 meses.</p>'}`;
+  }
+  det.innerHTML = html ? `<div class="db-desglose" style="margin-top:14px;">${html}</div>` : '';
+}
+
+// ============================================================
 // FOCO DEL MES — Gestión Operativa de auxiliares. Tarjetas (este mes, próximo mes, atrasados,
 // cambios) y pendientes por mes. No trae datos nuevos ni cambia
 // la cola: todo lo que se toca aquí solo llena los filtros de siempre y vuelve a filtrar.
@@ -3064,26 +3432,59 @@ async function procesarArchivoExcel(evento) {
 
   const COLUMNAS_MES = ['Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre','Enero','Febrero','Marzo','Abril','Mayo','Junio','Vacaciones 1','Vacaciones 2'];
 
-  // Fila 4 (índice 3) = encabezados, fila 5 (índice 4) en adelante = datos.
-  // Columnas: A=ID, B=Nombre, C=Nivel, D=Correo, E en adelante=meses (Correo corrió los meses
-  // una columna a la derecha respecto a la plantilla anterior).
+  // Fila 4 (índice 3) = encabezados, fila 5 (índice 4) en adelante = datos. Las columnas se
+  // reconocen por su TÍTULO, así funcionan la plantilla nueva (con los datos del residente) y la
+  // anterior (Cédula, Nombre, Nivel, Correo y los meses). Si la fila 4 no trae títulos de mes, se
+  // usa la posición fija de la plantilla anterior: A=ID, B=Nombre, C=Nivel, D=Correo, E en adelante=meses.
+  const normTitulo = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+  const titulos = (filasCrudas[3] || []).map(normTitulo);
+  const buscarCol = (...pistas) => titulos.findIndex(t => pistas.some(p => t === p || t.startsWith(p)));
+  const colMes = {};
+  COLUMNAS_MES.forEach(mes => { const i = titulos.indexOf(normTitulo(mes)); if (i !== -1) colMes[mes] = i; });
+  const porTitulo = Object.keys(colMes).length > 0;
+  const col = porTitulo ? {
+    id: buscarCol('cedula', 'documento', 'numero de documento', 'id'), nombre: buscarCol('nombre'), nivel: buscarCol('nivel'), correo: buscarCol('correo'),
+    nacimiento: buscarCol('fecha de nacimiento'), inicio: buscarCol('fecha de inicio'), fin: buscarCol('fecha de finalizacion', 'fecha de fin'),
+    grado: buscarCol('fecha probable de grado', 'grado'), novedad: buscarCol('novedad')
+  } : { id: 0, nombre: 1, nivel: 2, correo: 3, nacimiento: -1, inicio: -1, fin: -1, grado: -1, novedad: -1 };
+  if (!porTitulo) COLUMNAS_MES.forEach((mes, i) => { colMes[mes] = 4 + i; });
+  if (col.id === -1 || col.nombre === -1) {
+    mostrarMensaje('No encontré las columnas de Cédula y Nombre en la fila 4 del archivo.', 'error');
+    evento.target.value = '';
+    return;
+  }
+  // Las fechas del Excel llegan como número de serie; se convierten a AAAA-MM-DD. Si vienen como
+  // texto (ej. "JULIO 2026") se mandan tal cual y el servidor las interpreta o las deja pendientes.
+  const valorCelda = (fila, i) => {
+    if (i === -1 || i === undefined) return '';
+    const v = fila[i];
+    if (typeof v === 'number' && XLSX.SSF) {
+      const d = XLSX.SSF.parse_date_code(v);
+      if (d && d.y > 1900) return d.y + '-' + String(d.m).padStart(2, '0') + '-' + String(d.d).padStart(2, '0');
+    }
+    return String(v === undefined || v === null ? '' : v).trim();
+  };
   const filasDatos = filasCrudas.slice(4);
 
   const filasParaEnviar = [];
   filasDatos.forEach(fila => {
-    const id = fila[0], nombre = fila[1], nivel = fila[2], correo = String(fila[3] || '').trim();
+    const id = valorCelda(fila, col.id);
     if (!id) return;
-
     const meses = {};
-    COLUMNAS_MES.forEach((mes, i) => {
-      const contenido = String(fila[4 + i] || '').trim();
+    COLUMNAS_MES.forEach(mes => {
+      const contenido = String(fila[colMes[mes]] || '').trim();
       if (!contenido) return;
       const partes = contenido.split('\n');
       meses[mes] = { campo: (partes[0] || '').trim(), rotacion: (partes[1] || '').trim() };
     });
-
-    if (Object.keys(meses).length > 0) {
-      filasParaEnviar.push({ id: String(id), nombre: String(nombre), nivel: String(nivel), correo, meses });
+    const datosResidente = {
+      fechaNacimiento: valorCelda(fila, col.nacimiento), fechaInicio: valorCelda(fila, col.inicio),
+      fechaFinalizacion: valorCelda(fila, col.fin), fechaGradoProbable: valorCelda(fila, col.grado), novedad: valorCelda(fila, col.novedad)
+    };
+    const traeDatosResidente = Object.values(datosResidente).some(Boolean);
+    // Una fila sin meses igual se envía si trae datos del residente (para crearlo o completarlo en la base).
+    if (Object.keys(meses).length > 0 || traeDatosResidente) {
+      filasParaEnviar.push(Object.assign({ id: String(id), nombre: valorCelda(fila, col.nombre), nivel: valorCelda(fila, col.nivel), correo: valorCelda(fila, col.correo), meses }, datosResidente));
     }
   });
 
@@ -3101,6 +3502,11 @@ async function procesarArchivoExcel(evento) {
   if (!resultado.ok) { mostrarMensaje('Error: ' + resultado.error, 'error'); return; }
 
   let mensaje = 'Importado: ' + resultado.importadas + ' celdas nuevas para "' + programa + '".';
+  if (resultado.residentes) {
+    mensaje += ' Base de residentes: ' + resultado.residentes.creados + ' creados, ' + resultado.residentes.completados + ' completados' +
+      (resultado.residentes.conPendientes ? ', ' + resultado.residentes.conPendientes + ' con datos pendientes (revísalos en la pestaña Residentes)' : '') + '.';
+    residentesCargados = false;
+  }
   if (resultado.omitidas && resultado.omitidas.length > 0) {
     mensaje += ' Se saltaron ' + resultado.omitidas.length + ' porque ya existían: ' + resultado.omitidas.slice(0, 3).join(', ') + (resultado.omitidas.length > 3 ? '...' : '');
   }
@@ -3320,7 +3726,14 @@ function abrirModalAgregarResidente() {
       <label>Universidad de origen</label><input id="modal-res-universidad">
     </div>
     <label>Correo electrónico</label><input id="modal-res-correo" type="email" placeholder="para poder notificarle desde el sistema">
-    <div class="fila-botones"><button class="btn-primario" onclick="confirmarAgregarResidente()">Agregar a la cuadrícula</button></div>`;
+    <div id="campos-base-residente">
+      <p style="font-size:11px; color:#0d6e5f; margin:10px 0 0;">Si la cédula aún no está en la base de Residentes, estos datos son obligatorios:</p>
+      <label>Fecha de nacimiento (completa)</label><input id="modal-res-nacimiento" type="date">
+      <label>Fecha de inicio</label><input id="modal-res-inicio" type="month">
+      <label>Fecha de finalización</label><input id="modal-res-fin" type="month">
+      <label>Fecha probable de grado</label><input id="modal-res-grado" type="month">
+    </div>
+    <div class="fila-botones"><button class="btn-primario" id="modal-res-guardar" onclick="confirmarAgregarResidente()">Agregar a la cuadrícula</button></div>`;
   document.getElementById('contenido-modal').innerHTML = html;
   document.getElementById('overlay-modal').style.display = 'flex';
 }
@@ -3331,9 +3744,10 @@ function actualizarCamposTipoResidente() {
   const esMovilidad = document.getElementById('modal-res-tipo').value === 'Movilidad entrante';
   document.getElementById('campos-residente-ces').style.display = esMovilidad ? 'none' : 'block';
   document.getElementById('campos-residente-movilidad').style.display = esMovilidad ? 'block' : 'none';
+  document.getElementById('campos-base-residente').style.display = esMovilidad ? 'none' : 'block';
 }
 
-function confirmarAgregarResidente() {
+async function confirmarAgregarResidente() {
   const tipo = document.getElementById('modal-res-tipo').value;
   const nombre = document.getElementById('modal-res-nombre').value.trim();
   const cc = document.getElementById('modal-res-cc').value.trim();
@@ -3351,6 +3765,27 @@ function confirmarAgregarResidente() {
   if (filasGridActual.some(f => String(f.id) === String(cc))) {
     mostrarMensaje('Ese residente ya está en la cuadrícula.', 'error');
     return;
+  }
+
+  // Residente CES que todavía no está en la base de Residentes: se crea allí con sus datos completos.
+  if (tipo !== 'Movilidad entrante') {
+    await cargarResidentes();
+    const yaEnBase = cacheResidentes.some(r => String(r.ResidenteID) === String(cc));
+    if (!yaEnBase) {
+      const val = id => document.getElementById(id).value.trim();
+      const faltan = [];
+      if (!nivel) faltan.push('nivel'); if (!correo) faltan.push('correo');
+      if (!val('modal-res-nacimiento')) faltan.push('fecha de nacimiento'); if (!val('modal-res-inicio')) faltan.push('fecha de inicio');
+      if (!val('modal-res-fin')) faltan.push('fecha de finalización');
+      if (faltan.length) { mostrarMensaje('Este residente no está en la base. Falta: ' + faltan.join(', ') + '.', 'error'); return; }
+      const boton = document.getElementById('modal-res-guardar');
+      boton.disabled = true; boton.textContent = 'Guardando en la base...';
+      const res = await llamarBackend('guardarResidente', { nuevo: true, residenteId: cc, nombre, programa: contextoGrid.programa, nivel, correo, estado: 'Activo',
+        fechaNacimiento: val('modal-res-nacimiento'), fechaInicio: val('modal-res-inicio'), fechaFinalizacion: val('modal-res-fin'), fechaGradoProbable: val('modal-res-grado') });
+      boton.disabled = false; boton.textContent = 'Agregar a la cuadrícula';
+      if (!res.ok) { mostrarMensaje('No se pudo crear en la base de residentes: ' + res.error, 'error'); return; }
+      residentesCargados = false;
+    }
   }
 
   filasGridActual.push({ id: cc, nombre, nivel, tipo, universidadOrigen, correo });
