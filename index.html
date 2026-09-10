@@ -1,3 +1,4 @@
+<!-- ARCHIVO: MICROSITIO DE RESIDENTES (portal público) — subir SOLO a la raíz del repositorio como index.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -232,6 +233,95 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .nota-consolidada{font-size:10px;color:var(--sec);background:var(--fondo);border:1px solid var(--borde);border-radius:6px;padding:4px 7px;line-height:1.35;max-width:200px}
 .nota-consolidada strong{color:var(--az)}
 .aviso-multihoja{margin:.6rem 0 1.25rem;padding:11px 14px;background:#FDECEA;border:1.5px solid #F1998E;border-radius:10px;font-size:12.5px;color:#8A2A1F;line-height:1.6;font-weight:600}
+
+/* ===== VISTA DEL RESIDENTE — calendario y tareas ===== */
+.vr-card{background:var(--blanco);border-radius:14px;border:1px solid var(--borde);padding:14px 16px;margin-bottom:1rem;box-shadow:var(--sh)}
+.vr-card h3{font-size:14px;color:var(--az);margin:0}
+.vr-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.vr-progreso{width:100%;margin-top:.4rem}
+.vr-prog-txt{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--sec)}
+.vr-prog-txt b{color:var(--teal)}
+.vr-barra{position:relative;height:14px;background:#e6edf4;border-radius:8px;margin-top:30px}
+.vr-barra i{position:absolute;top:0;height:100%;display:block}
+.vr-barra i.hecho{left:0;background:linear-gradient(90deg,var(--teal),#35b39f);border-radius:8px 0 0 8px}
+.vr-barra i.cargado{background:repeating-linear-gradient(45deg,#9fd3c9,#9fd3c9 6px,#b9e0d8 6px,#b9e0d8 12px)}
+.vr-barra .corte{position:absolute;top:-3px;width:2px;height:20px;background:#fff}
+.vr-marca{position:absolute;top:-4px;width:4px;height:22px;background:var(--az);border-radius:2px;transform:translateX(-50%)}
+.vr-marca span{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);background:var(--az);color:#fff;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:8px;white-space:nowrap}
+.vr-anios{display:flex;margin-top:6px;font-size:11px;color:var(--sec)}
+.vr-anios span{text-align:center;border-left:1px solid #e6edf4;padding-top:2px}
+.vr-anios span:first-child{border-left:none}
+.vr-anios span.hecho{color:var(--teal);font-weight:700}
+.vr-anios span.actual{color:var(--az);font-weight:800}
+.vr-leyenda{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--sec);margin-top:8px;align-items:center}
+.vr-leyenda i{display:inline-block;width:12px;height:8px;border-radius:2px;margin-right:4px}
+.vr-cumple{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:linear-gradient(135deg,var(--az-suave),#ffffff);border:2px solid var(--az-claro);border-radius:16px;padding:14px 16px;margin-bottom:1rem;animation:fadeIn .4s}
+.vr-cumple .torta{font-size:40px;animation:vrRebote 1.4s ease-in-out infinite}
+.vr-cumple b{font-size:16px;color:var(--az)}
+.vr-cumple p{font-size:13px;color:var(--sec);margin-top:3px;line-height:1.45}
+.vr-cumple button{background:#fff;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;color:#999}
+@keyframes vrRebote{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.vr-tarea{display:flex;align-items:center;gap:10px;padding:9px 6px;border-top:1px solid #eef2f6;font-size:13px;width:100%;background:none;border-left:none;border-right:none;border-bottom:none;text-align:left;color:var(--texto);cursor:pointer;font-family:inherit}
+.vr-tarea:hover{background:var(--az-suave)}
+.vr-tarea .caja{width:22px;height:22px;border-radius:7px;border:2px solid var(--borde);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.vr-tarea.hecha .caja{background:var(--teal);border-color:var(--teal);color:#fff}
+.vr-tarea.hecha .txt{text-decoration:line-through;color:var(--sec)}
+.vr-tarea .txt small{display:block;color:var(--sec);font-size:11.5px}
+.vr-contadores{display:flex;gap:8px;margin:10px 0 4px;flex-wrap:wrap}
+.vr-cont{flex:1;min-width:92px;border-radius:12px;padding:9px 10px;text-align:center}
+.vr-cont b{display:block;font-size:20px}
+.vr-cont span{font-size:11px}
+.vr-ver{background:none;border:none;color:var(--az-med);font-size:12px;font-weight:600;padding:4px 0;cursor:pointer;font-family:inherit}
+.vr-tips{background:var(--blanco);border-radius:14px;border:1px solid var(--borde);overflow:hidden;margin-bottom:1rem}
+.vr-tips summary{list-style:none;padding:11px 14px;font-size:13px;font-weight:600;color:var(--az);cursor:pointer;display:flex;justify-content:space-between}
+.vr-tips summary::-webkit-details-marker{display:none}
+.vr-tips[open] summary .flecha{transform:rotate(90deg)}
+.vr-tips .flecha{display:inline-block;transition:transform .2s}
+.vr-tips .aviso-multihoja{margin:0 12px 12px}
+.vr-titulo{font-size:15px;color:var(--az);font-weight:700;margin:1.2rem 2px 2px}
+.vr-como{font-size:12px;color:var(--sec);margin:0 2px 10px}
+.vr-tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;-webkit-overflow-scrolling:touch}
+.vr-tabs button{border:1px solid var(--borde);background:#fff;border-radius:18px;padding:6px 13px;font-size:13px;color:var(--sec);white-space:nowrap;cursor:pointer;font-family:inherit}
+.vr-tabs button.on{background:var(--az);color:#fff;border-color:var(--az)}
+.vr-tabs button.activo:not(.on){border-color:var(--teal);color:var(--teal);font-weight:600}
+.vr-tabs button.vacio:not(.on){border-style:dashed;color:#8a97a6}
+.vr-meses{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.vr-mes{background:#fff;border-radius:14px;border:1px solid var(--borde);padding:0;text-align:left;overflow:hidden;display:flex;flex-direction:column;min-height:150px;transition:transform .15s;cursor:pointer;font-family:inherit;color:var(--texto)}
+.vr-mes:hover{transform:translateY(-2px)}
+.vr-mes .cab{padding:8px 11px;font-weight:800;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.vr-mes .cuerpo{padding:9px 11px;font-size:12px;flex:1;display:flex;flex-direction:column;gap:3px}
+.vr-mes .cuerpo b{color:var(--az);font-size:12.5px}
+.vr-mes .pie{padding:7px 11px;border-top:1px solid #eef2f6;font-size:11px;color:var(--sec)}
+.vr-mes.hoy{border:2px solid var(--teal);box-shadow:0 0 0 4px rgba(11,122,110,.12)}
+.vr-mes.vacio{background:transparent;border:1.5px dashed #b8c4d0;cursor:default}
+.vr-mes.vacio:hover{transform:none}
+.vr-mes.vacio .cab{color:#8a97a6}
+.vr-leyenda-est{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--sec);margin:10px 4px 0}
+.vr-leyenda-est i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:5px;vertical-align:-2px}
+#vr-velo{position:fixed;inset:0;background:rgba(20,32,48,.45);display:none;z-index:300;align-items:center;justify-content:center;padding:20px}
+#vr-velo.on{display:flex}
+.vr-hoja{background:#fff;border-radius:18px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.25);animation:fadeIn .2s}
+.vr-hoja-top{padding:16px 18px 12px;display:flex;justify-content:space-between;gap:10px;align-items:flex-start;border-bottom:1px solid #eef2f6}
+.vr-hoja-top .k{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--sec)}
+.vr-hoja-top h3{font-size:17px;color:var(--az);margin-top:3px}
+.vr-cerrar{background:#eef2f6;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;color:#555;flex-shrink:0;cursor:pointer}
+.vr-hoja-mes{padding:14px 18px;border-bottom:1px solid #eef2f6}
+.vr-dato{display:grid;grid-template-columns:120px 1fr;gap:10px;font-size:13px;padding:5px 0}
+.vr-dato > span:first-child{color:var(--sec);font-size:12px}
+.vr-eval{margin-top:8px;background:var(--fondo);border-radius:12px;padding:10px 12px}
+.vr-eval .k{font-size:11px;font-weight:700;color:var(--sec);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.vr-eval .btn-upload{font-size:13px;padding:8px 14px;border-radius:10px}
+.vr-eval .eval-status{font-size:11.5px;margin-top:4px}
+.vr-eval .nota-consolidada{max-width:none;font-size:12px}
+.vr-confeti{position:fixed;pointer-events:none;font-size:18px;z-index:400;animation:vrVolar 1.1s ease-out forwards}
+@keyframes vrVolar{to{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
+@media(max-width:768px){
+  .vr-meses{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #vr-velo{align-items:flex-end;padding:0}
+  .vr-hoja{border-radius:20px 20px 0 0;max-height:85vh}
+  .vr-dato{grid-template-columns:105px 1fr}
+}
+@media(prefers-reduced-motion:reduce){.vr-cumple .torta,.vr-confeti{animation:none}}
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:768px){
@@ -547,6 +637,9 @@ const HASH_PASS = 'a025870b6008c88467dd43e21285efc7b7aeb6b5c8150161149fa60aa60e3
 const LOG_KEY = 'ces_accesos_log';
 const EVAL_KEY = 'ces_eval_docs';
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwGfR900KCT1-jzZqT9NoaqYSymtxonSB0ZYTX-EAfbKOLBKo0vVSGNWq4IMFSOS4T2/exec';
+// Backend de Gestión Operativa: solo se le pregunta el avance del programa y si hoy es el cumpleaños
+// (consulta pública "perfilResidente"; nunca devuelve la fecha de nacimiento ni datos personales).
+const URL_BACKEND_GESTION = 'https://script.google.com/macros/s/AKfycbwgzWT4TQgmE87Kbc2vIypW_QNhcpWtONQC5ssrZmtTGABfBuXMZBkmRVcc_mHPId7hxg/exec';
 
 let datos = [];
 // Lista de instituciones/campos distintos disponibles para el selector
@@ -1509,6 +1602,7 @@ function renderChecklistResidente(checklistItems) {
   }).join('') || '<tr><td colspan="4" class="dash-cell">Sin rotaciones que requieran nota.</td></tr>';
   if(badge) badge.textContent = pend;
   window._checklistResidenteItems = checklistItems||[];
+  repintarVistaResidente_();
 }
 
 function toggleChecklistResidente() {
@@ -1516,7 +1610,7 @@ function toggleChecklistResidente() {
   const arr = document.getElementById('chk-res-arr');
   if(!det) return;
   const abierto = det.classList.toggle('open');
-  if(arr) arr.classList.toggle('open', abierto);
+  if(arr) arr.textContent = abierto ? 'Ocultar la lista ▴' : 'Ver las rotaciones que requieren nota ▾';
 }
 
 // Fuerza una nueva consulta a Drive sin esperar a que el residente recargue
@@ -1676,6 +1770,10 @@ async function subirArchivo(inputEl, clave, tipoDocumento, programa, residente, 
       actualizarUIEval(clave);
       status.textContent = tipoDocumento === 'certificado' ? 'Certificado cargado correctamente.' : 'Nota cargada correctamente.';
       status.className = 'eval-status ok';
+      actualizarResumenEval((VR && VR.clavesEval) || []);
+      if (window._checklistResidenteItems) renderChecklistResidente(window._checklistResidenteItems);
+      const caja = status.getBoundingClientRect();
+      confetiR_(caja.left + 40, caja.top);
     } else {
       status.textContent = 'Error al guardar: ' + (data.mensaje || 'intenta de nuevo.');
       status.className = 'eval-status err';
@@ -1727,144 +1825,355 @@ function contarMesesBloque(mis, filaFinal) {
 }
 
 // ============================================================
-// CRONOGRAMA INDIVIDUAL
+// CRONOGRAMA INDIVIDUAL — vista "Calendario y tareas"
+// Conserva toda la información de antes (perfil, avisos, checklist de notas y, por cada mes: campo,
+// rotación, estado, observación y evaluación/documentos); el detalle de cada mes se abre al tocarlo.
+// El avance se mide contra el programa COMPLETO (fechas de inicio y finalización de la base de
+// Residentes), no contra las rotaciones cargadas, que se van subiendo poco a poco.
 // ============================================================
+const MESES_CAL_ = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const escR_ = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const normMesR_ = m => String(m || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+const capR_ = s => s.charAt(0).toUpperCase() + s.slice(1);
+function mesAbsR_(sem, mes) {
+  const m = /^(\d{4})-[12]$/.exec(String(sem || '').trim());
+  const i = MESES_CAL_.indexOf(normMesR_(mes));
+  return (m && i !== -1) ? Number(m[1]) * 12 + i : null;
+}
+const ymAbsR_ = s => { const m = /^(\d{4})-(\d{2})$/.exec(String(s || '')); return m ? Number(m[1]) * 12 + Number(m[2]) - 1 : null; };
+const hoyAbsR_ = () => { const h = new Date(); return h.getFullYear() * 12 + h.getMonth(); };
+const semDeAbsR_ = a => Math.floor(a / 12) + '-' + (a % 12 >= 6 ? 2 : 1);
+const textoAbsR_ = a => capR_(MESES_CAL_[a % 12]) + ' ' + Math.floor(a / 12);
+function duracionR_(meses) {
+  const a = Math.floor(meses / 12), m = meses % 12;
+  return [a ? a + (a === 1 ? ' año' : ' años') : '', m ? m + (m === 1 ? ' mes' : ' meses') : ''].filter(Boolean).join(' y ') || '0 meses';
+}
+const estaCargadaR_ = clave => !!((leerEvalDocs()[clave] || {}).nota);
+
+let VR = null;   // estado de la vista del residente abierta
+
 function renderCrono(cedula) {
-  const mis=datos.filter(r=>String(r['ID']||'').trim()===cedula);
-  if(!mis.length){
-    document.getElementById('crono-contenido').innerHTML='<div class="sin">No se encontraron rotaciones para esta cédula.</div>';
+  const mis = datos.filter(r => String(r['ID'] || '').trim() === cedula);
+  if (!mis.length) {
+    document.getElementById('crono-contenido').innerHTML = '<div class="sin">No se encontraron rotaciones para esta cédula.</div>';
     return;
   }
-  const info=mis[0];
-  const nombre=info['Persona']||cedula;
-  const ini=nombre.split(' ').slice(0,2).map(n=>n[0]||'').join('').toUpperCase();
-  const prog=info['Programa']||'';
-  const nivel=info['Nivel / Origen']||'';
-  const total=mis.length;
-  const pends=mis.filter(r=>(r['Estado confirmacion']||'').trim()==='Pendiente').length;
-  const negados=mis.filter(r=>(r['Estado confirmacion']||'').trim()==='Negado').length;
-  const sems=[...new Set(mis.map(r=>r['Semestre']||'').filter(Boolean))];
-  const porSem={};
-  mis.forEach(r=>{const s=r['Semestre']||'Sin semestre';if(!porSem[s])porSem[s]=[];porSem[s].push(r);});
-  const semsOrd=Object.keys(porSem).sort((a,b)=>{
-    const pa=a.split('-'),pb=b.split('-');
-    if(pa[0]!==pb[0]) return parseInt(pa[0])-parseInt(pb[0]);
-    return parseInt(pa[1]||0)-parseInt(pb[1]||0);
+  const info = mis[0];
+  const nombre = info['Persona'] || cedula;
+  const ini = nombre.split(' ').slice(0, 2).map(n => n[0] || '').join('').toUpperCase();
+  const prog = info['Programa'] || '';
+  const nivel = info['Nivel / Origen'] || '';
+  const total = mis.length;
+  const pends = mis.filter(r => (r['Estado confirmacion'] || '').trim() === 'Pendiente').length;
+  const negados = mis.filter(r => (r['Estado confirmacion'] || '').trim() === 'Negado').length;
+  const sems = [...new Set(mis.map(r => r['Semestre'] || '').filter(Boolean))];
+  const clavesEval = [], mapaRotaciones = {}, checklistItems = [];
+
+  // Modelo por fila: mismas reglas de evaluación de siempre (vacaciones, corte 2026-2, nota consolidada o nota por subir)
+  const filas = mis.map((r, i) => {
+    const mes = r['Mes'] || '', camp = r['Campo de rotacion'] || '', rot = r['Rotacion'] || r['Detalle original'] || '';
+    const est = (r['Estado confirmacion'] || '').trim(), obs = r['Observacion'] || '', sem = r['Semestre'] || 'Sin semestre';
+    const aplicaNota = (r['Aplica nota'] || 'Si').trim();
+    let ev;
+    if (camp === 'VACACIONES') ev = { tipo: 'vacas' };
+    else if (!semestreDesdeCorte(sem)) ev = { tipo: 'antes' };
+    else if (aplicaNota === 'No') {
+      const fin = buscarMesFinalBloque(mis, r);
+      ev = { tipo: 'consolidada', destino: fin ? `${fin.mes}${fin.sem ? ' (' + fin.sem + ')' : ''}` : 'un mes posterior' };
+    } else {
+      const claveRot = (cedula + '_' + sem + '_' + mes + '_' + camp).replace(/[^a-zA-Z0-9]/g, '_');
+      const residenteId = (nombre + '_' + cedula).replace(/'/g, "\\'");
+      const rotacionId = claveCarpetaRotacion(camp, mes, sem).replace(/'/g, "\\'");
+      const nombreRotId = String(rot).replace(/'/g, "\\'");
+      const progId = prog.replace(/'/g, "\\'");
+      clavesEval.push(claveRot);
+      mapaRotaciones[claveCarpetaRotacion(camp, mes, sem)] = claveRot;
+      checklistItems.push({ claveRot, mes, sem, camp, rot });
+      ev = { tipo: 'nota', claveRot, args: `'${claveRot}','nota','${progId}','${residenteId}','${rotacionId}','${nombreRotId}'` };
+    }
+    return { i, mes, camp, rot, est, obs, sem, abs: mesAbsR_(sem, mes), ev };
   });
-  const sa=semsActivos();
-  const clavesEval=[];
-  const mapaRotaciones={};
-  const checklistItems=[];
-  let html=`
+
+  const semsDatos = [...new Set(filas.map(f => f.sem))];
+  const hoySem = semDeAbsR_(hoyAbsR_());
+  VR = { cedula, nombre, prog, nivel, filas, clavesEval, mapaRotaciones, checklistItems, perfil: null,
+    semSel: semsDatos.includes(hoySem) ? hoySem : semsDatos[semsDatos.length - 1], listaNotasAbierta: false, cumpleCerrado: false, confetiCumple: false };
+
+  document.getElementById('crono-contenido').innerHTML = `
+    <div id="vr-cumple"></div>
     <div class="perfil-card">
-      <div class="avatar">${ini}</div>
+      <div class="avatar">${escR_(ini)}</div>
       <div style="min-width:0">
-        <div class="p-nombre">${nombre}</div>
-        <div class="p-meta">${prog} · ${nivel}</div>
+        <div class="p-nombre">${escR_(nombre)}</div>
+        <div class="p-meta">${escR_(prog)} · ${escR_(nivel)}</div>
       </div>
       <div class="p-stats">
         <div class="p-stat"><div class="p-stat-n">${total}</div><div class="p-stat-l">Rotaciones</div></div>
         <div class="p-stat"><div class="p-stat-n">${sems.length}</div><div class="p-stat-l">Semestres</div></div>
-        ${pends?`<div class="p-stat"><div class="p-stat-n" style="color:var(--nar-txt)">${pends}</div><div class="p-stat-l">Pendientes</div></div>`:''}
-        ${negados?`<div class="p-stat"><div class="p-stat-n" style="color:var(--mor-txt)">${negados}</div><div class="p-stat-l">Negados</div></div>`:''}
+        ${pends ? `<div class="p-stat"><div class="p-stat-n" style="color:var(--nar-txt)">${pends}</div><div class="p-stat-l">Pendientes</div></div>` : ''}
+        ${negados ? `<div class="p-stat"><div class="p-stat-n" style="color:var(--mor-txt)">${negados}</div><div class="p-stat-l">Negados</div></div>` : ''}
         <div class="p-stat"><div class="p-stat-n" id="eval-pend-n" style="color:var(--nar-txt)">—</div><div class="p-stat-l">Notas pend.</div></div>
       </div>
+      <div class="vr-progreso" id="vr-progreso"></div>
     </div>
-    <div style="margin:1rem 0 .6rem;padding:11px 14px;background:var(--az-suave);border:1px solid var(--az-claro);border-radius:10px;font-size:12px;color:var(--az);line-height:1.6">
-      <strong>ℹ Nota sobre cargue de notas:</strong> Los campos de rotación en <strong>HPTU</strong>, <strong>HGM</strong> y <strong>SOMA</strong> entregan las notas directamente a la coordinación. Si tu rotación fue en alguno de estos, no debes cargarla aquí.
-    </div>
-    <div class="aviso-multihoja">
-      💡 <strong>¿Tu nota tiene varias hojas?</strong> Al presionar el botón "Nota" puedes seleccionar varias fotos a la vez (una por hoja): el sistema las combina automáticamente en un solo PDF antes de subirlas.
-    </div>
-    <div class="log-section" style="margin-bottom:1.25rem">
-      <div class="log-hdr" style="cursor:pointer" onclick="toggleChecklistResidente()">
-        <span>📋 Checklist de notas <span class="log-count-badge" id="chk-res-count">0</span></span>
-        <span class="fila-arr" id="chk-res-arr" style="color:#fff">▶</span>
-      </div>
-      <div class="acord-detalle" id="checklist-residente-detalle">
-        <div style="padding:9px 14px;display:flex;justify-content:flex-end;border-bottom:1px solid var(--borde)">
-          <button class="btn-actualizar-claro" id="btn-actualizar-estado" onclick="actualizarEstadoManual()">🔄 Actualizar estado</button>
-        </div>
+    <div class="vr-card" id="vr-tareas"></div>
+    <div class="vr-card">
+      <div class="vr-top"><h3>📋 Checklist de notas <span class="log-count-badge" id="chk-res-count">0</span></h3>
+        <button class="btn-actualizar-claro" id="btn-actualizar-estado" onclick="actualizarEstadoManual()">🔄 Actualizar estado</button></div>
+      <div class="vr-contadores" id="vr-contadores"></div>
+      <button class="vr-ver" id="chk-res-arr" onclick="toggleChecklistResidente()">Ver las rotaciones que requieren nota ▾</button>
+      <div class="acord-detalle" id="checklist-residente-detalle" style="margin-top:6px;border-radius:10px">
         <div style="max-height:280px;overflow-y:auto">
-          <table class="log-tbl">
-            <thead><tr><th>Mes / Semestre</th><th>Campo</th><th>Rotación</th><th>Estado</th></tr></thead>
-            <tbody id="checklist-residente-body"></tbody>
-          </table>
+          <table class="log-tbl"><thead><tr><th>Mes / Semestre</th><th>Campo</th><th>Rotación</th><th>Estado</th></tr></thead><tbody id="checklist-residente-body"></tbody></table>
         </div>
       </div>
-    </div>`;
-  semsOrd.forEach(sem=>{
-    const esAct=sa.includes(sem);
-    const semId='sem-'+sem.replace(/[^a-zA-Z0-9]/g,'_');
-    html+=`
-      <div class="sem-bloque ${esAct?'abierto':''}" id="${semId}">
-        <div class="sem-hdr ${esAct?'activo':''}" onclick="toggleSemestre('${semId}')">
-          <span class="sem-arr">▶</span>
-          Semestre ${sem}${esAct?'<span class="sem-badge">Período activo</span>':''}
-        </div>
-        <div class="crono-scroll"><table class="crono-tbl">
-          <thead><tr><th>Mes</th><th>Campo de rotación</th><th>Rotación</th><th>Estado</th><th>Observación</th><th>Evaluación y documentos</th></tr></thead>
-          <tbody>`;
-    porSem[sem].forEach(r=>{
-      const mes=r['Mes']||'';
-      const camp=r['Campo de rotacion']||'';
-      const rot=r['Rotacion']||r['Detalle original']||'';
-      const est=(r['Estado confirmacion']||'').trim();
-      const obs=r['Observacion']||'';
-      const esPend=est==='Pendiente';
-      const esNegado=est==='Negado';
-      // Compatibilidad: si el CSV aun no trae "Aplica nota" (datos generados
-      // antes de este cambio), se asume "Si" para no romper el flujo anterior.
-      const aplicaNota=(r['Aplica nota']||'Si').trim();
-      const semVigente=semestreDesdeCorte(sem);
+    </div>
+    <details class="vr-tips"><summary><span>💡 Antes de subir tus notas (2 recordatorios)</span><span class="flecha">▶</span></summary>
+      <div style="margin:0 12px 10px;padding:11px 14px;background:var(--az-suave);border:1px solid var(--az-claro);border-radius:10px;font-size:12px;color:var(--az);line-height:1.6">
+        <strong>ℹ Nota sobre cargue de notas:</strong> Los campos de rotación en <strong>HPTU</strong>, <strong>HGM</strong> y <strong>SOMA</strong> entregan las notas directamente a la coordinación. Si tu rotación fue en alguno de estos, no debes cargarla aquí.
+      </div>
+      <div class="aviso-multihoja">💡 <strong>¿Tu nota tiene varias hojas?</strong> Al presionar el botón "Nota" puedes seleccionar varias fotos a la vez (una por hoja): el sistema las combina automáticamente en un solo PDF antes de subirlas.</div>
+    </details>
+    <div class="vr-titulo">📅 Tu residencia mes a mes</div>
+    <p class="vr-como">Toca un mes para ver el detalle y subir tu nota. Los semestres que aún no tienen rotaciones se irán llenando a medida que coordinación los programe.</p>
+    <div class="vr-tabs" id="vr-tabs"></div>
+    <div class="vr-meses" id="vr-meses"></div>
+    <div class="vr-leyenda-est"><span><i style="background:var(--az-claro)"></i>Confirmado</span><span><i style="background:var(--naranja)"></i>Pendiente</span><span><i style="background:var(--morado)"></i>Negado</span><span><i style="background:#FFC7CE"></i>Cambio</span><span><i style="background:var(--teal-bg);border:1px solid var(--teal)"></i>Vacaciones</span><span><i style="background:#fff;border:1px dashed #b8c4d0"></i>Por programar</span></div>`;
 
-      let celdaEval;
-      if(camp==='VACACIONES') {
-        celdaEval=`<span class="vacaciones-cell">😎☀️ ¡Descansa!</span>`;
-      } else if(!semVigente) {
-        celdaEval=`<span class="dash-cell">— (rotación anterior a ${SEMESTRE_CORTE_NOTAS}, no aplica en el sistema)</span>`;
-      } else if(aplicaNota==='No') {
-        const info=buscarMesFinalBloque(mis, r);
-        const destino=info?`${info.mes}${info.sem?' ('+info.sem+')':''}`:'un mes posterior';
-        celdaEval=`<div class="nota-consolidada">ℹ️ Nota consolidada en <strong>${destino}</strong>. No debes cargar nada en este mes.</div>`;
-      } else {
-        const claveRot=(cedula+'_'+sem+'_'+mes+'_'+camp).replace(/[^a-zA-Z0-9]/g,'_');
-        const residenteId=(nombre+'_'+cedula).replace(/'/g,"\\'");
-        const rotacionId=claveCarpetaRotacion(camp, mes, sem).replace(/'/g,"\\'");
-        const nombreRotId=String(rot).replace(/'/g,"\\'");
-        const progId=prog.replace(/'/g,"\\'");
-        clavesEval.push(claveRot);
-        mapaRotaciones[claveCarpetaRotacion(camp, mes, sem)]=claveRot;
-        checklistItems.push({claveRot, mes, sem, camp, rot});
-        celdaEval=`
-          <div class="eval-widget">
-            <label class="btn-upload" id="lbl-nota-${claveRot}">
-              <span class="btn-upload-text">📄 Nota</span>
-              <input type="file" accept=".pdf,image/*" multiple style="display:none" onchange="subirArchivo(this,'${claveRot}','nota','${progId}','${residenteId}','${rotacionId}','${nombreRotId}')">
-            </label>
-            <div class="eval-status" id="status-${claveRot}"></div>
-          </div>`;
-      }
-
-      let celdaEstado;
-      if(esPend) celdaEstado=`<span class="pend-badge">Pendiente</span>`;
-      else if(esNegado) celdaEstado=`<span class="negado-badge">⚠ Negado — Estamos reasignando el campo</span>`;
-      else celdaEstado=`<span class="ok-estado">${est||'—'}</span>`;
-
-      html+=`<tr>
-        <td class="mes-cell">${mes}</td><td>${camp}</td><td>${rot}</td>
-        <td>${celdaEstado}</td>
-        <td>${obs?`<span class="obs-cell">${obs}</span>`:`<span class="dash-cell">—</span>`}</td>
-        <td class="eval-cell">${celdaEval}</td>
-      </tr>`;
-    });
-    html+=`</tbody></table></div></div>`;
-  });
-  document.getElementById('crono-contenido').innerHTML=html;
+  if (!document.getElementById('vr-velo')) {
+    const velo = document.createElement('div');
+    velo.id = 'vr-velo';
+    velo.innerHTML = '<div class="vr-hoja" id="vr-hoja" role="dialog" aria-modal="true"></div>';
+    velo.addEventListener('click', e => { if (e.target.id === 'vr-velo') cerrarHojaVR(); });
+    document.body.appendChild(velo);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarHojaVR(); });
+  }
   clavesEval.forEach(actualizarUIEval);
   actualizarResumenEval(clavesEval);
   renderChecklistResidente(checklistItems);
-  sincronizarConDrive(prog, nombre+'_'+cedula, mapaRotaciones, checklistItems);
+  sincronizarConDrive(prog, nombre + '_' + cedula, mapaRotaciones, checklistItems);
+  cargarPerfilResidente_(cedula);
+}
+
+// Fechas del programa y "¿hoy cumple?" desde la base de Residentes (el servidor nunca manda la fecha de nacimiento)
+async function cargarPerfilResidente_(cedula) {
+  if (!URL_BACKEND_GESTION) return;
+  const controlador = new AbortController();
+  const t = setTimeout(() => controlador.abort(), 9000);
+  try {
+    const resp = await fetch(URL_BACKEND_GESTION + '?accion=perfilResidente&id=' + encodeURIComponent(cedula), { signal: controlador.signal });
+    const data = await resp.json();
+    if (data && data.ok && data.encontrado && VR && VR.cedula === cedula) {
+      VR.perfil = data;
+      const plan = planResidenciaR_();
+      const hoySem = semDeAbsR_(hoyAbsR_());
+      if (plan && !VR.filas.some(f => f.sem === VR.semSel) && semestresProgramaR_(plan).includes(hoySem)) VR.semSel = hoySem;
+      repintarVistaResidente_();
+    }
+  } catch (e) {
+    // Sin conexión con la base: se muestra el avance aproximado con las rotaciones cargadas
+  } finally { clearTimeout(t); }
+}
+
+// Rango del programa: exacto con la base de Residentes; si no está, aproximado con las rotaciones cargadas.
+function planResidenciaR_() {
+  if (!VR) return null;
+  const p = VR.perfil;
+  if (p && ymAbsR_(p.inicio) !== null && ymAbsR_(p.finalizacion) !== null && ymAbsR_(p.finalizacion) >= ymAbsR_(p.inicio)) {
+    return { inicio: ymAbsR_(p.inicio), fin: ymAbsR_(p.finalizacion), grado: ymAbsR_(p.gradoProbable), exacto: true };
+  }
+  const abs = VR.filas.map(f => f.abs).filter(a => a !== null);
+  if (!abs.length) return null;
+  return { inicio: Math.min(...abs), fin: Math.max(...abs), grado: null, exacto: false };
+}
+function semestresProgramaR_(plan) {
+  const lista = [];
+  if (plan) for (let a = plan.inicio; a <= plan.fin; a++) { const s = semDeAbsR_(a); if (!lista.includes(s)) lista.push(s); }
+  return lista;
+}
+
+function repintarVistaResidente_() {
+  if (!VR || !document.getElementById('vr-progreso')) return;
+  pintarCumpleR_(); pintarProgresoR_(); pintarTareasR_(); pintarContadoresR_(); pintarMesesR_();
+}
+
+function pintarCumpleR_() {
+  const cont = document.getElementById('vr-cumple');
+  if (!cont) return;
+  if (!(VR.perfil && VR.perfil.cumpleHoy && modo === 'residente') || VR.cumpleCerrado) { cont.innerHTML = ''; return; }
+  const nombre = capR_(String(VR.nombre).split(' ')[0].toLowerCase());
+  cont.innerHTML = `<div class="vr-cumple"><div class="torta">🎂</div><div><b>¡Feliz cumpleaños, ${escR_(nombre)}!</b>
+    <p>Todo el equipo de Posgrados Clínicos CES te desea un día lleno de alegría. Hoy celebramos a la persona que eres, no solo al residente. 🎉</p></div>
+    <button onclick="VR.cumpleCerrado=true; pintarCumpleR_()" aria-label="Cerrar">✕</button></div>`;
+  if (!VR.confetiCumple) {
+    VR.confetiCumple = true;
+    const caja = cont.getBoundingClientRect();
+    [0.25, 0.5, 0.75].forEach((x, k) => setTimeout(() => confetiR_(caja.left + caja.width * x, caja.top + 30), k * 200));
+  }
+}
+
+function pintarProgresoR_() {
+  const cont = document.getElementById('vr-progreso');
+  const plan = planResidenciaR_();
+  if (!plan) { cont.innerHTML = ''; return; }
+  const total = plan.fin - plan.inicio + 1, hoy = hoyAbsR_();
+  const transcurridos = Math.min(total, Math.max(0, hoy - plan.inicio + 0.5));   // el mes en curso cuenta como medio mes
+  const pct = Math.round(transcurridos / total * 100);
+  const faltan = Math.max(0, plan.fin - hoy);
+  const absCargados = VR.filas.map(f => f.abs).filter(a => a !== null);
+  const hasta = absCargados.length ? Math.max(...absCargados) : plan.inicio - 1;
+  const pctCargado = Math.round(Math.min(total, Math.max(0, hasta - plan.inicio + 1)) / total * 100);
+  const anios = Math.ceil(total / 12);
+  const nivelNum = Number((/(\d)/.exec(VR.nivel || '') || [])[1]) || Math.min(anios, Math.floor(Math.max(0, hoy - plan.inicio) / 12) + 1);
+  const anchos = Array.from({ length: anios }, (_, k) => Math.min(12, total - k * 12) / total * 100);
+  let acumulado = 0;
+  const cortes = anchos.slice(0, -1).map(a => { acumulado += a; return `<span class="corte" style="left:${acumulado}%"></span>`; }).join('');
+  cont.innerHTML = `
+    <div class="vr-prog-txt"><span>🎓 Tu residencia: llevas <b>${duracionR_(Math.floor(transcurridos))}</b> de ${duracionR_(total)}</span><span><b>${pct}%</b> · faltan ${duracionR_(faltan)}</span></div>
+    <div class="vr-barra"><i class="hecho" style="width:${pct}%"></i><i class="cargado" style="left:${pct}%;width:${Math.max(0, pctCargado - pct)}%"></i>
+      ${cortes}<span class="vr-marca" style="left:${Math.min(100, pct)}%"><span>📍 ${capR_(MESES_CAL_[hoy % 12]).slice(0, 3)} ${Math.floor(hoy / 12)}</span></span></div>
+    <div class="vr-anios">${anchos.map((a, k) => `<span style="width:${a}%" class="${k + 1 < nivelNum ? 'hecho' : k + 1 === nivelNum ? 'actual' : ''}">R${k + 1}${k + 1 === nivelNum ? ' · estás aquí' : k + 1 < nivelNum ? ' ✓' : ''}</span>`).join('')}</div>
+    <div class="vr-leyenda"><span><i style="background:var(--teal)"></i>Recorrido</span><span><i style="background:#9fd3c9"></i>Rotaciones ya programadas</span><span><i style="background:#e6edf4"></i>Por programar</span>
+      <span style="margin-left:auto">Inicio ${textoAbsR_(plan.inicio)} · Finalización 🏁 ${textoAbsR_(plan.fin)}${plan.grado !== null ? ' · 🎓 Grado probable: ' + textoAbsR_(plan.grado) : ''}</span></div>
+    ${plan.exacto ? '' : '<div style="font-size:11px;color:var(--sec);margin-top:4px">Avance aproximado con las rotaciones cargadas.</div>'}`;
+}
+
+function pintarTareasR_() {
+  const cont = document.getElementById('vr-tareas');
+  const hoy = hoyAbsR_();
+  const tareas = [];
+  VR.filas.filter(f => f.ev.tipo === 'nota').forEach(f => {
+    const cargada = estaCargadaR_(f.ev.claveRot);
+    if (!cargada && (f.abs === null || f.abs <= hoy)) tareas.push({ txt: 'Subir la nota de ' + f.rot.toLowerCase(), sub: `${f.camp} · ${f.mes} ${f.sem}`, i: f.i });
+    else if (cargada && f.abs !== null && f.abs >= hoy - 2 && f.abs <= hoy) tareas.push({ hecha: true, txt: 'Nota de ' + f.rot.toLowerCase() + ' cargada', sub: `${f.camp} · ${f.mes} ${f.sem}`, i: f.i });
+  });
+  VR.filas.filter(f => f.est === 'Negado' && (f.abs === null || f.abs >= hoy)).forEach(f =>
+    tareas.push({ info: true, txt: `${f.mes}: estamos reasignando tu campo`, sub: `${f.camp} fue negado · no tienes que hacer nada, te avisaremos`, i: f.i }));
+  const actual = VR.filas.find(f => f.abs === hoy);
+  const prox = VR.filas.find(f => f.abs !== null && f.abs > hoy && f.camp !== 'VACACIONES' && (!actual || f.camp !== actual.camp || f.rot !== actual.rot));
+  if (prox) tareas.push({ info: true, txt: `Prepárate: en ${prox.mes} empiezas en ${prox.camp}`, sub: prox.rot + (prox.obs ? ' · ' + prox.obs : ''), i: prox.i });
+  cont.innerHTML = '<h3 style="margin-bottom:6px">✅ Tus tareas de hoy</h3>' + (tareas.length ? tareas.map(t =>
+    `<button class="vr-tarea ${t.hecha ? 'hecha' : ''}" onclick="abrirHojaVR([${t.i}])"><span class="caja" style="${t.info ? 'border-color:var(--az-claro);color:var(--az)' : ''}">${t.hecha ? '✓' : t.info ? 'i' : ''}</span><span class="txt">${escR_(t.txt)}<small>${escR_(t.sub)}</small></span></button>`).join('')
+    : '<div style="font-size:13px;color:var(--teal);padding:6px">🎉 ¡Estás al día! No tienes tareas pendientes.</div>');
+}
+
+function pintarContadoresR_() {
+  const cont = document.getElementById('vr-contadores');
+  const hoy = hoyAbsR_();
+  const conNota = VR.filas.filter(f => f.ev.tipo === 'nota');
+  const cargadas = conNota.filter(f => estaCargadaR_(f.ev.claveRot)).length;
+  const ya = conNota.filter(f => !estaCargadaR_(f.ev.claveRot) && (f.abs === null || f.abs <= hoy)).length;
+  cont.innerHTML = `<div class="vr-cont" style="background:var(--teal-bg);color:var(--teal)"><b>${cargadas}</b><span>✅ cargadas</span></div>
+    <div class="vr-cont" style="background:#fff3dc;color:var(--nar-txt)"><b>${ya}</b><span>📄 por subir ya</span></div>
+    <div class="vr-cont" style="background:var(--fondo);color:var(--sec)"><b>${conNota.length - cargadas - ya}</b><span>⏳ más adelante</span></div>`;
+}
+
+function colorEstadoR_(f) {
+  if (f.camp === 'VACACIONES') return ['var(--teal-bg)', 'var(--teal)'];
+  if (f.est === 'Pendiente') return ['var(--naranja)', 'var(--nar-txt)'];
+  if (f.est === 'Negado') return ['var(--morado)', 'var(--mor-txt)'];
+  if (f.est === 'Cambio') return ['#FFC7CE', '#9C0006'];
+  return ['var(--az-claro)', 'var(--az)'];
+}
+
+function pintarMesesR_() {
+  const plan = planResidenciaR_();
+  const hoy = hoyAbsR_(), hoySem = semDeAbsR_(hoy);
+  const semsPlan = VR.perfil ? semestresProgramaR_(plan) : [];
+  const semsDatos = [...new Set(VR.filas.map(f => f.sem))];
+  const ordenSem = s => { const m = /^(\d{4})-([12])/.exec(s); return m ? Number(m[1]) * 2 + Number(m[2]) : 99999; };
+  const sems = [...new Set(semsPlan.concat(semsDatos))].sort((a, b) => ordenSem(a) - ordenSem(b) || a.localeCompare(b));
+  if (!sems.includes(VR.semSel)) VR.semSel = sems.includes(hoySem) ? hoySem : sems[sems.length - 1];
+  document.getElementById('vr-tabs').innerHTML = sems.map(s => {
+    const sinCargar = !semsDatos.includes(s);
+    return `<button class="${s === VR.semSel ? 'on' : ''} ${s === hoySem ? 'activo' : ''} ${sinCargar ? 'vacio' : ''}" onclick="VR.semSel=${JSON.stringify(s).replace(/"/g, '&quot;')}; pintarMesesR_()">${escR_(s)}${s === hoySem ? ' · activo' : ''}${sinCargar ? ' · por programar' : ''}</button>`;
+  }).join('');
+
+  const delSem = VR.filas.filter(f => f.sem === VR.semSel);
+  const m = /^(\d{4})-([12])$/.exec(VR.semSel);
+  let tarjetas = [];
+  if (m) {
+    const primerMes = m[2] === '2' ? 6 : 0;
+    for (let k = 0; k < 6; k++) {
+      const abs = Number(m[1]) * 12 + primerMes + k;
+      const suyas = delSem.filter(f => f.abs === abs);
+      tarjetas.push({ abs, mes: capR_(MESES_CAL_[primerMes + k]), filas: suyas });
+    }
+    delSem.filter(f => f.abs === null).forEach(f => tarjetas.push({ abs: null, mes: f.mes, filas: [f] }));   // ej. "Vacaciones 1"
+  } else {
+    tarjetas = delSem.map(f => ({ abs: null, mes: f.mes, filas: [f] }));
+  }
+  document.getElementById('vr-meses').innerHTML = tarjetas.map(t => {
+    const esHoy = t.abs === hoy;
+    if (!t.filas.length) {
+      const dentro = plan && VR.perfil && t.abs >= plan.inicio && t.abs <= plan.fin;
+      return `<div class="vr-mes vacio"><div class="cab"><span>${escR_(t.mes)}${esHoy ? ' · 📍 hoy' : ''}</span></div>
+        <div class="cuerpo"><b style="color:#9aa7b5">${dentro ? 'Por programar' : 'Sin rotación cargada'}</b><span>${dentro ? 'Coordinación cargará esta rotación más adelante.' : ''}</span></div>
+        <div class="pie">${dentro ? '⏳ Pronto verás aquí tu rotación' : '—'}</div></div>`;
+    }
+    const f = t.filas[0], c = colorEstadoR_(f), ev = f.ev;
+    let pie;
+    if (ev.tipo === 'vacas') pie = '😎☀️ ¡Descansa!';
+    else if (ev.tipo === 'antes') pie = 'Nota: no aplica en el sistema';
+    else if (ev.tipo === 'consolidada') pie = 'ℹ️ Nota en ' + escR_(ev.destino.split(' (')[0]);
+    else if (estaCargadaR_(ev.claveRot)) pie = '<b style="color:var(--teal)">✅ Nota cargada</b>';
+    else pie = `<b style="color:${f.abs === null || f.abs <= hoy ? '#E8590C' : 'var(--sec)'}">📄 Nota pendiente</b>`;
+    return `<button class="vr-mes ${esHoy ? 'hoy' : ''}" onclick="abrirHojaVR([${t.filas.map(x => x.i).join(',')}])">
+      <div class="cab" style="background:${c[0]};color:${c[1]}"><span>${escR_(t.mes)}${esHoy ? ' · 📍 hoy' : ''}</span><span style="font-size:11px">${f.camp === 'VACACIONES' ? '☀️' : escR_(f.est || '—')}</span></div>
+      <div class="cuerpo">${f.camp === 'VACACIONES' ? '<b>😎 Vacaciones</b>' : `<b>${escR_(f.camp)}</b><span>${escR_(f.rot)}</span>`}
+        ${f.est === 'Negado' ? '<span style="color:var(--mor-txt);font-weight:600">⚠ Estamos reasignando el campo</span>' : ''}
+        ${t.filas.some(x => x.obs) ? '<span style="color:var(--nar-txt)">💬 Tiene observación</span>' : ''}
+        ${t.filas.length > 1 ? `<span style="color:var(--sec)">+${t.filas.length - 1} registro(s) más este mes</span>` : ''}</div>
+      <div class="pie">${pie}</div></button>`;
+  }).join('') || '<div class="sin">Sin rotaciones en este semestre.</div>';
+}
+
+// ---------- Hoja de detalle: TODO lo de cada mes (campo, rotación, estado, observación y evaluación) ----------
+function abrirHojaVR(indices) {
+  const filas = indices.map(i => VR.filas[i]).filter(Boolean);
+  if (!filas.length) return;
+  const f0 = filas[0], hoy = hoyAbsR_();
+  document.getElementById('vr-hoja').innerHTML = `
+    <div class="vr-hoja-top"><div><div class="k">${escR_(f0.mes)} · ${escR_(f0.sem)}${filas.some(f => f.abs === hoy) ? ' · 📍 este mes' : ''}</div>
+      <h3>${f0.camp === 'VACACIONES' ? '😎 Vacaciones' : escR_(f0.camp)}</h3></div><button class="vr-cerrar" onclick="cerrarHojaVR()" aria-label="Cerrar">✕</button></div>
+    ${filas.map(f => {
+      let estado;
+      if (f.est === 'Pendiente') estado = '<span class="pend-badge">Pendiente</span>';
+      else if (f.est === 'Negado') estado = '<span class="negado-badge">⚠ Negado — Estamos reasignando el campo</span>';
+      else estado = `<span class="ok-estado">${escR_(f.est || '—')}</span>`;
+      let evalHtml;
+      if (f.ev.tipo === 'vacas') evalHtml = '<span class="vacaciones-cell">😎☀️ ¡Descansa!</span>';
+      else if (f.ev.tipo === 'antes') evalHtml = `<span class="dash-cell">— (rotación anterior a ${SEMESTRE_CORTE_NOTAS}, no aplica en el sistema)</span>`;
+      else if (f.ev.tipo === 'consolidada') evalHtml = `<div class="nota-consolidada">ℹ️ Nota consolidada en <strong>${escR_(f.ev.destino)}</strong>. No debes cargar nada en este mes.</div>`;
+      else evalHtml = `<div class="eval-widget">
+          <label class="btn-upload" id="lbl-nota-${f.ev.claveRot}">
+            <span class="btn-upload-text">📄 Nota</span>
+            <input type="file" accept=".pdf,image/*" multiple style="display:none" onchange="subirArchivo(this,${f.ev.args})">
+          </label>
+          <div class="eval-status" id="status-${f.ev.claveRot}"></div>
+        </div>`;
+      return `<div class="vr-hoja-mes">
+        ${filas.length > 1 ? `<div style="font-weight:800;color:var(--az);font-size:13px;margin-bottom:4px">${escR_(f.mes)}</div>` : ''}
+        <div class="vr-dato"><span>Campo de rotación</span><span>${escR_(f.camp)}</span></div>
+        <div class="vr-dato"><span>Rotación</span><span>${escR_(f.rot)}</span></div>
+        <div class="vr-dato"><span>Estado</span><span>${estado}</span></div>
+        <div class="vr-dato"><span>Observación</span><span>${f.obs ? `<span class="obs-cell">${escR_(f.obs)}</span>` : '<span class="dash-cell">—</span>'}</span></div>
+        <div class="vr-eval"><div class="k">Evaluación y documentos</div>${evalHtml}</div>
+      </div>`;
+    }).join('')}`;
+  filas.forEach(f => { if (f.ev.tipo === 'nota') actualizarUIEval(f.ev.claveRot); });
+  document.getElementById('vr-velo').classList.add('on');
+}
+function cerrarHojaVR() { const v = document.getElementById('vr-velo'); if (v) v.classList.remove('on'); }
+
+function confetiR_(x, y) {
+  ['🎉', '✨', '⭐', '🎊', '✅', '✨', '🎉', '⭐'].forEach((e, k) => {
+    const s = document.createElement('span');
+    s.className = 'vr-confeti'; s.textContent = e; s.style.left = x + 'px'; s.style.top = y + 'px';
+    const ang = (k / 8) * Math.PI * 2;
+    s.style.setProperty('--dx', Math.cos(ang) * 90 + 'px'); s.style.setProperty('--dy', (Math.sin(ang) * 70 - 50) + 'px'); s.style.setProperty('--r', (k * 45) + 'deg');
+    document.body.appendChild(s); setTimeout(() => s.remove(), 1200);
+  });
 }
 </script>
 </body>
