@@ -2547,6 +2547,23 @@ let filtroResumenRes = '';   // '', 'pendientes', o un estado
 const ESTADOS_RESIDENTE = ['Activo', 'Suspendido', 'Retirado', 'Egresado'];
 const TIPOS_NOVEDAD = ['Suspensión', 'Reintegro', 'Licencia', 'Incapacidad', 'Cambio de fecha de finalización', 'Retiro', 'Otra'];
 const NOMBRES_MES_RES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const MOTIVOS_CAMBIO_FECHA = ['Suspensión', 'Licencia', 'Incapacidad', 'Reintegro', 'Prórroga', 'Corrección de dato', 'Otra'];
+const CAMPOS_FECHA_FICHA = [['fres-inicio', 'FechaInicio', 'Inicio'], ['fres-fin', 'FechaFinalizacion', 'Finalización'], ['fres-grado', 'FechaGradoProbable', 'Grado probable']];
+
+// Fechas ya registradas que el usuario está cambiando en la ficha (completar una fecha vacía no cuenta)
+function cambiosFechasFicha_() {
+  const r = fichaResidenteId ? cacheResidentes.find(x => String(x.ResidenteID) === String(fichaResidenteId)) : null;
+  if (!r) return [];
+  return CAMPOS_FECHA_FICHA.map(([id, campo, etiqueta]) => ({ etiqueta, antes: r[campo] || '', ahora: document.getElementById(id).value.trim() }))
+    .filter(c => c.antes && c.antes !== c.ahora);
+}
+function revisarCambioFechasFicha_() {
+  const caja = document.getElementById('fres-motivo-caja');
+  if (!caja) return;
+  const cambios = cambiosFechasFicha_();
+  caja.style.display = cambios.length ? 'block' : 'none';
+  document.getElementById('fres-motivo-resumen').innerHTML = cambios.map(c => `${esc(c.etiqueta)}: antes <b>${esc(textoMesAnioRes(c.antes))}</b> → ahora <b>${esc(textoMesAnioRes(c.ahora) || 'sin fecha')}</b>`).join('<br>');
+}
 
 async function cargarResidentes(forzar) {
   if (residentesCargados && !forzar) { pintarResidentesSiVisible_(); return cacheResidentes; }
@@ -2703,14 +2720,23 @@ function pintarFichaResidente_() {
           <div style="grid-column:1/-1;"><label class="obligatorio">Programa</label><input id="fres-programa" list="fres-lista-programas" value="${v('Programa')}"><datalist id="fres-lista-programas">${programas.map(p => `<option value="${esc(p)}">`).join('')}</datalist></div>
           <div><label class="obligatorio">Nivel</label><input id="fres-nivel" value="${v('Nivel')}" placeholder="R1, R2..."></div>
           <div><label class="obligatorio">Correo CES</label><input id="fres-correo" type="email" value="${v('Correo')}" placeholder="nombre@uces.edu.co"></div>
-          <div><label class="obligatorio">Fecha de inicio</label><input id="fres-inicio" type="month" value="${v('FechaInicio')}"></div>
-          <div><label class="obligatorio">Fecha de finalización</label><input id="fres-fin" type="month" value="${v('FechaFinalizacion')}"></div>
-          <div><label>Fecha probable de grado</label><input id="fres-grado" type="month" value="${v('FechaGradoProbable')}"></div>
+          <div><label class="obligatorio">Fecha de inicio</label><input id="fres-inicio" type="month" value="${v('FechaInicio')}" oninput="revisarCambioFechasFicha_()"></div>
+          <div><label class="obligatorio">Fecha de finalización</label><input id="fres-fin" type="month" value="${v('FechaFinalizacion')}" oninput="revisarCambioFechasFicha_()"></div>
+          <div><label>Fecha probable de grado</label><input id="fres-grado" type="month" value="${v('FechaGradoProbable')}" oninput="revisarCambioFechasFicha_()"></div>
           <div><label class="${nuevo ? 'obligatorio' : ''}">Fecha de nacimiento</label>
             ${cumple ? `<div class="fres-cumple">🎂 ${esc(cumple)} <span style="font-weight:400; color:#999; font-size:11px;">(el año no se muestra)</span></div>` : (nuevo ? '' : '<div class="fres-cumple" style="background:#FFF5F5; color:#9C0006;">Sin registrar</div>')}
             <input id="fres-nacimiento" type="date" style="margin-top:4px;" title="${nuevo ? 'Fecha completa: se necesita para enviar la felicitación' : 'Solo para registrar o corregir la fecha completa'}"></div>
         </div>
-        <p style="font-size:11px; color:#888; margin-top:8px;">${nuevo ? 'La fecha de nacimiento se pide completa para poder enviar la felicitación; después solo se muestran el día y el mes.' : 'Si cambias la fecha de finalización, queda registrada como novedad con la fecha anterior y la nueva.'}</p>
+        <div id="fres-motivo-caja" style="display:none; background:#FFF8E6; border:1px solid #F2C46D; border-radius:8px; padding:10px 12px; margin-top:10px;">
+          <div style="font-size:12px; font-weight:700; color:#823C00; margin-bottom:4px;">Cambiaste fechas: ¿por qué?</div>
+          <div id="fres-motivo-resumen" style="font-size:12px; color:#555; margin-bottom:8px;"></div>
+          <div class="fres-grilla">
+            <div><label class="obligatorio">Motivo</label><select id="fres-motivo"><option value="">Elige...</option>${MOTIVOS_CAMBIO_FECHA.map(m => `<option>${m}</option>`).join('')}</select></div>
+            <div style="grid-column:1/-1;"><label class="obligatorio">Detalle</label><textarea id="fres-motivo-detalle" rows="2" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px; font-family:inherit;" placeholder="Ej.: licencia de maternidad de 6 meses aprobada por el comité"></textarea></div>
+          </div>
+          <div style="font-size:11px; color:#888; margin-top:4px;">Queda como novedad: "antes … → ahora …", con el motivo y el detalle.</div>
+        </div>
+        <p style="font-size:11px; color:#888; margin-top:8px;">${nuevo ? 'La fecha de nacimiento se pide completa para poder enviar la felicitación; después solo se muestran el día y el mes.' : 'Si cambias una fecha ya registrada (inicio, finalización o grado), te pedirá el motivo y quedará como novedad con la fecha anterior y la nueva.'}</p>
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;"><button class="btn-secundario" onclick="cerrarFichaResidente()">Cancelar</button><button class="btn-primario" id="fres-guardar" onclick="guardarFichaResidente()">${nuevo ? 'Crear residente' : 'Guardar cambios'}</button></div>
       </div>
       <div>
@@ -2723,8 +2749,10 @@ function pintarFichaResidente_() {
           <div style="font-size:11px; color:#888;">Suspensión, reintegro y retiro cambian el estado automáticamente.</div>
           <div style="text-align:right;"><button class="btn-primario btn-pequeno" onclick="agregarNovedadResidente()">+ Registrar novedad</button></div>
         </div>
-        <div class="fres-linea">${(r.Novedades || []).map(n => `<div class="fres-evento"><b>${esc(n.Tipo)}</b>${n.Detalle ? `<div>${esc(n.Detalle)}</div>` : ''}
-          ${n.FinAnterior || n.FinNueva ? `<div style="font-size:12px; color:#555;">Finalización: ${esc(textoMesAnioRes(n.FinAnterior) || '—')} → <b>${esc(textoMesAnioRes(n.FinNueva) || '—')}</b></div>` : ''}
+        <div class="fres-linea">${(r.Novedades || []).map(n => `<div class="fres-evento"><b>${esc(n.Tipo)}</b>
+          ${n.CambiosFechas ? `<div style="font-size:12px; color:#1F4E79; background:#EBF3FB; border-radius:6px; padding:4px 8px; margin:3px 0;">📅 ${esc(n.CambiosFechas)}</div>`
+            : (n.FinAnterior || n.FinNueva ? `<div style="font-size:12px; color:#555;">Finalización: ${esc(textoMesAnioRes(n.FinAnterior) || '—')} → <b>${esc(textoMesAnioRes(n.FinNueva) || '—')}</b></div>` : '')}
+          ${n.Motivo ? `<div style="font-size:12px;"><b>Motivo:</b> ${esc(n.Motivo)}</div>` : ''}${n.Detalle ? `<div>${esc(n.Detalle)}</div>` : ''}
           <div class="meta">${esc(n.Fecha)} · ${esc(n.Autor)}</div></div>`).join('') || '<div style="font-size:13px; color:#999;">Sin novedades registradas.</div>'}</div>`}
       </div>
     </div>`;
@@ -2738,8 +2766,21 @@ async function guardarFichaResidente() {
     nivel: val('fres-nivel'), correo: val('fres-correo'), estado: val('fres-estado'),
     fechaInicio: val('fres-inicio'), fechaFinalizacion: val('fres-fin'), fechaGradoProbable: val('fres-grado')
   };
+  datos.correo = datos.correo.replace(/[\s\u200B-\u200D\uFEFF\u00A0]/g, '');   // un correo nunca lleva espacios
   const nac = val('fres-nacimiento');
   if (nac) datos.fechaNacimiento = nac;
+  if (r) {
+    const cambios = cambiosFechasFicha_();
+    if (cambios.length) {
+      datos.motivoCambio = val('fres-motivo');
+      datos.detalleCambio = val('fres-motivo-detalle');
+      if (!datos.motivoCambio || !datos.detalleCambio) {
+        mostrarMensaje('Cambiaste fechas del residente: elige el motivo y escribe el detalle del cambio.', 'error');
+        document.getElementById('fres-motivo-caja').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+    }
+  }
   const faltan = [];
   if (!datos.residenteId) faltan.push('cédula'); if (!datos.nombre) faltan.push('nombre'); if (!datos.programa) faltan.push('programa');
   if (!datos.nivel) faltan.push('nivel'); if (!datos.correo) faltan.push('correo');
@@ -2816,7 +2857,8 @@ function dibujarKpisResidentesDb() {
   } else if (kpiResidentesDb === 'novedades') {
     html = `<div class="db-desglose-top"><b>📝 Novedades del último mes</b></div>
       <table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th style="text-align:right;">Novedad</th></tr></thead><tbody>
-      ${novedades.map(n => filaPersona(n.residente, `<b>${esc(n.Tipo)}</b><br><span style="font-size:12px; color:#888;">${esc(n.Fecha)}</span>`, esCoord && n.Detalle ? esc(n.Detalle) : '')).join('')}
+      ${novedades.map(n => filaPersona(n.residente, `<b>${esc(n.Tipo)}</b><br><span style="font-size:12px; color:#888;">${esc(n.Fecha)}</span>`,
+        esCoord ? [n.CambiosFechas ? '📅 ' + esc(n.CambiosFechas) : '', n.Motivo ? '<b>Motivo:</b> ' + esc(n.Motivo) : '', n.Detalle ? esc(n.Detalle) : ''].filter(Boolean).join('<br>') : '')).join('')}
       </tbody></table>${novedades.length ? '' : '<p style="color:#999; font-size:13px;">Sin novedades en el último mes.</p>'}`;
   } else if (kpiResidentesDb === 'finalizan') {
     html = `<div class="db-desglose-top"><b>🏁 Finalizan en los próximos 3 meses</b></div>
