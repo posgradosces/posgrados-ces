@@ -234,6 +234,51 @@
   .foco-activos span b { cursor: pointer; }
   @media (max-width: 900px) { .foco-tarjetas { grid-template-columns: 1fr 1fr; } }
 
+  /* Centros de práctica — recordatorios automáticos a residentes según el mes de su rotación */
+  .rec-aviso { background:#FFF8E6; border:1px solid #F2C46D; color:#823C00; border-radius:8px; padding:10px 12px; font-size:13px; margin-bottom:12px; }
+  .rec-vacio { border:1px dashed #cfd6de; border-radius:10px; padding:22px; text-align:center; background:#fafbfc; }
+  .rec-item { background:white; border:1px solid #e3e8ee; border-radius:10px; padding:12px 14px; margin-bottom:10px; }
+  .rec-item.pausado { background:#fafbfc; }
+  .rec-item.pausado .rec-centro { color:#6b7684; }
+  .rec-item-top { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+  .rec-centro { font-weight:700; color:var(--azul-ces); font-size:15px; }
+  .rec-sub { font-size:12px; color:#6b7684; margin-top:2px; }
+  .rec-linea { font-size:13px; color:#333; margin-top:7px; line-height:1.5; }
+  .rec-linea.tenue { color:#888; font-size:12px; }
+  .rec-proximo { display:inline-block; background:#EBF3FB; color:#1F4E79; border-radius:6px; padding:3px 9px; margin:0 4px 4px 0; }
+  .rec-proximo.encurso { background:#FFF4DC; color:#823C00; }
+  .rec-proximo.pausado { background:#eef1f5; color:#6b7684; }
+  #overlay-rec { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); align-items:flex-start; justify-content:center; padding:28px 16px; overflow-y:auto; z-index:110; }
+  #caja-rec { background:white; border-radius:12px; width:100%; max-width:1100px; box-shadow:0 12px 40px rgba(0,0,0,.25); }
+  .rec-cuerpo { padding:16px 20px; display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); gap:22px; }
+  .rec-form { border:none; padding:0; margin:0; min-width:0; }
+  .rec-form label.et { font-size:12px; color:#555; display:block; margin-bottom:3px; font-weight:600; }
+  .rec-form input[type=text], .rec-form input[type=number], .rec-form input[type=date], .rec-form input[type=month], .rec-form select, .rec-form textarea { width:100%; padding:8px; border:1px solid #ccc; border-radius:5px; font-size:13px; font-family:inherit; }
+  .rec-form[disabled] input, .rec-form[disabled] select, .rec-form[disabled] textarea { background:#f7f9fb; color:#333; }
+  .rec-bloque { margin-bottom:14px; }
+  .rec-grilla { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:10px; }
+  .rec-ayuda { font-size:11px; color:#888; margin-top:4px; line-height:1.45; }
+  .rec-segmento { display:inline-flex; border:1px solid #cfd6de; border-radius:8px; overflow:hidden; }
+  .rec-segmento button { border-radius:0; background:white; color:#333; padding:7px 14px; }
+  .rec-segmento button.activo { background:var(--azul-ces); color:white; }
+  .rec-checklist { border:1px solid #ddd; border-radius:6px; max-height:170px; overflow-y:auto; padding:4px 0; }
+  .rec-check { display:flex; align-items:center; gap:8px; padding:4px 10px; font-size:13px; cursor:pointer; }
+  .rec-checklist .rec-check:hover { background:#f5f8fb; }
+  .rec-check .n { margin-left:auto; font-size:11px; color:#999; white-space:nowrap; }
+  .rec-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px; }
+  .rec-chip { display:inline-flex; align-items:center; gap:6px; background:#e8eef5; color:var(--azul-ces); font-size:12px; font-weight:600; padding:3px 10px; border-radius:12px; }
+  .rec-chip b { cursor:pointer; font-size:14px; }
+  .rec-col-vista { position:sticky; top:12px; align-self:start; min-width:0; }
+  .rec-vista { background:#eef3f8; border-radius:10px; padding:8px; }
+  .rec-asunto { font-size:12px; color:#555; background:white; border-radius:6px; padding:8px 10px; margin-bottom:6px; }
+  .rec-docs { font-size:12px; color:#555; margin-top:6px; line-height:1.5; }
+  .rec-docs b { color:#333; font-weight:600; }
+  .rec-segundo { margin-top:10px; }
+  .rec-segmento-mini button { padding:4px 10px; font-size:12px; }
+  .rec-pie { padding:12px 20px; border-top:1px solid #eee; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center; }
+  .rec-error { color:#9C0006; font-size:13px; max-width:360px; }
+  @media (max-width: 900px) { .rec-cuerpo { grid-template-columns:1fr; } .rec-col-vista { position:static; } .rec-grilla { grid-template-columns:1fr 1fr; } }
+
   #mensaje-flotante { position: fixed; bottom: 20px; right: 20px; padding: 12px 18px; border-radius: 8px; background: #333; color: white; font-size: 14px; display: none; max-width: 320px; z-index: 200; }
   #mensaje-flotante.ok { background: var(--gestionado-tx); }
   #mensaje-flotante.error { background: var(--cambio-tx); }
@@ -273,6 +318,7 @@
       <button class="btn-secundario btn-pequeno" id="tab-btn-historico" onclick="cambiarTab('historico')">Histórico</button>
       <button class="btn-secundario btn-pequeno" id="tab-btn-movilidad" onclick="cambiarTab('movilidad')" style="display:none;">Movilidad <span id="badge-movilidad" style="display:none; background:var(--confirmado-tx); color:white; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:4px;"></span></button>
       <button class="btn-secundario btn-pequeno" id="tab-btn-residentes" onclick="cambiarTab('residentes')" style="display:none;">Residentes</button>
+      <button class="btn-secundario btn-pequeno" id="tab-btn-centros" onclick="cambiarTab('centros')" style="display:none;">Centros de práctica</button>
       <button class="btn-secundario btn-pequeno" id="boton-publicar-github" onclick="publicarAlMicrositioPublico()" style="display:none; margin-left:auto; background:#003865; color:white;" title="Sube ahora mismo lo más reciente al micrositio público, sin esperar al disparador de las 9 PM">📤 Publicar al micrositio público</button>
     </div>
 
@@ -561,6 +607,20 @@
       <div id="res-lista"></div>
     </div>
 
+    <!-- Centros de práctica — recordatorios automáticos. Coordinadoras editan; auxiliares consultan. -->
+    <div class="panel" id="panel-centros" style="display:none;">
+      <h2>Recordatorios de centros de práctica <button class="btn-secundario btn-pequeno" onclick="cargarRecordatorios(true)" style="float:right;">🔄 Actualizar</button>
+        <button class="btn-primario btn-pequeno" id="cen-btn-nuevo" onclick="abrirEditorRecordatorio(null)" style="float:right; margin-right:8px; display:none;">+ Nuevo recordatorio</button></h2>
+      <p style="font-size:12px; color:#888; margin-top:-8px;">Requisitos de documentación de cada centro. El sistema envía el correo automáticamente a los residentes que van a rotar allí, según el mes de su rotación.</p>
+      <div id="cen-aviso"></div>
+      <div class="res-barra">
+        <div><label>Buscar</label><input id="cen-q" autocomplete="off" placeholder="Centro o campo" oninput="pintarRecordatorios()" style="min-width:240px;"></div>
+        <div><label>Tipo</label><select id="cen-tipo" onchange="pintarRecordatorios()"><option value="">Todos</option><option value="Recurrente">Recurrentes</option><option value="Puntual">Anuncios puntuales</option></select></div>
+      </div>
+      <div class="res-resumen" id="cen-resumen"></div>
+      <div id="cen-lista"></div>
+    </div>
+
     <!-- Movilidad — solo coordinadora. -->
     <div class="panel" id="panel-movilidad" style="display:none;">
       <h2>Movilidad académica <button class="btn-secundario btn-pequeno" onclick="cargarMovilidad(true)" style="float:right;">🔄 Actualizar</button></h2>
@@ -583,6 +643,8 @@
 
   </div>
 </div>
+
+<div id="overlay-rec"><div id="caja-rec" role="dialog" aria-modal="true"></div></div>
 
 <div id="overlay-ficha-res" onclick="if (event.target.id === 'overlay-ficha-res') cerrarFichaResidente();"><div id="caja-ficha-res" role="dialog" aria-modal="true"></div></div>
 
@@ -815,6 +877,7 @@ function entrarAlApp() {
     document.getElementById('tab-btn-historico').style.display = 'inline-block';
     document.getElementById('tab-btn-movilidad').style.display = 'inline-block';
     document.getElementById('tab-btn-residentes').style.display = 'inline-block';
+    document.getElementById('tab-btn-centros').style.display = 'inline-block';
     document.getElementById('boton-publicar-github').style.display = 'inline-block';
     cargarProgramasConocidos();
     cargarMesesFiltro();
@@ -829,6 +892,7 @@ function entrarAlApp() {
     document.getElementById('vista-gestion-coordinadora').style.display = 'none';
     document.getElementById('vista-gestion-auxiliar').style.display = 'block';
     document.getElementById('tab-btn-residentes').style.display = 'none';
+    document.getElementById('tab-btn-centros').style.display = 'inline-block';
     document.getElementById('tab-btn-gestion').style.display = 'inline-block';
     document.getElementById('tab-btn-dashboard').style.display = 'inline-block';
     document.getElementById('tab-btn-historico').style.display = 'inline-block';
@@ -1150,9 +1214,12 @@ function cambiarTab(tab) {
   const panelMov = document.getElementById('panel-movilidad');
   const btnRes = document.getElementById('tab-btn-residentes');
   const panelRes = document.getElementById('panel-residentes');
+  const btnCen = document.getElementById('tab-btn-centros');
+  const panelCen = document.getElementById('panel-centros');
 
   panelCuad.style.display = 'none'; panelGes.style.display = 'none'; panelDb.style.display = 'none';
   panelHist.style.display = 'none'; panelMov.style.display = 'none'; panelRes.style.display = 'none';
+  panelCen.style.display = 'none'; btnCen.className = 'btn-secundario btn-pequeno';
   btnRes.className = 'btn-secundario btn-pequeno';
   btnCuad.className = 'btn-secundario btn-pequeno'; btnGes.className = 'btn-secundario btn-pequeno';
   btnDb.className = 'btn-secundario btn-pequeno'; btnHist.className = 'btn-secundario btn-pequeno';
@@ -1176,6 +1243,9 @@ function cambiarTab(tab) {
   } else if (tab === 'residentes') {
     panelRes.style.display = 'block'; btnRes.className = 'btn-primario btn-pequeno';
     pintarResidentes();
+  } else if (tab === 'centros') {
+    panelCen.style.display = 'block'; btnCen.className = 'btn-primario btn-pequeno';
+    cargarRecordatorios();
   }
 }
 
@@ -4680,6 +4750,680 @@ async function descartarAlerta(clave) {
   } else {
     mostrarMensaje('Error: ' + resultado.error, 'error');
   }
+}
+
+// ============================================================
+// CENTROS DE PRÁCTICA — recordatorios automáticos a residentes según el mes de su rotación.
+// Coordinadoras: crean, editan, pausan, envían prueba y envían ahora. Auxiliares: solo consultan.
+// El correo de la vista previa usa exactamente la misma plantilla que envía el servidor.
+// ============================================================
+const REC_MESES_ES = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+const REC_DIAS_SEMANA = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+const REC_URL_PORTAL = 'https://posgradosces.github.io/posgrados-ces/';
+
+let cacheRecordatorios = [];
+let recordatoriosCargados = false;
+let recDisparadorActivo = null;
+let recFiltroEstado = '';
+let recEdicion = null;            // recordatorio que está abierto en el editor (o uno nuevo)
+let recCamposSel = new Set();
+let recProgramasSel = new Set();
+let recCamposExtra = [];
+let recVistaSegundo = false;      // vista previa: primer o segundo envío
+let recVistaContinua = false;     // vista previa: residente que empieza o que continúa rotando
+
+function esCoordinadoraRec_() { return !!usuarioActual && usuarioActual.rol === 'coordinadora'; }
+function primerNombreRec_(nombreCompleto) {
+  const primero = String(nombreCompleto || '').trim().split(/\s+/)[0] || '';
+  return primero.charAt(0).toUpperCase() + primero.slice(1).toLowerCase();
+}
+function hoyPartesRecCliente_() {
+  const h = new Date();
+  const y = h.getFullYear(), m = h.getMonth() + 1, d = h.getDate();
+  return { y, m, d, iso: y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0') };
+}
+// "2026-09-16" → "miércoles 16 de septiembre"
+function textoFechaDiaRec_(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+  if (!m) return '';
+  const f = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return REC_DIAS_SEMANA[f.getDay()] + ' ' + Number(m[3]) + ' de ' + REC_MESES_ES[Number(m[2]) - 1].toLowerCase();
+}
+
+// --- Copia exacta de las funciones del servidor (Code.gs), para que la vista previa sea idéntica al correo real ---
+function escHtmlRec_(t) {
+  return String(t === null || t === undefined ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function enlazarTextoRec_(texto) {
+  return escHtmlRec_(texto)
+    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#1F4E79;">$1</a>')
+    .replace(/(^|[\s(:;,])([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/g, '$1<a href="mailto:$2" style="color:#1F4E79;">$2</a>')
+    .replace(/\n/g, '<br>');
+}
+function textoMesRec_(ym) {
+  const m = /^(\d{4})-(\d{2})$/.exec(String(ym || ''));
+  return m ? REC_MESES_ES[Number(m[2]) - 1].toLowerCase() + ' de ' + m[1] : '';
+}
+function textoFechaRec_(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+  return m ? Number(m[3]) + ' de ' + REC_MESES_ES[Number(m[2]) - 1].toLowerCase() : '';
+}
+function ymSumarRec_(y, m, n) {
+  const total = y * 12 + (m - 1) + n;
+  return { y: Math.floor(total / 12), m: (total % 12) + 1 };
+}
+function ymTextoRec_(y, m) { return y + '-' + String(m).padStart(2, '0'); }
+function diasDelMesRec_(y, m) { return new Date(y, m, 0).getDate(); }
+function isoFechaRec_(y, m, d) { return ymTextoRec_(y, m) + '-' + String(d).padStart(2, '0'); }
+function diasDesdeCeldaRec_(valor) {
+  const dias = (String(valor === null || valor === undefined ? '' : valor).match(/\d+/g) || []).map(Number).filter(d => d >= 1 && d <= 31);
+  return [...new Set(dias)].sort((a, b) => a - b);
+}
+function diasEnvioDelMesRec_(rec, y, m) {
+  const ultimoDia = diasDelMesRec_(y, m);
+  const limite = Math.min(rec.diaLimite, ultimoDia);
+  // En meses cortos (ej. límite 30 en febrero) el límite pasa al último día y los envíos se corren a antes de él.
+  return { limite, dias: [...new Set(rec.diasEnvio.map(d => Math.min(d, limite - 1)).filter(d => d >= 1))].sort((a, b) => a - b) };
+}
+function armarEnvioRecurrente_(rec, y, m, dia, dias, limite) {
+  const destino = ymSumarRec_(y, m, rec.mesesAntes);
+  return {
+    slot: 'D' + dia, fecha: isoFechaRec_(y, m, dia), mesRotacion: ymTextoRec_(destino.y, destino.m),
+    fechaLimite: isoFechaRec_(y, m, limite), segundo: dias.length > 1 && dia === dias[dias.length - 1], puntual: false
+  };
+}
+function envioVigenteRecurrente_(rec, hoy) {
+  if (!rec.diasEnvio.length || !rec.diaLimite) return null;
+  const { limite, dias } = diasEnvioDelMesRec_(rec, hoy.y, hoy.m);
+  if (hoy.d >= limite) return null;
+  const alcanzados = dias.filter(d => d <= hoy.d);
+  if (!alcanzados.length) return null;
+  return armarEnvioRecurrente_(rec, hoy.y, hoy.m, alcanzados[alcanzados.length - 1], dias, limite);
+}
+function proximoEnvioRecurrente_(rec, hoy) {
+  if (!rec.diasEnvio.length || !rec.diaLimite) return null;
+  for (let k = 0; k < 3; k++) {
+    const mm = ymSumarRec_(hoy.y, hoy.m, k);
+    const { limite, dias } = diasEnvioDelMesRec_(rec, mm.y, mm.m);
+    const dia = dias.find(d => k > 0 || d >= hoy.d);
+    if (dia) return armarEnvioRecurrente_(rec, mm.y, mm.m, dia, dias, limite);
+  }
+  return null;
+}
+function envioPuntual_(rec) {
+  if (!rec.fechaEnvio || !rec.mesRotacion) return null;
+  return { slot: 'P', fecha: rec.fechaEnvio, mesRotacion: rec.mesRotacion, fechaLimite: rec.fechaLimite, segundo: false, puntual: true };
+}
+function asuntoRecordatorio_(rec, envio, d) {
+  const mes = textoMesRec_(envio.mesRotacion);
+  if (envio.puntual) return 'Información de ' + rec.centro + ' para tu rotación de ' + mes;
+  const prefijo = envio.segundo ? 'Segundo recordatorio' : 'Recordatorio';
+  if (d && d.continua) return prefijo + ': actualiza tus documentos para seguir rotando en ' + rec.centro + ' (' + mes + ')';
+  return prefijo + ': documentos para tu rotación en ' + rec.centro + ' (' + mes + ')';
+}
+function listaConYRec_(arr) {
+  const a = arr.map(String);
+  return a.length <= 1 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1];
+}
+function construirCorreoRecordatorio_(rec, envio, d) {
+  const mes = textoMesRec_(envio.mesRotacion);
+  const nombre = primerNombreRec_(d.nombre) || 'residente';
+  const actualizar = rec.documentosActualizar || [];
+  const continua = !envio.puntual && !!d.continua && actualizar.length > 0;
+  const limiteTexto = envio.fechaLimite ? textoFechaRec_(envio.fechaLimite) : '';
+  const fila = (etiqueta, contenido) =>
+    '<tr><td style="padding:14px 18px;border-top:1px solid #E3ECF5;font-family:Arial,Helvetica,sans-serif;">' +
+    '<div style="font-size:12px;font-weight:bold;color:#1F4E79;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">' + etiqueta + '</div>' +
+    '<div style="font-size:14px;color:#333333;line-height:21px;">' + contenido + '</div></td></tr>';
+
+  const limiteHtml = limiteTexto ? ' <b>antes del ' + limiteTexto + '</b>' : '';
+  const intro = envio.puntual
+    ? 'En <b>' + mes + '</b> tienes rotación en <b>' + escHtmlRec_(rec.centro) + '</b>. El centro de práctica nos pidió compartirte la siguiente información.'
+    : continua
+      ? (envio.segundo
+        ? 'En <b>' + mes + '</b> continúas tu rotación en <b>' + escHtmlRec_(rec.centro) + '</b>. <b>Si aún no has actualizado tus documentos, debes hacerlo</b>' + limiteHtml + ' para seguir rotando.'
+        : 'En <b>' + mes + '</b> continúas tu rotación en <b>' + escHtmlRec_(rec.centro) + '</b>. Como ya enviaste la documentación completa, este mes solo debes actualizar los documentos que aparecen abajo' + limiteHtml + '.')
+    : envio.segundo
+      ? 'En <b>' + mes + '</b> inicias tu rotación en <b>' + escHtmlRec_(rec.centro) + '</b>. <b>Si aún no has enviado tu documentación, debes hacerlo</b>' + limiteHtml + ' para que el centro pueda recibirte.'
+      : 'En <b>' + mes + '</b> inicias tu rotación en <b>' + escHtmlRec_(rec.centro) + '</b>. Para que el centro pueda recibirte, necesitas enviar tu documentación' + limiteHtml + '.';
+
+  let bloques = '';
+  if (limiteTexto) bloques += '<tr><td style="padding:14px 18px;font-family:Arial,Helvetica,sans-serif;background:#FFF4DC;">' +
+    '<div style="font-size:12px;font-weight:bold;color:#823C00;text-transform:uppercase;letter-spacing:.5px;">Fecha límite</div>' +
+    '<div style="font-size:18px;font-weight:bold;color:#823C00;margin-top:2px;">Antes del ' + limiteTexto + '</div></td></tr>';
+  if (rec.enviarA) bloques += fila('Envía la documentación a', enlazarTextoRec_(rec.enviarA));
+  const listaDocs = docs => '<table role="presentation" cellpadding="0" cellspacing="0">' + docs.map(doc =>
+    '<tr><td valign="top" style="padding:3px 8px 3px 0;color:#1F4E79;font-size:14px;">&#10003;</td><td style="padding:3px 0;font-size:14px;color:#333333;">' + escHtmlRec_(doc) + '</td></tr>').join('') + '</table>';
+  if (continua) bloques += fila('Documentos para actualizar', listaDocs(actualizar));
+  else if (rec.documentos.length) bloques += fila('Documentos requeridos', listaDocs(rec.documentos));
+  if (rec.indicaciones) bloques += fila('Información importante', enlazarTextoRec_(rec.indicaciones));
+  if (!envio.puntual && !continua && actualizar.length) bloques += fila('Nota',
+    'Si tu rotación en este centro dura varios meses, después de este primer envío completo solo tendrás que actualizar cada mes: ' + escHtmlRec_(listaConYRec_(actualizar)) + '.');
+
+  const detalle = [d.programa ? 'Programa: ' + escHtmlRec_(d.programa) : '', d.rotacion ? 'Rotación: ' + escHtmlRec_(d.rotacion) : ''].filter(Boolean).join(' &nbsp;·&nbsp; ');
+
+  return '' +
+    '<div style="margin:0;padding:0;background:#eef3f8;">' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef3f8;"><tr><td align="center" style="padding:24px 12px;">' +
+    '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:14px;overflow:hidden;">' +
+    '<tr><td style="background:#003865;padding:22px 28px;font-family:Arial,Helvetica,sans-serif;">' +
+    '<div style="font-size:12px;color:#BDD7EE;letter-spacing:.5px;">POSGRADOS CLÍNICOS · UNIVERSIDAD CES</div>' +
+    '<div style="font-size:21px;font-weight:bold;color:#ffffff;margin-top:6px;">' + (envio.puntual ? 'Información de tu centro de práctica' : continua ? (envio.segundo ? 'Segundo recordatorio: actualiza tus documentos' : 'Actualización de documentos') : (envio.segundo ? 'Segundo recordatorio: tu documentación' : 'Documentos para tu rotación')) + '</div>' +
+    '<div style="font-size:14px;color:#d8e8f5;margin-top:4px;">' + escHtmlRec_(rec.centro) + ' · ' + mes.charAt(0).toUpperCase() + mes.slice(1) + '</div>' +
+    '</td></tr>' +
+    '<tr><td style="padding:24px 28px 8px;font-family:Arial,Helvetica,sans-serif;color:#333333;font-size:15px;line-height:23px;">' +
+    '<p style="margin:0 0 12px;">Hola, ' + escHtmlRec_(nombre) + ':</p>' +
+    '<p style="margin:0 0 12px;">' + intro + '</p>' +
+    (detalle ? '<p style="margin:0 0 8px;font-size:13px;color:#6b7684;">' + detalle + '</p>' : '') +
+    '</td></tr>' +
+    (bloques ? '<tr><td style="padding:8px 28px 18px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #D6E4F5;border-radius:10px;overflow:hidden;">' + bloques + '</table></td></tr>' : '') +
+    '<tr><td style="padding:0 28px 22px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#555555;line-height:20px;">' +
+    (envio.puntual ? '' : '<p style="margin:0 0 10px;">' + (envio.segundo ? (continua ? 'Si ya los actualizaste, puedes ignorar este mensaje.' : 'Si ya la enviaste completa, puedes ignorar este mensaje.') : (continua ? 'Si ya los actualizaste, puedes ignorar este mensaje.' : 'Si ya enviaste la documentación, puedes ignorar este mensaje.')) + '</p>') +
+    '<p style="margin:0 0 16px;">Si tienes alguna duda, comunícate con la Coordinación de Posgrados Clínicos.</p>' +
+    '<a href="' + REC_URL_PORTAL + '" style="background:#003865;color:#ffffff;padding:10px 18px;border-radius:6px;text-decoration:none;display:inline-block;font-size:14px;">Ver mi cronograma</a>' +
+    '</td></tr>' +
+    '<tr><td align="center" style="background:#f4f7fb;padding:16px;font-family:Arial,Helvetica,sans-serif;">' +
+    '<div style="font-size:14px;font-weight:bold;color:#003865;">Coordinación de Posgrados Clínicos</div>' +
+    '<div style="font-size:12px;color:#666666;margin-top:2px;">Universidad CES</div>' +
+    '</td></tr></table>' +
+    '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#8a9aaa;margin-top:12px;">Recibes este correo automático porque tienes una rotación programada en este centro de práctica.</div>' +
+    '</td></tr></table></div>';
+}
+
+// ---------- Carga y listado ----------
+async function cargarRecordatorios(forzar) {
+  if (recordatoriosCargados && !forzar) { pintarRecordatorios(); return; }
+  document.getElementById('cen-lista').innerHTML = '<p style="color:#888; padding:12px;">⏳ Cargando recordatorios...</p>';
+  const res = await leerBackend('listarRecordatorios');
+  if (!res.ok) {
+    document.getElementById('cen-lista').innerHTML = `<p style="color:#9C0006; padding:12px;">No se pudieron cargar los recordatorios: ${esc(res.error)} <button class="btn-secundario btn-pequeno" onclick="cargarRecordatorios(true)">Reintentar</button></p>`;
+    return;
+  }
+  cacheRecordatorios = res.recordatorios || [];
+  recDisparadorActivo = res.disparadorActivo;
+  recordatoriosCargados = true;
+  pintarRecordatorios();
+}
+
+function filtrarEstadoRec(valor) { recFiltroEstado = recFiltroEstado === valor ? '' : valor; pintarRecordatorios(); }
+
+function estadoVisualRec_(r) {
+  if (!r.activo) return { texto: 'Pausado', bg: '#eef1f5', tx: '#6b7684' };
+  if (r.tipo === 'Puntual' && !r.proximo && !r.vigente) return { texto: 'Finalizado', bg: '#eef1f5', tx: '#6b7684' };
+  return { texto: 'Activo', bg: 'var(--gestionado-bg)', tx: 'var(--gestionado-tx)' };
+}
+
+function describirProgramacionRec_(r) {
+  if (r.tipo === 'Puntual') {
+    return `Anuncio único el <b>${esc(textoFechaDiaRec_(r.fechaEnvio))}</b> para quienes rotan en <b>${esc(textoMesRec_(r.mesRotacion))}</b>` +
+      (r.fechaLimite ? ` · fecha límite: antes del ${esc(textoFechaRec_(r.fechaLimite))}` : '');
+  }
+  const cuando = r.mesesAntes === 2 ? 'dos meses antes de la rotación' : 'del mes anterior a la rotación';
+  return `Cada mes: recordatorio el día <b>${esc(r.diasEnvio[0])}</b> ${cuando}${r.diasEnvio.length > 1 ? ` y segundo envío el día <b>${esc(r.diasEnvio[1])}</b>` : ''} · fecha límite: <b>antes del día ${esc(r.diaLimite)}</b>`;
+}
+
+function describirProximoRec_(r) {
+  if (!r.activo) return '<span class="rec-proximo pausado">Pausado: no se enviará nada hasta que lo actives.</span>';
+  const partes = [];
+  if (r.vigente) {
+    partes.push(`<span class="rec-proximo encurso">En curso: residentes que rotan en <b>${esc(textoMesRec_(r.vigente.mesRotacion))}</b>` +
+      (r.vigente.fechaLimite ? ` · si alguien se carga tarde, igual le llega antes del ${esc(textoFechaRec_(r.vigente.fechaLimite))}` : '') + '</span>');
+  }
+  if (r.proximo && (!r.vigente || r.proximo.fecha !== r.vigente.fecha)) {
+    partes.push(`<span class="rec-proximo">Próximo envío: <b>${esc(textoFechaDiaRec_(r.proximo.fecha))}</b>, a quienes rotan en ${esc(textoMesRec_(r.proximo.mesRotacion))}${r.proximo.segundo ? ' (segundo envío)' : ''}</span>`);
+  }
+  if (!partes.length) partes.push('<span class="rec-proximo pausado">Sin envíos pendientes.</span>');
+  return partes.join(' ');
+}
+
+function pintarRecordatorios() {
+  const cont = document.getElementById('cen-lista');
+  if (!cont) return;
+  const coord = esCoordinadoraRec_();
+  document.getElementById('cen-btn-nuevo').style.display = coord ? 'inline-block' : 'none';
+
+  const aviso = document.getElementById('cen-aviso');
+  aviso.innerHTML = (recDisparadorActivo === false && cacheRecordatorios.some(r => r.activo))
+    ? `<div class="rec-aviso">⚠️ El envío automático todavía no está activo. En el editor de Apps Script, corre una sola vez la función <b>configurarRecordatoriosCentros</b>. Mientras tanto puedes usar "Enviar ahora" en cada recordatorio.</div>` : '';
+
+  const activos = cacheRecordatorios.filter(r => r.activo).length;
+  const pausados = cacheRecordatorios.length - activos;
+  document.getElementById('cen-resumen').innerHTML = cacheRecordatorios.length ? `
+    <button class="${recFiltroEstado === '' ? 'activo' : ''}" onclick="filtrarEstadoRec('')"><b>${cacheRecordatorios.length}</b>recordatorios</button>
+    <button class="${recFiltroEstado === 'activo' ? 'activo' : ''}" onclick="filtrarEstadoRec('activo')"><b>${activos}</b>activos</button>
+    <button class="${recFiltroEstado === 'pausado' ? 'activo' : ''}" onclick="filtrarEstadoRec('pausado')"><b>${pausados}</b>pausados</button>` : '';
+
+  const q = normalizarBusquedaRec_(document.getElementById('cen-q').value);
+  const tipo = document.getElementById('cen-tipo').value;
+  const lista = cacheRecordatorios.filter(r =>
+    (!q || normalizarBusquedaRec_(r.centro + ' ' + r.campos.join(' ')).includes(q)) &&
+    (!tipo || r.tipo === tipo) &&
+    (!recFiltroEstado || (recFiltroEstado === 'activo' ? r.activo : !r.activo)));
+
+  if (!cacheRecordatorios.length) {
+    cont.innerHTML = `<div class="rec-vacio"><div style="font-size:15px; font-weight:700; color:var(--azul-ces);">Configura el primer centro de práctica</div>
+      <div style="font-size:13px; color:#666; margin:6px 0 12px;">Indica qué documentos pide el centro, a dónde se envían y en qué fecha debe salir el recordatorio. El sistema se encarga de enviarlo a quienes van a rotar allí.</div>
+      ${coord ? '<button class="btn-primario" onclick="abrirEditorRecordatorio(null)">+ Nuevo recordatorio</button>' : ''}</div>`;
+    return;
+  }
+  if (!lista.length) { cont.innerHTML = '<p style="color:#999; padding:12px;">Ningún recordatorio coincide con el filtro.</p>'; return; }
+
+  cont.innerHTML = lista.map(r => {
+    const est = estadoVisualRec_(r);
+    const id = esc(r.id);
+    const ultimo = r.ultimoEnvio ? `Último envío: ${esc(textoFechaDiaRec_(r.ultimoEnvio.fecha))} · ${r.ultimoEnvio.enviados} correo${r.ultimoEnvio.enviados === 1 ? '' : 's'}` : 'Aún no se ha enviado ningún correo';
+    return `<div class="rec-item ${r.activo ? '' : 'pausado'}">
+      <div class="rec-item-top">
+        <div><div class="rec-centro">${esc(r.centro)}</div>
+          <div class="rec-sub">Campos del cuadro: ${esc(r.campos.join(', '))} · Programas: ${r.programas.length ? esc(r.programas.join(', ')) : 'todos'}${r.incluirPendientes ? '' : ' · solo rotaciones confirmadas'}</div></div>
+        <div style="display:flex; gap:6px; flex-shrink:0;">
+          <span class="pastilla" style="background:${r.tipo === 'Puntual' ? '#E0F2F1; color:#00695C' : '#E8EEF5; color:var(--azul-ces)'};">${r.tipo === 'Puntual' ? 'Anuncio puntual' : 'Recurrente'}</span>
+          <span class="pastilla" style="background:${est.bg}; color:${est.tx};">${est.texto}</span></div>
+      </div>
+      <div class="rec-linea">${describirProgramacionRec_(r)}</div>
+      ${r.documentos.length ? `<div class="rec-docs"><b>Documentos requeridos:</b> ${r.documentos.map(esc).join(' · ')}</div>` : ''}
+      ${(r.documentosActualizar || []).length ? `<div class="rec-docs"><b>Si continúa rotando, actualiza cada mes:</b> ${r.documentosActualizar.map(esc).join(' · ')}</div>` : ''}
+      <div class="rec-linea">${describirProximoRec_(r)}</div>
+      <div class="rec-linea tenue">${ultimo}${r.totalEnviados > (r.ultimoEnvio ? r.ultimoEnvio.enviados : 0) ? ` · ${r.totalEnviados} en total` : ''}${r.autor ? ` · Editado por ${esc(r.autor)}${r.actualizado ? ' el ' + esc(r.actualizado.slice(0, 10)) : ''}` : ''}</div>
+      <div class="fila-acciones" style="margin-top:10px;">
+        <button class="btn-secundario btn-pequeno" onclick="abrirEditorRecordatorio('${id}')">${coord ? '✏️ Editar' : '👁 Ver detalle'}</button>
+        <button class="btn-secundario btn-pequeno" onclick="verDestinatariosRecordatorio('${id}')">👥 Ver destinatarios</button>
+        ${coord ? `<button class="btn-secundario btn-pequeno" onclick="cambiarEstadoRecordatorio('${id}', ${r.activo ? 'false' : 'true'})">${r.activo ? '⏸ Pausar' : '▶️ Activar'}</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function normalizarBusquedaRec_(t) { return String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim(); }
+
+async function cambiarEstadoRecordatorio(id, activo) {
+  const res = await llamarBackend('cambiarEstadoRecordatorio', { id, activo });
+  if (!res.ok) { mostrarMensaje('No se pudo cambiar: ' + res.error, 'error'); return; }
+  mostrarMensaje(activo ? 'Recordatorio activado' : 'Recordatorio pausado', 'ok');
+  cargarRecordatorios(true);
+}
+
+// ---------- Editor ----------
+function camposDisponiblesRec_() {
+  const conteo = {};
+  (cacheHistoricoCompleto || []).forEach(f => {
+    const c = String(f.CampoRotacion || '').replace(/\s+/g, ' ').trim();
+    if (!c || /^vacaciones/i.test(c)) return;
+    conteo[c] = (conteo[c] || 0) + 1;
+  });
+  recCamposExtra.forEach(c => { if (!(c in conteo)) conteo[c] = 0; });
+  recCamposSel.forEach(c => { if (!(c in conteo)) conteo[c] = 0; });
+  return conteo;
+}
+
+async function abrirEditorRecordatorio(id) {
+  if (!cacheHistoricoCompleto.length) {
+    const res = await leerBackend('listarHistorico');
+    if (res.ok) cacheHistoricoCompleto = res.datos;
+  }
+  const r = id ? cacheRecordatorios.find(x => x.id === id) : null;
+  recEdicion = r ? JSON.parse(JSON.stringify(r)) : {
+    id: '', centro: '', campos: [], tipo: 'Recurrente', activo: true, programas: [], mesesAntes: 1, diaLimite: 18, diasEnvio: [10],
+    fechaEnvio: '', mesRotacion: '', fechaLimite: '', incluirPendientes: true, enviarA: '', documentos: [], documentosActualizar: [], indicaciones: ''
+  };
+  recEdicion.diasEnvio = recEdicion.diasEnvio && recEdicion.diasEnvio.length ? recEdicion.diasEnvio : [10];
+  recEdicion.documentosActualizar = recEdicion.documentosActualizar || [];
+  recVistaSegundo = false; recVistaContinua = false;
+  recCamposSel = new Set(recEdicion.campos);
+  recProgramasSel = new Set(recEdicion.programas);
+  recCamposExtra = [];
+  pintarEditorRecordatorio_();
+  document.getElementById('overlay-rec').style.display = 'flex';
+  document.getElementById('overlay-rec').scrollTop = 0;
+}
+
+function cerrarEditorRecordatorio() { document.getElementById('overlay-rec').style.display = 'none'; }
+
+function pintarEditorRecordatorio_() {
+  const r = recEdicion;
+  const coord = esCoordinadoraRec_();
+  const nuevo = !r.id;
+  const programas = (listaProgramasConocidos || []).slice().sort((a, b) => a.localeCompare(b, 'es'));
+  const titulo = !coord ? 'Detalle del recordatorio' : (nuevo ? 'Nuevo recordatorio' : 'Editar recordatorio');
+  document.getElementById('caja-rec').innerHTML = `
+    <div class="fres-top"><div><h3 style="margin:0; font-size:17px; color:var(--azul-ces);">${titulo}</h3>
+      <div style="font-size:12px; color:#888; margin-top:2px;">${coord ? 'Los cambios aplican desde el próximo envío. A la derecha ves cómo le llega el correo al residente.' : 'Solo consulta: las coordinadoras son quienes editan los recordatorios.'}</div></div>
+      <button class="btn-secundario btn-pequeno" onclick="cerrarEditorRecordatorio()">✕</button></div>
+    <div class="rec-cuerpo">
+      <fieldset id="rec-form" class="rec-form" ${coord ? '' : 'disabled'}>
+        <div class="rec-bloque"><label class="et">Nombre del centro (así lo verá el residente)</label>
+          <input type="text" id="rec-centro" value="${esc(r.centro)}" placeholder="Hospital General de Medellín (HGM)" oninput="actualizarVistaPreviaRec_()"></div>
+
+        <div class="rec-bloque"><label class="et">Campos del cuadro de rotaciones que corresponden a este centro</label>
+          <div class="rec-chips" id="rec-campos-sel"></div>
+          <div style="${coord ? '' : 'display:none;'}">
+          <input type="text" id="rec-campos-filtro" placeholder="Filtrar campos..." oninput="pintarCamposRec_()" style="margin-bottom:6px;">
+          <div class="rec-checklist" id="rec-campos-lista"></div>
+          <div style="display:flex; gap:6px; margin-top:6px;"><input type="text" id="rec-campo-nuevo" placeholder="¿No aparece? Escríbelo tal como irá en el cuadro" onkeydown="if(event.key==='Enter'){event.preventDefault(); agregarCampoRec();}">
+            <button class="btn-secundario btn-pequeno" style="white-space:nowrap;" onclick="agregarCampoRec()">+ Agregar</button></div>
+          <div class="rec-ayuda">Marca todos los nombres con los que aparece el centro en el cuadro (ej. "HGM" y "HOSPITAL GENERAL").</div></div></div>
+
+        <div class="rec-bloque"><label class="et">Tipo</label>
+          <div class="rec-segmento"><button type="button" id="rec-tipo-rec" onclick="cambiarTipoRec('Recurrente')">Recurrente (cada mes)</button><button type="button" id="rec-tipo-pun" onclick="cambiarTipoRec('Puntual')">Anuncio puntual</button></div></div>
+
+        <div class="rec-bloque" id="rec-bloque-recurrente">
+          <div class="rec-grilla">
+            <div><label class="et">Se envía (respecto a la rotación)</label><select id="rec-meses-antes" onchange="actualizarVistaPreviaRec_()">
+              <option value="1" ${r.mesesAntes !== 2 ? 'selected' : ''}>Mes anterior</option>
+              <option value="2" ${r.mesesAntes === 2 ? 'selected' : ''}>Dos meses antes</option></select></div>
+            <div><label class="et">Primer envío: día</label><input type="number" id="rec-dia-1" min="1" max="30" step="1" value="${esc(r.diasEnvio[0] || '')}" oninput="actualizarVistaPreviaRec_()"></div>
+            <div><label class="et">Fecha límite: antes del día</label><input type="number" id="rec-dia-limite" min="2" max="31" step="1" value="${esc(r.diaLimite)}" oninput="actualizarVistaPreviaRec_()"></div>
+          </div>
+          <div class="rec-segundo">
+            <label class="rec-check" style="padding-left:0;"><input type="checkbox" id="rec-segundo-chk" ${r.diasEnvio.length > 1 ? 'checked' : ''} onchange="toggleSegundoEnvioRec()"> Agregar un segundo envío, para quienes aún no hayan enviado la documentación</label>
+            <div id="rec-segundo-caja" style="display:${r.diasEnvio.length > 1 ? 'flex' : 'none'}; align-items:center; gap:8px; margin:4px 0 0 26px;">
+              <label class="et" style="margin:0;">Segundo envío: día</label><input type="number" id="rec-dia-2" min="2" max="30" step="1" value="${esc(r.diasEnvio[1] || '')}" style="width:90px;" oninput="actualizarVistaPreviaRec_()"></div>
+          </div>
+          <div class="rec-ayuda" id="rec-ejemplo"></div></div>
+
+        <div class="rec-bloque" id="rec-bloque-puntual">
+          <div class="rec-grilla">
+            <div><label class="et">Fecha de envío</label><input type="date" id="rec-fecha-envio" value="${esc(r.fechaEnvio)}" oninput="actualizarVistaPreviaRec_()"></div>
+            <div><label class="et">Para quienes rotan en</label><input type="month" id="rec-mes-rotacion" value="${esc(r.mesRotacion)}" oninput="actualizarVistaPreviaRec_()"></div>
+            <div><label class="et">Fecha límite (opcional)</label><input type="date" id="rec-fecha-limite" value="${esc(r.fechaLimite)}" oninput="actualizarVistaPreviaRec_()"></div>
+          </div>
+          <div class="rec-ayuda">Se envía una sola vez. Le llega a todos los que tengan rotación en este centro ese mes.</div></div>
+
+        <div class="rec-bloque"><label class="et">Programas</label>
+          <label class="rec-check" style="padding-left:0;"><input type="checkbox" id="rec-prog-todos" ${recProgramasSel.size ? '' : 'checked'} onchange="togglePrgTodosRec()"> Todos los programas</label>
+          <div class="rec-checklist" id="rec-prog-lista" style="display:${recProgramasSel.size ? 'block' : 'none'};">${programas.map(p =>
+            `<label class="rec-check"><input type="checkbox" data-programa="${esc(p)}" ${recProgramasSel.has(p) ? 'checked' : ''} onchange="toggleProgramaRec(this)"> ${esc(p)}</label>`).join('')}</div></div>
+
+        <div class="rec-bloque"><label class="rec-check" style="padding-left:0;"><input type="checkbox" id="rec-pendientes" ${r.incluirPendientes ? 'checked' : ''}> Enviar también a rotaciones que aún están Pendientes de confirmar</label>
+          <div class="rec-ayuda">Las rotaciones Negadas nunca reciben el recordatorio.</div></div>
+
+        <div class="rec-bloque"><label class="et">Envía la documentación a</label>
+          <input type="text" id="rec-enviar-a" value="${esc(r.enviarA)}" placeholder="Correo, plataforma o lugar de entrega" oninput="actualizarVistaPreviaRec_()"></div>
+        <div class="rec-bloque"><label class="et">Documentos requeridos (uno por línea)</label>
+          <textarea id="rec-documentos" rows="5" placeholder="Carné de vacunación actualizado&#10;Póliza de responsabilidad civil vigente" oninput="actualizarVistaPreviaRec_()">${esc((r.documentos || []).join('\n'))}</textarea></div>
+        <div class="rec-bloque" id="rec-bloque-actualizar"><label class="et">Si continúa rotando en el centro, cada mes solo debe actualizar (opcional, uno por línea)</label>
+          <textarea id="rec-doc-actualizar" rows="2" placeholder="Certificado de afiliación a EPS&#10;Certificado de afiliación a ARL" oninput="actualizarVistaPreviaRec_()">${esc((r.documentosActualizar || []).join('\n'))}</textarea>
+          <div class="rec-ayuda">Si lo llenas, el primer correo incluye una nota explicándolo, y quienes siguen rotando aquí reciben cada mes un aviso corto solo con estos documentos. Si lo dejas vacío, el correo solo le llega a quien empieza a rotar.</div></div>
+        <div class="rec-bloque"><label class="et">Información importante</label>
+          <textarea id="rec-indicaciones" rows="3" placeholder="Ej.: La documentación debe enviarse antes del día 18. Recuerda que debe estar completa." oninput="actualizarVistaPreviaRec_()">${esc(r.indicaciones)}</textarea></div>
+        <label class="rec-check" style="padding-left:0;"><input type="checkbox" id="rec-activo" ${r.activo ? 'checked' : ''}> Activo (si lo desmarcas, queda guardado pero no se envía)</label>
+      </fieldset>
+      <div class="rec-col-vista">
+        <div style="font-size:12px; font-weight:700; color:#555; margin-bottom:6px;">Así le llega al residente</div>
+        <div id="rec-vista-selector" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+          <div class="rec-segmento rec-segmento-mini" id="rec-sel-envio"><button type="button" id="rec-v-primero" onclick="cambiarVistaRec('segundo', false)">Primer envío</button><button type="button" id="rec-v-segundo" onclick="cambiarVistaRec('segundo', true)">Segundo envío</button></div>
+          <div class="rec-segmento rec-segmento-mini" id="rec-sel-continua"><button type="button" id="rec-v-nuevo" onclick="cambiarVistaRec('continua', false)">Empieza a rotar</button><button type="button" id="rec-v-continua" onclick="cambiarVistaRec('continua', true)">Continúa rotando</button></div>
+        </div>
+        <div class="rec-vista"><div class="rec-asunto" id="rec-vista-asunto"></div><div id="rec-vista-correo"></div></div>
+      </div>
+    </div>
+    <div class="rec-pie">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        ${coord ? `<input type="email" id="rec-correo-prueba" placeholder="tu_correo@ces.edu.co" style="padding:7px; border:1px solid #ccc; border-radius:5px; font-size:13px; min-width:210px;">
+        <button class="btn-secundario btn-pequeno" id="rec-btn-prueba" onclick="enviarPruebaRecordatorio()">📧 Enviar prueba</button>
+        ${nuevo ? '' : `<button class="btn-pequeno" style="background:none; color:#9C0006;" onclick="eliminarRecordatorio('${esc(r.id)}')">🗑 Eliminar recordatorio</button>`}` : ''}
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;"><span class="rec-error" id="rec-error"></span>
+        <button class="btn-secundario" onclick="cerrarEditorRecordatorio()">${coord ? 'Cancelar' : 'Cerrar'}</button>
+        ${coord ? `<button class="btn-primario" id="rec-btn-guardar" onclick="guardarRecordatorio()">${nuevo ? 'Crear recordatorio' : 'Guardar cambios'}</button>` : ''}</div>
+    </div>`;
+  cambiarTipoRec(r.tipo, true);
+  pintarCamposRec_();
+}
+
+function pintarCamposRec_() {
+  const conteo = camposDisponiblesRec_();
+  const filtro = normalizarBusquedaRec_((document.getElementById('rec-campos-filtro') || {}).value);
+  const nombres = Object.keys(conteo)
+    .filter(c => !filtro || normalizarBusquedaRec_(c).includes(filtro))
+    .sort((a, b) => (recCamposSel.has(b) - recCamposSel.has(a)) || a.localeCompare(b, 'es'));
+  document.getElementById('rec-campos-lista').innerHTML = nombres.map(c =>
+    `<label class="rec-check"><input type="checkbox" data-campo="${esc(c)}" ${recCamposSel.has(c) ? 'checked' : ''} onchange="toggleCampoRec(this)"> ${esc(c)}<span class="n">${conteo[c] ? conteo[c] + ' rotaciones' : 'nuevo'}</span></label>`).join('')
+    || '<div style="padding:6px 10px; font-size:12px; color:#999;">Ningún campo coincide.</div>';
+  const deshabilitado = !esCoordinadoraRec_();
+  document.getElementById('rec-campos-sel').innerHTML = [...recCamposSel].map((c, i) =>
+    `<span class="rec-chip">${esc(c)}${deshabilitado ? '' : ` <b onclick="quitarCampoRec(${i})" title="Quitar">×</b>`}</span>`).join('')
+    || '<span style="font-size:12px; color:#9C0006;">Aún no has elegido ningún campo.</span>';
+}
+function toggleCampoRec(el) { if (el.checked) recCamposSel.add(el.dataset.campo); else recCamposSel.delete(el.dataset.campo); pintarCamposRec_(); }
+function quitarCampoRec(i) { recCamposSel.delete([...recCamposSel][i]); pintarCamposRec_(); }
+function agregarCampoRec() {
+  const input = document.getElementById('rec-campo-nuevo');
+  const c = String(input.value || '').replace(/\s+/g, ' ').trim();
+  if (!c) return;
+  const existente = Object.keys(camposDisponiblesRec_()).find(x => normalizarBusquedaRec_(x) === normalizarBusquedaRec_(c));
+  if (!existente) recCamposExtra.push(c);
+  recCamposSel.add(existente || c);
+  input.value = '';
+  pintarCamposRec_();
+}
+function togglePrgTodosRec() {
+  const todos = document.getElementById('rec-prog-todos').checked;
+  document.getElementById('rec-prog-lista').style.display = todos ? 'none' : 'block';
+  if (todos) { recProgramasSel.clear(); document.querySelectorAll('#rec-prog-lista input').forEach(i => { i.checked = false; }); }
+  actualizarVistaPreviaRec_();
+}
+function toggleProgramaRec(el) { if (el.checked) recProgramasSel.add(el.dataset.programa); else recProgramasSel.delete(el.dataset.programa); actualizarVistaPreviaRec_(); }
+
+function toggleSegundoEnvioRec() {
+  const activo = document.getElementById('rec-segundo-chk').checked;
+  document.getElementById('rec-segundo-caja').style.display = activo ? 'flex' : 'none';
+  const d2 = document.getElementById('rec-dia-2');
+  if (activo && !d2.value) {
+    // Sugerencia: unos días después del primero, siempre antes del límite (se puede cambiar)
+    const d1 = parseInt(document.getElementById('rec-dia-1').value, 10), lim = parseInt(document.getElementById('rec-dia-limite').value, 10);
+    if (d1 && lim && d1 + 1 < lim) d2.value = Math.max(d1 + 1, Math.min(lim - 2, d1 + 6));
+  }
+  if (!activo) recVistaSegundo = false;
+  actualizarVistaPreviaRec_();
+}
+function cambiarVistaRec(que, valor) {
+  if (que === 'segundo') recVistaSegundo = valor; else recVistaContinua = valor;
+  actualizarVistaPreviaRec_();
+}
+
+function cambiarTipoRec(tipo, sinPreview) {
+  recEdicion.tipo = tipo;
+  document.getElementById('rec-tipo-rec').className = tipo === 'Recurrente' ? 'activo' : '';
+  document.getElementById('rec-tipo-pun').className = tipo === 'Puntual' ? 'activo' : '';
+  document.getElementById('rec-bloque-recurrente').style.display = tipo === 'Recurrente' ? 'block' : 'none';
+  document.getElementById('rec-bloque-puntual').style.display = tipo === 'Puntual' ? 'block' : 'none';
+  document.getElementById('rec-bloque-actualizar').style.display = tipo === 'Recurrente' ? 'block' : 'none';
+  actualizarVistaPreviaRec_();
+}
+
+function leerFormularioRec_() {
+  const val = id => (document.getElementById(id) || {}).value || '';
+  return {
+    id: recEdicion.id, centro: val('rec-centro').trim(), campos: [...recCamposSel], tipo: recEdicion.tipo,
+    activo: document.getElementById('rec-activo').checked, programas: [...recProgramasSel],
+    mesesAntes: Number(val('rec-meses-antes')) === 2 ? 2 : 1, diaLimite: val('rec-dia-limite'),
+    diasEnvio: [val('rec-dia-1'), document.getElementById('rec-segundo-chk').checked ? val('rec-dia-2') : ''].filter(Boolean).join(', '),
+    documentosActualizar: val('rec-doc-actualizar'),
+    fechaEnvio: val('rec-fecha-envio'), mesRotacion: val('rec-mes-rotacion'), fechaLimite: val('rec-fecha-limite'),
+    incluirPendientes: document.getElementById('rec-pendientes').checked,
+    enviarA: val('rec-enviar-a').trim(), documentos: val('rec-documentos'), indicaciones: val('rec-indicaciones').trim()
+  };
+}
+
+// Convierte lo del formulario al mismo formato que usa la plantilla del servidor.
+function recDesdeFormulario_(f) {
+  return {
+    centro: f.centro, tipo: f.tipo, mesesAntes: f.mesesAntes, diaLimite: parseInt(f.diaLimite, 10) || '',
+    diasEnvio: diasDesdeCeldaRec_(f.diasEnvio), fechaEnvio: f.fechaEnvio, mesRotacion: f.mesRotacion, fechaLimite: f.fechaLimite,
+    enviarA: f.enviarA, documentos: String(f.documentos || '').split(/\n/).map(s => s.trim()).filter(Boolean), indicaciones: f.indicaciones,
+    documentosActualizar: f.tipo === 'Puntual' ? [] : String(f.documentosActualizar || '').split(/\n/).map(s => s.trim()).filter(Boolean)
+  };
+}
+
+function validarFormularioRec_(f) {
+  const rec = recDesdeFormulario_(f);
+  if (!f.centro) return 'Escribe el nombre del centro.';
+  if (!f.campos.length) return 'Elige al menos un campo de rotación del cuadro.';
+  if (f.tipo === 'Recurrente') {
+    if (!(rec.diaLimite >= 2 && rec.diaLimite <= 31)) return 'La fecha límite debe ser un día entre 2 y 31.';
+    const d1 = parseInt(document.getElementById('rec-dia-1').value, 10);
+    if (!(d1 >= 1)) return 'Indica el día del primer envío.';
+    if (document.getElementById('rec-segundo-chk').checked) {
+      const d2 = parseInt(document.getElementById('rec-dia-2').value, 10);
+      if (!(d2 >= 1)) return 'Indica el día del segundo envío, o desmarca esa opción.';
+      if (d2 <= d1) return 'El segundo envío debe ser después del primero (día ' + d1 + ').';
+    }
+    if (rec.diasEnvio.some(d => d >= rec.diaLimite)) return 'Los envíos deben ser antes del día límite (' + rec.diaLimite + ').';
+    if (!f.enviarA) return 'Indica a dónde deben enviar la documentación.';
+    if (!rec.documentos.length) return 'Escribe al menos un documento requerido.';
+  } else {
+    if (!f.fechaEnvio) return 'Elige la fecha de envío del anuncio.';
+    if (!f.mesRotacion) return 'Elige el mes de rotación al que aplica el anuncio.';
+    if (f.fechaEnvio.slice(0, 7) > f.mesRotacion) return 'La fecha de envío no puede ser posterior al mes de rotación.';
+    if (!f.indicaciones && !rec.documentos.length) return 'Escribe el mensaje del anuncio (información importante o documentos).';
+  }
+  return '';
+}
+
+function actualizarVistaPreviaRec_() {
+  if (!recEdicion || !document.getElementById('rec-vista-correo')) return;
+  const f = leerFormularioRec_();
+  const rec = recDesdeFormulario_(f);
+  rec.centro = rec.centro || 'Nombre del centro';
+  const hoy = hoyPartesRecCliente_();
+  let envio = null;
+  if (rec.tipo === 'Puntual') envio = envioPuntual_(rec);
+  else if (rec.diasEnvio.length && rec.diaLimite >= 2) envio = envioVigenteRecurrente_(rec, hoy) || proximoEnvioRecurrente_(rec, hoy);
+  const ejemploMes = (() => { const s = ymSumarRec_(hoy.y, hoy.m, rec.mesesAntes || 1); return ymTextoRec_(s.y, s.m); })();
+  const hayDos = rec.tipo === 'Recurrente' && rec.diasEnvio.length > 1;
+  const hayActualizar = rec.tipo === 'Recurrente' && rec.documentosActualizar.length > 0;
+  if (!hayDos) recVistaSegundo = false;
+  if (!hayActualizar) recVistaContinua = false;
+  document.getElementById('rec-sel-envio').style.display = hayDos ? 'inline-flex' : 'none';
+  document.getElementById('rec-sel-continua').style.display = hayActualizar ? 'inline-flex' : 'none';
+  document.getElementById('rec-v-primero').className = recVistaSegundo ? '' : 'activo';
+  document.getElementById('rec-v-segundo').className = recVistaSegundo ? 'activo' : '';
+  document.getElementById('rec-v-nuevo').className = recVistaContinua ? '' : 'activo';
+  document.getElementById('rec-v-continua').className = recVistaContinua ? 'activo' : '';
+  const base = envio || { slot: 'P', fecha: '', mesRotacion: rec.mesRotacion || ejemploMes, fechaLimite: rec.fechaLimite || '', segundo: false, puntual: rec.tipo === 'Puntual' };
+  const envioVista = Object.assign({}, base, { segundo: hayDos && recVistaSegundo });
+  const ejemplo = { nombre: 'Laura', programa: [...recProgramasSel][0] || 'Medicina Interna', rotacion: 'Nombre de la rotación', continua: hayActualizar && recVistaContinua };
+  document.getElementById('rec-vista-asunto').innerHTML = '<b>Asunto:</b> ' + esc(asuntoRecordatorio_(rec, envioVista, ejemplo));
+  document.getElementById('rec-vista-correo').innerHTML = construirCorreoRecordatorio_(rec, envioVista, ejemplo);
+
+  const ej = document.getElementById('rec-ejemplo');
+  if (ej && rec.tipo === 'Recurrente') {
+    ej.innerHTML = envio
+      ? `${envio.fecha < hoy.iso ? 'En curso desde el' : 'Próximo:'} <b>${esc(textoFechaDiaRec_(envio.fecha))}</b>${envio.segundo ? ' (segundo envío)' : ''} a quienes rotan en ${esc(textoMesRec_(envio.mesRotacion))}, con fecha límite antes del ${esc(textoFechaRec_(envio.fechaLimite))}. Si una rotación se carga tarde, el residente igual recibe el correo mientras no haya pasado la fecha límite.`
+      : 'Escribe el día del primer envío y el día límite.';
+  }
+}
+
+async function guardarRecordatorio() {
+  const f = leerFormularioRec_();
+  const error = validarFormularioRec_(f);
+  const caja = document.getElementById('rec-error');
+  caja.textContent = error;
+  if (error) return;
+  const boton = document.getElementById('rec-btn-guardar');
+  boton.disabled = true; boton.textContent = '⏳ Guardando...';
+  const res = await llamarBackend('guardarRecordatorio', f);
+  boton.disabled = false; boton.textContent = f.id ? 'Guardar cambios' : 'Crear recordatorio';
+  if (!res.ok) { caja.textContent = res.error; return; }
+  cerrarEditorRecordatorio();
+  mostrarMensaje(f.id ? 'Cambios guardados' : 'Recordatorio creado', 'ok');
+  cargarRecordatorios(true);
+}
+
+async function eliminarRecordatorio(id) {
+  const res = await llamarBackend('eliminarRecordatorio', { id });
+  if (!res.ok) { mostrarMensaje('No se pudo eliminar: ' + res.error, 'error'); return; }
+  cerrarEditorRecordatorio();
+  mostrarMensaje('Recordatorio eliminado', 'ok');
+  cargarRecordatorios(true);
+}
+
+async function enviarPruebaRecordatorio() {
+  const caja = document.getElementById('rec-error');
+  const correo = document.getElementById('rec-correo-prueba').value.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)) { caja.textContent = 'Escribe tu correo para recibir la prueba.'; return; }
+  const f = leerFormularioRec_();
+  const error = validarFormularioRec_(f);
+  caja.textContent = error;
+  if (error) return;
+  const boton = document.getElementById('rec-btn-prueba');
+  boton.disabled = true; boton.textContent = '⏳ Enviando...';
+  const res = await llamarBackend('enviarPruebaRecordatorio', { correo, recordatorio: f, variante: { segundo: recVistaSegundo, continua: recVistaContinua } });
+  boton.disabled = false; boton.textContent = '📧 Enviar prueba';
+  if (!res.ok) { caja.textContent = res.error; return; }
+  mostrarMensaje('Prueba enviada a ' + correo + ' (la versión que ves en la vista previa)', 'ok');
+}
+
+// ---------- Destinatarios ----------
+async function verDestinatariosRecordatorio(id) {
+  const r = cacheRecordatorios.find(x => x.id === id);
+  if (!r) return;
+  recEdicion = r;
+  const caja = document.getElementById('caja-rec');
+  caja.innerHTML = `<div class="fres-top"><div><h3 style="margin:0; font-size:17px; color:var(--azul-ces);">${esc(r.centro)}</h3>
+    <div style="font-size:12px; color:#888; margin-top:2px;">Quiénes reciben el recordatorio</div></div>
+    <button class="btn-secundario btn-pequeno" onclick="cerrarEditorRecordatorio()">✕</button></div>
+    <div style="padding:24px 20px; color:#888;">⏳ Buscando residentes...</div>`;
+  document.getElementById('overlay-rec').style.display = 'flex';
+  document.getElementById('overlay-rec').scrollTop = 0;
+  const res = await llamarBackend('previsualizarRecordatorio', { id });
+  if (!res.ok) { caja.querySelector('div:last-child').innerHTML = `<span style="color:#9C0006;">${esc(res.error)}</span>`; return; }
+  pintarDestinatariosRec_(r, res);
+}
+
+function pintarDestinatariosRec_(r, res) {
+  const caja = document.getElementById('caja-rec');
+  const top = `<div class="fres-top"><div><h3 style="margin:0; font-size:17px; color:var(--azul-ces);">${esc(r.centro)}</h3>
+    <div style="font-size:12px; color:#888; margin-top:2px;">Quiénes reciben el recordatorio</div></div>
+    <button class="btn-secundario btn-pequeno" onclick="cerrarEditorRecordatorio()">✕</button></div>`;
+  if (!res.envio) {
+    caja.innerHTML = top + '<div style="padding:20px;"><p style="color:#666;">Este recordatorio no tiene un envío programado.</p></div>';
+    return;
+  }
+  const e = res.envio;
+  const lista = res.destinatarios || [];
+  const recibieron = lista.filter(d => d.yaRecibio).length;
+  const sinCorreo = lista.filter(d => !d.correo).length;
+  const porEnviar = lista.filter(d => d.correo && !d.yaRecibio).length;
+  const cuando = e.abiertoHoy
+    ? `Envío en curso (${esc(textoFechaDiaRec_(e.fecha))})`
+    : `Se enviará el <b>${esc(textoFechaDiaRec_(e.fecha))}</b>`;
+  const colorEstado = est => ({ Confirmado: ['var(--confirmado-bg)', 'var(--confirmado-tx)'], Pendiente: ['var(--pendiente-bg)', 'var(--pendiente-tx)'], Cambio: ['var(--cambio-bg)', 'var(--cambio-tx)'] }[est] || ['#eef1f5', '#555']);
+  caja.innerHTML = top + `<div style="padding:16px 20px;">
+    <div class="rec-linea" style="margin-top:0;">${cuando} · residentes que rotan en <b>${esc(textoMesRec_(e.mesRotacion))}</b>${e.fechaLimite ? ` · fecha límite: antes del ${esc(textoFechaRec_(e.fechaLimite))}` : ''}</div>
+    <div class="rec-linea tenue">Asunto: ${esc(e.asunto)}</div>
+    <div class="res-resumen" style="margin-top:12px;">
+      <button><b>${lista.length}</b>residentes</button><button><b>${recibieron}</b>ya lo recibieron</button>
+      <button><b>${porEnviar}</b>por enviar</button><button style="${sinCorreo ? 'color:#9C0006;' : ''}"><b style="${sinCorreo ? 'color:#9C0006;' : ''}">${sinCorreo}</b>sin correo</button></div>
+    ${lista.length ? `<div style="overflow-x:auto;"><table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th>Rotación</th><th>Estado</th><th>Aviso</th><th>Correo</th><th>Envío</th></tr></thead><tbody>
+      ${lista.map(d => { const c = colorEstado(d.estado); return `<tr><td>${esc(d.nombre)}</td><td>${esc(d.programa)}</td><td>${esc(d.rotacion || d.campo)}</td>
+        <td><span class="pastilla" style="background:${c[0]}; color:${c[1]};">${esc(d.estado || '—')}</span></td>
+        <td style="font-size:12px;">${d.continua ? 'Solo actualización' : 'Documentación completa'}</td>
+        <td>${d.correo ? esc(d.correo) : '<span class="res-pend">Sin correo</span>'}</td>
+        <td>${d.yaRecibio ? '<span class="pastilla" style="background:var(--gestionado-bg); color:var(--gestionado-tx);">Recibido</span>' : (d.correo ? '<span style="color:#888; font-size:12px;">Pendiente</span>' : '<span style="color:#9C0006; font-size:12px;">Regístralo en Residentes</span>')}</td></tr>`; }).join('')}
+      </tbody></table></div>` : `<p style="color:#666; font-size:13px;">Por ahora nadie tiene rotación que empiece en este centro ese mes. Si se cargan rotaciones después, el sistema las incluye automáticamente mientras no haya pasado la fecha límite.</p>`}
+    ${r.tipo === 'Recurrente' ? `<p class="rec-ayuda" style="margin-top:10px;">${(r.documentosActualizar || []).length
+      ? 'Quien empieza a rotar en este centro recibe la documentación completa; quien ya venía rotando aquí recibe solo el aviso de actualización (' + esc(listaConYRec_(r.documentosActualizar)) + ').'
+      : 'Solo aparece quien empieza a rotar en este centro ese mes: si ya venía rotando allí el mes anterior, ya recibió el aviso.'}</p>` : ''}
+    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
+      <button class="btn-secundario" onclick="cerrarEditorRecordatorio()">Cerrar</button>
+      ${esCoordinadoraRec_() && porEnviar && r.activo ? `<button class="btn-primario" id="rec-btn-ahora" onclick="enviarRecordatorioAhora('${esc(r.id)}', ${porEnviar})">📧 Enviar ahora a ${porEnviar} residente${porEnviar === 1 ? '' : 's'}</button>` : ''}
+    </div></div>`;
+}
+
+async function enviarRecordatorioAhora(id, cantidad) {
+  if (!confirm('Se enviará el recordatorio a ' + cantidad + ' residente' + (cantidad === 1 ? '' : 's') + ' que aún no lo han recibido. ¿Continuar?')) return;
+  const boton = document.getElementById('rec-btn-ahora');
+  if (boton) { boton.disabled = true; boton.textContent = '⏳ Enviando...'; }
+  const res = await llamarBackend('enviarRecordatorioAhora', { id });
+  if (!res.ok) { mostrarMensaje('No se pudo enviar: ' + res.error, 'error'); if (boton) { boton.disabled = false; boton.textContent = '📧 Reintentar'; } return; }
+  const partes = [res.enviados + ' enviado' + (res.enviados === 1 ? '' : 's')];
+  if (res.errores) partes.push(res.errores + ' con error');
+  if (res.sinCupo) partes.push(res.sinCupo + ' quedan para mañana (cupo diario de correos)');
+  mostrarMensaje('Recordatorio: ' + partes.join(', '), res.errores ? 'error' : 'ok');
+  await cargarRecordatorios(true);
+  verDestinatariosRecordatorio(id);
 }
 
 </script>
