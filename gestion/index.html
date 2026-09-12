@@ -337,6 +337,16 @@
   .sel-cen-pie { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px; }
   .sel-cen-ayuda { font-size:11.5px; color:#6b7684; }
   .alias-cod { background:#f1f3f6; padding:1px 6px; border-radius:3px; margin:0 4px 3px 0; display:inline-block; font-size:11.5px; color:#55606b; }
+  .et-cen { font-size:11px; font-weight:700; padding:2px 8px; border-radius:9px; display:inline-block; white-space:nowrap; margin:0 4px 3px 0; }
+  .et-cen.red { background:var(--gestionado-bg); color:var(--gestionado-tx); }
+  .et-cen.conv { background:var(--pendiente-bg); color:var(--pendiente-tx); }
+  .et-cen.intl { background:var(--negado-bg); color:var(--negado-tx); }
+  .et-cen.nac { background:var(--confirmado-bg); color:var(--confirmado-tx); }
+  .et-cen.gris { background:#ececec; color:#555; }
+  .et-cen.pend { background:#fff; color:#9C0006; border:1px dashed #9C0006; }
+  .opc-cen { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+  .opc-cen button { border:1px solid #cfd6de; background:white; color:#333; border-radius:16px; padding:6px 14px; font-size:12.5px; cursor:pointer; }
+  .opc-cen button.sel { background:var(--azul-ces); color:white; border-color:var(--azul-ces); }
 
   /* ---- Catálogo y asistente de unificación ---- */
   #overlay-cen { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); align-items:flex-start; justify-content:center; padding:40px 16px; overflow-y:auto; z-index:130; }
@@ -5764,8 +5774,8 @@ function selCentrosPintar(idBase) {
   cajaChips.innerHTML = chips || '<span class="sel-cen-vacio">Ningún centro seleccionado</span>';
 
   const q = claveCentroJS(estado.filtro);
-  const lista = cacheCentros.filter(c => c.activo !== false)
-    .filter(c => !q || claveCentroJS(c.sigla + ' ' + c.nombre + ' ' + (c.alias || []).join(' ')).includes(q))
+  const lista = centrosOrdenados().filter(c => c.activo !== false)
+    .filter(c => !q || claveCentroJS(c.sigla + ' ' + c.nombre + ' ' + (c.alias || []).join(' ') + ' ' + (c.pais || '')).includes(q))
     .concat(cacheNoCentros.filter(c => c.sigla && (!q || claveCentroJS(c.sigla + ' ' + c.nombre).includes(q))));
 
   cajaLista.innerHTML = lista.length
@@ -5773,6 +5783,7 @@ function selCentrosPintar(idBase) {
       <div class="sel-cen-it ${estado.ids.indexOf(c.id) >= 0 ? 'marcado' : ''}" onclick="selCentrosAlternar('${idBase}','${c.id}')">
         <span class="tic">${estado.ids.indexOf(c.id) >= 0 ? '☑' : '☐'}</span>
         <span class="sg">${esc(c.sigla)}</span><span class="nm">${esc(c.nombre)}</span>
+        ${c.id.indexOf('CEN-') === 0 ? etiquetaCortaCentro(c) : ''}
       </div>`).join('')
     : '<div class="sel-cen-nada">Ningún centro del catálogo coincide con la búsqueda.</div>';
 
@@ -5829,26 +5840,81 @@ function selCentrosFijarTexto(idBase, texto) {
 // ------------------------------------------------------------
 let centroEditandoDesde = null;
 
+let centroEnEdicion = null;
+
 function abrirEditorCentro(id, idBaseSelector) {
   centroEditandoDesde = idBaseSelector || null;
   const c = id ? cacheCentros.find(x => x.id === id) : null;
+  centroEnEdicion = c
+    ? { id: c.id, sigla: c.sigla, nombre: c.nombre, alias: (c.alias || []).slice(), ambito: c.ambito || 'Nacional', vinculo: c.vinculo || 'Red CES', intermediaria: c.intermediaria || '', pais: c.pais || '' }
+    : { id: '', sigla: '', nombre: '', alias: [], ambito: 'Nacional', vinculo: 'Red CES', intermediaria: '', pais: '' };
+  pintarEditorCentro();
+  document.getElementById('overlay-cen').style.display = 'flex';
+}
+
+// Lee lo escrito antes de repintar, para que cambiar una opción no borre el texto ya digitado.
+function leerEditorCentro() {
+  const g = i => { const el = document.getElementById(i); return el ? el.value : ''; };
+  if (!document.getElementById('ec-sigla')) return;
+  centroEnEdicion.sigla = g('ec-sigla');
+  centroEnEdicion.nombre = g('ec-nombre');
+  centroEnEdicion.alias = g('ec-alias').split(',').map(x => x.trim()).filter(Boolean);
+  if (document.getElementById('ec-inter')) centroEnEdicion.intermediaria = g('ec-inter');
+  if (document.getElementById('ec-pais')) centroEnEdicion.pais = g('ec-pais');
+}
+
+function fijarCampoCentro(campo, valor) {
+  leerEditorCentro();
+  centroEnEdicion[campo] = valor;
+  // 'Red CES' solo existe en lo nacional y 'Directa' solo en lo internacional.
+  if (campo === 'ambito') {
+    if (valor === 'Internacional' && centroEnEdicion.vinculo === 'Red CES') centroEnEdicion.vinculo = 'Directa';
+    if (valor === 'Nacional') { centroEnEdicion.pais = ''; if (centroEnEdicion.vinculo === 'Directa') centroEnEdicion.vinculo = 'Red CES'; }
+  }
+  if (campo === 'vinculo' && valor !== 'Convenio') centroEnEdicion.intermediaria = '';
+  pintarEditorCentro();
+}
+
+function opcionesCentro(campo, valores) {
+  return `<div class="opc-cen">${valores.map(v =>
+    `<button class="${centroEnEdicion[campo] === v ? 'sel' : ''}" onclick="fijarCampoCentro('${campo}','${v}')">${esc(v)}</button>`).join('')}</div>`;
+}
+
+function pintarEditorCentro() {
+  const c = centroEnEdicion;
+  const esIntl = c.ambito === 'Internacional';
   document.getElementById('caja-cen').innerHTML = `
-    <h3 style="margin-top:0; color:var(--azul-ces); font-size:15px;">${c ? 'Editar centro' : 'Crear centro nuevo'}</h3>
+    <h3 style="margin-top:0; color:var(--azul-ces); font-size:15px;">${c.id ? 'Editar centro' : 'Crear centro nuevo'}</h3>
     <p style="font-size:12px; color:#888; margin-top:-6px;">Se guarda sin tildes, sin ñ y sin guiones. Escribe normal; el sistema convierte.</p>
     <label class="lbl-cen">Sigla como se verá en el cuadro</label>
-    <input type="text" id="ec-sigla" class="in-cen" autocomplete="off" value="${c ? esc(c.sigla) : ''}" placeholder="Ej. HGM" oninput="previaCentro()">
+    <input type="text" id="ec-sigla" class="in-cen" autocomplete="off" value="${esc(c.sigla)}" placeholder="Ej. HGM" oninput="leerEditorCentro(); previaCentro()">
     <label class="lbl-cen">Nombre oficial</label>
-    <input type="text" id="ec-nombre" class="in-cen" autocomplete="off" value="${c ? esc(c.nombre) : ''}" placeholder="Ej. Hospital General de Medellín" oninput="previaCentro()">
+    <input type="text" id="ec-nombre" class="in-cen" autocomplete="off" value="${esc(c.nombre)}" placeholder="Ej. Hospital General de Medellín" oninput="leerEditorCentro(); previaCentro()">
     <label class="lbl-cen">Formas antiguas con las que aparece en el cuadro (separadas por coma)</label>
-    <input type="text" id="ec-alias" class="in-cen" autocomplete="off" value="${c ? esc((c.alias || []).join(', ')) : ''}" placeholder="HOSPITAL GENERAL, H.G.M." oninput="previaCentro()">
-    <div class="sel-cen-ayuda" id="ec-previa" style="margin-top:10px;"></div>
+    <input type="text" id="ec-alias" class="in-cen" autocomplete="off" value="${esc((c.alias || []).join(', '))}" placeholder="HOSPITAL GENERAL, H.G.M." oninput="leerEditorCentro()">
+
+    <label class="lbl-cen">Ámbito</label>
+    ${opcionesCentro('ambito', ['Nacional', 'Internacional'])}
+    ${esIntl ? `
+      <label class="lbl-cen">País</label>
+      <input type="text" id="ec-pais" class="in-cen" autocomplete="off" value="${esc(c.pais)}" placeholder="Ej. España" oninput="leerEditorCentro(); previaCentro()">` : ''}
+
+    <label class="lbl-cen">Cómo se llega</label>
+    ${esIntl ? opcionesCentro('vinculo', ['Directa', 'Convenio']) : opcionesCentro('vinculo', ['Red CES', 'Convenio'])}
+    <div class="sel-cen-ayuda" style="margin-top:6px;">${esIntl
+      ? 'Lo normal en internacional es directa: el hospital recibe al residente y no hay institución de por medio. Convenio es la excepción.'
+      : 'Red CES: relación directa nuestra. Convenio: se llega por medio de otra universidad o institución.'}</div>
+    ${c.vinculo === 'Convenio' ? `
+      <label class="lbl-cen">Por medio de qué institución</label>
+      <input type="text" id="ec-inter" class="in-cen" autocomplete="off" value="${esc(c.intermediaria)}" placeholder="Ej. FUCS" oninput="leerEditorCentro(); previaCentro()">` : ''}
+
+    <div class="sel-cen-ayuda" id="ec-previa" style="margin-top:12px; background:#f7f9fb; border:1px dashed #d7dee5; border-radius:6px; padding:9px 11px;"></div>
     <div id="ec-msg"></div>
     <div class="fila-botones" style="margin-top:16px;">
-      <button class="btn-primario" onclick="guardarEditorCentro('${c ? c.id : ''}')">${c ? 'Guardar cambios' : 'Crear'}</button>
+      <button class="btn-primario" onclick="guardarEditorCentro('${c.id}')">${c.id ? 'Guardar cambios' : 'Crear'}</button>
       <button class="btn-secundario" onclick="cerrarEditorCentro()">Cancelar</button>
-      ${c ? `<button class="btn-secundario" style="margin-left:auto; color:#9C0006;" onclick="borrarCentroCat('${c.id}')">Eliminar</button>` : ''}
+      ${c.id ? `<button class="btn-secundario" style="margin-left:auto; color:#9C0006;" onclick="borrarCentroCat('${c.id}')">Eliminar</button>` : ''}
     </div>`;
-  document.getElementById('overlay-cen').style.display = 'flex';
   previaCentro();
 }
 
@@ -5858,20 +5924,61 @@ function cerrarEditorCentro() {
 }
 
 function previaCentro() {
-  const s = limpiarNombreCentroJS(document.getElementById('ec-sigla').value);
-  const n = limpiarNombreCentroJS(document.getElementById('ec-nombre').value);
-  document.getElementById('ec-previa').innerHTML = `Quedará guardado como <b>${esc(s || '—')}</b> · ${esc(n || '—')}`;
+  leerEditorCentro();
+  const c = centroEnEdicion;
+  const s = limpiarNombreCentroJS(c.sigla), n = limpiarNombreCentroJS(c.nombre);
+  document.getElementById('ec-previa').innerHTML =
+    `Quedará guardado como <b>${esc(s || '—')}</b> · ${esc(n || '—')}<br>
+     <span style="font-size:11px;">Cada rotación aquí contará como: <b>${esc(textoClasificacionCentro(c))}</b></span>`;
+}
+
+// Misma regla que aplica el servidor: es movilidad saliente toda rotación en un centro que no
+// sea de la red CES.
+function textoClasificacionCentro(c) {
+  if (c.ambito === 'Internacional') {
+    return 'movilidad saliente internacional en ' + (limpiarNombreCentroJS(c.pais) || 'país sin registrar')
+      + (c.vinculo === 'Convenio' ? ' por convenio con ' + (limpiarNombreCentroJS(c.intermediaria) || '?') : ' (directa con el hospital)');
+  }
+  if (c.vinculo === 'Convenio') {
+    return 'movilidad saliente nacional por convenio con ' + (limpiarNombreCentroJS(c.intermediaria) || '?');
+  }
+  return 'rotación dentro de la red CES, no es movilidad';
+}
+
+function centrosOrdenados() {
+  return cacheCentros.slice().sort((a, b) => String(a.sigla).localeCompare(String(b.sigla), 'es'));
+}
+
+function etiquetasCentro(c) {
+  if (!c.clasificado) return '<span class="et-cen pend">sin clasificar</span>';
+  let h = c.ambito === 'Internacional'
+    ? `<span class="et-cen intl">Internacional${c.pais ? ' · ' + esc(c.pais) : ''}</span>`
+    : '<span class="et-cen nac">Nacional</span>';
+  h += c.vinculo === 'Red CES' ? '<span class="et-cen red">Red CES</span>'
+    : (c.vinculo === 'Convenio' ? `<span class="et-cen conv">Convenio · ${esc(c.intermediaria || '?')}</span>`
+                                : '<span class="et-cen gris">Directa con el hospital</span>');
+  return h;
+}
+
+function etiquetaCortaCentro(c) {
+  if (!c.clasificado) return '';
+  if (c.ambito === 'Internacional') return `<span class="et-cen intl">${esc(c.pais || 'intl')}</span>`;
+  if (c.vinculo === 'Convenio') return '<span class="et-cen conv">convenio</span>';
+  return '<span class="et-cen red">red</span>';
 }
 
 async function guardarEditorCentro(id) {
-  const sigla = document.getElementById('ec-sigla').value;
-  const nombre = document.getElementById('ec-nombre').value;
-  const alias = document.getElementById('ec-alias').value.split(',').map(s => s.trim()).filter(Boolean);
-  if (!limpiarNombreCentroJS(sigla) || !limpiarNombreCentroJS(nombre)) {
-    document.getElementById('ec-msg').innerHTML = '<p style="color:#9C0006; font-size:12px; margin:10px 0 0;">La sigla y el nombre oficial son obligatorios.</p>';
-    return;
-  }
-  const res = await llamarBackend('guardarCentro', { id: id || '', sigla, nombre, alias });
+  leerEditorCentro();
+  const c = centroEnEdicion;
+  const err = t => { document.getElementById('ec-msg').innerHTML = `<p style="color:#9C0006; font-size:12px; margin:10px 0 0;">${esc(t)}</p>`; };
+  if (!limpiarNombreCentroJS(c.sigla) || !limpiarNombreCentroJS(c.nombre)) { err('La sigla y el nombre oficial son obligatorios.'); return; }
+  if (c.ambito === 'Internacional' && !limpiarNombreCentroJS(c.pais)) { err('Un centro internacional necesita el país.'); return; }
+  if (c.vinculo === 'Convenio' && !limpiarNombreCentroJS(c.intermediaria)) { err('Si se llega por convenio, hay que decir por medio de qué institución.'); return; }
+
+  const res = await llamarBackend('guardarCentro', {
+    id: id || '', sigla: c.sigla, nombre: c.nombre, alias: c.alias,
+    ambito: c.ambito, vinculo: c.vinculo, intermediaria: c.intermediaria, pais: c.pais
+  });
   if (!res.ok) {
     document.getElementById('ec-msg').innerHTML = `<p style="color:#9C0006; font-size:12px; margin:10px 0 0;">${esc(res.error)}</p>`;
     return;
@@ -5928,19 +6035,26 @@ function pintarCatalogoCentros() {
   if (!caja) return;
   const esCoord = usuarioActual.rol === 'coordinadora';
   const q = claveCentroJS(document.getElementById('cat-q') ? document.getElementById('cat-q').value : '');
-  const lista = cacheCentros.filter(c => !q || claveCentroJS(c.sigla + ' ' + c.nombre + ' ' + (c.alias || []).join(' ')).includes(q));
+  const lista = centrosOrdenados().filter(c => !q || claveCentroJS(c.sigla + ' ' + c.nombre + ' ' + (c.alias || []).join(' ') + ' ' + (c.pais || '')).includes(q));
 
   if (lista.length === 0) {
     caja.innerHTML = '<p style="color:#888; padding:12px; font-size:13px;">El catálogo está vacío. Crea el primer centro con el botón de arriba.</p>';
     return;
   }
 
-  caja.innerHTML = `<table class="lista">
-    <thead><tr><th style="width:140px;">Sigla (cuadro)</th><th>Nombre oficial</th><th>Formas antiguas reconocidas</th>${esCoord ? '<th style="width:90px;"></th>' : ''}</tr></thead>
+  const sinClasificar = lista.filter(c => !c.clasificado).length;
+  const aviso = sinClasificar
+    ? `<p style="background:#FFF6E8; color:var(--pendiente-tx); padding:9px 12px; border-radius:7px; font-size:12.5px; margin-bottom:12px;">
+        ${sinClasificar} ${sinClasificar === 1 ? 'centro está' : 'centros están'} sin clasificar: mientras tanto el sistema los asume nacionales de la red CES. Ábrelos y confirma el vínculo.</p>`
+    : '';
+
+  caja.innerHTML = aviso + `<table class="lista">
+    <thead><tr><th style="width:140px;">Sigla (cuadro)</th><th>Nombre oficial</th><th style="width:300px;">Vínculo</th><th>Formas antiguas reconocidas</th>${esCoord ? '<th style="width:90px;"></th>' : ''}</tr></thead>
     <tbody>${lista.map(c => `
       <tr${c.activo === false ? ' style="opacity:.55;"' : ''}>
         <td><strong style="color:var(--azul-ces);">${esc(c.sigla)}</strong>${c.activo === false ? '<br><span style="font-size:11px; color:#888;">inactivo</span>' : ''}</td>
         <td>${esc(c.nombre)}</td>
+        <td>${etiquetasCentro(c)}</td>
         <td>${(c.alias || []).length ? (c.alias || []).map(a => `<code class="alias-cod">${esc(a)}</code>`).join('') : '<span style="color:#bbb;">—</span>'}</td>
         ${esCoord ? `<td><button class="btn-secundario btn-pequeno" onclick="abrirEditorCentro('${c.id}')">Editar</button></td>` : ''}
       </tr>`).join('')}</tbody></table>`;
