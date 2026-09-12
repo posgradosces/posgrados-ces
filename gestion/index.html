@@ -327,6 +327,7 @@
   .sel-chip .x { cursor:pointer; background:rgba(255,255,255,.25); border-radius:50%; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; font-size:10px; }
   .sel-cen-buscar { width:100%; padding:7px 8px; border:1px solid #ccc; border-radius:5px; font-size:13px; margin-top:8px; }
   .sel-cen-lista { border:1px solid #e0e4e8; background:white; border-radius:5px; max-height:170px; overflow-y:auto; margin-top:6px; }
+  .et-cen.falta { background:#fff; color:#823C00; border:1px dashed #c79a4e; }
   .sel-cen-it { display:flex; align-items:center; gap:8px; padding:6px 9px; border-bottom:1px solid #f1f3f5; cursor:pointer; font-size:12.5px; }
   .sel-cen-it:last-child { border-bottom:none; }
   .sel-cen-it:hover { background:#f2f7fc; }
@@ -5776,19 +5777,24 @@ function selCentrosPintar(idBase) {
 
   cajaChips.innerHTML = chips || '<span class="sel-cen-vacio">Ningún centro seleccionado</span>';
 
+  // La lista solo aparece al escribir: con el catálogo completo ocupaba casi todo el modal.
   const q = claveCentroJS(estado.filtro);
-  const lista = centrosOrdenados().filter(c => c.activo !== false)
-    .filter(c => !q || claveCentroJS(c.sigla + ' ' + c.nombre + ' ' + (c.alias || []).join(' ') + ' ' + (c.pais || '')).includes(q))
-    .concat(cacheNoCentros.filter(c => c.sigla && (!q || claveCentroJS(c.sigla + ' ' + c.nombre).includes(q))));
+  if (!q) {
+    cajaLista.innerHTML = '<div class="sel-cen-nada">Escribe arriba para buscar el centro.</div>';
+  } else {
+    const lista = centrosOrdenados().filter(c => c.activo !== false)
+      .filter(c => claveCentroJS(c.sigla + ' ' + c.nombre + ' ' + (c.alias || []).join(' ') + ' ' + (c.pais || '')).includes(q))
+      .concat(cacheNoCentros.filter(c => c.sigla && claveCentroJS(c.sigla + ' ' + c.nombre).includes(q)));
 
-  cajaLista.innerHTML = lista.length
-    ? lista.map(c => `
-      <div class="sel-cen-it ${estado.ids.indexOf(c.id) >= 0 ? 'marcado' : ''}" onclick="selCentrosAlternar('${idBase}','${c.id}')">
-        <span class="tic">${estado.ids.indexOf(c.id) >= 0 ? '☑' : '☐'}</span>
-        <span class="sg">${esc(c.sigla)}</span><span class="nm">${esc(c.nombre)}</span>
-        ${c.id.indexOf('CEN-') === 0 ? etiquetaCortaCentro(c) : ''}
-      </div>`).join('')
-    : '<div class="sel-cen-nada">Ningún centro del catálogo coincide con la búsqueda.</div>';
+    cajaLista.innerHTML = lista.length
+      ? lista.map(c => `
+        <div class="sel-cen-it ${estado.ids.indexOf(c.id) >= 0 ? 'marcado' : ''}" onclick="selCentrosAlternar('${idBase}','${c.id}')">
+          <span class="tic">${estado.ids.indexOf(c.id) >= 0 ? '☑' : '☐'}</span>
+          <span class="sg">${esc(c.sigla)}</span><span class="nm">${esc(c.nombre)}</span>
+          ${c.id.indexOf('CEN-') === 0 ? etiquetaCortaCentro(c) : ''}
+        </div>`).join('')
+      : '<div class="sel-cen-nada">Ningún centro del catálogo coincide con la búsqueda.</div>';
+  }
 
   if (cajaPie) {
     cajaPie.innerHTML = usuarioActual.rol === 'coordinadora'
@@ -5899,8 +5905,8 @@ function pintarEditorCentro() {
     <label class="lbl-cen">Ámbito</label>
     ${opcionesCentro('ambito', ['Nacional', 'Internacional'])}
     ${esIntl ? `
-      <label class="lbl-cen">País</label>
-      <input type="text" id="ec-pais" class="in-cen" autocomplete="off" value="${esc(c.pais)}" placeholder="Ej. España" oninput="leerEditorCentro(); previaCentro()">` : ''}
+      <label class="lbl-cen">País <span style="font-weight:400; color:#888;">— puedes dejarlo pendiente</span></label>
+      <input type="text" id="ec-pais" class="in-cen" autocomplete="off" value="${esc(c.pais)}" placeholder="Si aún no lo sabes, déjalo vacío" oninput="leerEditorCentro(); previaCentro()">` : ''}
 
     <label class="lbl-cen">Cómo se llega</label>
     ${esIntl ? opcionesCentro('vinculo', ['Directa', 'Convenio']) : opcionesCentro('vinculo', ['Red CES', 'Convenio'])}
@@ -5908,8 +5914,8 @@ function pintarEditorCentro() {
       ? 'Lo normal en internacional es directa: el hospital recibe al residente y no hay institución de por medio. Convenio es la excepción.'
       : 'Red CES: relación directa nuestra. Convenio: se llega por medio de otra universidad o institución.'}</div>
     ${c.vinculo === 'Convenio' ? `
-      <label class="lbl-cen">Por medio de qué institución</label>
-      <input type="text" id="ec-inter" class="in-cen" autocomplete="off" value="${esc(c.intermediaria)}" placeholder="Ej. FUCS" oninput="leerEditorCentro(); previaCentro()">` : ''}
+      <label class="lbl-cen">Por medio de qué institución <span style="font-weight:400; color:#888;">— puedes dejarlo pendiente</span></label>
+      <input type="text" id="ec-inter" class="in-cen" autocomplete="off" value="${esc(c.intermediaria)}" placeholder="Si aún no lo sabes, déjalo vacío" oninput="leerEditorCentro(); previaCentro()">` : ''}
 
     <div class="sel-cen-ayuda" id="ec-previa" style="margin-top:12px; background:#f7f9fb; border:1px dashed #d7dee5; border-radius:6px; padding:9px 11px;"></div>
     <div id="ec-msg"></div>
@@ -5939,11 +5945,11 @@ function previaCentro() {
 // sea de la red CES.
 function textoClasificacionCentro(c) {
   if (c.ambito === 'Internacional') {
-    return 'movilidad saliente internacional en ' + (limpiarNombreCentroJS(c.pais) || 'país sin registrar')
-      + (c.vinculo === 'Convenio' ? ' por convenio con ' + (limpiarNombreCentroJS(c.intermediaria) || '?') : ' (directa con el hospital)');
+    return 'movilidad saliente internacional en ' + (limpiarNombreCentroJS(c.pais) || 'país por definir')
+      + (c.vinculo === 'Convenio' ? ' por convenio con ' + (limpiarNombreCentroJS(c.intermediaria) || 'institución por definir') : ' (directa con el hospital)');
   }
   if (c.vinculo === 'Convenio') {
-    return 'movilidad saliente nacional por convenio con ' + (limpiarNombreCentroJS(c.intermediaria) || '?');
+    return 'movilidad saliente nacional por convenio con ' + (limpiarNombreCentroJS(c.intermediaria) || 'institución por definir');
   }
   return 'rotación dentro de la red CES, no es movilidad';
 }
@@ -5952,14 +5958,20 @@ function centrosOrdenados() {
   return cacheCentros.slice().sort((a, b) => String(a.sigla).localeCompare(String(b.sigla), 'es'));
 }
 
+function centroIncompleto(c) {
+  return (c.ambito === 'Internacional' && !c.pais) || (c.vinculo === 'Convenio' && !c.intermediaria);
+}
+
 function etiquetasCentro(c) {
   if (!c.clasificado) return '<span class="et-cen pend">sin clasificar</span>';
   let h = c.ambito === 'Internacional'
     ? `<span class="et-cen intl">Internacional${c.pais ? ' · ' + esc(c.pais) : ''}</span>`
     : '<span class="et-cen nac">Nacional</span>';
   h += c.vinculo === 'Red CES' ? '<span class="et-cen red">Red CES</span>'
-    : (c.vinculo === 'Convenio' ? `<span class="et-cen conv">Convenio · ${esc(c.intermediaria || '?')}</span>`
+    : (c.vinculo === 'Convenio' ? `<span class="et-cen conv">Convenio${c.intermediaria ? ' · ' + esc(c.intermediaria) : ''}</span>`
                                 : '<span class="et-cen gris">Directa con el hospital</span>');
+  if (c.ambito === 'Internacional' && !c.pais) h += '<span class="et-cen falta">falta país</span>';
+  if (c.vinculo === 'Convenio' && !c.intermediaria) h += '<span class="et-cen falta">falta institución</span>';
   return h;
 }
 
@@ -5975,8 +5987,8 @@ async function guardarEditorCentro(id) {
   const c = centroEnEdicion;
   const err = t => { document.getElementById('ec-msg').innerHTML = `<p style="color:#9C0006; font-size:12px; margin:10px 0 0;">${esc(t)}</p>`; };
   if (!limpiarNombreCentroJS(c.sigla) || !limpiarNombreCentroJS(c.nombre)) { err('La sigla y el nombre oficial son obligatorios.'); return; }
-  if (c.ambito === 'Internacional' && !limpiarNombreCentroJS(c.pais)) { err('Un centro internacional necesita el país.'); return; }
-  if (c.vinculo === 'Convenio' && !limpiarNombreCentroJS(c.intermediaria)) { err('Si se llega por convenio, hay que decir por medio de qué institución.'); return; }
+  // El país y la institución intermediaria pueden quedar pendientes: el centro se guarda igual y
+  // queda marcado como incompleto, para no dejar rotaciones sin asignar mientras llega el dato.
 
   const res = await llamarBackend('guardarCentro', {
     id: id || '', sigla: c.sigla, nombre: c.nombre, alias: c.alias,
@@ -6046,9 +6058,13 @@ function pintarCatalogoCentros() {
   }
 
   const sinClasificar = lista.filter(c => !c.clasificado).length;
-  const aviso = sinClasificar
+  const incompletos = lista.filter(c => c.clasificado && centroIncompleto(c)).length;
+  const partes = [];
+  if (sinClasificar) partes.push(`${sinClasificar} ${sinClasificar === 1 ? 'centro está' : 'centros están'} sin clasificar (mientras tanto se asumen nacionales de la red CES)`);
+  if (incompletos) partes.push(`${incompletos} ${incompletos === 1 ? 'tiene' : 'tienen'} datos pendientes, como el país o la institución por la que se llega`);
+  const aviso = partes.length
     ? `<p style="background:#FFF6E8; color:var(--pendiente-tx); padding:9px 12px; border-radius:7px; font-size:12.5px; margin-bottom:12px;">
-        ${sinClasificar} ${sinClasificar === 1 ? 'centro está' : 'centros están'} sin clasificar: mientras tanto el sistema los asume nacionales de la red CES. Ábrelos y confirma el vínculo.</p>`
+        ${partes.join('. ')}. Puedes completarlos cuando tengas el dato; nada queda bloqueado.</p>`
     : '';
 
   caja.innerHTML = aviso + `<table class="lista">
