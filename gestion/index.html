@@ -370,6 +370,9 @@
   .uni-var:first-child { border-top:none; }
   .uni-n { color:#6b7684; font-size:12px; }
   .uni-var select { margin-left:auto; padding:5px 8px; border:1px solid #ccc; border-radius:5px; font-size:12.5px; max-width:280px; }
+  .uni-asig { margin-left:auto; padding:6px 9px; border:1px solid #ccc; border-radius:5px; font-size:12.5px; width:330px; max-width:100%; font-family:inherit; }
+  .uni-asig.puesto { border-color:#7fb98a; background:#f4fbf5; }
+  .uni-limpiar { border:none; background:none; color:#9C0006; cursor:pointer; font-size:12px; padding:2px 4px; }
   .uni-marca { font-size:11px; font-weight:700; padding:2px 7px; border-radius:8px; }
   .uni-marca.ok { background:var(--gestionado-bg); color:var(--gestionado-tx); }
   .uni-marca.rev { background:var(--pendiente-bg); color:var(--pendiente-tx); }
@@ -6082,11 +6085,38 @@ async function cargarUnificacion(forzar) {
   pintarUnificacionCampos();
 }
 
-function asignarVariante(clave, destino) {
+let mapaDestinosUni = {};
+let textoDestinoUni = {};
+
+function marcaClaseUni(v) { return !v.sugerido ? 'rev' : (v.sugerido.indexOf('NOC-') === 0 ? 'no' : 'ok'); }
+function marcaTextoUni(v) { return !v.sugerido ? 'decidir' : (v.sugerido.indexOf('NOC-') === 0 ? 'no es centro' : 'ok'); }
+
+// Se asigna escribiendo. La fila NO se reagrupa al momento: con cientos de variantes, moverlas
+// mientras se escribe haría perder el hilo. El reagrupado ocurre al volver a analizar.
+function asignarPorTexto(clave, texto) {
   const v = variantesCampos.find(x => x.clave === clave);
   if (!v) return;
-  v.sugerido = destino || null;
-  pintarUnificacionCampos();
+  v.sugerido = mapaDestinosUni[claveCentroJS(texto)] || null;
+  const marca = document.getElementById('um-' + clave);
+  const input = document.getElementById('ua-' + clave);
+  if (marca) { marca.className = 'uni-marca ' + marcaClaseUni(v); marca.textContent = marcaTextoUni(v); }
+  if (input) input.classList.toggle('puesto', !!v.sugerido);
+  actualizarContadoresUni();
+}
+
+function limpiarAsignacion(clave) {
+  const input = document.getElementById('ua-' + clave);
+  if (input) input.value = '';
+  asignarPorTexto(clave, '');
+}
+
+function actualizarContadoresUni() {
+  const sinAsignar = variantesCampos.filter(v => !v.sugerido).length;
+  const centrosReales = new Set(variantesCampos.filter(v => v.sugerido && v.sugerido.indexOf('CEN-') === 0).map(v => v.sugerido)).size;
+  document.getElementById('uni-k-variantes').textContent = variantesCampos.length;
+  document.getElementById('uni-k-centros').textContent = centrosReales;
+  document.getElementById('uni-k-registros').textContent = variantesCampos.reduce((a, v) => a + v.n, 0);
+  document.getElementById('uni-k-pend').textContent = sinAsignar;
 }
 
 function pintarUnificacionCampos() {
@@ -6100,18 +6130,34 @@ function pintarUnificacionCampos() {
     (porDestino[v.sugerido] = porDestino[v.sugerido] || []).push(v);
   });
 
-  const opciones = sel => '<option value="">— sin asignar —</option>'
-    + '<optgroup label="Centros de práctica">'
-    + cacheCentros.map(c => `<option value="${c.id}"${sel === c.id ? ' selected' : ''}>${esc(c.sigla)} · ${esc(c.nombre)}</option>`).join('')
-    + '</optgroup><optgroup label="No es un centro">'
-    + cacheNoCentros.map(c => `<option value="${c.id}"${sel === c.id ? ' selected' : ''}>${esc(c.nombre)}</option>`).join('')
-    + '</optgroup>';
+  // Lista única de destinos, en orden alfabético, para buscar escribiendo en cada fila.
+  const destinos = cacheCentros.slice()
+    .sort((a, b) => String(a.sigla).localeCompare(String(b.sigla), 'es'))
+    .map(c => ({ id: c.id, texto: c.sigla + ' · ' + c.nombre }))
+    .concat(cacheNoCentros.map(c => ({ id: c.id, texto: c.nombre })));
 
-  const fila = v => `<div class="uni-var">
+  mapaDestinosUni = {};
+  destinos.forEach(d => { mapaDestinosUni[claveCentroJS(d.texto)] = d.id; });
+  cacheCentros.forEach(c => {
+    [c.sigla, c.nombre].concat(c.alias || []).forEach(t => {
+      const k = claveCentroJS(t);
+      if (k && !mapaDestinosUni[k]) mapaDestinosUni[k] = c.id;
+    });
+  });
+  textoDestinoUni = {};
+  destinos.forEach(d => { textoDestinoUni[d.id] = d.texto; });
+
+  const datalist = `<datalist id="dl-destinos-uni">${destinos.map(d => `<option value="${esc(d.texto)}"></option>`).join('')}</datalist>`;
+
+  const fila = v => `<div class="uni-var" id="uv-${esc(v.clave)}">
       <code class="alias-cod">${esc(v.txt)}</code>
       <span class="uni-n">${v.n} registros</span>
-      <span class="uni-marca ${!v.sugerido ? 'rev' : (v.sugerido.indexOf('NOC-') === 0 ? 'no' : 'ok')}">${!v.sugerido ? 'decidir' : (v.sugerido.indexOf('NOC-') === 0 ? 'no es centro' : 'ok')}</span>
-      <select onchange="asignarVariante('${esc(v.clave)}', this.value)">${opciones(v.sugerido)}</select>
+      <span class="uni-marca ${marcaClaseUni(v)}" id="um-${esc(v.clave)}">${marcaTextoUni(v)}</span>
+      <input class="uni-asig ${v.sugerido ? 'puesto' : ''}" id="ua-${esc(v.clave)}" list="dl-destinos-uni" autocomplete="off"
+             placeholder="Escribe para buscar el centro..."
+             value="${esc(v.sugerido ? (textoDestinoUni[v.sugerido] || '') : '')}"
+             oninput="asignarPorTexto('${esc(v.clave)}', this.value)">
+      <button class="uni-limpiar" onclick="limpiarAsignacion('${esc(v.clave)}')" title="Dejar sin asignar">✕</button>
     </div>`;
 
   let html = '';
@@ -6130,28 +6176,32 @@ function pintarUnificacionCampos() {
       <div class="uni-cuerpo-grupo">${vs.map(fila).join('')}</div></div>`;
   });
 
-  caja.innerHTML = html || '<p style="color:#888; padding:12px; font-size:13px;">No se encontraron campos de rotación para revisar.</p>';
+  caja.innerHTML = html ? (datalist + html) : '<p style="color:#888; padding:12px; font-size:13px;">No se encontraron campos de rotación para revisar.</p>';
 
-  const centrosReales = new Set(variantesCampos.filter(v => v.sugerido && v.sugerido.indexOf('CEN-') === 0).map(v => v.sugerido)).size;
-  document.getElementById('uni-k-variantes').textContent = variantesCampos.length;
-  document.getElementById('uni-k-centros').textContent = centrosReales;
-  document.getElementById('uni-k-registros').textContent = variantesCampos.reduce((a, v) => a + v.n, 0);
-  document.getElementById('uni-k-pend').textContent = sinAsignar.length;
+  actualizarContadoresUni();
 }
 
 async function aplicarUnificacionCampos() {
+  const asignadas = variantesCampos.filter(v => v.sugerido);
   const pendientes = variantesCampos.filter(v => !v.sugerido);
   const aviso = document.getElementById('uni-resultado');
-  if (pendientes.length) {
+
+  if (asignadas.length === 0) {
     aviso.innerHTML = `<p style="background:var(--pendiente-bg); color:var(--pendiente-tx); padding:10px 12px; border-radius:7px; font-size:13px;">
-      Quedan ${pendientes.length} formas sin asignar. Asígnalas todas antes de aplicar: si se reescribe a medias, los indicadores siguen partidos.</p>`;
+      Todavía no has asignado ninguna forma.</p>`;
     return;
   }
-  if (!confirm('Se van a reescribir ' + variantesCampos.reduce((a, v) => a + v.n, 0) + ' registros en Histórico y Gestión Operativa.\n\nAntes se guarda una copia de respaldo de ambas hojas. ¿Continuar?')) return;
+
+  // Se puede aplicar por tandas: se reescribe solo lo asignado y lo demás queda intacto, para
+  // no perder el avance cuando son muchas variantes.
+  const mensaje = 'Se van a reescribir las celdas de las ' + asignadas.length + ' formas ya asignadas.\n\n'
+    + (pendientes.length ? 'Las ' + pendientes.length + ' formas sin asignar quedan intactas y volverán a aparecer la próxima vez.\n\n' : '')
+    + 'Antes se guarda una copia de respaldo de las dos hojas. ¿Continuar?';
+  if (!confirm(mensaje)) return;
 
   aviso.innerHTML = '<p style="color:#888; font-size:13px;">⏳ Respaldando y reescribiendo. Esto puede tardar un minuto — no cierres la pestaña.</p>';
   const mapa = {}, textos = {};
-  variantesCampos.forEach(v => { mapa[v.clave] = v.sugerido; textos[v.clave] = v.txt; });
+  asignadas.forEach(v => { mapa[v.clave] = v.sugerido; textos[v.clave] = v.txt; });
 
   const res = await llamarBackend('aplicarUnificacionCentros', { mapa, textos });
   if (!res.ok) {
@@ -6160,7 +6210,7 @@ async function aplicarUnificacionCampos() {
   }
   cacheCentros = res.centros || cacheCentros;
   aviso.innerHTML = `<p style="background:var(--gestionado-bg); color:var(--gestionado-tx); padding:10px 12px; border-radius:7px; font-size:13px;">
-    Listo. Se reescribieron ${res.reescritas} celdas${res.omitidas ? ' (' + res.omitidas + ' quedaron sin tocar)' : ''}.
+    Listo. Se reescribieron ${res.reescritas} celdas${res.omitidas ? ' (' + res.omitidas + ' quedaron intactas por tener formas sin asignar)' : ''}.
     Respaldos creados: ${esc((res.respaldos || []).join(', '))}. Vuelve a cargar el cuadro para ver los indicadores unificados.</p>`;
   unificacionCargada = false;
   await cargarUnificacion(true);
