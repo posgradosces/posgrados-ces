@@ -317,6 +317,53 @@
   #mensaje-flotante { position: fixed; bottom: 20px; right: 20px; padding: 12px 18px; border-radius: 8px; background: #333; color: white; font-size: 14px; display: none; max-width: 320px; z-index: 200; }
   #mensaje-flotante.ok { background: var(--gestionado-tx); }
   #mensaje-flotante.error { background: var(--cambio-tx); }
+
+  /* ---- Selector de centros de práctica (reemplaza el texto libre del campo de rotación) ---- */
+  .sel-cen { border:1px solid #c9dcee; background:#f7fafd; border-radius:7px; padding:8px; }
+  .sel-cen-chips { display:flex; gap:6px; flex-wrap:wrap; align-items:center; min-height:30px; }
+  .sel-cen-vacio { color:#9aa5b1; font-size:12px; }
+  .sel-chip { display:inline-flex; align-items:center; gap:6px; background:var(--azul-ces); color:white; border-radius:14px; padding:3px 6px 3px 10px; font-size:12px; font-weight:600; }
+  .sel-chip.suelto { background:#9aa5b1; }
+  .sel-chip .x { cursor:pointer; background:rgba(255,255,255,.25); border-radius:50%; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; font-size:10px; }
+  .sel-cen-buscar { width:100%; padding:7px 8px; border:1px solid #ccc; border-radius:5px; font-size:13px; margin-top:8px; }
+  .sel-cen-lista { border:1px solid #e0e4e8; background:white; border-radius:5px; max-height:170px; overflow-y:auto; margin-top:6px; }
+  .sel-cen-it { display:flex; align-items:center; gap:8px; padding:6px 9px; border-bottom:1px solid #f1f3f5; cursor:pointer; font-size:12.5px; }
+  .sel-cen-it:last-child { border-bottom:none; }
+  .sel-cen-it:hover { background:#f2f7fc; }
+  .sel-cen-it.marcado { background:#eaf3fb; }
+  .sel-cen-it .sg { font-weight:700; color:var(--azul-ces); min-width:80px; }
+  .sel-cen-it .nm { color:#55606b; }
+  .sel-cen-nada { padding:10px; font-size:12.5px; color:#6b7684; }
+  .sel-cen-pie { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px; }
+  .sel-cen-ayuda { font-size:11.5px; color:#6b7684; }
+  .alias-cod { background:#f1f3f6; padding:1px 6px; border-radius:3px; margin:0 4px 3px 0; display:inline-block; font-size:11.5px; color:#55606b; }
+
+  /* ---- Catálogo y asistente de unificación ---- */
+  #overlay-cen { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); align-items:flex-start; justify-content:center; padding:40px 16px; overflow-y:auto; z-index:130; }
+  #caja-cen { background:white; border-radius:12px; width:100%; max-width:470px; padding:22px; box-shadow:0 12px 40px rgba(0,0,0,.25); }
+  .lbl-cen { font-size:12px; color:#555; display:block; margin:12px 0 4px; font-weight:600; }
+  .in-cen { width:100%; padding:8px; border:1px solid #ccc; border-radius:5px; font-size:13px; font-family:inherit; }
+  .cen-subtabs { display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 16px; }
+  .uni-kpis { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+  .uni-kpi { flex:1; min-width:140px; border:1px solid #e3e8ee; border-radius:10px; padding:12px 14px; background:#fafbfc; }
+  .uni-kpi .n { font-size:25px; font-weight:700; color:var(--azul-ces); line-height:1.1; }
+  .uni-kpi .t { font-size:12px; color:#6b7684; margin-top:3px; }
+  .uni-grupo { border:1px solid #e3e8ee; border-radius:10px; margin-bottom:12px; overflow:hidden; }
+  .uni-grupo.revisar { border-color:#e8c89a; }
+  .uni-cab { display:flex; align-items:center; gap:10px; padding:10px 14px; background:#f7f9fb; flex-wrap:wrap; }
+  .uni-grupo.revisar .uni-cab { background:#FFF6E8; }
+  .uni-sigla { font-weight:700; color:var(--azul-ces); font-size:14px; }
+  .uni-nombre { color:#55606b; font-size:12.5px; }
+  .uni-cuenta { margin-left:auto; font-size:12px; color:#6b7684; }
+  .uni-cuerpo-grupo { padding:4px 14px 10px; }
+  .uni-var { display:flex; align-items:center; gap:10px; padding:6px 0; border-top:1px dashed #eceff2; font-size:13px; flex-wrap:wrap; }
+  .uni-var:first-child { border-top:none; }
+  .uni-n { color:#6b7684; font-size:12px; }
+  .uni-var select { margin-left:auto; padding:5px 8px; border:1px solid #ccc; border-radius:5px; font-size:12.5px; max-width:280px; }
+  .uni-marca { font-size:11px; font-weight:700; padding:2px 7px; border-radius:8px; }
+  .uni-marca.ok { background:var(--gestionado-bg); color:var(--gestionado-tx); }
+  .uni-marca.rev { background:var(--pendiente-bg); color:var(--pendiente-tx); }
+  .uni-marca.no { background:#ececec; color:#666; }
 </style>
 </head>
 <body>
@@ -655,6 +702,13 @@
 
     <!-- Centros de práctica — recordatorios automáticos. Coordinadoras editan; auxiliares consultan. -->
     <div class="panel" id="panel-centros" style="display:none;">
+      <div class="cen-subtabs">
+        <button class="btn-primario btn-pequeno" id="cen-st-rec" onclick="cambiarSubCentros('rec')">Recordatorios</button>
+        <button class="btn-secundario btn-pequeno" id="cen-st-cat" onclick="cambiarSubCentros('cat')">Catálogo de centros</button>
+        <button class="btn-secundario btn-pequeno" id="cen-st-uni" onclick="cambiarSubCentros('uni')" style="display:none;">Unificar lo que ya existe</button>
+      </div>
+
+      <div id="cen-sub-rec">
       <h2>Recordatorios de centros de práctica <button class="btn-secundario btn-pequeno" onclick="cargarRecordatorios(true)" style="float:right;">🔄 Actualizar</button>
         <button class="btn-primario btn-pequeno" id="cen-btn-nuevo" onclick="abrirEditorRecordatorio(null)" style="float:right; margin-right:8px; display:none;">+ Nuevo recordatorio</button></h2>
       <p style="font-size:12px; color:#888; margin-top:-8px;">Requisitos de documentación de cada centro. El sistema envía el correo automáticamente a los residentes que van a rotar allí, según el mes de su rotación.</p>
@@ -665,6 +719,38 @@
       </div>
       <div class="res-resumen" id="cen-resumen"></div>
       <div id="cen-lista"></div>
+      </div>
+
+      <!-- Catálogo de centros: fuente única de los nombres que se pueden usar en el cuadro. -->
+      <div id="cen-sub-cat" style="display:none;">
+        <h2>Catálogo de centros de práctica
+          <button class="btn-primario btn-pequeno" id="cat-btn-nuevo" onclick="abrirEditorCentro(null)" style="float:right; display:none;">+ Nuevo centro</button>
+          <button class="btn-secundario btn-pequeno" onclick="cargarCentros(true).then(pintarCatalogoCentros)" style="float:right; margin-right:8px;">🔄 Actualizar</button></h2>
+        <p style="font-size:12px; color:#888; margin-top:-8px;">Lista oficial de nombres. En el cuadro de rotaciones solo se pueden elegir centros de aquí, y todo se guarda sin tildes, sin ñ y sin guiones. Los alias son las formas antiguas: si una carga vieja las trae, el sistema las reconoce en vez de abrir un campo nuevo.</p>
+        <div class="res-barra">
+          <div><label>Buscar</label><input id="cat-q" autocomplete="off" placeholder="Sigla, nombre o forma antigua" oninput="pintarCatalogoCentros()" style="min-width:240px;"></div>
+        </div>
+        <div id="cat-lista"></div>
+      </div>
+
+      <!-- Asistente de unificación: se corre una sola vez sobre el histórico. -->
+      <div id="cen-sub-uni" style="display:none;">
+        <h2>Unificar los campos que ya existen
+          <button class="btn-secundario btn-pequeno" onclick="cargarUnificacion(true)" style="float:right;">🔄 Volver a analizar</button></h2>
+        <p style="font-size:12px; color:#888; margin-top:-8px;">El sistema revisa Histórico y Gestión Operativa y agrupa por semejanza todas las formas en que está escrito cada centro. Revisa la asignación de cada una y aplica. Se hace una sola vez; después, el catálogo impide que vuelvan a aparecer variantes.</p>
+        <div class="uni-kpis">
+          <div class="uni-kpi"><div class="n" id="uni-k-variantes">—</div><div class="t">formas distintas encontradas</div></div>
+          <div class="uni-kpi"><div class="n" id="uni-k-centros">—</div><div class="t">centros reales tras unificar</div></div>
+          <div class="uni-kpi"><div class="n" id="uni-k-registros">—</div><div class="t">registros que se reescriben</div></div>
+          <div class="uni-kpi"><div class="n" id="uni-k-pend">—</div><div class="t">sin asignar</div></div>
+        </div>
+        <div id="uni-cuerpo"></div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:16px; padding-top:14px; border-top:1px solid #eee;">
+          <button class="btn-primario" onclick="aplicarUnificacionCampos()">Aplicar unificación</button>
+          <span style="font-size:12px; color:#6b7684;">Antes de escribir se guarda una copia de respaldo de las dos hojas.</span>
+        </div>
+        <div id="uni-resultado" style="margin-top:14px;"></div>
+      </div>
     </div>
 
     <!-- Movilidad — solo coordinadora. -->
@@ -691,6 +777,8 @@
 </div>
 
 <div id="overlay-rec"><div id="caja-rec" role="dialog" aria-modal="true"></div></div>
+
+<div id="overlay-cen" onclick="if (event.target.id === 'overlay-cen') cerrarEditorCentro();"><div id="caja-cen" role="dialog" aria-modal="true"></div></div>
 
 <div id="overlay-ficha-res" onclick="if (event.target.id === 'overlay-ficha-res') cerrarFichaResidente();"><div id="caja-ficha-res" role="dialog" aria-modal="true"></div></div>
 
@@ -926,6 +1014,9 @@ function entrarAlApp() {
     document.getElementById('tab-btn-residentes').style.display = 'inline-block';
     document.getElementById('tab-btn-centros').style.display = 'inline-block';
     document.getElementById('boton-publicar-github').style.display = 'inline-block';
+    document.getElementById('cat-btn-nuevo').style.display = 'inline-block';
+    document.getElementById('cen-st-uni').style.display = 'inline-block';
+    cargarCentros();
     cargarProgramasConocidos();
     cargarMesesFiltro();
     mostrarBannerRespaldoSiAplica();
@@ -943,6 +1034,7 @@ function entrarAlApp() {
     document.getElementById('tab-btn-gestion').style.display = 'inline-block';
     document.getElementById('tab-btn-dashboard').style.display = 'inline-block';
     document.getElementById('tab-btn-historico').style.display = 'inline-block';
+    cargarCentros();
     cargarProgramasConocidos();
     cargarMesesFiltro();
     cargarCola();
@@ -1292,7 +1384,7 @@ function cambiarTab(tab) {
     pintarResidentes();
   } else if (tab === 'centros') {
     panelCen.style.display = 'block'; btnCen.className = 'btn-primario btn-pequeno';
-    cargarRecordatorios();
+    cambiarSubCentros(subCentrosActual);
   }
 }
 
@@ -1778,7 +1870,9 @@ function periodoMasReciente() {
 
 // Un CampoRotacion como "C. CES - HPTU - SOMER" representa 3 campos distintos, no uno solo — se separa siempre así.
 function separarCampos(campoStr) {
-  return String(campoStr || '').split('-').map(s => s.trim()).filter(Boolean);
+  // El separador oficial es ' + '. El guion se sigue aceptando porque el histórico anterior
+  // a la unificación todavía lo trae.
+  return String(campoStr || '').split(/[+\u2010-\u2015\-]/).map(s => s.trim()).filter(Boolean);
 }
 
 // Semestre que está corriendo hoy (julio a diciembre = AAAA-2; enero a junio = AAAA-1).
@@ -4015,8 +4109,8 @@ function abrirCeldaVacia(residenteId, mes, anioInicioBloque) {
       <option${tipoDefault === 'Movilidad entrante' ? ' selected' : ''}>Movilidad entrante</option>
       <option${tipoDefault === 'Vacaciones' ? ' selected' : ''}>Vacaciones</option>
     </select>
-    <label>Campo de rotación</label><input id="modal-campo" value="${esVacaciones ? 'VACACIONES' : ''}">
-    <label>Nombre de la rotación</label><input id="modal-rotacion" value="${esVacaciones ? mes : ''}">
+    ${selectorCentrosHtml('modal-campo', esVacaciones ? 'VACACIONES' : '')}
+    <label>Nombre de la rotación</label><input id="modal-rotacion" oninput="limpiarEnVivo(this)" value="${esVacaciones ? mes.toUpperCase() : ''}">
     ${portapapelesCelda ? `<div class="fila-botones"><button class="btn-secundario" onclick="pegarEnFormulario()">📌 Pegar rotación copiada (${portapapelesCelda.campoRotacion})</button></div>` : ''}
     <div class="fila-botones"><button class="btn-primario" onclick="guardarCeldaNueva('${residenteId}','${mes}')">Guardar</button></div>`;
   document.getElementById('contenido-modal').innerHTML = html;
@@ -4056,8 +4150,8 @@ function copiarCelda(campoRotacion, rotacion) {
 
 function pegarEnFormulario() {
   if (!portapapelesCelda) return;
-  document.getElementById('modal-campo').value = portapapelesCelda.campoRotacion;
-  document.getElementById('modal-rotacion').value = portapapelesCelda.rotacion;
+  selCentrosFijarTexto('modal-campo', portapapelesCelda.campoRotacion);
+  document.getElementById('modal-rotacion').value = limpiarDuroJS(portapapelesCelda.rotacion);
 }
 
 function abrirCelda(clave) {
@@ -4115,14 +4209,14 @@ function abrirCeldaExistente(clave) {
       <div class="fila-botones">
         <button class="btn-gestionado" onclick="ejecutarEstado('${clave}','Gestionado')">✅ Confirmar (mismo sitio)</button>
       </div>
-      <label>Nuevo campo de rotación</label><input id="modal-nuevo-campo">
-      <label>Nueva rotación</label><input id="modal-nueva-rotacion">
+      ${selectorCentrosHtml('modal-nuevo-campo', '', 'Nuevo campo de rotación')}
+      <label>Nueva rotación</label><input id="modal-nueva-rotacion" oninput="limpiarEnVivo(this)">
       <div class="fila-botones"><button class="btn-primario" onclick="ejecutarReasignar('${clave}')">🔁 Cambiar a otro sitio</button></div>`;
     html += bloqueObservaciones(registro, clave);
   } else {
     html += `
-      <label>Campo de rotación</label><input id="modal-campo" value="${esc(registro.CampoRotacion || '')}">
-      <label>Nombre de la rotación</label><input id="modal-rotacion" value="${esc(registro.Rotacion || '')}">
+      ${selectorCentrosHtml('modal-campo', registro.CampoRotacion || '')}
+      <label>Nombre de la rotación</label><input id="modal-rotacion" oninput="limpiarEnVivo(this)" value="${esc(registro.Rotacion || '')}">
       <div class="fila-botones">
         <button class="btn-gestionado" onclick="ejecutarEstado('${clave}','Gestionado')">Gestionado</button>
         <button class="btn-negado" onclick="ejecutarEstado('${clave}','Negado')">Negado</button>
@@ -4270,7 +4364,7 @@ async function ejecutarGuardarCambiosCelda(clave) {
   const observacionPublica = document.getElementById('modal-obs-publica').value;
 
   const registro = registrosGridActual.find(r => r.ClaveUnica === clave) || {};
-  const cambioRotacion = campoRotacion !== (registro.CampoRotacion || '') || rotacion !== (registro.Rotacion || '');
+  const cambioRotacion = !mismoCampoRotacion(campoRotacion, registro.CampoRotacion || '') || rotacion !== (registro.Rotacion || '');
   const cambioObs = observacionInterna !== (registro.ObservacionInterna || '') || observacionPublica !== (registro.Observacion || '');
 
   if (!cambioRotacion && !cambioObs) { mostrarMensaje('No hay cambios para guardar.', 'error'); return; }
@@ -4340,8 +4434,8 @@ function abrirReasignarNegado(clave) {
   const html = `
     <h3>🔁 Cambiar a otro sitio</h3>
     <p style="font-size:12px; color:#888;">${registro ? esc(registro.ResidenteNombre) + ' — ' + esc(registro.Mes) : ''}</p>
-    <label>Nuevo campo de rotación</label><input id="modal-nuevo-campo">
-    <label>Nueva rotación</label><input id="modal-nueva-rotacion">
+    ${selectorCentrosHtml('modal-nuevo-campo', '', 'Nuevo campo de rotación')}
+    <label>Nueva rotación</label><input id="modal-nueva-rotacion" oninput="limpiarEnVivo(this)">
     <div class="fila-botones">
       <button class="btn-secundario" onclick="cerrarModal()">Cancelar</button>
       <button class="btn-primario" onclick="ejecutarReasignar('${clave}')">Confirmar reasignación</button>
@@ -5520,6 +5614,443 @@ async function enviarRecordatorioAhora(id, cantidad) {
   mostrarMensaje('Recordatorio: ' + partes.join(', '), res.errores ? 'error' : 'ok');
   await cargarRecordatorios(true);
   verDestinatariosRecordatorio(id);
+}
+
+
+// ============================================================
+// CATALOGO DE CENTROS DE PRACTICA (frontend)
+// ------------------------------------------------------------
+// El campo de rotacion dejo de escribirse a mano. Aqui viven: el catalogo en memoria, el
+// selector de centros que reemplaza los cuadros de texto, la pantalla de catalogo y el
+// asistente que unifica lo que ya quedo escrito de varias formas en el historico.
+// ============================================================
+
+let cacheCentros = [];
+let cacheNoCentros = [];
+let centrosCargados = false;
+
+// Regla de escritura: sin tildes, sin enie, sin espacios repetidos, en mayuscula.
+function limpiarDuroJS(valor) {
+  return String(valor === null || valor === undefined ? '' : valor)
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\u00f1/g, 'n').replace(/\u00d1/g, 'N')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toUpperCase();
+}
+
+// Para nombres de centro va un paso mas: el guion se vuelve espacio, porque el guion era el
+// separador viejo entre centros y confundia el conteo.
+function limpiarNombreCentroJS(valor) {
+  return limpiarDuroJS(String(valor === null || valor === undefined ? '' : valor).replace(/[\u2010-\u2015\-]+/g, ' '));
+}
+
+function claveCentroJS(valor) {
+  return limpiarNombreCentroJS(valor).replace(/[^A-Z0-9]/g, '');
+}
+
+// Limpia un campo de texto mientras se escribe, sin que se mueva el cursor de lugar cuando el
+// texto no cambio de longitud (al escribir una tilde, el cursor queda al final, que es lo natural).
+function limpiarEnVivo(el) {
+  const antes = el.value;
+  const despues = limpiarDuroJS(antes);
+  if (antes === despues) return;
+  el.value = despues;
+  try { el.setSelectionRange(despues.length, despues.length); } catch (e) { /* campos sin seleccion */ }
+}
+
+async function cargarCentros(forzar) {
+  if (centrosCargados && !forzar) return true;
+  const res = await leerBackend('listarCentros');
+  if (!res.ok) return false;
+  cacheCentros = res.centros || [];
+  cacheNoCentros = res.noCentros || [];
+  centrosCargados = true;
+  return true;
+}
+
+function centroPorIdCat(id) {
+  return cacheCentros.find(c => c.id === id) || cacheNoCentros.find(c => c.id === id) || null;
+}
+
+function siglaCentroCat(id) {
+  const c = centroPorIdCat(id);
+  return c ? c.sigla : '';
+}
+
+function indiceCentrosJS() {
+  const indice = {};
+  cacheNoCentros.forEach(c => {
+    [c.sigla, c.nombre].forEach(t => {
+      const k = claveCentroJS(t);
+      if (k) indice[k] = c.id;
+    });
+  });
+  cacheCentros.forEach(c => {
+    [c.sigla, c.nombre].concat(c.alias || []).forEach(t => {
+      const k = claveCentroJS(t);
+      if (k) indice[k] = c.id;
+    });
+  });
+  return indice;
+}
+
+// Convierte el texto guardado en la celda a identificadores del catalogo. Lo que no reconoce
+// NO se descarta: vuelve como "suelto", para que editar un registro viejo (anterior a la
+// unificacion) no borre lo que decia.
+function idsDesdeTextoCampo(texto) {
+  const indice = indiceCentrosJS();
+  const ids = [];
+  const sueltos = [];
+  separarCampos(texto).forEach(t => {
+    const id = indice[claveCentroJS(t)];
+    if (id) { if (ids.indexOf(id) === -1) ids.push(id); }
+    else { const limpio = limpiarNombreCentroJS(t); if (limpio && sueltos.indexOf(limpio) === -1) sueltos.push(limpio); }
+  });
+  return { ids, sueltos };
+}
+
+// Dos textos de campo son "el mismo sitio" si traen los mismos centros, sin importar como
+// esten escritos ni en que orden. Evita falsos avisos de cambio en registros todavia sin unificar.
+function mismoCampoRotacion(a, b) {
+  const norm = t => separarCampos(t).map(claveCentroJS).filter(Boolean).sort().join('|');
+  return norm(a) === norm(b);
+}
+
+function textoDesdeSeleccion(estado) {
+  return estado.ids.map(siglaCentroCat).filter(Boolean).concat(estado.sueltos).join(' + ');
+}
+
+// ------------------------------------------------------------
+// Selector de centros (reemplaza el cuadro de texto del campo de rotacion)
+// ------------------------------------------------------------
+// Escribe su resultado en un input oculto con el mismo id que tenia el cuadro de texto
+// anterior, para que todo lo que ya leia ese id siga funcionando igual.
+const selCentrosEstado = {};
+
+function selectorCentrosHtml(idBase, valorInicial, etiqueta) {
+  const inicial = idsDesdeTextoCampo(valorInicial || '');
+  selCentrosEstado[idBase] = { ids: inicial.ids, sueltos: inicial.sueltos, filtro: '' };
+  setTimeout(() => selCentrosPintar(idBase), 0);
+  // Si el catálogo aún no terminó de cargar, se carga y se vuelve a interpretar el texto.
+  if (!centrosCargados) cargarCentros().then(() => selCentrosFijarTexto(idBase, valorInicial || ''));
+  return `
+    <label>${esc(etiqueta || 'Campo de rotación')}</label>
+    <input type="hidden" id="${idBase}" value="${esc(valorInicial || '')}">
+    <div class="sel-cen" id="${idBase}-caja">
+      <div class="sel-cen-chips" id="${idBase}-chips"></div>
+      <input type="text" class="sel-cen-buscar" id="${idBase}-q" autocomplete="off"
+             placeholder="Buscar centro (sigla, nombre o forma antigua)..."
+             oninput="selCentrosFiltrar('${idBase}', this.value)">
+      <div class="sel-cen-lista" id="${idBase}-lista"></div>
+      <div class="sel-cen-pie" id="${idBase}-pie"></div>
+    </div>`;
+}
+
+function selCentrosPintar(idBase) {
+  const estado = selCentrosEstado[idBase];
+  const cajaChips = document.getElementById(idBase + '-chips');
+  const cajaLista = document.getElementById(idBase + '-lista');
+  const cajaPie = document.getElementById(idBase + '-pie');
+  const oculto = document.getElementById(idBase);
+  if (!estado || !cajaChips || !cajaLista || !oculto) return;
+
+  const chips = estado.ids.map(id =>
+    `<span class="sel-chip">${esc(siglaCentroCat(id))}<span class="x" onclick="selCentrosQuitar('${idBase}','${id}')" title="Quitar">✕</span></span>`
+  ).concat(estado.sueltos.map((t, i) =>
+    `<span class="sel-chip suelto" title="Nombre viejo, todavía sin unificar">${esc(t)}<span class="x" onclick="selCentrosQuitarSuelto('${idBase}',${i})" title="Quitar">✕</span></span>`
+  )).join('');
+
+  cajaChips.innerHTML = chips || '<span class="sel-cen-vacio">Ningún centro seleccionado</span>';
+
+  const q = claveCentroJS(estado.filtro);
+  const lista = cacheCentros.filter(c => c.activo !== false)
+    .filter(c => !q || claveCentroJS(c.sigla + ' ' + c.nombre + ' ' + (c.alias || []).join(' ')).includes(q))
+    .concat(cacheNoCentros.filter(c => c.sigla && (!q || claveCentroJS(c.sigla + ' ' + c.nombre).includes(q))));
+
+  cajaLista.innerHTML = lista.length
+    ? lista.map(c => `
+      <div class="sel-cen-it ${estado.ids.indexOf(c.id) >= 0 ? 'marcado' : ''}" onclick="selCentrosAlternar('${idBase}','${c.id}')">
+        <span class="tic">${estado.ids.indexOf(c.id) >= 0 ? '☑' : '☐'}</span>
+        <span class="sg">${esc(c.sigla)}</span><span class="nm">${esc(c.nombre)}</span>
+      </div>`).join('')
+    : '<div class="sel-cen-nada">Ningún centro del catálogo coincide con la búsqueda.</div>';
+
+  if (cajaPie) {
+    cajaPie.innerHTML = usuarioActual.rol === 'coordinadora'
+      ? `<button class="btn-crear btn-pequeno" onclick="abrirEditorCentro(null, '${idBase}')">+ Crear centro nuevo</button>
+         <span class="sel-cen-ayuda">Se guardará como: <b>${esc(textoDesdeSeleccion(estado) || '—')}</b></span>`
+      : `<span class="sel-cen-ayuda">¿Falta el centro? Pídeselo a una coordinadora. Se guardará como: <b>${esc(textoDesdeSeleccion(estado) || '—')}</b></span>`;
+  }
+
+  oculto.value = textoDesdeSeleccion(estado);
+}
+
+function selCentrosAlternar(idBase, id) {
+  const estado = selCentrosEstado[idBase];
+  if (!estado) return;
+  const p = estado.ids.indexOf(id);
+  if (p >= 0) estado.ids.splice(p, 1); else estado.ids.push(id);
+  selCentrosPintar(idBase);
+}
+
+function selCentrosQuitar(idBase, id) {
+  const estado = selCentrosEstado[idBase];
+  if (!estado) return;
+  estado.ids = estado.ids.filter(x => x !== id);
+  selCentrosPintar(idBase);
+}
+
+function selCentrosQuitarSuelto(idBase, i) {
+  const estado = selCentrosEstado[idBase];
+  if (!estado) return;
+  estado.sueltos.splice(i, 1);
+  selCentrosPintar(idBase);
+}
+
+function selCentrosFiltrar(idBase, valor) {
+  const estado = selCentrosEstado[idBase];
+  if (!estado) return;
+  estado.filtro = valor;
+  selCentrosPintar(idBase);
+}
+
+// Vuelve a cargar el selector con un texto dado (lo usa "pegar rotación copiada").
+function selCentrosFijarTexto(idBase, texto) {
+  const estado = selCentrosEstado[idBase];
+  if (!estado) return;
+  const nuevo = idsDesdeTextoCampo(texto || '');
+  estado.ids = nuevo.ids; estado.sueltos = nuevo.sueltos;
+  selCentrosPintar(idBase);
+}
+
+// ------------------------------------------------------------
+// Editor de un centro (ventana propia, para no cerrar el modal de la celda)
+// ------------------------------------------------------------
+let centroEditandoDesde = null;
+
+function abrirEditorCentro(id, idBaseSelector) {
+  centroEditandoDesde = idBaseSelector || null;
+  const c = id ? cacheCentros.find(x => x.id === id) : null;
+  document.getElementById('caja-cen').innerHTML = `
+    <h3 style="margin-top:0; color:var(--azul-ces); font-size:15px;">${c ? 'Editar centro' : 'Crear centro nuevo'}</h3>
+    <p style="font-size:12px; color:#888; margin-top:-6px;">Se guarda sin tildes, sin ñ y sin guiones. Escribe normal; el sistema convierte.</p>
+    <label class="lbl-cen">Sigla como se verá en el cuadro</label>
+    <input type="text" id="ec-sigla" class="in-cen" autocomplete="off" value="${c ? esc(c.sigla) : ''}" placeholder="Ej. HGM" oninput="previaCentro()">
+    <label class="lbl-cen">Nombre oficial</label>
+    <input type="text" id="ec-nombre" class="in-cen" autocomplete="off" value="${c ? esc(c.nombre) : ''}" placeholder="Ej. Hospital General de Medellín" oninput="previaCentro()">
+    <label class="lbl-cen">Formas antiguas con las que aparece en el cuadro (separadas por coma)</label>
+    <input type="text" id="ec-alias" class="in-cen" autocomplete="off" value="${c ? esc((c.alias || []).join(', ')) : ''}" placeholder="HOSPITAL GENERAL, H.G.M." oninput="previaCentro()">
+    <div class="sel-cen-ayuda" id="ec-previa" style="margin-top:10px;"></div>
+    <div id="ec-msg"></div>
+    <div class="fila-botones" style="margin-top:16px;">
+      <button class="btn-primario" onclick="guardarEditorCentro('${c ? c.id : ''}')">${c ? 'Guardar cambios' : 'Crear'}</button>
+      <button class="btn-secundario" onclick="cerrarEditorCentro()">Cancelar</button>
+      ${c ? `<button class="btn-secundario" style="margin-left:auto; color:#9C0006;" onclick="borrarCentroCat('${c.id}')">Eliminar</button>` : ''}
+    </div>`;
+  document.getElementById('overlay-cen').style.display = 'flex';
+  previaCentro();
+}
+
+function cerrarEditorCentro() {
+  document.getElementById('overlay-cen').style.display = 'none';
+  centroEditandoDesde = null;
+}
+
+function previaCentro() {
+  const s = limpiarNombreCentroJS(document.getElementById('ec-sigla').value);
+  const n = limpiarNombreCentroJS(document.getElementById('ec-nombre').value);
+  document.getElementById('ec-previa').innerHTML = `Quedará guardado como <b>${esc(s || '—')}</b> · ${esc(n || '—')}`;
+}
+
+async function guardarEditorCentro(id) {
+  const sigla = document.getElementById('ec-sigla').value;
+  const nombre = document.getElementById('ec-nombre').value;
+  const alias = document.getElementById('ec-alias').value.split(',').map(s => s.trim()).filter(Boolean);
+  if (!limpiarNombreCentroJS(sigla) || !limpiarNombreCentroJS(nombre)) {
+    document.getElementById('ec-msg').innerHTML = '<p style="color:#9C0006; font-size:12px; margin:10px 0 0;">La sigla y el nombre oficial son obligatorios.</p>';
+    return;
+  }
+  const res = await llamarBackend('guardarCentro', { id: id || '', sigla, nombre, alias });
+  if (!res.ok) {
+    document.getElementById('ec-msg').innerHTML = `<p style="color:#9C0006; font-size:12px; margin:10px 0 0;">${esc(res.error)}</p>`;
+    return;
+  }
+  cacheCentros = res.centros || cacheCentros;
+  const desde = centroEditandoDesde;
+  cerrarEditorCentro();
+  mostrarMensaje(id ? 'Centro actualizado.' : 'Centro creado.', 'ok');
+  // Si se creó desde una celda, queda marcado de una vez en el selector que lo pidió.
+  if (desde && !id && selCentrosEstado[desde]) {
+    selCentrosEstado[desde].ids.push(res.id);
+    selCentrosEstado[desde].filtro = '';
+    const q = document.getElementById(desde + '-q');
+    if (q) q.value = '';
+    selCentrosPintar(desde);
+  } else if (desde) {
+    selCentrosPintar(desde);
+  }
+  pintarCatalogoCentros();
+}
+
+async function borrarCentroCat(id) {
+  const c = cacheCentros.find(x => x.id === id);
+  if (!c) return;
+  if (!confirm('¿Eliminar "' + c.sigla + '" del catálogo? Si ya se usó en rotaciones, se desactivará en vez de borrarse.')) return;
+  const res = await llamarBackend('eliminarCentro', { id });
+  if (!res.ok) { mostrarMensaje('Error: ' + res.error, 'error'); return; }
+  cacheCentros = res.centros || cacheCentros;
+  cerrarEditorCentro();
+  mostrarMensaje(res.desactivado ? 'Se desactivó: está usado en ' + res.usos + ' rotaciones.' : 'Centro eliminado.', 'ok');
+  pintarCatalogoCentros();
+}
+
+// ------------------------------------------------------------
+// Pestaña de centros: subpestañas
+// ------------------------------------------------------------
+let subCentrosActual = 'rec';
+
+function cambiarSubCentros(sub) {
+  subCentrosActual = sub;
+  ['rec', 'cat', 'uni'].forEach(k => {
+    const panel = document.getElementById('cen-sub-' + k);
+    const boton = document.getElementById('cen-st-' + k);
+    if (panel) panel.style.display = k === sub ? 'block' : 'none';
+    if (boton) boton.className = k === sub ? 'btn-primario btn-pequeno' : 'btn-secundario btn-pequeno';
+  });
+  if (sub === 'rec') cargarRecordatorios();
+  if (sub === 'cat') cargarCentros().then(pintarCatalogoCentros);
+  if (sub === 'uni') cargarUnificacion();
+}
+
+function pintarCatalogoCentros() {
+  const caja = document.getElementById('cat-lista');
+  if (!caja) return;
+  const esCoord = usuarioActual.rol === 'coordinadora';
+  const q = claveCentroJS(document.getElementById('cat-q') ? document.getElementById('cat-q').value : '');
+  const lista = cacheCentros.filter(c => !q || claveCentroJS(c.sigla + ' ' + c.nombre + ' ' + (c.alias || []).join(' ')).includes(q));
+
+  if (lista.length === 0) {
+    caja.innerHTML = '<p style="color:#888; padding:12px; font-size:13px;">El catálogo está vacío. Crea el primer centro con el botón de arriba.</p>';
+    return;
+  }
+
+  caja.innerHTML = `<table class="lista">
+    <thead><tr><th style="width:140px;">Sigla (cuadro)</th><th>Nombre oficial</th><th>Formas antiguas reconocidas</th>${esCoord ? '<th style="width:90px;"></th>' : ''}</tr></thead>
+    <tbody>${lista.map(c => `
+      <tr${c.activo === false ? ' style="opacity:.55;"' : ''}>
+        <td><strong style="color:var(--azul-ces);">${esc(c.sigla)}</strong>${c.activo === false ? '<br><span style="font-size:11px; color:#888;">inactivo</span>' : ''}</td>
+        <td>${esc(c.nombre)}</td>
+        <td>${(c.alias || []).length ? (c.alias || []).map(a => `<code class="alias-cod">${esc(a)}</code>`).join('') : '<span style="color:#bbb;">—</span>'}</td>
+        ${esCoord ? `<td><button class="btn-secundario btn-pequeno" onclick="abrirEditorCentro('${c.id}')">Editar</button></td>` : ''}
+      </tr>`).join('')}</tbody></table>`;
+}
+
+// ------------------------------------------------------------
+// Asistente de unificación (se corre una sola vez)
+// ------------------------------------------------------------
+let variantesCampos = [];
+let unificacionCargada = false;
+
+async function cargarUnificacion(forzar) {
+  if (unificacionCargada && !forzar) { pintarUnificacionCampos(); return; }
+  const caja = document.getElementById('uni-cuerpo');
+  if (!caja) return;
+  caja.innerHTML = '<p style="color:#888; padding:12px;">⏳ Revisando el histórico y agrupando las formas encontradas...</p>';
+  await cargarCentros(true);
+  const res = await leerBackend('analizarVariantesCampos');
+  if (!res.ok) {
+    caja.innerHTML = `<p style="color:#9C0006; padding:12px;">No se pudo analizar: ${esc(res.error)} <button class="btn-secundario btn-pequeno" onclick="cargarUnificacion(true)">Reintentar</button></p>`;
+    return;
+  }
+  variantesCampos = res.variantes || [];
+  unificacionCargada = true;
+  pintarUnificacionCampos();
+}
+
+function asignarVariante(clave, destino) {
+  const v = variantesCampos.find(x => x.clave === clave);
+  if (!v) return;
+  v.sugerido = destino || null;
+  pintarUnificacionCampos();
+}
+
+function pintarUnificacionCampos() {
+  const caja = document.getElementById('uni-cuerpo');
+  if (!caja) return;
+
+  const porDestino = {};
+  const sinAsignar = [];
+  variantesCampos.forEach(v => {
+    if (!v.sugerido) { sinAsignar.push(v); return; }
+    (porDestino[v.sugerido] = porDestino[v.sugerido] || []).push(v);
+  });
+
+  const opciones = sel => '<option value="">— sin asignar —</option>'
+    + '<optgroup label="Centros de práctica">'
+    + cacheCentros.map(c => `<option value="${c.id}"${sel === c.id ? ' selected' : ''}>${esc(c.sigla)} · ${esc(c.nombre)}</option>`).join('')
+    + '</optgroup><optgroup label="No es un centro">'
+    + cacheNoCentros.map(c => `<option value="${c.id}"${sel === c.id ? ' selected' : ''}>${esc(c.nombre)}</option>`).join('')
+    + '</optgroup>';
+
+  const fila = v => `<div class="uni-var">
+      <code class="alias-cod">${esc(v.txt)}</code>
+      <span class="uni-n">${v.n} registros</span>
+      <span class="uni-marca ${!v.sugerido ? 'rev' : (v.sugerido.indexOf('NOC-') === 0 ? 'no' : 'ok')}">${!v.sugerido ? 'decidir' : (v.sugerido.indexOf('NOC-') === 0 ? 'no es centro' : 'ok')}</span>
+      <select onchange="asignarVariante('${esc(v.clave)}', this.value)">${opciones(v.sugerido)}</select>
+    </div>`;
+
+  let html = '';
+  if (sinAsignar.length) {
+    html += `<div class="uni-grupo revisar">
+      <div class="uni-cab"><span class="uni-sigla">Requieren tu decisión</span>
+        <span class="uni-nombre">el sistema no las agrupa solo</span>
+        <span class="uni-cuenta">${sinAsignar.length} formas · ${sinAsignar.reduce((a, v) => a + v.n, 0)} registros</span></div>
+      <div class="uni-cuerpo-grupo">${sinAsignar.map(fila).join('')}</div></div>`;
+  }
+  cacheCentros.map(c => c.id).concat(cacheNoCentros.map(c => c.id)).filter(id => porDestino[id]).forEach(id => {
+    const c = centroPorIdCat(id), vs = porDestino[id];
+    html += `<div class="uni-grupo">
+      <div class="uni-cab"><span class="uni-sigla">${esc(c.sigla || '(vaciar celda)')}</span><span class="uni-nombre">${esc(c.nombre)}</span>
+        <span class="uni-cuenta">${vs.length} formas · ${vs.reduce((a, v) => a + v.n, 0)} registros</span></div>
+      <div class="uni-cuerpo-grupo">${vs.map(fila).join('')}</div></div>`;
+  });
+
+  caja.innerHTML = html || '<p style="color:#888; padding:12px; font-size:13px;">No se encontraron campos de rotación para revisar.</p>';
+
+  const centrosReales = new Set(variantesCampos.filter(v => v.sugerido && v.sugerido.indexOf('CEN-') === 0).map(v => v.sugerido)).size;
+  document.getElementById('uni-k-variantes').textContent = variantesCampos.length;
+  document.getElementById('uni-k-centros').textContent = centrosReales;
+  document.getElementById('uni-k-registros').textContent = variantesCampos.reduce((a, v) => a + v.n, 0);
+  document.getElementById('uni-k-pend').textContent = sinAsignar.length;
+}
+
+async function aplicarUnificacionCampos() {
+  const pendientes = variantesCampos.filter(v => !v.sugerido);
+  const aviso = document.getElementById('uni-resultado');
+  if (pendientes.length) {
+    aviso.innerHTML = `<p style="background:var(--pendiente-bg); color:var(--pendiente-tx); padding:10px 12px; border-radius:7px; font-size:13px;">
+      Quedan ${pendientes.length} formas sin asignar. Asígnalas todas antes de aplicar: si se reescribe a medias, los indicadores siguen partidos.</p>`;
+    return;
+  }
+  if (!confirm('Se van a reescribir ' + variantesCampos.reduce((a, v) => a + v.n, 0) + ' registros en Histórico y Gestión Operativa.\n\nAntes se guarda una copia de respaldo de ambas hojas. ¿Continuar?')) return;
+
+  aviso.innerHTML = '<p style="color:#888; font-size:13px;">⏳ Respaldando y reescribiendo. Esto puede tardar un minuto — no cierres la pestaña.</p>';
+  const mapa = {}, textos = {};
+  variantesCampos.forEach(v => { mapa[v.clave] = v.sugerido; textos[v.clave] = v.txt; });
+
+  const res = await llamarBackend('aplicarUnificacionCentros', { mapa, textos });
+  if (!res.ok) {
+    aviso.innerHTML = `<p style="color:#9C0006; font-size:13px;">Error: ${esc(res.error)}</p>`;
+    return;
+  }
+  cacheCentros = res.centros || cacheCentros;
+  aviso.innerHTML = `<p style="background:var(--gestionado-bg); color:var(--gestionado-tx); padding:10px 12px; border-radius:7px; font-size:13px;">
+    Listo. Se reescribieron ${res.reescritas} celdas${res.omitidas ? ' (' + res.omitidas + ' quedaron sin tocar)' : ''}.
+    Respaldos creados: ${esc((res.respaldos || []).join(', '))}. Vuelve a cargar el cuadro para ver los indicadores unificados.</p>`;
+  unificacionCargada = false;
+  await cargarUnificacion(true);
+  pintarCatalogoCentros();
 }
 
 </script>
