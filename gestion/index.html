@@ -70,7 +70,13 @@
   table.cuadricula th.esquina { position: sticky; left: 0; z-index: 3; text-align: left; background: #f0f2f5; }
   table.cuadricula td.col-residente { text-align: left; padding: 8px; white-space: nowrap; background: #fafbfc; font-weight: 600; position: sticky; left: 0; z-index: 1; }
   tr.fila-grupo td { background: var(--azul-ces); color: white; font-weight: 700; padding: 6px 10px !important; text-align: left; position: sticky; left: 0; }
+  /* Tamaño de celda: la coordinadora elige cuánto texto quiere ver sin abrir cada rotación. */
   .celda { width: 110px; height: 52px; cursor: pointer; padding: 4px !important; font-size: 11px; line-height: 1.25; }
+  table.cuadricula.tam-compacta .celda { width: 110px; }
+  table.cuadricula.tam-compacta .celda .txt { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  table.cuadricula.tam-media .celda { width: 165px; font-size: 12px; }
+  table.cuadricula.tam-amplia .celda { width: 230px; font-size: 12px; padding: 7px !important; }
+  table.cuadricula.tam-amplia .celda strong { font-size: 13px; }
   .celda:hover { outline: 2px solid var(--azul-ces); outline-offset: -2px; }
   .celda-vacia { color: #ccc; }
   .celda-oculta { color: #bbb; font-size: 16px; background: #f7f7f7 !important; }
@@ -103,6 +109,14 @@
   .db-caja { border: 1px solid #e3e8ee; border-radius: 10px; padding: 16px 18px; margin-bottom: 16px; background: white; min-width: 0; }
   .db-caja h3 { font-size: 15px; color: var(--azul-ces); margin: 0 0 2px; }
   .db-como { font-size: 12px; color: #6b7684; margin: 0 0 12px; }
+  /* El buscador se destaca del resto de tarjetas: fondo tenue, borde azul y título con lupa. */
+  .db-caja-buscar { background: #f2f7fc; border: 1px solid #c9dcee; border-top: 3px solid var(--azul-ces); }
+  .db-titulo-buscar { font-size: 15px; font-weight: 600; color: var(--azul-ces); margin-bottom: 10px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .db-titulo-buscar .lupa { font-size: 17px; }
+  .db-titulo-buscar .ayuda { font-size: 12px; font-weight: 400; color: #6b7684; }
+  .db-caja-buscar .controles-cuadricula input { background: white; border-color: #b9cfe4; }
+  .db-caja-buscar .controles-cuadricula input:focus { outline: 2px solid var(--azul-ces); outline-offset: -1px; }
+  .db-caja-buscar .db-tabs-busqueda { border-bottom-color: #c9dcee; }
   .db-tabs-busqueda { display: flex; align-items: center; border-bottom: 1px solid #e3e8ee; margin: -4px 0 14px; flex-wrap: wrap; }
   .db-tabs-busqueda button { background: none; border-bottom: 3px solid transparent; border-radius: 0; padding: 8px 14px; font-size: 14px; color: #6b7684; }
   .db-tabs-busqueda button.activo { color: var(--azul-ces); border-bottom-color: var(--azul-ces); font-weight: 600; }
@@ -142,6 +156,19 @@
   .db-link:hover { text-decoration: underline; }
   .db-mini { background: #eef1f5; color: #333; border-radius: 6px; padding: 3px 7px; font-size: 12px; white-space: nowrap; }
   .db-treemap { position: relative; width: 100%; height: 400px; }
+  /* "Dónde rotan": desglose por capas — campo → programas → residentes. */
+  .db-capa { padding: 10px 14px 12px; }
+  .db-capa-titulo { font-size: 12px; font-weight: 600; color: #555; margin: 0 0 8px; }
+  .db-capa-titulo span { font-weight: 400; color: #8a929c; }
+  .db-progs { display: flex; flex-direction: column; gap: 3px; }
+  .db-prog-fila { display: flex; align-items: center; gap: 10px; width: 100%; background: none; color: #333; padding: 5px 8px; border-radius: 6px; font-size: 13px; text-align: left; }
+  .db-prog-fila:hover { background: #eef4f3; }
+  .db-prog-fila.activo { background: #dff0ec; font-weight: 600; }
+  .db-prog-fila .nom { flex: 0 0 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .db-prog-fila .barra { flex: 1; height: 14px; background: #eef1f5; border-radius: 4px; overflow: hidden; min-width: 60px; }
+  .db-prog-fila .barra i { display: block; height: 100%; background: #2f9e8a; }
+  .db-prog-fila .num { flex: 0 0 34px; text-align: right; color: #0d6e5f; font-weight: 700; }
+  @media (max-width: 700px) { .db-prog-fila .nom { flex-basis: 120px; } }
   .db-tm { position: absolute; border: 2px solid white; border-radius: 6px; padding: 6px 8px; color: white; overflow: hidden; text-align: left; font-size: 12px; line-height: 1.25; }
   .db-tm b { display: block; font-size: 16px; }
   .db-tm:hover { filter: brightness(1.12); }
@@ -271,8 +298,16 @@
   .rec-col-vista { position:sticky; top:12px; align-self:start; min-width:0; }
   .rec-vista { background:#eef3f8; border-radius:10px; padding:8px; }
   .rec-asunto { font-size:12px; color:#555; background:white; border-radius:6px; padding:8px 10px; margin-bottom:6px; }
+  .rec-desplegar { background:none; color:var(--azul-ces); padding:4px 0; font-size:12px; font-weight:600; margin-top:6px; }
+  .rec-desplegar .flecha { display:inline-block; transition:transform .15s; }
+  .rec-desplegar.abierto .flecha { transform:rotate(90deg); }
+  .rec-desplegar .n { color:#8a929c; font-weight:400; margin-left:4px; }
+  .rec-detalle { background:#f7f9fb; border-radius:8px; padding:10px 14px; margin-top:4px; }
   .rec-docs { font-size:12px; color:#555; margin-top:6px; line-height:1.5; }
-  .rec-docs b { color:#333; font-weight:600; }
+  .rec-docs:first-child { margin-top:0; }
+  .rec-docs b { color:#333; font-weight:600; display:block; margin-bottom:2px; }
+  .rec-docs ul { margin:0; padding-left:18px; }
+  .rec-docs li { margin:1px 0; }
   .rec-segundo { margin-top:10px; }
   .rec-segmento-mini button { padding:4px 10px; font-size:12px; }
   .rec-pie { padding:12px 20px; border-top:1px solid #eee; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center; }
@@ -346,6 +381,15 @@
         </div>
         <div class="separador-acciones"></div>
         <div class="grupo-acciones">
+          <span style="font-size:12px; color:#6b7684;">Tamaño de celda</span>
+          <div class="rec-segmento rec-segmento-mini" id="grupo-tamano-celda">
+            <button type="button" data-tam="compacta" onclick="cambiarTamanoCelda('compacta')">Compacta</button>
+            <button type="button" data-tam="media" onclick="cambiarTamanoCelda('media')">Media</button>
+            <button type="button" data-tam="amplia" onclick="cambiarTamanoCelda('amplia')">Amplia</button>
+          </div>
+        </div>
+        <div class="separador-acciones"></div>
+        <div class="grupo-acciones">
           <button class="btn-notas" id="boton-notas-programa" onclick="abrirPanelNotasPrograma()" title="Observaciones generales de este programa — aplican para cualquier año académico">📝 Notas <span id="badge-notas-programa" style="display:none; background:#00695C; color:white; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:4px;"></span></button>
         </div>
         <div class="separador-acciones"></div>
@@ -385,11 +429,13 @@
       </div>
 
       <!-- BUSCADORES — van primero: los mismos tres de siempre, en pestañas -->
-      <div class="db-caja" id="db-buscadores">
+      <div class="db-caja db-caja-buscar" id="db-buscadores">
+        <div class="db-titulo-buscar"><span class="lupa">🔍</span> Buscar en la base de rotaciones
+          <span class="ayuda">Encuentra un residente, un campo de práctica o una rotación en cualquier periodo</span></div>
         <div class="db-tabs-busqueda">
-          <button id="db-tab-residente" class="activo" onclick="cambiarTabBusquedaDb('residente')">🔍 Buscar residente</button>
-          <button id="db-tab-campo" onclick="cambiarTabBusquedaDb('campo')">Buscar campo de rotación</button>
-          <button id="db-tab-rotacion" onclick="cambiarTabBusquedaDb('rotacion')">Buscar por rotación</button>
+          <button id="db-tab-residente" class="activo" onclick="cambiarTabBusquedaDb('residente')">Residente</button>
+          <button id="db-tab-campo" onclick="cambiarTabBusquedaDb('campo')">Campo de rotación</button>
+          <button id="db-tab-rotacion" onclick="cambiarTabBusquedaDb('rotacion')">Rotación</button>
           <label class="db-todos"><input type="checkbox" id="db-buscar-todos" checked onchange="rebuscarDb()"> Buscar en todos los periodos</label>
         </div>
         <div id="db-busq-residente">
@@ -729,6 +775,7 @@ function esc(valor) {
 let contextoGrid = { programa: '', periodo: '', anioAcademico: '', semestre: '' };
 let filasGridActual = [];   // [{id, nombre, nivel}]
 let registrosGridActual = []; // registros de HistoricoBaseGeneral para el programa+periodo actual
+let tamanoCelda = 'compacta';  // tamaño de las celdas del cuadro: compacta | media | amplia
 
 // ============================================================
 // LOGIN
@@ -1757,7 +1804,7 @@ function dibujarChipsPeriodo() {
 
 // Estado de lo que está abierto en el panel (desgloses). Se conserva en el refresco automático
 // de cada 2 minutos; solo se limpia cuando se cambia de periodo.
-const dbSel = { kpi: null, prog: null, campo: null, mes: null, mov: null, celdaNivel: null, otros: false, vistaCampos: 'mapa', filtroCampos: '', filtroTablaCampos: '' };
+const dbSel = { kpi: null, prog: null, campo: null, campoProg: null, mes: null, mov: null, celdaNivel: null, otros: false, vistaCampos: 'mapa', filtroCampos: '', filtroTablaCampos: '' };
 // Registro de acciones: los botones del panel llaman dbAcc(n), así ningún nombre con comillas o
 // caracteres raros puede romper un onclick. Cada sección borra sus acciones viejas al redibujarse.
 const dbAcciones = new Map();
@@ -2103,6 +2150,7 @@ function dibujarCamposDb() {
 }
 
 function elegirCampoDb(c, desplazar) {
+  if (dbSel.campo !== c) dbSel.campoProg = null;   // al cambiar de campo se vuelve a la vista de programas
   dbSel.campo = (dbSel.campo === c && !desplazar) ? null : c;
   dibujarCamposDb();
   if (desplazar) document.getElementById('db-caja-campos').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2116,12 +2164,40 @@ function dibujarDetalleCampoDb() {
   const personas = personasDb_(filas).sort((a, b) => a.programa.localeCompare(b.programa, 'es') || a.nombre.localeCompare(b.nombre, 'es'));
   const campoActual = dbSel.campo;
   const nCerrar = regDb(() => elegirCampoDb(campoActual), 'detcampo');
-  det.innerHTML = `<div class="db-panel-detalle"><div class="top"><div><b style="color:#0d6e5f;">${esc(dbSel.campo)}</b> <span style="font-size:12px; color:#8a929c;">· ${plDb_(personas.length, 'residente', 'residentes')} de ${unicosDb_(filas, r => r.Programa)} programas</span></div><button class="db-cerrar" onclick="dbAcc(${nCerrar})">Cerrar</button></div>
-    <table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th>Meses en este campo</th></tr></thead><tbody>
-    ${personas.map(p => { const nAcc = regDb(() => irACeldaDesdeComentario(p.registros[0].ClaveUnica, p.programa, p.registros[0].Semestre), 'detcampo');
-      return `<tr><td><button class="db-link" onclick="dbAcc(${nAcc})" title="Abrir la rotación en el cuadro">${esc(p.nombre)}</button><br><span style="color:#888; font-size:12px;">${esc(p.nivel)}</span></td><td>${esc(p.programa)}</td>
+
+  // Desglose por capas: primero cuántos residentes pone cada programa en este campo; al elegir un
+  // programa se ve quiénes son, sin perder de vista el resto.
+  const porPrograma = {};
+  personas.forEach(p => { (porPrograma[p.programa] = porPrograma[p.programa] || []).push(p); });
+  const programas = Object.entries(porPrograma).sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0], 'es'));
+  const maxProg = Math.max(1, ...programas.map(p => p[1].length));
+  const elegido = dbSel.campoProg && porPrograma[dbSel.campoProg] ? dbSel.campoProg : null;
+
+  const barras = programas.map(([prog, gente]) => {
+    const nAcc = regDb(() => { dbSel.campoProg = dbSel.campoProg === prog ? null : prog; dibujarDetalleCampoDb(); }, 'detcampo');
+    return `<button class="db-prog-fila ${elegido === prog ? 'activo' : ''}" onclick="dbAcc(${nAcc})" title="Ver los residentes de ${esc(prog)} en este campo">
+      <span class="nom">${esc(prog)}</span>
+      <span class="barra"><i style="width:${Math.round(gente.length / maxProg * 100)}%;"></i></span>
+      <span class="num">${gente.length}</span></button>`;
+  }).join('');
+
+  const tabla = lista => `<table class="lista"><thead><tr><th>Residente</th><th>Meses en este campo</th></tr></thead><tbody>
+    ${lista.map(p => { const nAcc = regDb(() => irACeldaDesdeComentario(p.registros[0].ClaveUnica, p.programa, p.registros[0].Semestre), 'detcampo');
+      return `<tr><td><button class="db-link" onclick="dbAcc(${nAcc})" title="Abrir la rotación en el cuadro">${esc(p.nombre)}</button><br><span style="color:#888; font-size:12px;">${esc(p.nivel)}</span></td>
         <td>${p.registros.map(r => `<span class="pastilla" style="background:${(COLORES_ESTADO[r.Estado] || { bg: '#eee' }).bg}; color:${(COLORES_ESTADO[r.Estado] || { tx: '#333' }).tx}; margin:1px;" title="${esc(r.Estado)} · ${esc(r.Rotacion || '')}">${esc(String(r.Mes || '').slice(0, 3))}</span>`).join('')}</td></tr>`; }).join('')}
-    </tbody></table></div>`;
+    </tbody></table>`;
+
+  const nTodos = regDb(() => { dbSel.campoProg = null; dibujarDetalleCampoDb(); }, 'detcampo');
+  det.innerHTML = `<div class="db-panel-detalle"><div class="top"><div><b style="color:#0d6e5f;">${esc(dbSel.campo)}</b> <span style="font-size:12px; color:#8a929c;">· ${plDb_(personas.length, 'residente', 'residentes')} de ${plDb_(programas.length, 'programa', 'programas')}</span></div><button class="db-cerrar" onclick="dbAcc(${nCerrar})">Cerrar</button></div>
+    <div class="db-capa">
+      <p class="db-capa-titulo">${elegido ? 'Programas que rotan aquí' : 'Programas que rotan aquí <span>· clic en uno para ver quiénes son</span>'}</p>
+      <div class="db-progs">${barras}</div>
+    </div>
+    ${elegido ? `<div class="db-capa" style="border-top:1px solid #e3e8ee;">
+      <p class="db-capa-titulo">${esc(elegido)} <span>· ${plDb_(porPrograma[elegido].length, 'residente', 'residentes')} en ${esc(dbSel.campo)}</span>
+        <button class="db-link" style="font-size:12px; margin-left:8px;" onclick="dbAcc(${nTodos})">← Ver todos los programas</button></p>
+      ${tabla(porPrograma[elegido])}</div>` : ''}
+  </div>`;
 }
 
 // ---------- Avance de confirmación mes a mes ----------
@@ -3307,6 +3383,13 @@ function agruparPorNivel(filas) {
   return grupos;
 }
 
+function cambiarTamanoCelda(tam) {
+  tamanoCelda = tam;
+  document.querySelectorAll('#grupo-tamano-celda button').forEach(b => b.className = b.dataset.tam === tam ? 'activo' : '');
+  const tabla = document.querySelector('table.cuadricula');
+  if (tabla) tabla.className = 'cuadricula tam-' + tam;   // no hay que redibujar: solo cambia el estilo
+}
+
 function redibujarCuadricula() {
   const contenedor = document.getElementById('contenedor-cuadricula');
 
@@ -3334,7 +3417,7 @@ function redibujarCuadricula() {
     </div>`;
   }
 
-  let html = avisoDatos + '<div class="contenedor-scroll-cuadricula"><table class="cuadricula"><thead>';
+  let html = avisoDatos + '<div class="contenedor-scroll-cuadricula"><table class="cuadricula tam-' + tamanoCelda + '"><thead>';
   html += `<tr><th class="esquina" rowspan="2">Residente</th>`;
   bloques.forEach(b => {
     html += `<th colspan="6" style="background:#003865; color:white;">${b.anioInicio}-2</th>
@@ -3353,7 +3436,7 @@ function redibujarCuadricula() {
       const colorFondo = colorDeFondoPorCampo(registro.CampoRotacion, registro.Rotacion);
       const claveEsc = String(registro.ClaveUnica === null || registro.ClaveUnica === undefined ? '' : registro.ClaveUnica).replace(/'/g, "\\'");
       return `<td class="celda" style="color:${colorTexto}; background:${colorFondo};" onclick="abrirCelda('${claveEsc}')">
-        <strong>${esc(registro.CampoRotacion || '')}</strong><br>${esc(registro.Rotacion || '')}
+        <div class="txt"><strong>${esc(registro.CampoRotacion || '')}</strong><br>${esc(registro.Rotacion || '')}</div>
         ${registro.Alerta ? '<div class="celda-alerta">' + esc(registro.Alerta) + '</div>' : ''}
         ${(registro.Observacion || registro.ObservacionInterna) ? '<div style="font-size:13px;">📝</div>' : ''}
       </td>`;
@@ -4769,6 +4852,7 @@ let recEdicion = null;            // recordatorio que está abierto en el editor
 let recCamposSel = new Set();
 let recProgramasSel = new Set();
 let recCamposExtra = [];
+const recAbiertos = new Set();   // centros con los requisitos desplegados en la lista
 let recVistaSegundo = false;      // vista previa: primer o segundo envío
 let recVistaContinua = false;     // vista previa: residente que empieza o que continúa rotando
 
@@ -4945,6 +5029,11 @@ async function cargarRecordatorios(forzar) {
   pintarRecordatorios();
 }
 
+function alternarDetalleRec(id) {
+  if (recAbiertos.has(id)) recAbiertos.delete(id); else recAbiertos.add(id);
+  pintarRecordatorios();
+}
+
 function filtrarEstadoRec(valor) { recFiltroEstado = recFiltroEstado === valor ? '' : valor; pintarRecordatorios(); }
 
 function estadoVisualRec_(r) {
@@ -5021,8 +5110,15 @@ function pintarRecordatorios() {
           <span class="pastilla" style="background:${est.bg}; color:${est.tx};">${est.texto}</span></div>
       </div>
       <div class="rec-linea">${describirProgramacionRec_(r)}</div>
-      ${r.documentos.length ? `<div class="rec-docs"><b>Documentos requeridos:</b> ${r.documentos.map(esc).join(' · ')}</div>` : ''}
-      ${(r.documentosActualizar || []).length ? `<div class="rec-docs"><b>Si continúa rotando, actualiza cada mes:</b> ${r.documentosActualizar.map(esc).join(' · ')}</div>` : ''}
+      ${(r.documentos.length || (r.documentosActualizar || []).length) ? `
+        <button class="rec-desplegar ${recAbiertos.has(r.id) ? 'abierto' : ''}" onclick="alternarDetalleRec('${id}')">
+          <span class="flecha">▸</span> ${recAbiertos.has(r.id) ? 'Ocultar' : 'Ver'} requisitos <span class="n">${r.documentos.length ? r.documentos.length + ' documento' + (r.documentos.length === 1 ? '' : 's') : ''}</span></button>
+        ${recAbiertos.has(r.id) ? `<div class="rec-detalle">
+          ${r.documentos.length ? `<div class="rec-docs"><b>Documentos requeridos</b><ul>${r.documentos.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>` : ''}
+          ${(r.documentosActualizar || []).length ? `<div class="rec-docs"><b>Si continúa rotando, cada mes solo actualiza</b><ul>${r.documentosActualizar.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>` : ''}
+          ${r.enviarA ? `<div class="rec-docs"><b>Envía la documentación a:</b> ${esc(r.enviarA)}</div>` : ''}
+          ${r.indicaciones ? `<div class="rec-docs"><b>Información importante:</b> ${esc(r.indicaciones)}</div>` : ''}
+        </div>` : ''}` : ''}
       <div class="rec-linea">${describirProximoRec_(r)}</div>
       <div class="rec-linea tenue">${ultimo}${r.totalEnviados > (r.ultimoEnvio ? r.ultimoEnvio.enviados : 0) ? ` · ${r.totalEnviados} en total` : ''}${r.autor ? ` · Editado por ${esc(r.autor)}${r.actualizado ? ' el ' + esc(r.actualizado.slice(0, 10)) : ''}` : ''}</div>
       <div class="fila-acciones" style="margin-top:10px;">
