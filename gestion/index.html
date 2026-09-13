@@ -745,6 +745,10 @@
           <div><label>Buscar</label><input id="cat-q" autocomplete="off" placeholder="Sigla, nombre o forma antigua" oninput="pintarCatalogoCentros()" style="min-width:240px;"></div>
         </div>
         <div id="cat-lista"></div>
+        <p id="enlace-unificar" style="display:none; margin-top:18px; padding-top:14px; border-top:1px solid #eee; font-size:12px; color:#888;">
+          ¿Quedaron nombres antiguos escritos de varias formas en el histórico?
+          <a href="javascript:void(0)" onclick="mostrarUnificacion()" style="color:var(--azul-ces);">Abrir el asistente de unificación</a>.
+        </p>
       </div>
 
       <!-- Asistente de unificación: se corre una sola vez sobre el histórico. -->
@@ -1029,7 +1033,7 @@ function entrarAlApp() {
     document.getElementById('tab-btn-centros').style.display = 'inline-block';
     document.getElementById('boton-publicar-github').style.display = 'inline-block';
     document.getElementById('cat-btn-nuevo').style.display = 'inline-block';
-    document.getElementById('cen-st-uni').style.display = 'inline-block';
+    document.getElementById('enlace-unificar').style.display = 'block';
     cargarCentros();
     cargarProgramasConocidos();
     cargarMesesFiltro();
@@ -5665,12 +5669,19 @@ function claveCentroJS(valor) {
 
 // Limpia un campo de texto mientras se escribe, sin que se mueva el cursor de lugar cuando el
 // texto no cambio de longitud (al escribir una tilde, el cursor queda al final, que es lo natural).
+// Mientras se escribe solo se quitan tildes y ñ y se pasa a mayúscula. NO se recortan espacios:
+// un espacio recién tecleado al final es indistinguible de un espacio sobrante, y recortarlo
+// impedía escribir "UCI NEONATAL". El recorte lo hace el servidor al guardar.
 function limpiarEnVivo(el) {
   const antes = el.value;
-  const despues = limpiarDuroJS(antes);
+  const despues = String(antes)
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\u00f1/g, 'n').replace(/\u00d1/g, 'N')
+    .toUpperCase();
   if (antes === despues) return;
+  const pos = el.selectionStart;
   el.value = despues;
-  try { el.setSelectionRange(despues.length, despues.length); } catch (e) { /* campos sin seleccion */ }
+  try { el.setSelectionRange(pos, pos); } catch (e) { /* campos sin selección */ }
 }
 
 async function cargarCentros(forzar) {
@@ -6032,6 +6043,13 @@ async function borrarCentroCat(id) {
 // ------------------------------------------------------------
 let subCentrosActual = 'rec';
 
+// El asistente de unificación se usa una vez y estorba después, así que deja de ocupar una
+// subpestaña fija: se abre desde el enlace al pie del catálogo cuando se necesita.
+function mostrarUnificacion() {
+  document.getElementById('cen-st-uni').style.display = 'inline-block';
+  cambiarSubCentros('uni');
+}
+
 function cambiarSubCentros(sub) {
   subCentrosActual = sub;
   ['rec', 'cat', 'uni'].forEach(k => {
@@ -6040,6 +6058,10 @@ function cambiarSubCentros(sub) {
     if (panel) panel.style.display = k === sub ? 'block' : 'none';
     if (boton) boton.className = k === sub ? 'btn-primario btn-pequeno' : 'btn-secundario btn-pequeno';
   });
+  if (sub !== 'uni') {
+    const btnUni = document.getElementById('cen-st-uni');
+    if (btnUni) btnUni.style.display = 'none';
+  }
   if (sub === 'rec') cargarRecordatorios();
   if (sub === 'cat') cargarCentros().then(pintarCatalogoCentros);
   if (sub === 'uni') cargarUnificacion();
