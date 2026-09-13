@@ -323,6 +323,124 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 }
 @media(prefers-reduced-motion:reduce){.vr-cumple .torta,.vr-confeti{animation:none}}
 
+/* ===== SALUDO DE LA MASCOTA ===== */
+.saludo-b{display:grid;grid-template-columns:auto 1fr auto;gap:15px;align-items:center;border-radius:20px;
+  padding:15px 17px;margin-bottom:1rem;box-shadow:var(--sh);border:1.5px solid var(--az-claro);
+  background:linear-gradient(135deg,var(--az-suave),#fff 72%);animation:fadeIn .4s}
+.saludo-b.madrugada{background:linear-gradient(135deg,#e8ecf6,#fff 72%);border-color:#ccd6e8}
+.saludo-b.tarde{background:linear-gradient(135deg,#fdefdd,#fff 72%);border-color:#f2d9b4}
+.saludo-b.noche{background:linear-gradient(135deg,#e6eaf4,#fff 72%);border-color:#c8d2e6}
+.saludo-b.fiesta{background:linear-gradient(135deg,#ffe9f1,#fff8ea 72%);border-color:#f3c9d8}
+.saludo-b .hola{font-size:16.5px;font-weight:700;color:var(--az);line-height:1.25}
+.saludo-b .msg{font-size:13.5px;color:var(--sec);margin-top:5px;line-height:1.5}
+.saludo-b .msg b{color:var(--texto)}
+.saludo-b .cerrar{background:#fff;border:1px solid var(--borde);border-radius:50%;width:29px;height:29px;
+  cursor:pointer;color:var(--sec);font-size:13px;align-self:flex-start;font-family:inherit}
+.vr-ident .buho-chico{margin-left:auto;flex-shrink:0}
+
+/* ===== mascota ===== */
+.buho{width:88px;height:92px;flex-shrink:0;display:block}
+.buho.chico{width:38px;height:38px}
+.buho *{transform-box:fill-box}
+.mecer{transform-origin:center bottom;animation:mecer 5.5s ease-in-out infinite}
+@keyframes mecer{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+.parpado{transform-origin:center top;transform:scaleY(0);animation:parpadeo 5.6s ease-in-out infinite}
+.parpado.b{animation-delay:.06s}
+@keyframes parpadeo{0%,90%,100%{transform:scaleY(0)}93%{transform:scaleY(1)}96%{transform:scaleY(0)}}
+.ala-saluda{transform-origin:right top;animation:saludar 3s ease-in-out .5s 2}
+@keyframes saludar{0%,100%{transform:rotate(0)}14%{transform:rotate(-24deg)}28%{transform:rotate(3deg)}42%{transform:rotate(-20deg)}56%{transform:rotate(0)}}
+.vapor{animation:vapor 2.8s ease-in-out infinite}
+.vapor.v2{animation-delay:.5s}
+.vapor.v3{animation-delay:1s}
+@keyframes vapor{0%{opacity:0;transform:translateY(3px)}30%{opacity:.75}100%{opacity:0;transform:translateY(-9px)}}
+.rayos{transform-origin:center;animation:girar 26s linear infinite}
+@keyframes girar{to{transform:rotate(360deg)}}
+.estrella{animation:titilar 3.2s ease-in-out infinite}
+.estrella.e2{animation-delay:.9s}.estrella.e3{animation-delay:1.7s}
+@keyframes titilar{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.1)}}
+.globo{transform-origin:center bottom;animation:flotar 4.2s ease-in-out infinite}
+.globo.g2{animation-delay:.7s}.globo.g3{animation-delay:1.4s}
+@keyframes flotar{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-5px) rotate(2deg)}}
+.conf{transform-origin:center;animation:confeti 3.4s ease-in-out infinite}
+.conf.c2{animation-delay:.6s}.conf.c3{animation-delay:1.2s}.conf.c4{animation-delay:1.8s}.conf.c5{animation-delay:2.4s}
+@keyframes confeti{0%,100%{opacity:.45;transform:translateY(0) rotate(0)}50%{opacity:1;transform:translateY(4px) rotate(28deg)}}
+.pompon{transform-origin:center bottom;animation:pompon 2.6s ease-in-out infinite}
+@keyframes pompon{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+.pupila{animation:mirar 7s ease-in-out infinite}
+@keyframes mirar{0%,60%,100%{transform:translateX(0)}70%,85%{transform:translateX(2.2px)}}
+
+/* ===== PANEL DE USO DEL APLICATIVO ===== */
+.panel-top{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:1.1rem}
+.panel-top h1{font-size:21px;color:var(--az);letter-spacing:-.3px}
+.panel-top p{font-size:13px;color:var(--sec);margin-top:3px}
+.periodo{display:flex;gap:5px;background:#fff;border:1px solid var(--borde);border-radius:11px;padding:4px}
+.periodo button{border:none;background:none;border-radius:8px;padding:8px 13px;font-size:12.5px;color:var(--sec);cursor:pointer;white-space:nowrap;font-family:inherit}
+.periodo button.on{background:var(--az);color:#fff;font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:.85rem;margin-bottom:1.4rem}
+.kpi{background:#fff;border:1px solid var(--borde);border-radius:14px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:var(--sh);cursor:default}
+.kpi::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--az);border-radius:0}
+.kpi.teal::before{background:var(--teal)}
+.kpi.warn::before{background:#E8A33D}
+.kpi.mor::before{background:#8E5BA8}
+.kpi .n{font-size:29px;font-weight:700;color:var(--az);line-height:1.05;letter-spacing:-.5px}
+.kpi.teal .n{color:var(--teal)}
+.kpi.warn .n{color:#9a6200}
+.kpi.mor .n{color:var(--mor-txt)}
+.kpi .l{font-size:11.5px;color:var(--sec);margin-top:5px;line-height:1.35;text-transform:none;letter-spacing:0}
+.kpi .d{font-size:11px;margin-top:7px;color:var(--sec)}
+.sec{margin-bottom:1.5rem}
+.sec-cab{display:flex;align-items:center;gap:10px;margin-bottom:.7rem;flex-wrap:wrap}
+.sec-cab h2{font-size:15.5px;color:var(--az)}
+.sec-cab p{font-size:12.5px;color:var(--sec);flex-basis:100%;margin-top:-2px}
+.grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:1.1rem}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem}
+.caja{background:#fff;border:1px solid var(--borde);border-radius:14px;box-shadow:var(--sh);overflow:hidden}
+.caja-cab{padding:12px 15px;border-bottom:1px solid #eef2f6;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.caja-cab b{font-size:13.5px;color:var(--az)}
+.caja-cab span{font-size:11.5px;color:var(--sec)}
+.caja-cuerpo{padding:14px 15px}
+.caja-pie{padding:11px 15px;background:var(--fondo);border-top:1px solid #eef2f6;display:flex;gap:8px;flex-wrap:wrap}
+.fila-barra{display:grid;grid-template-columns:1fr 52px;gap:10px;align-items:center;padding:7px 0;font-size:12.5px}
+.fila-barra .n{color:var(--texto);margin-bottom:4px;display:block}
+.pista{height:8px;background:#eef2f6;border-radius:6px;overflow:hidden}
+.pista i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--teal),#35b39f)}
+.pista i.medio{background:linear-gradient(90deg,#E8A33D,#f0bd6d)}
+.pista i.bajo{background:linear-gradient(90deg,#C05621,#e07a45)}
+.pct{text-align:right;font-weight:700;font-size:13px;color:var(--az)}
+.pers{display:flex;align-items:center;gap:11px;padding:9px 15px;border-bottom:1px solid #eef2f6;font-size:13px;width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left;color:var(--texto);cursor:pointer;font-family:inherit}
+.pers:hover{background:var(--az-suave)}
+.pers:last-child{border-bottom:none}
+.pers .av{width:31px;height:31px;border-radius:10px;background:var(--az-suave);color:var(--az);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;flex-shrink:0}
+.pers .t{flex:1;min-width:0}
+.pers .t b{display:block;font-weight:600}
+.pers .t small{color:var(--sec);font-size:11.5px;display:block}
+.pers .dias{font-size:11.5px;color:var(--nar-txt);background:#fff8e8;border:1px solid #f0d68a;border-radius:20px;padding:2px 9px;white-space:nowrap}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th{background:var(--az-suave);color:var(--az);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:8px 14px;text-align:left;position:sticky;top:0}
+.tbl td{padding:9px 14px;border-bottom:1px solid #eef2f6}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr[data-id]{cursor:pointer}
+.tbl tr[data-id]:hover td{background:var(--az-suave)}
+.tbl .disp{font-size:11.5px;color:var(--sec)}
+.scroll{max-height:340px;overflow:auto}
+.barras{display:flex;align-items:flex-end;gap:3px;height:140px;padding-top:8px}
+.barras .b{flex:1;background:linear-gradient(180deg,var(--az-med),var(--az));border-radius:4px 4px 0 0;min-height:2px;position:relative}
+.barras .b.fds{background:linear-gradient(180deg,#c3d3e2,#a9bccd)}
+.barras .b:hover::after{content:attr(data-t);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#17293d;color:#fff;font-size:10.5px;padding:3px 7px;border-radius:6px;white-space:nowrap;margin-bottom:5px;z-index:5}
+.eje{display:flex;justify-content:space-between;font-size:10.5px;color:var(--sec);margin-top:7px}
+.horas{display:grid;grid-template-columns:repeat(12,1fr);gap:3px}
+.horas i{aspect-ratio:1;border-radius:4px;display:block}
+.horas-eje{display:flex;justify-content:space-between;font-size:10.5px;color:var(--sec);margin-top:6px}
+.anillo{display:flex;align-items:center;gap:16px}
+.anillo-leyenda{font-size:12.5px;display:flex;flex-direction:column;gap:7px}
+.anillo-leyenda span{display:flex;align-items:center;gap:7px;color:var(--sec)}
+.anillo-leyenda i{width:11px;height:11px;border-radius:3px}
+.anillo-leyenda b{color:var(--texto)}
+.sin-log{background:#fff8e8;border:1px solid #f0d68a;border-radius:11px;padding:14px 16px;font-size:12.5px;color:var(--nar-txt);line-height:1.6}
+.sin-log b{display:block;margin-bottom:3px}
+@media(max-width:980px){.grid2,.grid3{grid-template-columns:1fr}.grid3 .caja[style]{grid-column:auto!important}}
+@media(max-width:768px){.horas{grid-template-columns:repeat(8,1fr)}.panel-top h1{font-size:18px}}
+
 /* ===== MEJORAS 2026: recordar dispositivo, novedades, recorrido ===== */
 .rec-box{display:flex;align-items:flex-start;gap:10px;background:var(--teal-bg);border:1px solid #bfe5da;border-radius:11px;padding:11px 13px;cursor:pointer}
 .rec-box input{width:19px;height:19px;margin-top:1px;accent-color:var(--teal);flex-shrink:0}
@@ -572,144 +690,126 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<!-- COORDINACIÓN -->
+<!-- COORDINACIÓN — PANEL DE USO DEL APLICATIVO -->
 <div class="pant" id="p-coord">
   <div class="wrap">
-    <div class="info-bar">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <span id="info-actualizacion">Datos cargados automáticamente desde GitHub.</span>
-    </div>
-    <div class="sec-titulo">Panel ejecutivo</div>
-    <div class="sec-sub" id="periodo-lbl">—</div>
 
-    <div class="filtro-bar">
-      <span class="filtro-lbl">Ver semestre:</span>
-      <div class="filtro-btns" id="filtro-sems"></div>
-    </div>
-
-    <div class="kpis">
-      <div class="kpi" onclick="filtrarKPI('res')"><div class="kpi-n" id="k-res">—</div><div class="kpi-lbl">Residentes activos</div></div>
-      <div class="kpi teal" onclick="filtrarKPI('mov')"><div class="kpi-n" id="k-mov">—</div><div class="kpi-lbl">Movilidad entrante</div></div>
-      <div class="kpi" onclick=""><div class="kpi-n" id="k-prog">—</div><div class="kpi-lbl">Programas</div></div>
-      <div class="kpi teal" onclick=""><div class="kpi-n" id="k-camp">—</div><div class="kpi-lbl">Campos de rotación</div></div>
-      <div class="kpi warn" onclick="filtrarKPI('pend')"><div class="kpi-n" id="k-pend">—</div><div class="kpi-lbl">Pendientes de confirmar</div></div>
-      <div class="kpi warn" onclick="filtrarKPI('negado')"><div class="kpi-n" id="k-negado" style="color:var(--mor-txt)">—</div><div class="kpi-lbl">Negados (requieren reasignación)</div></div>
-    </div>
-
-    <div class="grid2">
-      <div class="card">
-        <div class="card-hdr">Residentes por programa <span class="card-hdr-hint">Clic para ver residentes</span></div>
-        <div class="card-body" id="tbl-prog"><div class="empty">Sin datos</div></div>
+    <div class="panel-top">
+      <div>
+        <h1>Uso del aplicativo</h1>
+        <p id="pu-actualizado">Cómo están usando los residentes el portal de rotaciones.</p>
       </div>
-      <div class="card">
-        <div class="card-hdr teal">Campos de rotación <span class="card-hdr-hint">Clic para ver residentes</span></div>
-        <div class="card-body" id="tbl-camp"><div class="empty">Sin datos</div></div>
+      <div class="periodo" id="pu-periodo">
+        <button class="on" onclick="setPeriodoUso(this,30)">Últimos 30 días</button>
+        <button onclick="setPeriodoUso(this,90)">90 días</button>
+        <button onclick="setPeriodoUso(this,0)">Todo</button>
       </div>
     </div>
 
-    <!-- BUSCAR CAMPO DE ROTACIÓN -->
-    <div class="buscador">
-      <div class="buscador-tit">Buscar campo de rotación</div>
-      <div class="buscador-row" style="flex-wrap:wrap">
-        <div class="ms-wrap" id="fc-camp-wrap">
-          <input type="text" id="fc-camp" placeholder="Institución/campo... (elige una o varias)" autocomplete="off"
-            oninput="filtrarOpcionesCampo()" onfocus="filtrarOpcionesCampo()">
-          <div class="ms-dropdown" id="fc-camp-dropdown"></div>
+    <div class="kpis" id="pu-kpis"></div>
+
+    <!-- ADOPCIÓN -->
+    <div class="sec">
+      <div class="sec-cab"><h2>Adopción</h2>
+        <p>Quiénes ya lo están usando y a quiénes hay que buscar.</p></div>
+      <div class="grid2">
+        <div class="caja">
+          <div class="caja-cab"><b>Cobertura por programa</b><span>residentes que han entrado al menos una vez</span></div>
+          <div class="caja-cuerpo" id="pu-cobertura"></div>
         </div>
-        <select id="fc-mes" onchange="buscarCampo()">
-          <option value="">Todos los meses</option>
-          <option value="ENERO">Enero</option>
-          <option value="FEBRERO">Febrero</option>
-          <option value="MARZO">Marzo</option>
-          <option value="ABRIL">Abril</option>
-          <option value="MAYO">Mayo</option>
-          <option value="JUNIO">Junio</option>
-          <option value="JULIO">Julio</option>
-          <option value="AGOSTO">Agosto</option>
-          <option value="SEPTIEMBRE">Septiembre</option>
-          <option value="OCTUBRE">Octubre</option>
-          <option value="NOVIEMBRE">Noviembre</option>
-          <option value="DICIEMBRE">Diciembre</option>
-        </select>
-        <select id="fc-anio" onchange="buscarCampo()"><option value="">Todos los años</option></select>
-        <select id="fc-prog" onchange="buscarCampo()"><option value="">Todas las especialidades</option></select>
-      </div>
-      <div class="ms-chips" id="fc-camp-chips"></div>
-      <div class="res-lista" id="fc-lista"></div>
-    </div>
-
-    <!-- BUSCAR POR ROTACIÓN -->
-    <div class="buscador">
-      <div class="buscador-tit">Buscar por rotación</div>
-      <div class="buscador-row" style="flex-wrap:wrap">
-        <input type="text" id="br-nombre" list="br-rotaciones-list" placeholder="Nombre de la rotación..." autocomplete="off" oninput="buscarRotacion()">
-        <datalist id="br-rotaciones-list"></datalist>
-        <select id="br-prog" onchange="buscarRotacion()"><option value="">Todas las especialidades</option></select>
-        <select id="br-mes" onchange="buscarRotacion()">
-          <option value="">Todos los meses</option>
-          <option value="ENERO">Enero</option>
-          <option value="FEBRERO">Febrero</option>
-          <option value="MARZO">Marzo</option>
-          <option value="ABRIL">Abril</option>
-          <option value="MAYO">Mayo</option>
-          <option value="JUNIO">Junio</option>
-          <option value="JULIO">Julio</option>
-          <option value="AGOSTO">Agosto</option>
-          <option value="SEPTIEMBRE">Septiembre</option>
-          <option value="OCTUBRE">Octubre</option>
-          <option value="NOVIEMBRE">Noviembre</option>
-          <option value="DICIEMBRE">Diciembre</option>
-        </select>
-      </div>
-      <div class="resumen-meses" id="br-resumen-meses"></div>
-      <div class="res-lista" id="br-lista"></div>
-    </div>
-
-    <div class="buscador" id="box-residente">
-      <div class="buscador-tit" id="tit-residente">Buscar residente</div>
-      <div class="buscador-row">
-        <input type="text" id="b-nom" placeholder="Nombre..." oninput="buscar()">
-        <select id="b-prog" onchange="buscar()"><option value="">Todos los programas</option></select>
-        <select id="b-sem" onchange="buscar()"><option value="">Todos los semestres</option></select>
-      </div>
-      <div class="res-lista" id="res-lista"></div>
-    </div>
-
-    <!-- NOTAS Y CERTIFICADOS PENDIENTES -->
-    <div class="log-section" id="pend-notas-section">
-      <div class="log-hdr">
-        <span>
-          Checklist de notas por residente
-          <span class="log-count-badge" id="pend-notas-count">0</span>
-        </span>
-        <span class="log-hdr-hint">Según lo archivado en Drive</span>
-        <button class="btn-clear-log" onclick="cargarPendientesNotas(true)">Actualizar</button>
-      </div>
-      <div style="padding:10px 14px;display:flex;gap:.6rem;flex-wrap:wrap;border-bottom:1px solid var(--borde)">
-        <input type="text" id="pn-nom" placeholder="Buscar residente..." oninput="renderChecklistNotas()"
-          style="flex:1;min-width:140px;padding:8px 10px;border:1.5px solid var(--borde);border-radius:8px;font-size:13px;outline:none;background:var(--fondo)">
-        <select id="pn-prog" onchange="renderChecklistNotas()"
-          style="flex:1;min-width:140px;padding:8px 10px;border:1.5px solid var(--borde);border-radius:8px;font-size:13px;outline:none;background:var(--fondo)">
-          <option value="">Todos los programas</option>
-        </select>
-      </div>
-      <div class="log-tbl-wrap" style="max-height:420px">
-        <div id="pend-notas-contenido"><div class="log-empty">Cargando información desde Drive...</div></div>
+        <div class="caja">
+          <div class="caja-cab"><b>Nunca han entrado</b><span id="pu-nunca-n"></span></div>
+          <div class="scroll" id="pu-nunca"></div>
+          <div class="caja-pie">
+            <button class="btn-ch" onclick="copiarNuncaUso()">📋 Copiar la lista</button>
+            <button class="btn-ch" onclick="descargarNuncaUso()">⬇ Descargar CSV</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- LOG DE ACCESOS -->
-    <div class="log-section">
-      <div class="log-hdr">
-        <span>
-          Registro de accesos
-          <span class="log-count-badge" id="log-count">0</span>
-        </span>
-        <span class="log-hdr-hint">Accesos de residentes al portal</span>
-        <button class="btn-clear-log" onclick="limpiarLog()">Borrar registro</button>
+    <!-- ACTIVIDAD -->
+    <div class="sec">
+      <div class="sec-cab"><h2>Actividad</h2>
+        <p>Cuándo y desde dónde entran. Sirve para decidir a qué hora enviar los avisos.</p></div>
+      <div class="grid3">
+        <div class="caja" style="grid-column:span 2">
+          <div class="caja-cab"><b>Ingresos por día</b><span id="pu-ingresos-n"></span></div>
+          <div class="caja-cuerpo">
+            <div class="barras" id="pu-barras"></div>
+            <div class="eje" id="pu-eje"></div>
+          </div>
+        </div>
+        <div class="caja">
+          <div class="caja-cab"><b>Dispositivo</b></div>
+          <div class="caja-cuerpo" id="pu-dispositivo"></div>
+        </div>
       </div>
-      <div class="log-tbl-wrap">
-        <div id="log-contenido"><div class="log-empty">Sin accesos registrados aún.</div></div>
+      <div class="grid2" style="margin-top:1.1rem">
+        <div class="caja">
+          <div class="caja-cab"><b>Franja horaria</b><span>hora del día con más ingresos</span></div>
+          <div class="caja-cuerpo">
+            <div class="horas" id="pu-horas"></div>
+            <div class="horas-eje"><span>0 h</span><span>6 h</span><span>12 h</span><span>18 h</span><span>23 h</span></div>
+            <p style="font-size:12px;color:var(--sec);margin-top:11px" id="pu-pico"></p>
+          </div>
+        </div>
+        <div class="caja">
+          <div class="caja-cab"><b>Duración de las sesiones</b></div>
+          <div class="caja-cuerpo" id="pu-sesiones"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTADO -->
+    <div class="sec">
+      <div class="sec-cab"><h2>Resultado</h2>
+        <p>Lo que el aplicativo produce: notas cargadas y qué tan al día va cada programa.</p></div>
+      <div class="grid2">
+        <div class="caja">
+          <div class="caja-cab"><b>Cumplimiento de notas por programa</b><span>notas cargadas sobre rotaciones que la requieren</span></div>
+          <div class="caja-cuerpo" id="pu-cumplimiento"><div class="log-empty">Consultando Drive...</div></div>
+        </div>
+        <div class="caja">
+          <div class="caja-cab"><b>Notas cargadas por mes</b><span id="pu-notas-n"></span></div>
+          <div class="caja-cuerpo">
+            <div class="barras" id="pu-barras-notas"></div>
+            <div class="eje" id="pu-eje-notas"></div>
+            <div id="pu-notas-resumen" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--sec)"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detalle por residente (lo que antes era el checklist de notas pendientes) -->
+      <div class="caja" style="margin-top:1.1rem">
+        <div class="caja-cab">
+          <b>Notas pendientes por residente <span class="log-count-badge" id="pend-notas-count" style="background:var(--naranja);color:var(--nar-txt)">0</span></b>
+          <button class="btn-ch" onclick="cargarPendientesNotas(true)">🔄 Actualizar desde Drive</button>
+        </div>
+        <div class="caja-cuerpo" style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" id="pn-nom" placeholder="Buscar residente..." oninput="renderChecklistNotas()"
+                 style="flex:1;min-width:180px;padding:9px 12px;border:1.5px solid var(--borde);border-radius:9px;font-size:13px;background:var(--fondo);outline:none">
+          <select id="pn-prog" onchange="renderChecklistNotas()"
+                  style="padding:9px 12px;border:1.5px solid var(--borde);border-radius:9px;font-size:13px;background:var(--fondo)">
+            <option value="">Todos los programas</option>
+          </select>
+        </div>
+        <div class="scroll" id="pend-notas-contenido"><div class="log-empty">Cargando información desde Drive...</div></div>
+      </div>
+    </div>
+
+    <!-- ACCESOS -->
+    <div class="sec">
+      <div class="sec-cab"><h2>Accesos recientes</h2>
+        <p>Quién entró, cuándo y cuánto tiempo se quedó. Toca una fila para abrir su cronograma.</p></div>
+      <div class="caja">
+        <div class="scroll">
+          <table class="tbl">
+            <thead><tr><th>Residente</th><th>Programa</th><th>Fecha y hora</th><th>Duración</th><th>Dispositivo</th></tr></thead>
+            <tbody id="pu-accesos"></tbody>
+          </table>
+        </div>
+        <div class="caja-pie"><button class="btn-ch" onclick="descargarAccesosUso()">⬇ Descargar el registro completo</button></div>
       </div>
     </div>
 
@@ -783,9 +883,8 @@ async function cargarDesdeGitHub() {
         txt.textContent = `Datos actualizados · ${datos.length} registros · ${ahora}`;
         document.getElementById('datos-hdr').textContent = `${datos.length} registros`;
         document.getElementById('datos-hdr').style.display = 'inline';
-        document.getElementById('info-actualizacion').textContent =
-          `Datos cargados automáticamente · ${datos.length} registros · Última actualización: ${ahora}`;
         mostrarRecordado_();
+        if (modo === 'coord') { renderPanelUso(); cargarPendientesNotas(); }
       },
       error() { throw new Error('Error CSV'); }
     });
@@ -833,7 +932,7 @@ function setTab(t) {
 async function entrarCoord() {
   const pass = document.getElementById('inp-pass').value;
   const h = await sha256(pass);
-  if(h===HASH_PASS) { modo='coord'; setBadge('Coordinación'); ir('coord'); renderDash(); renderLog(); cargarPendientesNotas(); }
+  if(h===HASH_PASS) { modo='coord'; setBadge('Coordinación'); ir('coord'); cargarUso(true); cargarPendientesNotas(); }
   else { document.getElementById('e-coord').classList.add('on'); document.getElementById('inp-pass').value=''; }
 }
 
@@ -935,6 +1034,7 @@ function cerrar() {
   document.getElementById('hdr-badge').style.display='none';
   document.getElementById('btn-salir').style.display='none';
   cerrarTourR_();
+  cerrarSesionUso_();
   ir('login');
   if(leerLocal_(DOC_KEY)) mostrarRecordado_();
 }
@@ -954,281 +1054,329 @@ function ir(p) {
 function volverAtras() { if(modo==='coord') ir('coord'); else cerrar(); }
 
 // ============================================================
-// LOG DE ACCESOS
+// PANEL DE USO DEL APLICATIVO (coordinacion)
+// Lee la hoja LogAccesos del backend de Gestion Operativa y la cruza con la
+// base del CSV. Si el registro todavia no esta configurado en Code.gs, cada
+// bloque muestra un aviso explicando que falta, en vez de quedar vacio.
 // ============================================================
-function registrarAcceso(cedula) {
-  const registro = leerLog();
-  const ahora = new Date();
-  // Buscar nombre del residente
-  const fila = datos.find(r=>String(r['ID']||'').trim()===cedula);
-  const nombre = fila ? (fila['Persona']||'') : '';
-  const programa = fila ? (fila['Programa']||'') : '';
-  registro.unshift({
-    cedula,
-    nombre,
-    programa,
-    fecha: ahora.toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',year:'numeric'}),
-    hora: ahora.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),
-    ts: ahora.getTime()
+let LOG_USO = null;      // filas crudas de LogAccesos
+let DIAS_USO = 30;       // periodo seleccionado (0 = todo)
+
+const AVISO_LOG = '<div class="sin-log"><b>Falta activar el registro de accesos</b>' +
+  'Este bloque necesita la hoja <strong>LogAccesos</strong> en el backend de Gestion Operativa. ' +
+  'Mientras no exista, no hay forma de saber quien entro: hoy cada ingreso queda guardado solo en el navegador del residente.</div>';
+
+function fmtDurUso(seg) {
+  if (!seg && seg !== 0) return '—';
+  const m = Math.floor(seg / 60), s = Math.round(seg % 60);
+  return m ? (m + ':' + String(s).padStart(2, '0')) : (s + ' s');
+}
+function inicialesUso(n) { return String(n||'').split(' ').slice(0,2).map(x=>x[0]||'').join('').toUpperCase(); }
+function escUso(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function barraPctUso(nombre, pct, detalle) {
+  const cls = pct >= 80 ? '' : (pct >= 60 ? 'medio' : 'bajo');
+  return '<div class="fila-barra"><div><span class="n">' + escUso(nombre) +
+    (detalle ? ' <small style="color:var(--sec)">· ' + escUso(detalle) + '</small>' : '') + '</span>' +
+    '<div class="pista"><i class="' + cls + '" style="width:' + pct + '%"></i></div></div>' +
+    '<div class="pct">' + pct + '%</div></div>';
+}
+
+// Residentes vigentes segun el CSV (uno por documento)
+function rosterUso() {
+  const r = {};
+  datos.forEach(f => {
+    if (String(f['Tipo'] || '').toUpperCase().trim() !== 'RESIDENTE CES') return;
+    if (!vigente(f['Anio academico'] || '', f['Semestre'] || '')) return;
+    const id = String(f['ID'] || '').trim();
+    if (!id) return;
+    if (!r[id]) r[id] = { id, nombre: (f['Persona'] || '').trim(), prog: (f['Programa'] || '').trim() };
   });
-  // Conservar máximo 500 registros
-  if(registro.length > 500) registro.splice(500);
-  guardarLog(registro);
+  return r;
 }
 
-function leerLog() {
-  try { return JSON.parse(localStorage.getItem(LOG_KEY)||'[]'); }
-  catch(e) { return []; }
+async function cargarUso(forzar) {
+  if (LOG_USO && !forzar) { renderPanelUso(); return; }
+  renderPanelUso();     // pinta de una lo que se pueda con el CSV y Drive
+  if (!URL_BACKEND_GESTION) return;
+  try {
+    const resp = await fetch(URL_BACKEND_GESTION + '?accion=logAccesos&clave=' + HASH_PASS + '&t=' + Date.now());
+    const data = await resp.json();
+    LOG_USO = (data && data.ok && Array.isArray(data.accesos)) ? data.accesos : [];
+  } catch (e) {
+    LOG_USO = null;     // no se pudo consultar: se mantiene el aviso
+  }
+  renderPanelUso();
 }
 
-function guardarLog(arr) {
-  try { localStorage.setItem(LOG_KEY, JSON.stringify(arr)); }
-  catch(e) { console.warn('No se pudo guardar el log.'); }
+function setPeriodoUso(btn, dias) {
+  DIAS_USO = dias;
+  const hermanos = btn.parentNode.querySelectorAll('button');
+  for (let i = 0; i < hermanos.length; i++) hermanos[i].classList.remove('on');
+  btn.classList.add('on');
+  renderPanelUso();
 }
 
-function limpiarLog() {
-  if(!confirm('¿Borrar todo el registro de accesos? Esta acción no se puede deshacer.')) return;
-  localStorage.removeItem(LOG_KEY);
-  renderLog();
+function accesosPeriodoUso() {
+  if (!LOG_USO) return null;
+  if (!DIAS_USO) return LOG_USO.slice();
+  const corte = Date.now() - DIAS_USO * 86400000;
+  return LOG_USO.filter(a => { const t = Date.parse(a.fecha); return !isNaN(t) && t >= corte; });
 }
 
-function renderLog() {
-  const registro = leerLog();
-  const cont = document.getElementById('log-contenido');
-  const badge = document.getElementById('log-count');
-  badge.textContent = registro.length;
+function renderPanelUso() {
+  if (!document.getElementById('pu-kpis')) return;
+  const roster = rosterUso();
+  const totalRes = Object.keys(roster).length;
+  const acc = accesosPeriodoUso();
+  const hayLog = !!acc;
 
-  if(!registro.length) {
-    cont.innerHTML = '<div class="log-empty">Sin accesos registrados aún.</div>';
-    return;
+  // ---------- quien entro ----------
+  const entraron = {};
+  if (hayLog) acc.forEach(a => { const id = String(a.id || '').trim(); if (id) entraron[id] = (entraron[id] || 0) + 1; });
+  const nEntraron = Object.keys(entraron).filter(id => roster[id]).length;
+  const nunca = Object.values(roster).filter(r => !entraron[r.id]);
+
+  // ---------- duraciones ----------
+  const dur = hayLog ? acc.map(a => Number(a.duracion) || 0).filter(d => d > 0) : [];
+  const prom = dur.length ? dur.reduce((a, b) => a + b, 0) / dur.length : 0;
+
+  // ---------- notas (Drive) ----------
+  const grupos = estadoDriveGlobal ? construirChecklistPorResidente() : null;
+  let notasOk = 0, notasTotal = 0;
+  if (grupos) Object.values(grupos).forEach(g => { notasTotal += g.items.length; notasOk += g.items.length - g.pend; });
+
+  // ---------- KPIs ----------
+  const kpis = [
+    { c: '', n: hayLog ? (nEntraron + ' de ' + totalRes) : '—', l: 'Residentes que ya usaron el portal',
+      d: hayLog && totalRes ? '<b>' + Math.round(nEntraron / totalRes * 100) + '%</b> de cobertura' : 'sin registro de accesos' },
+    { c: 'teal', n: hayLog ? acc.length : '—', l: 'Ingresos en el periodo', d: hayLog ? (DIAS_USO ? 'últimos ' + DIAS_USO + ' días' : 'histórico completo') : 'sin registro de accesos' },
+    { c: '', n: dur.length ? fmtDurUso(prom) : '—', l: 'Duración promedio de la sesión', d: dur.length ? (dur.length + ' sesiones medidas') : 'sin registro de accesos' },
+    { c: 'teal', n: grupos ? notasOk : '—', l: 'Notas cargadas en Drive', d: grupos ? ('de ' + notasTotal + ' que se requieren') : 'consultando Drive...' },
+    { c: 'warn', n: hayLog ? nunca.length : '—', l: 'Residentes que nunca han entrado', d: hayLog ? 'están en la lista de abajo' : 'sin registro de accesos' },
+    { c: 'mor', n: grupos ? (notasTotal - notasOk) : '—', l: 'Notas pendientes de cargar', d: grupos && notasTotal ? ('<b>' + Math.round(notasOk / notasTotal * 100) + '%</b> de cumplimiento') : '' }
+  ];
+  document.getElementById('pu-kpis').innerHTML = kpis.map(k =>
+    '<div class="kpi ' + k.c + '"><div class="n">' + k.n + '</div><div class="l">' + k.l + '</div><div class="d">' + k.d + '</div></div>').join('');
+
+  // ---------- cobertura por programa ----------
+  const cob = document.getElementById('pu-cobertura');
+  if (!hayLog) cob.innerHTML = AVISO_LOG;
+  else {
+    const porProg = {};
+    Object.values(roster).forEach(r => {
+      if (!porProg[r.prog]) porProg[r.prog] = { total: 0, con: 0 };
+      porProg[r.prog].total++;
+      if (entraron[r.id]) porProg[r.prog].con++;
+    });
+    const lista = Object.keys(porProg).sort((a, b) => porProg[a].con / porProg[a].total - porProg[b].con / porProg[b].total);
+    cob.innerHTML = lista.length
+      ? lista.map(n => barraPctUso(n, Math.round(porProg[n].con / porProg[n].total * 100), porProg[n].con + ' de ' + porProg[n].total)).join('')
+      : '<div class="log-empty">Sin residentes vigentes en la base.</div>';
   }
 
-  cont.innerHTML = `<table class="log-tbl">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Fecha</th>
-        <th>Hora</th>
-        <th>Documento</th>
-        <th>Residente</th>
-        <th>Programa</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${registro.map((r,i)=>`
-        <tr>
-          <td style="color:var(--sec)">${i+1}</td>
-          <td>${r.fecha||'—'}</td>
-          <td style="font-variant-numeric:tabular-nums">${r.hora||'—'}</td>
-          <td style="font-weight:600;color:var(--az)">${r.cedula}</td>
-          <td>${r.nombre||'—'}</td>
-          <td><span class="log-programa">${r.programa||'—'}</span></td>
-        </tr>`).join('')}
-    </tbody>
-  </table>`;
-}
+  // ---------- nunca han entrado ----------
+  const cajaNunca = document.getElementById('pu-nunca');
+  document.getElementById('pu-nunca-n').textContent = hayLog ? (nunca.length + ' residentes') : '';
+  if (!hayLog) cajaNunca.innerHTML = '<div style="padding:14px 15px">' + AVISO_LOG + '</div>';
+  else if (!nunca.length) cajaNunca.innerHTML = '<div class="log-empty">🎉 Todos los residentes vigentes han entrado al menos una vez.</div>';
+  else cajaNunca.innerHTML = nunca.sort((a, b) => a.prog.localeCompare(b.prog, 'es') || a.nombre.localeCompare(b.nombre, 'es')).map(r =>
+    '<button class="pers" onclick="verResidente(\'' + escUso(r.id) + '\')"><span class="av">' + escUso(inicialesUso(r.nombre)) + '</span>' +
+    '<span class="t"><b>' + escUso(r.nombre) + '</b><small>' + escUso(r.prog) + '</small></span>' +
+    '<span class="dias">Nunca</span></button>').join('');
 
-// ============================================================
-// FILTROS DE SEMESTRE
-// ============================================================
-function construirFiltroSems() {
-  const sems = [...new Set(datos.map(r=>r['Semestre']||'').filter(Boolean))].sort();
-  const cont = document.getElementById('filtro-sems');
-  let html = `<button class="filtro-btn ${semFiltro==='activo'?'on':''}" onclick="cambiarFiltroSem('activo',this)">Período activo</button>`;
-  sems.forEach(s => {
-    html += `<button class="filtro-btn ${semFiltro===s?'on':''}" onclick="cambiarFiltroSem('${s}',this)">${s}</button>`;
-  });
-  html += `<button class="filtro-btn ${semFiltro==='todos'?'on':''}" onclick="cambiarFiltroSem('todos',this)">Todos</button>`;
-  cont.innerHTML = html;
-}
-
-function cambiarFiltroSem(valor, btn) {
-  semFiltro = valor;
-  document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  renderDash();
-}
-
-// ============================================================
-// DASHBOARD PRINCIPAL
-// ============================================================
-function renderDash() {
-  if(!datos.length) return;
-  document.getElementById('periodo-lbl').textContent =
-    `Año académico activo: ${anioActivo()} · Semestres: ${semsActivos().join(' y ')}`;
-
-  construirFiltroSems();
-
-  const res=new Set(), mov=new Set(), progs=new Set(), camps=new Set();
-  let pend=0, negados=0;
-  const cProg={}, cCamp={}, resxProg={}, resxCamp={};
-
-  datos.forEach(r=>{
-    const tipo=(r['Tipo']||'').toUpperCase().trim();
-    const id=(r['ID']||r['Persona']||'').trim();
-    const nombre=(r['Persona']||'').trim();
-    const prog=(r['Programa']||'').trim();
-    const camp=(r['Campo de rotacion']||'').trim();
-    const nivel=(r['Nivel / Origen']||'').trim();
-    const sem=(r['Semestre']||'').trim();
-    const est=(r['Estado confirmacion']||'').trim();
-    const pasa=pasaFiltroSem(r);
-
-    if(prog) progs.add(prog);
-    if(camp&&camp!=='VACACIONES') camps.add(camp);
-
-    if(!pasa) return;
-
-    if(est==='Pendiente') pend++;
-    if(est==='Negado') negados++;
-
-    if(tipo==='RESIDENTE CES'&&id) {
-      res.add(id);
-      if(!cProg[prog]) cProg[prog]=new Set();
-      cProg[prog].add(id);
-      if(!resxProg[prog]) resxProg[prog]=[];
-      if(!resxProg[prog].find(x=>x.id===id))
-        resxProg[prog].push({id,nombre,nivel,sem,pend:0,negado:0});
-    }
-    if(tipo==='MOVILIDAD ENTRANTE'&&id) {
-      mov.add(id);
-    }
-    if(camp&&camp!=='VACACIONES'&&id) {
-      camp.split(' - ').forEach(c=>{
-        const ct=c.trim(); if(!ct) return;
-        if(!cCamp[ct]) cCamp[ct]=new Set();
-        cCamp[ct].add(id);
-        if(!resxCamp[ct]) resxCamp[ct]=[];
-        if(!resxCamp[ct].find(x=>x.id===id))
-          resxCamp[ct].push({id,nombre,nivel,prog,sem});
-      });
-    }
-  });
-
-  datos.filter(r=>pasaFiltroSem(r)&&(r['Estado confirmacion']||'').trim()==='Pendiente').forEach(r=>{
-    const id=(r['ID']||r['Persona']||'').trim();
-    const prog=(r['Programa']||'').trim();
-    if(resxProg[prog]) { const p=resxProg[prog].find(x=>x.id===id); if(p) p.pend++; }
-    Object.values(resxCamp).flat().filter(x=>x.id===id).forEach(x=>x.pend=(x.pend||0)+1);
-  });
-
-  datos.filter(r=>pasaFiltroSem(r)&&(r['Estado confirmacion']||'').trim()==='Negado').forEach(r=>{
-    const id=(r['ID']||r['Persona']||'').trim();
-    const prog=(r['Programa']||'').trim();
-    if(resxProg[prog]) { const p=resxProg[prog].find(x=>x.id===id); if(p) p.negado=(p.negado||0)+1; }
-    Object.values(resxCamp).flat().filter(x=>x.id===id).forEach(x=>x.negado=(x.negado||0)+1);
-  });
-
-  document.getElementById('k-res').textContent=res.size;
-  document.getElementById('k-mov').textContent=mov.size;
-  document.getElementById('k-prog').textContent=progs.size;
-  document.getElementById('k-camp').textContent=camps.size;
-  document.getElementById('k-pend').textContent=pend;
-  document.getElementById('k-negado').textContent=negados;
-
-  const pRows=Object.entries(cProg).map(([k,v])=>[k,v.size]).sort((a,b)=>a[0].localeCompare(b[0],'es'));
-  document.getElementById('tbl-prog').innerHTML = pRows.map(([p,n])=>`
-    <div>
-      <div class="fila" onclick="toggleAcord('prog-${p.replace(/[^a-z0-9]/gi,'_')}',this)">
-        <span class="fila-txt">${p}</span>
-        <span class="fila-n">${n}</span>
-        <span class="fila-arr">▶</span>
-      </div>
-      <div class="acord-detalle" id="prog-${p.replace(/[^a-z0-9]/gi,'_')}">
-        <div class="acord-titulo">Residentes en ${p}</div>
-        <div class="acord-lista">
-          ${(resxProg[p]||[]).sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(res=>`
-            <div class="acord-item">
-              <span class="acord-nombre">${res.nombre||res.id}</span>
-              <span class="acord-tag">${res.nivel}</span>
-              ${res.pend?`<span class="acord-tag pend">${res.pend} pend.</span>`:''}
-              <button class="btn-crono" onclick="verResidente('${res.id.replace(/'/g,"\\'")}')">Ver →</button>
-            </div>`).join('')}
-        </div>
-      </div>
-    </div>`).join('') || '<div class="empty">Sin datos</div>';
-
-  const cRows=Object.entries(cCamp).map(([k,v])=>[k,v.size]).sort((a,b)=>a[0].localeCompare(b[0],'es'));
-  document.getElementById('tbl-camp').innerHTML = cRows.map(([c,n])=>`
-    <div>
-      <div class="fila" onclick="toggleAcord('camp-${c.replace(/[^a-z0-9]/gi,'_')}',this)">
-        <span class="fila-txt">${c}</span>
-        <span class="fila-n teal">${n}</span>
-        <span class="fila-arr">▶</span>
-      </div>
-      <div class="acord-detalle" id="camp-${c.replace(/[^a-z0-9]/gi,'_')}">
-        <div class="acord-titulo">Residentes en ${c}</div>
-        <div class="acord-lista">
-          ${(resxCamp[c]||[]).sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(res=>`
-            <div class="acord-item">
-              <span class="acord-nombre">${res.nombre||res.id}</span>
-              <span class="acord-tag">${res.prog}</span>
-              <span class="acord-tag">${res.nivel}</span>
-              ${res.pend?`<span class="acord-tag pend">${res.pend} pend.</span>`:''}
-              <button class="btn-crono" onclick="verResidente('${res.id.replace(/'/g,"\\'")}')">Ver →</button>
-            </div>`).join('')}
-        </div>
-      </div>
-    </div>`).join('') || '<div class="empty">Sin datos</div>';
-
-  const sP=document.getElementById('b-prog');
-  sP.innerHTML='<option value="">Todos los programas</option>'+
-    [...progs].sort().map(p=>`<option value="${p}">${p}</option>`).join('');
-  const semSet=new Set(datos.map(r=>r['Semestre']||'').filter(Boolean));
-  const sS=document.getElementById('b-sem');
-  sS.innerHTML='<option value="">Todos los semestres</option>'+
-    [...semSet].sort().map(s=>`<option value="${s}">${s}</option>`).join('');
-
-  const pP=document.getElementById('pn-prog');
-  if(pP) pP.innerHTML='<option value="">Todos los programas</option>'+
-    [...progs].sort().map(p=>`<option value="${p}">${p}</option>`).join('');
-
-  // Selects del buscador "Campo de rotación" (Año = Semestre limpio tipo "2027-1")
-  const semCleanSet=new Set();
-  datos.forEach(r=>{
-    const sem=(r['Semestre']||'').trim();
-    if(!sem) return;
-    sem.split(' / ').forEach(s=>{
-      const st=s.trim();
-      if(/^\d{4}-[12]$/.test(st)) semCleanSet.add(st);
+  // ---------- ingresos por dia ----------
+  const cajaBarras = document.getElementById('pu-barras');
+  const eje = document.getElementById('pu-eje');
+  if (!hayLog) { cajaBarras.innerHTML = ''; cajaBarras.parentNode.innerHTML = AVISO_LOG; }
+  else {
+    const dias = DIAS_USO || 30, hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+    const serie = new Array(dias).fill(0);
+    acc.forEach(a => {
+      const t = new Date(a.fecha); t.setHours(0, 0, 0, 0);
+      const idx = dias - 1 - Math.round((hoy - t) / 86400000);
+      if (idx >= 0 && idx < dias) serie[idx]++;
     });
-  });
-  const fA=document.getElementById('fc-anio');
-  if(fA) fA.innerHTML='<option value="">Todos los años</option>'+
-    [...semCleanSet].sort().map(s=>`<option value="${s}">${s}</option>`).join('');
+    const max = Math.max(1, ...serie);
+    cajaBarras.innerHTML = serie.map((v, i) => {
+      const f = new Date(hoy.getTime() - (dias - 1 - i) * 86400000);
+      const fds = f.getDay() === 0 || f.getDay() === 6;
+      return '<div class="b ' + (fds ? 'fds' : '') + '" style="height:' + Math.round(v / max * 100) + '%" data-t="' +
+        f.getDate() + ' ' + MESES_CAL_[f.getMonth()].slice(0, 3) + ': ' + v + '"></div>';
+    }).join('');
+    const ini = new Date(hoy.getTime() - (dias - 1) * 86400000);
+    eje.innerHTML = '<span>' + ini.getDate() + ' ' + MESES_CAL_[ini.getMonth()].slice(0, 3) + '</span><span>hoy</span>';
+    document.getElementById('pu-ingresos-n').textContent = acc.length + ' ingresos';
+  }
 
-  const fP=document.getElementById('fc-prog');
-  if(fP) fP.innerHTML='<option value="">Todas las especialidades</option>'+
-    [...progs].sort().map(p=>`<option value="${p}">${p}</option>`).join('');
+  // ---------- dispositivo ----------
+  const disp = document.getElementById('pu-dispositivo');
+  if (!hayLog) disp.innerHTML = AVISO_LOG;
+  else {
+    const movil = acc.filter(a => String(a.dispositivo || '').toLowerCase().indexOf('m') === 0).length;
+    const pct = acc.length ? Math.round(movil / acc.length * 100) : 0;
+    disp.innerHTML = '<div class="anillo"><svg width="108" height="108" viewBox="0 0 42 42">' +
+      '<circle cx="21" cy="21" r="15.9" fill="none" stroke="#eef2f6" stroke-width="6"></circle>' +
+      '<circle cx="21" cy="21" r="15.9" fill="none" stroke="#1F4E79" stroke-width="6" stroke-dasharray="' + pct + ' ' + (100 - pct) + '" stroke-dashoffset="25"></circle>' +
+      '<text x="21" y="22.6" text-anchor="middle" font-size="8.5" font-weight="700" fill="#1F4E79">' + pct + '%</text></svg>' +
+      '<div class="anillo-leyenda"><span><i style="background:#1F4E79"></i><b>' + pct + '%</b>&nbsp;celular</span>' +
+      '<span><i style="background:#eef2f6;border:1px solid var(--borde)"></i><b>' + (100 - pct) + '%</b>&nbsp;computador</span></div></div>';
+  }
 
-  // Selects/datalist del buscador "Buscar por rotación"
-  const brP=document.getElementById('br-prog');
-  if(brP) brP.innerHTML='<option value="">Todas las especialidades</option>'+
-    [...progs].sort().map(p=>`<option value="${p}">${p}</option>`).join('');
+  // ---------- franja horaria ----------
+  const horas = document.getElementById('pu-horas');
+  const pico = document.getElementById('pu-pico');
+  if (!hayLog) { horas.innerHTML = ''; pico.innerHTML = AVISO_LOG; }
+  else {
+    const hh = new Array(24).fill(0);
+    acc.forEach(a => { const t = new Date(a.fecha); if (!isNaN(t)) hh[t.getHours()]++; });
+    const max = Math.max(1, ...hh);
+    horas.innerHTML = hh.map((v, i) => {
+      const op = v / max;
+      const color = op < .12 ? '#eef2f6' : 'rgba(31,78,121,' + (0.18 + op * 0.82) + ')';
+      return '<i style="background:' + color + '" title="' + i + ' h · ' + v + ' ingresos"></i>';
+    }).join('');
+    const mejor = hh.indexOf(Math.max(...hh));
+    pico.innerHTML = max > 1 ? 'La mayoría entra alrededor de las <b style="color:var(--az)">' + mejor + ':00</b>. Conviene enviar los avisos poco antes de esa hora.' : 'Todavía no hay suficientes ingresos para ver un patrón.';
+  }
 
-  const rotSet=new Set();
-  datos.forEach(r=>{
-    const rv=(r['Rotacion']||r['Detalle original']||'').trim();
-    if(rv) rotSet.add(rv);
-  });
-  const brList=document.getElementById('br-rotaciones-list');
-  if(brList) brList.innerHTML=[...rotSet].sort((a,b)=>a.localeCompare(b,'es')).map(r=>`<option value="${r}"></option>`).join('');
+  // ---------- duracion de sesiones ----------
+  const ses = document.getElementById('pu-sesiones');
+  if (!hayLog) ses.innerHTML = AVISO_LOG;
+  else if (!dur.length) ses.innerHTML = '<div class="log-empty">Aún no hay sesiones con duración registrada.</div>';
+  else {
+    const b = [0, 0, 0, 0];
+    dur.forEach(d => { if (d < 60) b[0]++; else if (d < 180) b[1]++; else if (d < 480) b[2]++; else b[3]++; });
+    const etq = ['Menos de 1 minuto', 'Entre 1 y 3 minutos', 'Entre 3 y 8 minutos', 'Más de 8 minutos'];
+    ses.innerHTML = b.map((v, i) => barraPctUso(etq[i], Math.round(v / dur.length * 100), v + ' sesiones')).join('') +
+      (b[0] / dur.length > 0.2 ? '<p style="font-size:12px;color:var(--sec);margin-top:10px;line-height:1.5">Más de una de cada cinco sesiones dura menos de un minuto: vale la pena mirar si están encontrando lo que buscan.</p>' : '');
+  }
 
-  // Instituciones/campos distintos para el selector multiple de "Buscar campo
-  // de rotación": se separan igual que en el panel "Campos de rotación"
-  // (por " - "), para no mezclar campos compuestos como "FRACTURAS - INCODOL
-  // - C. ROSARIO CENTRO - HGM" en una sola opcion gigante.
-  const campSet=new Set();
-  datos.forEach(r=>{
-    const c=(r['Campo de rotacion']||'').trim();
-    if(!c || c==='VACACIONES') return;
-    c.split(' - ').forEach(tok=>{
-      const t=tok.trim();
-      if(t) campSet.add(t);
+  // ---------- cumplimiento por programa ----------
+  const cum = document.getElementById('pu-cumplimiento');
+  if (!grupos) cum.innerHTML = '<div class="log-empty">Consultando Drive...</div>';
+  else {
+    const pp = {};
+    Object.values(grupos).forEach(g => {
+      if (!pp[g.prog]) pp[g.prog] = { ok: 0, total: 0 };
+      pp[g.prog].total += g.items.length;
+      pp[g.prog].ok += g.items.length - g.pend;
     });
-  });
-  camposUnicosDisponibles = [...campSet].sort((a,b)=>a.localeCompare(b,'es'));
+    const lista = Object.keys(pp).filter(k => pp[k].total).sort((a, b) => pp[a].ok / pp[a].total - pp[b].ok / pp[b].total);
+    cum.innerHTML = lista.length
+      ? lista.map(n => barraPctUso(n, Math.round(pp[n].ok / pp[n].total * 100), pp[n].ok + ' de ' + pp[n].total)).join('')
+      : '<div class="log-empty">Sin rotaciones que requieran nota en este periodo.</div>';
+  }
+
+  // ---------- notas cargadas por mes ----------
+  const bn = document.getElementById('pu-barras-notas');
+  const ejeN = document.getElementById('pu-eje-notas');
+  const resN = document.getElementById('pu-notas-resumen');
+  const cargues = hayLog ? LOG_USO.filter(a => Number(a.notas) > 0) : null;
+  if (!cargues || !cargues.length) {
+    bn.innerHTML = '';
+    ejeN.innerHTML = '';
+    resN.innerHTML = '<div class="sin-log" style="width:100%"><b>Falta el registro de cargues</b>Drive dice cuántas notas hay, pero no cuándo se subieron. Con la hoja LogAccesos se puede mostrar la evolución mes a mes y la mora promedio.</div>';
+    document.getElementById('pu-notas-n').textContent = '';
+  } else {
+    const meses = {};
+    cargues.forEach(a => { const t = new Date(a.fecha); if (!isNaN(t)) { const k = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0'); meses[k] = (meses[k] || 0) + Number(a.notas); } });
+    const claves = Object.keys(meses).sort();
+    const max = Math.max(1, ...claves.map(k => meses[k]));
+    bn.innerHTML = claves.map(k => '<div class="b" style="height:' + Math.round(meses[k] / max * 100) + '%" data-t="' + k + ': ' + meses[k] + '"></div>').join('');
+    ejeN.innerHTML = claves.length ? '<span>' + claves[0] + '</span><span>' + claves[claves.length - 1] + '</span>' : '';
+    const total = claves.reduce((a, k) => a + meses[k], 0);
+    document.getElementById('pu-notas-n').textContent = total + ' cargues registrados';
+    resN.innerHTML = '<span>Cargues registrados: <b style="color:var(--az)">' + total + '</b></span>';
+  }
+
+  // ---------- accesos recientes ----------
+  const tb = document.getElementById('pu-accesos');
+  if (!hayLog) tb.innerHTML = '<tr><td colspan="5">' + AVISO_LOG + '</td></tr>';
+  else if (!acc.length) tb.innerHTML = '<tr><td colspan="5" class="log-empty">Sin accesos en este periodo.</td></tr>';
+  else tb.innerHTML = acc.slice().sort((a, b) => Date.parse(b.fecha) - Date.parse(a.fecha)).slice(0, 60).map(a => {
+    const t = new Date(a.fecha);
+    const cuando = isNaN(t) ? '—' : t.toLocaleString('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    const esMovil = String(a.dispositivo || '').toLowerCase().indexOf('m') === 0;
+    return '<tr data-id="' + escUso(a.id) + '" onclick="verResidente(\'' + escUso(a.id) + '\')"><td><b>' + escUso(a.nombre || roster[a.id] && roster[a.id].nombre || a.id) + '</b></td>' +
+      '<td class="disp">' + escUso(a.programa || (roster[a.id] ? roster[a.id].prog : '')) + '</td>' +
+      '<td class="disp">' + cuando + '</td><td>' + fmtDurUso(Number(a.duracion) || 0) + '</td>' +
+      '<td class="disp">' + (esMovil ? '📱 celular' : '💻 computador') + '</td></tr>';
+  }).join('');
+
+  // ---------- filtro de programas del detalle por residente ----------
+  const sel = document.getElementById('pn-prog');
+  if (sel && sel.options.length <= 1) {
+    const progs = [...new Set(Object.values(roster).map(r => r.prog).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+    sel.innerHTML = '<option value="">Todos los programas</option>' + progs.map(x => '<option>' + escUso(x) + '</option>').join('');
+  }
+
+  document.getElementById('pu-actualizado').textContent =
+    'Cómo están usando los residentes el portal · ' + datos.length + ' registros en la base' + (hayLog ? ' · ' + LOG_USO.length + ' accesos registrados' : '');
 }
+
+// ---------- exportar ----------
+function copiarNuncaUso() {
+  const roster = rosterUso(), acc = accesosPeriodoUso();
+  if (!acc) { alert('Todavía no hay registro de accesos.'); return; }
+  const entraron = {}; acc.forEach(a => entraron[String(a.id || '').trim()] = 1);
+  const txt = Object.values(roster).filter(r => !entraron[r.id]).map(r => r.nombre + ' — ' + r.prog).join('\n');
+  navigator.clipboard.writeText(txt).then(() => toastR_('Lista copiada'), () => alert(txt));
+}
+function descargarCsvUso(nombre, filas) {
+  const csv = filas.map(f => f.map(c => '"' + String(c == null ? '' : c).replace(/"/g, '""') + '"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = nombre; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function descargarNuncaUso() {
+  const roster = rosterUso(), acc = accesosPeriodoUso();
+  if (!acc) { alert('Todavía no hay registro de accesos.'); return; }
+  const entraron = {}; acc.forEach(a => entraron[String(a.id || '').trim()] = 1);
+  const filas = [['Documento', 'Nombre', 'Programa']].concat(
+    Object.values(roster).filter(r => !entraron[r.id]).map(r => [r.id, r.nombre, r.prog]));
+  descargarCsvUso('residentes_sin_ingreso.csv', filas);
+}
+function descargarAccesosUso() {
+  if (!LOG_USO || !LOG_USO.length) { alert('Todavía no hay registro de accesos.'); return; }
+  const filas = [['FechaHora', 'Documento', 'Nombre', 'Programa', 'Dispositivo', 'DuracionSeg', 'NotasCargadas']].concat(
+    LOG_USO.map(a => [a.fecha, a.id, a.nombre, a.programa, a.dispositivo, a.duracion, a.notas]));
+  descargarCsvUso('log_accesos.csv', filas);
+}
+
+// ============================================================
+// REGISTRO DE ACCESOS EN EL SERVIDOR
+// Avisa al backend cuando un residente entra y cuando cierra, para poder
+// medir cobertura, actividad y duracion de las sesiones.
+// ============================================================
+let SESION_USO = null;
+
+function dispositivoUso_() { return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ? 'movil' : 'escritorio'; }
+
+function registrarAcceso(cedula) {
+  if (!URL_BACKEND_GESTION) return;
+  const fila = datos.find(r => String(r['ID'] || '').trim() === cedula);
+  SESION_USO = { id: cedula, inicio: Date.now(), notas: 0, idSesion: 'S' + Date.now() + Math.floor(Math.random() * 1000) };
+  const q = '?accion=registrarAcceso&idSesion=' + encodeURIComponent(SESION_USO.idSesion) +
+    '&id=' + encodeURIComponent(cedula) +
+    '&nombre=' + encodeURIComponent(fila ? (fila['Persona'] || '') : '') +
+    '&programa=' + encodeURIComponent(fila ? (fila['Programa'] || '') : '') +
+    '&dispositivo=' + encodeURIComponent(dispositivoUso_());
+  fetch(URL_BACKEND_GESTION + q).catch(() => {});
+}
+
+function cerrarSesionUso_() {
+  if (!SESION_USO || !URL_BACKEND_GESTION) return;
+  const seg = Math.round((Date.now() - SESION_USO.inicio) / 1000);
+  const q = '?accion=cerrarSesion&idSesion=' + encodeURIComponent(SESION_USO.idSesion) +
+    '&duracion=' + seg + '&notas=' + SESION_USO.notas;
+  try { fetch(URL_BACKEND_GESTION + q, { keepalive: true }).catch(() => {}); } catch (e) {}
+  SESION_USO = null;
+}
+
+window.addEventListener('pagehide', cerrarSesionUso_);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') cerrarSesionUso_(); });
 
 // ============================================================
 // NOTAS Y CERTIFICADOS PENDIENTES (panel de coordinación)
@@ -1252,6 +1400,7 @@ async function cargarPendientesNotas(forzar) {
     if(data.ok) {
       estadoDriveGlobal = data.datos || {};
       renderChecklistNotas();
+      renderPanelUso();
     } else {
       cont.innerHTML = '<div class="log-empty">No se pudo consultar Drive: '+(data.mensaje||'intenta de nuevo')+'</div>';
     }
@@ -1376,266 +1525,10 @@ function toggleAcordNotas(id, filaEl) {
 // ============================================================
 // ACORDEON
 // ============================================================
-function toggleAcord(id, filaEl) {
-  const detalle = document.getElementById(id);
-  const arr = filaEl.querySelector('.fila-arr');
-  const estaAbierto = detalle.classList.contains('open');
-  const contenedor = filaEl.closest('.card-body');
-  contenedor.querySelectorAll('.acord-detalle.open').forEach(d=>d.classList.remove('open'));
-  contenedor.querySelectorAll('.fila-arr.open').forEach(a=>a.classList.remove('open'));
-  if(!estaAbierto) {
-    detalle.classList.add('open');
-    arr.classList.add('open');
-    setTimeout(()=>detalle.scrollIntoView({behavior:'smooth',block:'nearest'}),150);
-  }
-}
 
 // ============================================================
 // FILTRO RAPIDO DESDE KPI
 // ============================================================
-function filtrarKPI(tipo) {
-  if(tipo==='res') {
-    document.getElementById('b-nom').value='';
-    document.getElementById('b-prog').value='';
-    document.getElementById('b-sem').value='';
-    buscar();
-    document.getElementById('box-residente').scrollIntoView({behavior:'smooth'});
-  } else if(tipo==='mov') {
-    document.getElementById('b-nom').value='';
-    document.getElementById('b-prog').value='';
-    document.getElementById('b-sem').value='';
-    buscarMov();
-    document.getElementById('box-residente').scrollIntoView({behavior:'smooth'});
-  } else if(tipo==='pend') {
-    buscarPend();
-    document.getElementById('box-residente').scrollIntoView({behavior:'smooth'});
-  } else if(tipo==='negado') {
-    buscarNegado();
-    document.getElementById('box-residente').scrollIntoView({behavior:'smooth'});
-  }
-}
-
-function buscarMov() {
-  const filtrado = datos.filter(r=>{
-    const tipo=(r['Tipo']||'').toUpperCase().trim();
-    return tipo==='MOVILIDAD ENTRANTE' && pasaFiltroSem(r);
-  });
-  mostrarResultados(filtrado, 'Movilidad entrante');
-}
-
-function buscarPend() {
-  const filtrado = datos.filter(r=>(r['Estado confirmacion']||'').trim()==='Pendiente' && pasaFiltroSem(r));
-  mostrarResultados(filtrado, 'Pendientes de confirmar');
-}
-
-function buscarNegado() {
-  const filtrado = datos.filter(r=>(r['Estado confirmacion']||'').trim()==='Negado' && pasaFiltroSem(r));
-  mostrarResultados(filtrado, 'Negados (requieren reasignación)');
-}
-
-function mostrarResultados(filtrado, titulo) {
-  document.getElementById('tit-residente').textContent = titulo;
-  const personas={};
-  filtrado.forEach(r=>{
-    const id=(r['ID']||r['Persona']||'sin').trim();
-    if(!personas[id]) personas[id]={nombre:r['Persona']||'',programa:r['Programa']||'',nivel:r['Nivel / Origen']||'',sems:new Set(),pend:0,negado:0,id};
-    if(r['Semestre']) personas[id].sems.add(r['Semestre']);
-    if((r['Estado confirmacion']||'').trim()==='Pendiente') personas[id].pend++;
-    if((r['Estado confirmacion']||'').trim()==='Negado') personas[id].negado++;
-  });
-  const lista=document.getElementById('res-lista');
-  const items=Object.values(personas);
-  if(!items.length){lista.innerHTML='<div class="empty">Sin resultados.</div>';return;}
-  lista.innerHTML=items.map(p=>`
-    <div class="res-item" onclick="verResidente('${p.id.replace(/'/g,"\\'")}')">
-      <span class="res-nombre">${p.nombre||p.id}</span>
-      <span class="res-tag">${p.programa}</span>
-      <span class="res-tag">${p.nivel}</span>
-      ${p.pend?`<span class="res-tag pend">${p.pend} pendientes</span>`:''}
-      ${p.negado?`<span class="res-tag negado">${p.negado} negados</span>`:''}
-      <button class="btn-ver" onclick="event.stopPropagation();verResidente('${p.id.replace(/'/g,"\\'")}')">Ver →</button>
-    </div>`).join('');
-}
-
-// ============================================================
-// BUSCADOR
-// ============================================================
-function buscar() {
-  document.getElementById('tit-residente').textContent = 'Buscar residente';
-  const nom=document.getElementById('b-nom').value.toLowerCase().trim();
-  const prog=document.getElementById('b-prog').value;
-  const sem=document.getElementById('b-sem').value;
-  if(!nom&&!prog&&!sem){document.getElementById('res-lista').innerHTML='';return;}
-  const filtrado=datos.filter(r=>{
-    const nOk=!nom||(r['Persona']||'').toLowerCase().includes(nom);
-    const pOk=!prog||r['Programa']===prog;
-    const sOk=!sem||r['Semestre']===sem;
-    return nOk&&pOk&&sOk;
-  });
-  mostrarResultados(filtrado, 'Resultados');
-}
-
-// ============================================================
-// BUSCAR CAMPO DE ROTACIÓN (texto libre + Año + Especialidad)
-// Independiente del filtro global "Ver semestre": busca en todos los datos.
-// ============================================================
-function filtrarOpcionesCampo() {
-  const texto=(document.getElementById('fc-camp').value||'').toLowerCase().trim();
-  const dd=document.getElementById('fc-camp-dropdown');
-  const opciones = camposUnicosDisponibles.filter(c=>!texto || c.toLowerCase().includes(texto));
-  if(!opciones.length) {
-    dd.innerHTML = '<div class="ms-opcion ms-vacio">Sin coincidencias</div>';
-  } else {
-    dd.innerHTML = opciones.map(c=>{
-      const marcado = camposSeleccionados.has(c);
-      const cEsc = c.replace(/'/g,"\\'");
-      return `<label class="ms-opcion"><input type="checkbox" ${marcado?'checked':''} onchange="toggleCampoSeleccionado('${cEsc}')"><span class="ms-opcion-txt">${c}</span></label>`;
-    }).join('');
-  }
-  dd.style.display='block';
-}
-
-function toggleCampoSeleccionado(valor) {
-  if(camposSeleccionados.has(valor)) camposSeleccionados.delete(valor); else camposSeleccionados.add(valor);
-  renderChipsCampo();
-  buscarCampo();
-}
-
-function quitarCampoSeleccionado(valor) {
-  camposSeleccionados.delete(valor);
-  renderChipsCampo();
-  filtrarOpcionesCampo();
-  buscarCampo();
-}
-
-function renderChipsCampo() {
-  const cont=document.getElementById('fc-camp-chips');
-  if(!cont) return;
-  if(!camposSeleccionados.size) { cont.innerHTML=''; return; }
-  cont.innerHTML=[...camposSeleccionados].sort((a,b)=>a.localeCompare(b,'es')).map(c=>{
-    const cEsc = c.replace(/'/g,"\\'");
-    return `<span class="ms-chip">${c} <span onclick="quitarCampoSeleccionado('${cEsc}')">&times;</span></span>`;
-  }).join('');
-}
-
-// Cierra el desplegable de instituciones al hacer clic fuera de el
-document.addEventListener('click', function(e){
-  const wrap = document.getElementById('fc-camp-wrap');
-  const dd = document.getElementById('fc-camp-dropdown');
-  if(wrap && dd && !wrap.contains(e.target)) dd.style.display='none';
-});
-
-function buscarCampo() {
-  const anio=document.getElementById('fc-anio').value;
-  const mesFiltro=document.getElementById('fc-mes').value;
-  const prog=document.getElementById('fc-prog').value;
-  const lista=document.getElementById('fc-lista');
-  if(!camposSeleccionados.size && !anio && !mesFiltro && !prog) { lista.innerHTML=''; return; }
-
-  const filtrado=[];
-  datos.forEach(r=>{
-    const campoVal=(r['Campo de rotacion']||'').trim();
-    if(!campoVal || campoVal==='VACACIONES') return;
-    const sem=(r['Semestre']||'').trim();
-    const mesVal=(r['Mes']||'').trim();
-    const progVal=(r['Programa']||'').trim();
-    const id=(r['ID']||r['Persona']||'').trim();
-
-    const campOk = camposSeleccionados.size===0 || campoVal.split(' - ').map(t=>t.trim()).some(t=>camposSeleccionados.has(t));
-    const anioOk = !anio || sem.split(' / ').map(s=>s.trim()).includes(anio);
-    const mesOk = !mesFiltro || mesVal.toUpperCase()===mesFiltro;
-    const progOk = !prog || progVal===prog;
-
-    if(campOk && anioOk && mesOk && progOk) {
-      filtrado.push({
-        id,
-        residente: r['Persona']||id||'—',
-        periodo: sem + (r['Mes']?(' · '+r['Mes']):''),
-        progRot: progVal + (r['Rotacion']?(' / '+r['Rotacion']):'')
-      });
-    }
-  });
-
-  if(!filtrado.length) { lista.innerHTML='<div class="empty">Sin resultados.</div>'; return; }
-
-  lista.innerHTML = filtrado.map(f=>`
-    <div class="res-item" onclick="verResidente('${f.id.replace(/'/g,"\\'")}')">
-      <span class="res-nombre">${f.residente}</span>
-      <span class="res-tag">${f.periodo}</span>
-      <span class="res-tag">${f.progRot}</span>
-      <button class="btn-ver" onclick="event.stopPropagation();verResidente('${f.id.replace(/'/g,"\\'")}')">Ver →</button>
-    </div>`).join('');
-}
-
-// ============================================================
-// BUSCAR POR ROTACIÓN (nombre de rotación + especialidad + mes)
-// Responde directamente "¿en qué meses está la rotación X de la
-// especialidad Y?": arma un resumen de meses encontrados además del
-// listado detallado. Independiente del filtro global "Ver semestre":
-// busca en todos los datos.
-// ============================================================
-const ORDEN_MESES=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
-
-function buscarRotacion() {
-  const texto=(document.getElementById('br-nombre').value||'').toLowerCase().trim();
-  const prog=document.getElementById('br-prog').value;
-  const mesFiltro=document.getElementById('br-mes').value;
-  const lista=document.getElementById('br-lista');
-  const resumen=document.getElementById('br-resumen-meses');
-  if(!texto && !prog && !mesFiltro) { lista.innerHTML=''; resumen.innerHTML=''; return; }
-
-  const filtrado=[];
-  const mesesEncontrados=new Set();
-  datos.forEach(r=>{
-    const rotVal=(r['Rotacion']||r['Detalle original']||'').trim();
-    if(!rotVal) return;
-    const progVal=(r['Programa']||'').trim();
-    const mesVal=(r['Mes']||'').trim();
-    const sem=(r['Semestre']||'').trim();
-    const id=(r['ID']||r['Persona']||'').trim();
-
-    const rotOk = !texto || rotVal.toLowerCase().includes(texto);
-    const progOk = !prog || progVal===prog;
-    const mesOk = !mesFiltro || mesVal.toUpperCase()===mesFiltro;
-
-    if(rotOk && progOk && mesOk) {
-      if(mesVal) mesesEncontrados.add(mesVal.toUpperCase());
-      filtrado.push({
-        id,
-        residente: r['Persona']||id||'—',
-        periodo: sem + (mesVal?(' · '+mesVal):''),
-        progRot: progVal + (rotVal?(' / '+rotVal):'')
-      });
-    }
-  });
-
-  if(mesesEncontrados.size) {
-    const mesesOrd=[...mesesEncontrados].sort((a,b)=>ORDEN_MESES.indexOf(a)-ORDEN_MESES.indexOf(b));
-    resumen.innerHTML = '<span class="resumen-meses-lbl">Meses encontrados:</span>'+
-      mesesOrd.map(m=>`<span class="chip-mes">${m.charAt(0)+m.slice(1).toLowerCase()}</span>`).join('');
-  } else {
-    resumen.innerHTML='';
-  }
-
-  if(!filtrado.length) { lista.innerHTML='<div class="empty">Sin resultados.</div>'; return; }
-
-  lista.innerHTML = filtrado.map(f=>`
-    <div class="res-item" onclick="verResidente('${f.id.replace(/'/g,"\\'")}')">
-      <span class="res-nombre">${f.residente}</span>
-      <span class="res-tag">${f.periodo}</span>
-      <span class="res-tag">${f.progRot}</span>
-      <button class="btn-ver" onclick="event.stopPropagation();verResidente('${f.id.replace(/'/g,"\\'")}')">Ver →</button>
-    </div>`).join('');
-}
-
-function verPrograma(prog) {
-  document.getElementById('b-prog').value=prog;
-  document.getElementById('b-nom').value='';
-  document.getElementById('b-sem').value='';
-  buscar();
-  document.getElementById('box-residente').scrollIntoView({behavior:'smooth'});
-}
-
 function verResidente(id) { pantallaAnterior='coord'; cedulaActiva=id; ir('crono'); renderCrono(id); }
 
 // ============================================================
@@ -1954,6 +1847,7 @@ async function subirArchivo(inputEl, clave, tipoDocumento, programa, residente, 
       const caja = status.getBoundingClientRect();
       confetiR_(caja.left + 40, caja.top);
       toastR_(reemplaza ? 'Nota reemplazada' : 'Nota cargada');
+      if (SESION_USO && !reemplaza) SESION_USO.notas++;
       setTimeout(refrescarHojaVR_, 900);
     } else {
       status.textContent = 'Error al guardar: ' + (data.mensaje || 'intenta de nuevo.');
@@ -2090,6 +1984,7 @@ function renderCrono(cedula) {
           <b>${escR_(nombre)}</b>
           <span>${escR_(prog)}${nivel ? ' · ' + escR_(nivel) : ''}</span>
         </div>
+        <span class="buho-chico" id="vr-buho-chico"></span>
       </div>
       <div class="vr-progreso" id="vr-progreso"></div>
     </div>
@@ -2177,22 +2072,7 @@ function semestresProgramaR_(plan) {
 
 function repintarVistaResidente_() {
   if (!VR || !document.getElementById('vr-progreso')) return;
-  pintarCumpleR_(); pintarNovedadesR_(); pintarProgresoR_(); pintarTareasR_(); pintarContadoresR_(); pintarMesesR_();
-}
-
-function pintarCumpleR_() {
-  const cont = document.getElementById('vr-cumple');
-  if (!cont) return;
-  if (!(VR.perfil && VR.perfil.cumpleHoy && modo === 'residente') || VR.cumpleCerrado) { cont.innerHTML = ''; return; }
-  const nombre = capR_(String(VR.nombre).split(' ')[0].toLowerCase());
-  cont.innerHTML = `<div class="vr-cumple"><div class="torta">🎂</div><div><b>¡Feliz cumpleaños, ${escR_(nombre)}!</b>
-    <p>Todo el equipo de Posgrados Clínicos CES te desea un día lleno de alegría. Hoy celebramos a la persona que eres, no solo al residente. 🎉</p></div>
-    <button onclick="VR.cumpleCerrado=true; pintarCumpleR_()" aria-label="Cerrar">✕</button></div>`;
-  if (!VR.confetiCumple) {
-    VR.confetiCumple = true;
-    const caja = cont.getBoundingClientRect();
-    [0.25, 0.5, 0.75].forEach((x, k) => setTimeout(() => confetiR_(caja.left + caja.width * x, caja.top + 30), k * 200));
-  }
+  pintarSaludoR_(); pintarNovedadesR_(); pintarProgresoR_(); pintarTareasR_(); pintarContadoresR_(); pintarMesesR_();
 }
 
 function pintarProgresoR_() {
@@ -2391,6 +2271,231 @@ function refrescarHojaVR_() {
 const enlaceNotaR_ = clave => ((leerEvalDocs()[clave] || {}).notaUrl) || '';
 
 function cerrarHojaVR() { const v = document.getElementById('vr-velo'); if (v) v.classList.remove('on'); }
+
+// ============================================================
+// MASCOTA DEL PORTAL
+// Dibujo vectorial dentro del mismo archivo (no depende de imagenes).
+// La escena cambia con la hora; la cara y el mensaje, con la situacion
+// del residente. El saludo completo sale una vez al dia.
+// ============================================================
+function buhoR_(momento, animo, chico, uid) {
+  var id = uid || ('b' + Math.random().toString(36).slice(2, 7));
+  var cielo = {
+    madrugada: ['#2b3f66', '#16233d'],
+    manana: ['#CFE6F7', '#EAF4FD'],
+    tarde: ['#FFDFB8', '#FFF1DE'],
+    noche: ['#2a3c63', '#16233d'],
+    fiesta: ['#FFE3EF', '#FFF6E4']
+  }[momento];
+  var oscuro = (momento === 'noche' || momento === 'madrugada');
+
+  // ---- objetos de la escena ----
+  var escena = '';
+  if (momento === 'manana') {
+    escena = '<g class="rayos" transform="translate(105,34)">' +
+      '<circle r="11" fill="#FFC94D"/>' +
+      '<g stroke="#FFC94D" stroke-width="2.6" stroke-linecap="round">' +
+      '<path d="M0 -16 V-21"/><path d="M0 16 V21"/><path d="M-16 0 H-21"/><path d="M16 0 H21"/>' +
+      '<path d="M-11.5 -11.5 l-3.5 -3.5"/><path d="M11.5 11.5 l3.5 3.5"/>' +
+      '<path d="M11.5 -11.5 l3.5 -3.5"/><path d="M-11.5 11.5 l-3.5 3.5"/></g></g>';
+  } else if (momento === 'tarde') {
+    escena = '<circle cx="108" cy="46" r="13" fill="#FF9E4D" opacity=".9"/>' +
+      '<g fill="#ffffff" opacity=".75"><ellipse cx="34" cy="36" rx="15" ry="8"/><ellipse cx="46" cy="33" rx="11" ry="7"/></g>';
+  } else if (momento === 'fiesta') {
+    // serpentinas
+    escena = '<g stroke-linecap="round" fill="none" stroke-width="3">' +
+      '<path d="M2 26 q14 12 8 26 q-6 14 8 24" stroke="#2E75B6" opacity=".55"/>' +
+      '<path d="M138 22 q-14 12 -8 26 q6 14 -8 24" stroke="#0B7A6E" opacity=".5"/></g>' +
+      // globos
+      '<g class="globo"><path d="M26 40 q0 -14 10 -14 q10 0 10 14 q0 12 -10 18 q-10 -6 -10 -18 z" fill="#E8567A"/>' +
+      '<path d="M36 58 q3 6 -2 11" stroke="#C94B68" stroke-width="1.6" fill="none"/></g>' +
+      '<g class="globo g2"><path d="M104 32 q0 -13 9 -13 q9 0 9 13 q0 11 -9 17 q-9 -6 -9 -17 z" fill="#2E75B6"/>' +
+      '<path d="M113 49 q-3 6 2 11" stroke="#24608F" stroke-width="1.6" fill="none"/></g>' +
+      '<g class="globo g3"><path d="M12 74 q0 -11 8 -11 q8 0 8 11 q0 9 -8 14 q-8 -5 -8 -14 z" fill="#E8A33D"/>' +
+      '<path d="M20 88 q3 5 -2 9" stroke="#C4842B" stroke-width="1.6" fill="none"/></g>' +
+      // confeti
+      '<g><rect class="conf" x="58" y="16" width="5" height="8" rx="1.6" fill="#0B7A6E"/>' +
+      '<rect class="conf c2" x="86" y="24" width="5" height="8" rx="1.6" fill="#E8567A"/>' +
+      '<rect class="conf c3" x="122" y="62" width="5" height="8" rx="1.6" fill="#2E75B6"/>' +
+      '<rect class="conf c4" x="30" y="104" width="5" height="8" rx="1.6" fill="#E8A33D"/>' +
+      '<rect class="conf c5" x="112" y="104" width="5" height="8" rx="1.6" fill="#0B7A6E"/>' +
+      '<rect class="conf c2" x="46" y="20" width="4" height="7" rx="1.4" fill="#E8A33D"/></g>';
+  } else {
+    escena = '<path d="M110 26 a15 15 0 1 0 6 25 a12 12 0 0 1 -6 -25 z" fill="#FFE9A8"/>' +
+      '<g fill="#ffffff">' +
+      '<circle class="estrella" cx="30" cy="30" r="2.1"/>' +
+      '<circle class="estrella e2" cx="46" cy="20" r="1.6"/>' +
+      '<circle class="estrella e3" cx="22" cy="50" r="1.7"/>' +
+      '<circle class="estrella e2" cx="118" cy="80" r="1.5"/></g>';
+  }
+
+  // ---- ojos segun el animo ----
+  var ojos;
+  if (animo === 'dormido') {
+    // ojos entrecerrados: se ve solo la mitad de abajo
+    // ojos a medio abrir con parpado redondeado y ojeras suaves (nada de cejas rectas)
+    ojos = '<g>' +
+      '<circle cx="56" cy="70" r="14" fill="#fff"/><circle cx="84" cy="70" r="14" fill="#fff"/>' +
+      '<circle class="pupila" cx="56" cy="74" r="6.2" fill="#17293d"/><circle class="pupila" cx="84" cy="74" r="6.2" fill="#17293d"/>' +
+      '<circle cx="58.4" cy="72" r="2" fill="#fff"/><circle cx="86.4" cy="72" r="2" fill="#fff"/>' +
+      // parpado: la mitad de arriba del ojo, con la curva del propio ojo
+      '<path d="M42 71 A14 14 0 0 1 70 71 Z" fill="#3C7FB8"/>' +
+      '<path d="M70 71 A14 14 0 0 1 98 71 Z" fill="#3C7FB8"/>' +
+      '<path d="M42 71 h28 M70 71 h28" stroke="#2A5E8C" stroke-width="1.6" stroke-linecap="round" opacity=".5"/>' +
+      // ojeras
+      '<g fill="#8FA6CE" opacity=".38"><ellipse cx="55" cy="85" rx="9" ry="3.2"/><ellipse cx="85" cy="85" rx="9" ry="3.2"/></g>' +
+      '</g>';
+  } else if (animo === 'feliz') {
+    // ojos cerrados en arco, cara de contento
+    ojos = '<g stroke="#17293d" stroke-width="3.4" fill="none" stroke-linecap="round">' +
+      '<path d="M46 72 q10 -12 20 0"/><path d="M74 72 q10 -12 20 0"/></g>' +
+      '<g fill="#F2A0A6" opacity=".55"><ellipse cx="40" cy="82" rx="6" ry="4"/><ellipse cx="100" cy="82" rx="6" ry="4"/></g>';
+  } else {
+    ojos = '<g>' +
+      '<circle cx="56" cy="70" r="14" fill="#fff"/><circle cx="84" cy="70" r="14" fill="#fff"/>' +
+      '<circle class="pupila" cx="56" cy="70" r="7.2" fill="#17293d"/><circle class="pupila" cx="84" cy="70" r="7.2" fill="#17293d"/>' +
+      '<circle cx="58.6" cy="67.4" r="2.4" fill="#fff"/><circle cx="86.6" cy="67.4" r="2.4" fill="#fff"/>' +
+      '<path class="parpado" d="M42 56 h28 v14 a14 14 0 0 1 -28 0 z" fill="#3C7FB8"/>' +
+      '<path class="parpado b" d="M70 56 h28 v14 a14 14 0 0 1 -28 0 z" fill="#3C7FB8"/></g>';
+  }
+
+  // ---- ala derecha: con taza en la madrugada ----
+  var alaDer = (momento === 'madrugada')
+    ? '<g><path d="M104 74 q7 16 1 30 q-7 5 -10 -2 q5 -14 3 -27 z" fill="#0B7A6E"/>' +
+      '<g class="vapor" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none" opacity=".7"><path d="M104 86 q3 -4 0 -8"/></g>' +
+      '<g class="vapor v2" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none" opacity=".7"><path d="M110 86 q3 -4 0 -8"/></g>' +
+      '<g class="vapor v3" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none" opacity=".7"><path d="M116 86 q3 -4 0 -8"/></g>' +
+      '<rect x="100" y="90" width="20" height="15" rx="3" fill="#ffffff"/>' +
+      '<rect x="100" y="90" width="20" height="4.5" rx="2" fill="#E8A33D"/>' +
+      '<path d="M120 94 q6 3 0 7" stroke="#ffffff" stroke-width="2.6" fill="none"/></g>'
+    : '<path class="ala-saluda" d="M104 70 q8 18 1 33 q-8 5 -11 -3 q6 -15 4 -30 z" fill="#0B7A6E"/>';
+
+  return '<svg class="buho ' + (chico ? 'chico' : '') + '" viewBox="0 0 140 140" role="img" aria-label="Mascota del portal">' +
+    '<defs>' +
+      '<linearGradient id="cielo' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + cielo[0] + '"/><stop offset="1" stop-color="' + cielo[1] + '"/></linearGradient>' +
+      '<linearGradient id="cuerpo' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3C7FB8"/><stop offset="1" stop-color="#1F4E79"/></linearGradient>' +
+      '<clipPath id="rec' + id + '"><circle cx="70" cy="70" r="68"/></clipPath>' +
+    '</defs>' +
+    '<g clip-path="url(#rec' + id + ')">' +
+      '<circle cx="70" cy="70" r="68" fill="url(#cielo' + id + ')"/>' +
+      escena +
+      '<g class="mecer">' +
+        // penachos
+        '<path d="M44 46 q-4 -19 6 -25 q7 9 6 22 z" fill="#1F4E79"/>' +
+        '<path d="M96 46 q4 -19 -6 -25 q-7 9 -6 22 z" fill="#1F4E79"/>' +
+        (momento === 'fiesta'
+          ? '<g transform="rotate(11 78 34)">' +
+            '<path d="M78 2 L94 38 L62 38 Z" fill="#E8567A"/>' +
+            '<path d="M72 20 L86 20 L89 27 L69 27 Z" fill="#FFD9E4" opacity=".9"/>' +
+            '<path d="M66 32 L92 32 L94 38 L62 38 Z" fill="#FFD9E4" opacity=".9"/>' +
+            '<path d="M62 38 q16 6 32 0" stroke="#E8A33D" stroke-width="3.4" fill="none" stroke-linecap="round"/>' +
+            '<circle class="pompon" cx="78" cy="2" r="5" fill="#0B7A6E"/></g>'
+          : '') +
+        // cuerpo
+        '<path d="M70 34 C44 34 32 56 32 82 C32 108 48 124 70 124 C92 124 108 108 108 82 C108 56 96 34 70 34 Z" fill="url(#cuerpo' + id + ')"/>' +
+        // pecho con plumas
+        '<path d="M70 62 C54 62 46 78 46 96 C46 112 57 122 70 122 C83 122 94 112 94 96 C94 78 86 62 70 62 Z" fill="#EAF3FB"/>' +
+        '<g stroke="#C9DDF0" stroke-width="1.8" fill="none" stroke-linecap="round">' +
+          '<path d="M58 94 q6 6 12 0"/><path d="M70 94 q6 6 12 0"/>' +
+          '<path d="M52 106 q6 6 12 0"/><path d="M64 106 q6 6 12 0"/><path d="M76 106 q6 6 12 0"/></g>' +
+        // disco facial
+        '<path d="M70 50 C52 50 40 60 40 72 C40 84 53 92 70 92 C87 92 100 84 100 72 C100 60 88 50 70 50 Z" fill="#D9E9F7"/>' +
+        ojos +
+        // pico
+        '<path d="M70 80 l-6.5 9 q6.5 5.5 13 0 z" fill="#E8A33D"/>' +
+        // ala izquierda
+        '<path d="M36 70 q-8 18 -1 33 q8 5 11 -3 q-6 -15 -4 -30 z" fill="#0B7A6E"/>' +
+        alaDer +
+        // patas
+        '<g stroke="#E8A33D" stroke-width="3.6" stroke-linecap="round" fill="none">' +
+          '<path d="M58 124 v6 M53 130 h10 M82 124 v6 M77 130 h10"/></g>' +
+      '</g>' +
+      // rama
+      '<path d="M-4 132 q40 -8 78 -2 q36 6 70 -2" stroke="#8B6A45" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+      '<path d="M96 130 q10 -10 20 -9" stroke="#0B7A6E" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+    '</g></svg>';
+}
+
+
+const SALUDO_KEY = 'ces_saludo_';
+
+function momentoDeR_(h) { return h < 5 ? 'madrugada' : (h < 12 ? 'manana' : (h < 19 ? 'tarde' : 'noche')); }
+
+const TITULOS_R_ = {
+  madrugada: n => '\u00bfTurno largo, ' + n + '?',
+  manana: n => 'Buenos d\u00edas, ' + n,
+  tarde: n => 'Buenas tardes, ' + n,
+  noche: n => 'Buenas noches, ' + n
+};
+
+// Decide que le dice hoy la mascota, segun lo que este pasando en su residencia
+function casoSaludoR_() {
+  if (VR.perfil && VR.perfil.cumpleHoy) return 'cumple';
+  if (!leerLocal_(SALUDO_KEY + VR.cedula)) return 'primera';
+  const hoy = hoyAbsR_();
+  if (VR.filas.some(f => f.est === 'Negado' && (f.abs === null || f.abs >= hoy))) return 'negado';
+  const actual = VR.filas.find(f => f.abs === hoy && f.camp !== 'VACACIONES');
+  const previo = VR.filas.find(f => f.abs === hoy - 1);
+  if (actual && (!previo || previo.camp !== actual.camp)) return 'nueva';
+  const pend = VR.filas.filter(f => f.ev.tipo === 'nota' && !estaCargadaR_(f.ev.claveRot) && (f.abs === null || f.abs <= hoy)).length;
+  if (pend) return { tipo: 'pendientes', n: pend };
+  return 'aldia';
+}
+
+function textoSaludoR_(caso) {
+  const hoy = hoyAbsR_();
+  if (caso === 'cumple') return 'Hoy no te vamos a hablar de notas ni de rotaciones. Disfruta tu d\u00eda, cel\u00e9bralo con los tuyos y acu\u00e9rdate de una cosa: esto que est\u00e1s haciendo ahora es uno de esos sue\u00f1os que alguna vez le pediste a una velita. \ud83c\udf82';
+  if (caso === 'primera') return 'Bienvenido a tu portal de rotaciones. Aqu\u00ed vas a ver d\u00f3nde rotas cada mes, qu\u00e9 cambi\u00f3 y d\u00f3nde subir tus notas. Cualquier cosa, coordinaci\u00f3n est\u00e1 al otro lado.';
+  if (caso === 'negado') {
+    const f = VR.filas.find(x => x.est === 'Negado' && (x.abs === null || x.abs >= hoy));
+    return 'Vi que tu campo de ' + escR_(String(f.mes).toLowerCase()) + ' qued\u00f3 negado. Coordinaci\u00f3n ya est\u00e1 busc\u00e1ndote otro: no tienes que hacer nada, te avisamos apenas quede listo.';
+  }
+  if (caso === 'nueva') {
+    const f = VR.filas.find(x => x.abs === hoy && x.camp !== 'VACACIONES');
+    return 'Este mes empiezas en <b>' + escR_(f.camp) + '</b>. Revisa los documentos que te piden antes de llegar.';
+  }
+  if (caso && caso.tipo === 'pendientes') {
+    return 'Tienes <b>' + caso.n + (caso.n === 1 ? ' nota</b> esperando' : ' notas</b> esperando') + ' a que las subas. Cuando puedas, las dejas listas y quedas al d\u00eda.';
+  }
+  return 'Est\u00e1s al d\u00eda con todas tus notas. Sigue as\u00ed: cuando llegue el grado no vas a tener que correr detr\u00e1s de nada.';
+}
+
+function pintarSaludoR_() {
+  const cont = document.getElementById('vr-cumple');
+  const chico = document.getElementById('vr-buho-chico');
+  if (!cont) return;
+  if (modo !== 'residente') { cont.innerHTML = ''; if (chico) chico.innerHTML = ''; return; }
+
+  const caso = casoSaludoR_();
+  const esCumple = caso === 'cumple';
+  const m = momentoDeR_(new Date().getHours());
+  const escena = esCumple ? 'fiesta' : m;
+  const animo = (esCumple || caso === 'aldia') ? 'feliz' : (m === 'madrugada' ? 'dormido' : 'normal');
+
+  if (chico) chico.innerHTML = buhoR_(escena, animo, true, 'chico');
+
+  // El saludo completo sale una vez al dia (el cumpleanos siempre)
+  const hoyTxt = new Date().toISOString().slice(0, 10);
+  const visto = leerLocal_(SALUDO_KEY + VR.cedula);
+  if (VR.saludoCerrado || (!esCumple && visto === hoyTxt)) { cont.innerHTML = ''; return; }
+
+  const nombre = capR_(String(VR.nombre).trim().split(' ')[0].toLowerCase());
+  const titulo = esCumple ? '\u00a1Feliz cumplea\u00f1os, ' + escR_(nombre) + '!' : TITULOS_R_[m](escR_(nombre));
+  cont.innerHTML = '<div class="saludo-b ' + escena + '">' + buhoR_(escena, animo, false, 'main') +
+    '<div style="min-width:0"><div class="hola">' + titulo + '</div>' +
+    '<div class="msg">' + textoSaludoR_(caso) + '</div></div>' +
+    '<button class="cerrar" onclick="cerrarSaludoR_()" aria-label="Cerrar">\u2715</button></div>';
+
+  guardarLocal_(SALUDO_KEY + VR.cedula, hoyTxt);
+
+  if (esCumple && !VR.confetiCumple) {
+    VR.confetiCumple = true;
+    const caja = cont.getBoundingClientRect();
+    [0.25, 0.5, 0.75].forEach((x, k) => setTimeout(() => confetiR_(caja.left + caja.width * x, caja.top + 30), k * 200));
+  }
+}
+
+function cerrarSaludoR_() { if (VR) { VR.saludoCerrado = true; pintarSaludoR_(); } }
 
 // ============================================================
 // NOVEDADES DESDE LA ULTIMA VISITA
