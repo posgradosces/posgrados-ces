@@ -373,6 +373,19 @@
   .uni-var:first-child { border-top:none; }
   .uni-n { color:#6b7684; font-size:12px; }
   .uni-var select { margin-left:auto; padding:5px 8px; border:1px solid #ccc; border-radius:5px; font-size:12.5px; max-width:280px; }
+  .mov-sub { display:flex; gap:8px; margin:12px 0 16px; flex-wrap:wrap; }
+  .mov-sub button { border:1px solid #cfd6de; background:white; color:#333; padding:8px 18px; font-size:13.5px; border-radius:20px; cursor:pointer; }
+  .mov-sub button.sel { background:var(--azul-ces); color:white; border-color:var(--azul-ces); }
+  .cuadrantes { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; margin-bottom:18px; }
+  .cuad { border:1px solid #e3e8ee; border-top:4px solid; border-radius:0 0 10px 10px; background:white; text-align:left;
+          padding:14px 16px; cursor:pointer; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; align-items:center; color:#222; }
+  .cuad:hover { background:#fafbfc; }
+  .cuad.activo { box-shadow:inset 0 0 0 2px var(--azul-ces); background:#f3f7fb; }
+  .cuad .n { font-size:32px; font-weight:700; line-height:1; }
+  .cuad .t { font-size:13px; font-weight:600; margin-top:5px; }
+  .cuad .d { font-size:12px; color:#8a929c; margin-top:4px; line-height:1.45; }
+  .cuad .ver { font-size:11px; color:#6b7684; margin-top:6px; }
+  @media (max-width:900px) { .cuadrantes { grid-template-columns:1fr; } }
   .uni-asig { margin-left:auto; padding:6px 9px; border:1px solid #ccc; border-radius:5px; font-size:12.5px; width:330px; max-width:100%; font-family:inherit; }
   .uni-asig.puesto { border-color:#7fb98a; background:#f4fbf5; }
   .uni-limpiar { border:none; background:none; color:#9C0006; cursor:pointer; font-size:12px; padding:2px 4px; }
@@ -788,6 +801,13 @@
       <div id="panel-origenes" style="display:none; border:1px solid #e3e8ee; border-radius:10px; padding:14px; margin-bottom:14px; background:#fafbfc;">
         <div id="origenes-lista"></div>
       </div>
+      <div class="mov-sub">
+        <button class="sel" id="mov-b-ent" onclick="verSubMovilidad('ent')">Entrante</button>
+        <button id="mov-b-sal" onclick="verSubMovilidad('sal')">Saliente</button>
+      </div>
+
+      <div id="mov-sub-ent">
+      <div class="cuadrantes" id="mov-cuad-ent"></div>
       <div id="kpis-movilidad" style="display:flex; gap:12px; margin:12px 0; flex-wrap:wrap;"></div>
       <div class="controles-cuadricula" style="margin-bottom:10px;">
         <div><label>Nombre</label><input id="mov-filtro-nombre" autocomplete="off" placeholder="Escribe..." oninput="buscarMovilidad()"></div>
@@ -798,9 +818,20 @@
       </div>
       <div style="overflow-x:auto;">
         <table class="lista">
-          <thead><tr><th>Residente</th><th>ID</th><th>Programa</th><th>Periodo</th><th>Mes</th><th>Campo de rotación</th><th>Rotación</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>Residente</th><th>ID</th><th>Programa</th><th>Origen</th><th>Periodo</th><th>Mes</th><th>Campo de rotación</th><th>Rotación</th><th>Estado</th><th>Acciones</th></tr></thead>
           <tbody id="tabla-movilidad"></tbody>
         </table>
+      </div>
+      </div>
+
+      <!-- Saliente: solo consulta. No se digita en ninguna parte, sale del vínculo del centro. -->
+      <div id="mov-sub-sal" style="display:none;">
+        <div class="cuadrantes" id="mov-cuad-sal"></div>
+        <div id="mov-tabla-sal"></div>
+        <p style="font-size:12px; color:#96a0aa; margin-top:16px; line-height:1.6;">
+          Esta sección no tiene botones de gestión porque la salida no se registra aquí: se deduce del vínculo del
+          centro en el catálogo. Los centros que sigan sin clasificar todavía no aparecen.
+        </p>
       </div>
     </div>
 
@@ -1749,18 +1780,133 @@ function aplicarFiltrosHistorico() {
 // ============================================================
 let movilidadFiltroActivo = null; // null = nada elegido todavía; 'Confirmado' | 'Negado' | 'Pendiente'
 let cacheMovilidad = [];
+let movSub = 'ent';                 // 'ent' | 'sal'
+let movAmbitoEnt = null;            // 'Nacional' | 'Internacional' | null
+let movAmbitoSal = null;
+
+function verSubMovilidad(sub) {
+  movSub = sub;
+  document.getElementById('mov-sub-ent').style.display = sub === 'ent' ? 'block' : 'none';
+  document.getElementById('mov-sub-sal').style.display = sub === 'sal' ? 'block' : 'none';
+  document.getElementById('mov-b-ent').className = sub === 'ent' ? 'sel' : '';
+  document.getElementById('mov-b-sal').className = sub === 'sal' ? 'sel' : '';
+  if (sub === 'sal') dibujarSalienteMovilidad();
+}
+
+// Barritas por mes, el mismo lenguaje visual del dashboard.
+function miniMesesMov_(filas, color) {
+  return miniBarrasDb_(MESES.map(m => filas.filter(r => r.Mes === m).length), color);
+}
+
+function cuadranteMov_(id, n, titulo, detalle, color, activo, accion, vis) {
+  return `<button class="cuad ${activo ? 'activo' : ''}" style="border-top-color:${color};" onclick="${accion}">
+      <div><div class="n" style="color:${color};">${n}</div><div class="t">${titulo}</div>
+        <div class="d">${detalle}</div>
+        <div class="ver">${activo ? 'Clic para quitar el filtro' : 'Clic para filtrar la tabla'}</div></div>
+      <div>${vis}</div>
+    </button>`;
+}
+
+function filtrarAmbitoEntrante(a) {
+  movAmbitoEnt = movAmbitoEnt === a ? null : a;
+  actualizarKpisMovilidad();
+  buscarMovilidad();
+}
+
+function filtrarAmbitoSaliente(a) {
+  movAmbitoSal = movAmbitoSal === a ? null : a;
+  dibujarSalienteMovilidad();
+}
+
+// Los residentes de movilidad entrante se agrupan por universidad si son nacionales y por país
+// si son internacionales: son dos preguntas distintas.
+function dibujarCuadrantesEntrante() {
+  const caja = document.getElementById('mov-cuad-ent');
+  if (!caja) return;
+  const nac = cacheMovilidad.filter(r => etiquetaOrigen(r.UniversidadOrigen).ambito === 'Nacional');
+  const intl = cacheMovilidad.filter(r => etiquetaOrigen(r.UniversidadOrigen).ambito === 'Internacional');
+  const sin = cacheMovilidad.length - nac.length - intl.length;
+  const universidades = new Set(nac.map(r => etiquetaOrigen(r.UniversidadOrigen).etiqueta));
+  const paises = new Set(intl.map(r => etiquetaOrigen(r.UniversidadOrigen).etiqueta));
+
+  caja.innerHTML =
+    cuadranteMov_('nac', unicosDb_(nac, r => r.ResidenteID), 'Entrante nacional',
+      universidades.size ? `De ${universidades.size} universidades colombianas.` : 'Sin residentes clasificados como nacionales.',
+      '#1F4E79', movAmbitoEnt === 'Nacional', "filtrarAmbitoEntrante('Nacional')", miniMesesMov_(nac, '#1F4E79')) +
+    cuadranteMov_('intl', unicosDb_(intl, r => r.ResidenteID), 'Entrante internacional',
+      paises.size ? `De ${paises.size} ${paises.size === 1 ? 'país' : 'países'}: ${[...paises].slice(0, 3).join(', ')}.` : 'Sin residentes clasificados como internacionales.',
+      '#7030A0', movAmbitoEnt === 'Internacional', "filtrarAmbitoEntrante('Internacional')", miniMesesMov_(intl, '#7030A0'));
+
+  if (sin > 0) {
+    caja.insertAdjacentHTML('beforeend',
+      `<p style="grid-column:1 / -1; margin:0; font-size:12px; background:#FFF6E8; color:var(--pendiente-tx); padding:9px 12px; border-radius:7px;">
+        ${sin} ${sin === 1 ? 'registro tiene' : 'registros tienen'} el origen sin clasificar, así que no entran en ninguno de los dos.
+        Usa el botón "Clasificar orígenes" de arriba.</p>`);
+  }
+}
+
+// Cada salida es una pareja de registro y centro: si alguien rota en dos sitios fuera de la red
+// el mismo mes, son dos salidas.
+function salidasDelHistorico() {
+  const filas = [];
+  (cacheHistoricoCompleto || []).forEach(r => salidasDeRegistro(r).forEach(c => filas.push({ r, c })));
+  return filas;
+}
+
+function dibujarSalienteMovilidad() {
+  const caja = document.getElementById('mov-cuad-sal');
+  const tabla = document.getElementById('mov-tabla-sal');
+  if (!caja || !tabla) return;
+
+  const todas = salidasDelHistorico();
+  const nac = todas.filter(f => f.c.ambito !== 'Internacional');
+  const intl = todas.filter(f => f.c.ambito === 'Internacional');
+  const intermediarias = new Set(nac.map(f => f.c.intermediaria).filter(Boolean));
+  const paises = new Set(intl.map(f => f.c.pais).filter(Boolean));
+
+  caja.innerHTML =
+    cuadranteMov_('sn', nac.length, 'Saliente nacional',
+      intermediarias.size ? `Por convenio con ${[...intermediarias].slice(0, 3).join(', ')}.` : 'Sin salidas nacionales registradas.',
+      '#006100', movAmbitoSal === 'Nacional', "filtrarAmbitoSaliente('Nacional')", miniMesesMov_(nac.map(f => f.r), '#006100')) +
+    cuadranteMov_('si', intl.length, 'Saliente internacional',
+      paises.size ? `${paises.size} ${paises.size === 1 ? 'país' : 'países'}: ${[...paises].slice(0, 3).join(', ')}.` : 'Sin salidas internacionales registradas.',
+      '#C77700', movAmbitoSal === 'Internacional', "filtrarAmbitoSaliente('Internacional')", miniMesesMov_(intl.map(f => f.r), '#C77700'));
+
+  const filas = movAmbitoSal
+    ? todas.filter(f => (movAmbitoSal === 'Internacional') === (f.c.ambito === 'Internacional'))
+    : todas;
+  filas.sort((a, b) => String(b.r.Semestre || '').localeCompare(String(a.r.Semestre || '')) ||
+                       String(a.r.ResidenteNombre || '').localeCompare(String(b.r.ResidenteNombre || ''), 'es'));
+
+  tabla.innerHTML = filas.length ? `<div style="overflow-x:auto;"><table class="lista">
+    <thead><tr><th>Residente</th><th>Programa</th><th>Periodo</th><th>Mes</th><th>Destino</th><th>Lugar</th><th>Tipo</th><th>Se llega por</th></tr></thead>
+    <tbody>${filas.map(f => `<tr>
+      <td><b>${esc(f.r.ResidenteNombre || '')}</b></td>
+      <td>${esc(f.r.Programa || '')}</td>
+      <td>${esc(f.r.Semestre || '')}</td>
+      <td>${esc(f.r.Mes || '')}</td>
+      <td>${esc(f.c.nombre)}</td>
+      <td>${esc(f.c.ambito === 'Internacional' ? (f.c.pais || 'País por definir') : 'Colombia')}</td>
+      <td><span class="pastilla" style="background:${f.c.ambito === 'Internacional' ? 'var(--negado-bg)' : 'var(--confirmado-bg)'}; color:${f.c.ambito === 'Internacional' ? 'var(--negado-tx)' : 'var(--confirmado-tx)'};">${f.c.ambito === 'Internacional' ? 'Internacional' : 'Nacional'}</span></td>
+      <td>${f.c.vinculo === 'Convenio' ? `<span class="pastilla" style="background:var(--pendiente-bg); color:var(--pendiente-tx);">${esc(f.c.intermediaria || 'sin registrar')}</span>` : '<span style="color:#8a929c;">Directa con el hospital</span>'}</td>
+    </tr>`).join('')}</tbody></table></div>`
+    : '<p style="font-size:13px; color:#888; padding:14px 4px;">No hay salidas registradas. Si esperabas ver alguna, revisa que esos centros tengan vínculo distinto a red CES en el catálogo.</p>';
+}
 
 async function cargarMovilidad(forzarRecarga) {
   if (cacheHistoricoCompleto.length === 0 || forzarRecarga) {
-    document.getElementById('tabla-movilidad').innerHTML = '<tr><td colspan="9" style="text-align:center; color:#888; padding:20px;">⏳ Cargando...</td></tr>';
+    document.getElementById('tabla-movilidad').innerHTML = '<tr><td colspan="10" style="text-align:center; color:#888; padding:20px;">⏳ Cargando...</td></tr>';
     const res = await leerBackend('listarHistorico');
     if (!res.ok) { mostrarMensaje('Error cargando movilidad: ' + res.error, 'error'); return; }
     cacheHistoricoCompleto = res.datos;
   }
 
-  cacheMovilidad = cacheHistoricoCompleto.filter(r => r.Tipo === 'Movilidad entrante');
+  cacheMovilidad = cacheHistoricoCompleto.filter(r => String(r.Tipo || '').indexOf('Movilidad entrante') === 0);
+  await cargarCentros();
+  await cargarOrigenes();
   actualizarKpisMovilidad();
   buscarMovilidad();
+  if (movSub === 'sal') dibujarSalienteMovilidad();
 }
 
 // Se dispara al escribir en Nombre/Documento/Especialidad/Lugar y también al elegir una
@@ -1776,7 +1922,7 @@ function buscarMovilidad() {
   } else if (hayTexto) {
     dibujarTablaMovilidad('Todos');
   } else {
-    document.getElementById('tabla-movilidad').innerHTML = '<tr><td colspan="9" style="text-align:center; color:#999; padding:24px;">Elige "Aceptados", "Negados" o "Pendientes" arriba, o escribe un nombre/documento para buscar en todos los estados.</td></tr>';
+    document.getElementById('tabla-movilidad').innerHTML = '<tr><td colspan="10" style="text-align:center; color:#999; padding:24px;">Elige "Aceptados", "Negados" o "Pendientes" arriba, o escribe un nombre/documento para buscar en todos los estados.</td></tr>';
   }
 }
 
@@ -1788,6 +1934,7 @@ function limpiarFiltrosMovilidad() {
 }
 
 function actualizarKpisMovilidad() {
+  dibujarCuadrantesEntrante();
   const aceptados = cacheMovilidad.filter(r => r.Estado === 'Confirmado');
   const negados = cacheMovilidad.filter(r => r.Estado === 'Negado');
   const pendientes = cacheMovilidad.filter(r => r.Estado !== 'Confirmado' && r.Estado !== 'Negado');
@@ -1845,11 +1992,12 @@ function dibujarTablaMovilidad(estado) {
   filtrado = filtrado.filter(r =>
     coincideNombreDocumento(r, nombre, documento) &&
     (!programa || (r.Programa || '').toLowerCase().includes(programa)) &&
-    (!lugar || (r.CampoRotacion || '').toLowerCase().includes(lugar))
+    (!lugar || (r.CampoRotacion || '').toLowerCase().includes(lugar)) &&
+    (!movAmbitoEnt || etiquetaOrigen(r.UniversidadOrigen).ambito === movAmbitoEnt)
   );
 
   if (filtrado.length === 0) {
-    cuerpo.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#999; padding:20px;">Sin registros en esta categoría.</td></tr>';
+    cuerpo.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#999; padding:20px;">Sin registros en esta categoría.</td></tr>';
     return;
   }
 
@@ -1862,6 +2010,7 @@ function dibujarTablaMovilidad(estado) {
       <td>${esNuevo ? '<span title="Recién aprobado, sin marcar" style="margin-right:4px;">🆕</span>' : ''}${esc(r.ResidenteNombre || '')}</td>
       <td>${esc(r.ResidenteID || '')}</td>
       <td>${esc(r.Programa || '')}</td>
+      <td>${origenColumna_(r)}</td>
       <td>${esc(r.Semestre || '')}</td>
       <td>${esc(r.Mes || '')}</td>
       <td>${esc(r.CampoRotacion || '')}</td>
@@ -1873,6 +2022,17 @@ function dibujarTablaMovilidad(estado) {
       </td>
     </tr>`;
   }).join('');
+}
+
+// Si es nacional interesa la universidad; si es internacional, el país, con la universidad
+// debajo en gris. Son dos lecturas distintas y por eso la columna no muestra siempre lo mismo.
+function origenColumna_(r) {
+  const e = etiquetaOrigen(r.UniversidadOrigen);
+  if (!e.ambito) return `<span style="color:#b0b8c0;">${esc(r.UniversidadOrigen || 'sin registrar')}</span>`;
+  if (e.ambito === 'Internacional') {
+    return `<b>${esc(e.etiqueta)}</b><br><span style="color:#8a929c; font-size:11.5px;">${esc(r.UniversidadOrigen || '')}</span>`;
+  }
+  return `<b>${esc(e.etiqueta)}</b>`;
 }
 
 // Marca que ya se envió la carta de movilidad para este residente — deja de contar como
