@@ -1840,13 +1840,13 @@ async function subirArchivo(inputEl, clave, tipoDocumento, programa, residente, 
       guardarEvalDocs(estados);
       actualizarUIEval(clave);
       status.textContent = tipoDocumento === 'certificado' ? 'Certificado cargado correctamente.'
-        : (reemplaza ? 'Nota reemplazada correctamente.' : 'Nota cargada correctamente.');
+        : (reemplaza ? 'Listo, se agregó el archivo a esta rotación.' : 'Nota cargada correctamente.');
       status.className = 'eval-status ok';
       actualizarResumenEval((VR && VR.clavesEval) || []);
       if (window._checklistResidenteItems) renderChecklistResidente(window._checklistResidenteItems);
       const caja = status.getBoundingClientRect();
       confetiR_(caja.left + 40, caja.top);
-      toastR_(reemplaza ? 'Nota reemplazada' : 'Nota cargada');
+      toastR_(reemplaza ? 'Archivo agregado' : 'Nota cargada');
       if (SESION_USO && !reemplaza) SESION_USO.notas++;
       setTimeout(refrescarHojaVR_, 900);
     } else {
@@ -2234,11 +2234,11 @@ function abrirHojaVR(indices) {
             <span class="t">Nota cargada<small>${escR_(f.camp)} · ${escR_(f.mes)} ${escR_(f.sem)}</small></span></div>
           <div class="acc-notas">
             ${enlace ? `<a class="btn-ch" href="${escR_(enlace)}" target="_blank" rel="noopener">👁 Ver lo que subí</a>` : ''}
-            <label class="btn-ch peligro">🔁 Subir otra en su lugar
+            <label class="btn-ch">📎 Subir otra
               <input type="file" accept=".pdf,image/*" multiple onchange="subirArchivo(this,${f.ev.args},true)">
             </label>
           </div>
-          <p class="hint-nota">${enlace ? 'Si subes otra, reemplaza a la anterior: coordinación verá solo la más reciente.' : 'Tu nota quedó guardada. Si necesitas corregirla, sube la correcta y reemplaza a la anterior.'}</p>
+          <p class="hint-nota">¿Te faltó una hoja o la foto salió movida? Sube otra sin problema: se guardan todas y coordinación toma la más reciente.</p>
           <div class="eval-status" id="status-${f.ev.claveRot}"></div>`;
       }
       else evalHtml = `<div class="eval-widget">
