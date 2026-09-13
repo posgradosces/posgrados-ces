@@ -721,10 +721,15 @@
               <div id="vm-count-negado" style="font-size:32px; font-weight:700;">0</div>
             </div>
           </div>
-          <table class="lista">
-            <thead><tr><th>Programa</th><th>Residente</th><th>Periodo / Mes</th><th>Campo de rotación</th><th>Rotación</th><th>Estado</th><th>Observación</th><th>Alerta</th><th>Acciones</th></tr></thead>
-            <tbody id="tabla-validacion-mensual"></tbody>
-          </table>
+          <div id="barra-aplicar-vm" style="display:none; align-items:center; justify-content:space-between; background:#eef4fb; border:1px solid #1F4E79; border-radius:8px; padding:10px 16px; margin-bottom:12px;">
+            <span id="resumen-seleccion-vm" style="font-size:13px; color:#1F4E79; font-weight:600;"></span>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-secundario btn-pequeno" onclick="cancelarSeleccionGestion()">Cancelar selección</button>
+              <button class="btn-primario btn-pequeno" onclick="aplicarSeleccionesGestion()">Aplicar cambios</button>
+            </div>
+          </div>
+          <div class="enc-ges"><span></span><span>Programa / Residente</span><span>Periodo / Mes</span><span>Rotación e instituciones</span><span>Estado</span></div>
+          <div id="lista-validacion-mensual"></div>
         </div>
       </div>
     </div>
@@ -1687,11 +1692,78 @@ function filtrarVmPorEstado(estado) {
 
 const ORDEN_ESTADO_VM = { 'Negado': 0, 'Pendiente': 1, 'Cambio': 1, 'Confirmado': 2 };
 
+// Misma tarjeta plegable de la cola de auxiliares, con lo propio de esta vista: la alerta de
+// reasignar y el botón de reasignación, que aparece solo cuando ya no queda ninguna institución.
 function dibujarTablaValidacionMensual(filas) {
-  const cuerpo = document.getElementById('tabla-validacion-mensual');
-  if (filas.length === 0) { cuerpo.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#999; padding:20px;">Sin registros para este filtro.</td></tr>'; return; }
+  const caja = document.getElementById('lista-validacion-mensual');
+  if (!caja) return;
+  if (filas.length === 0) { caja.innerHTML = '<p style="text-align:center; color:#999; padding:22px; font-size:13px;">Sin registros para este filtro.</p>'; return; }
 
   filas = [...filas].sort((a, b) => (ORDEN_ESTADO_VM[a.Estado] ?? 3) - (ORDEN_ESTADO_VM[b.Estado] ?? 3));
+  ultimoFiltradoVm_ = filas;
+
+  caja.innerHTML = filas.slice(0, 300).map(f => {
+    const clave = f.ClaveUnica;
+    const claveEsc = clave.replace(/'/g, "\\'");
+    const filaOp = cacheColaCompleta.find(g => g.ClaveUnica === clave);
+    const inst = institucionesDeFila(f);
+    const derivado = estadoDerivadoFila(inst);
+    const est = derivado === 'Gestionado' ? 'Confirmado' : derivado;
+    const colores = COLORES_ESTADO[est] || { bg: '#eee', tx: '#333' };
+    const abierta = abiertasGestion.has(clave);
+    const seg = seguimientoFila(inst);
+    const sinSitio = inst.every(i => i.e === 'Negado');
+    const obs = obsGestion[clave] !== undefined ? obsGestion[clave] : (f.ObservacionInterna || '');
+
+    const chips = inst.map(i => {
+      const c = COLORES_INST_[i.e] || COLORES_INST_.Pendiente;
+      return `<span class="chip-i ${i.e === 'Negado' ? 'tach' : ''}" style="background:${c.bg}; color:${c.tx};">${esc(i.n)}</span>`;
+    }).join('');
+
+    const lineas = inst.map((i, j) => `
+      <div class="inst-linea ${i.e === 'Negado' ? 'fuera' : ''}">
+        <span class="sg">${esc(i.n)}</span>
+        <span class="seg-est">
+          <button class="${i.e === 'Gestionado' ? 'on-con' : ''}" onclick="fijarEstadoInst('${claveEsc}',${j},'Gestionado')">Confirma</button>
+          <button class="${i.e === 'Pendiente' ? 'on-pen' : ''}" onclick="fijarEstadoInst('${claveEsc}',${j},'Pendiente')">Pendiente</button>
+          <button class="${i.e === 'Negado' ? 'on-neg' : ''}" onclick="fijarEstadoInst('${claveEsc}',${j},'Negado')">Niega</button>
+        </span>
+        ${j === 0 && inst.length > 1
+          ? `<span style="margin-left:auto;"><button class="btn-secundario btn-pequeno" onclick="fijarTodasInst('${claveEsc}','Gestionado')">Confirmar todas</button></span>`
+          : ''}
+      </div>`).join('');
+
+    return `<div class="ges-fila ${abierta ? 'abierta' : ''} ${seleccionesGestion[clave] ? 'tocada' : ''}">
+      <div class="ges-cab" onclick="alternarFilaGestion('${claveEsc}')">
+        <span class="ges-chev">▶</span>
+        <span class="ges-res"><span style="font-size:11px; color:#7a8791; font-weight:700;">${esc(f.Programa || '')}</span><br>
+          <b>${esc(f.ResidenteNombre || '')}</b><br><span>${esc(f.ResidenteID || '')}</span></span>
+        <span class="ges-prog">${esc(f.Semestre || '')}<br><span>${esc(f.Mes || '')}</span></span>
+        <span class="ges-rot">${esc(f.Rotacion || '')}<div class="ges-chips">${chips}</div></span>
+        <span><span class="pastilla" style="background:${colores.bg}; color:${colores.tx};">${esc(est)}</span>
+          ${filaOp && filaOp.Alerta ? `<br><span style="font-size:11px; color:var(--negado-tx); font-weight:700;">⚠ ${esc(filaOp.Alerta)}</span>` : ''}
+          ${obs ? '<br><span style="font-size:11px; color:#b8860b;">💬 con observación</span>' : ''}</span>
+      </div>
+
+      <div class="ges-det">
+        <h4>Respuesta de cada institución</h4>
+        ${lineas}
+        ${seg.length ? `<h4>Seguimiento automático</h4><div class="ges-auto">${seg.map(x => '· ' + esc(x)).join('<br>')}</div>` : ''}
+        <h4>Observaciones</h4>
+        <textarea placeholder="Lo que haya que dejar anotado sobre esta rotación..." oninput="anotarObsGestion('${claveEsc}', this.value)">${esc(obs)}</textarea>
+        <div class="ges-pie">
+          ${sinSitio ? `<button class="btn-primario btn-pequeno" onclick="abrirReasignarNegado('${claveEsc}')">🔁 Reasignar campo</button>` : ''}
+          <button class="btn-secundario btn-pequeno" onclick="irACeldaDesdeComentario('${claveEsc}', '${String(f.Programa || '').replace(/'/g, "\\'")}', '${String(f.Semestre || '').replace(/'/g, "\\'")}')">🔗 Ver en cuadro</button>
+          <button class="btn-secundario btn-pequeno" onclick="abrirNotificarAsistente('${claveEsc}')">🔔 Notificar asistente</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('') + (filas.length > 300 ? `<p style="font-size:11px; color:#999; padding:8px 4px;">Mostrando 300 de ${filas.length}.</p>` : '');
+}
+
+function dibujarTablaValidacionMensualAntigua_(filas) {
+  const cuerpo = document.getElementById('tabla-validacion-mensual');
+  if (!cuerpo) return;
 
   cuerpo.innerHTML = filas.slice(0, 300).map(f => {
     const colores = COLORES_ESTADO[f.Estado] || { bg: '#eee', tx: '#333' };
@@ -1734,6 +1806,7 @@ function dibujarTablaValidacionMensual(filas) {
 // ============================================================
 // PANEL EJECUTIVO (dashboard) — usa el histórico completo de todos los programas
 // ============================================================
+let ultimoFiltradoVm_ = [];
 let cacheHistoricoCompleto = [];
 let periodoSeleccionadoDb = null; // null = aún no elegido: el panel abre en el semestre en curso
 
@@ -4984,7 +5057,16 @@ function dibujarGestionAuxiliar(filas) {
 
 function alternarFilaGestion(clave) {
   if (abiertasGestion.has(clave)) abiertasGestion.delete(clave); else abiertasGestion.add(clave);
-  aplicarFiltrosGestion();
+  redibujarListasGestion_();
+}
+
+// Las dos vistas comparten estado, así que se redibuja la que esté a la vista.
+function redibujarListasGestion_() {
+  const auxiliar = document.getElementById('vista-gestion-auxiliar');
+  const coordinadora = document.getElementById('vista-gestion-coordinadora');
+  if (auxiliar && auxiliar.style.display === 'block') aplicarFiltrosGestion();
+  if (coordinadora && coordinadora.style.display === 'block') dibujarTablaValidacionMensual(ultimoFiltradoVm_ || []);
+  actualizarBarraAplicarGestion();
 }
 
 function fijarEstadoInst(clave, i, estado) {
@@ -4993,7 +5075,7 @@ function fijarEstadoInst(clave, i, estado) {
   inst[i].e = estado;
   seleccionesGestion[clave] = 'porCentro';
   abiertasGestion.add(clave);
-  aplicarFiltrosGestion();
+  redibujarListasGestion_();
 }
 
 function fijarTodasInst(clave, estado) {
@@ -5002,7 +5084,7 @@ function fijarTodasInst(clave, estado) {
   inst.forEach(i => { i.e = estado; });
   seleccionesGestion[clave] = 'porCentro';
   abiertasGestion.add(clave);
-  aplicarFiltrosGestion();
+  redibujarListasGestion_();
 }
 
 function anotarObsGestion(clave, texto) {
@@ -5031,10 +5113,22 @@ function actualizarBarraAplicarGestion() {
   const barra = document.getElementById('barra-aplicar-gestion');
   if (!barra) return;
   const total = Object.keys(seleccionesGestion).length;
-  if (total === 0) { barra.style.display = 'none'; return; }
-  document.getElementById('resumen-seleccion-gestion').textContent =
-    total === 1 ? '1 rotación con cambios sin aplicar' : total + ' rotaciones con cambios sin aplicar';
+  if (total === 0) {
+    barra.style.display = 'none';
+    const vm = document.getElementById('barra-aplicar-vm');
+    if (vm) vm.style.display = 'none';
+    return;
+  }
+  const texto = total === 1 ? '1 rotación con cambios sin aplicar' : total + ' rotaciones con cambios sin aplicar';
+  document.getElementById('resumen-seleccion-gestion').textContent = texto;
   barra.style.display = 'flex';
+
+  // La validación mensual usa la misma selección, así que su barra va en paralelo.
+  const barraVm = document.getElementById('barra-aplicar-vm');
+  if (barraVm) {
+    document.getElementById('resumen-seleccion-vm').textContent = texto;
+    barraVm.style.display = 'flex';
+  }
 }
 
 function cancelarSeleccionGestion() {
