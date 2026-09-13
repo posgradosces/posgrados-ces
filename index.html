@@ -323,6 +323,81 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 }
 @media(prefers-reduced-motion:reduce){.vr-cumple .torta,.vr-confeti{animation:none}}
 
+/* ===== MEJORAS 2026: recordar dispositivo, novedades, recorrido ===== */
+.rec-box{display:flex;align-items:flex-start;gap:10px;background:var(--teal-bg);border:1px solid #bfe5da;border-radius:11px;padding:11px 13px;cursor:pointer}
+.rec-box input{width:19px;height:19px;margin-top:1px;accent-color:var(--teal);flex-shrink:0}
+.rec-box span{font-size:12.5px;color:#0a5f56;line-height:1.5}
+.rec-box small{display:block;color:#3c7a72;font-size:11px;margin-top:2px}
+.vuelve{border:1.5px solid var(--az-claro);background:var(--az-suave);border-radius:15px;padding:15px;display:flex;align-items:center;gap:13px;margin-bottom:1rem}
+.vuelve .ini{width:44px;height:44px;border-radius:13px;background:var(--az);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0}
+.vuelve .t{flex:1;min-width:0}
+.vuelve .t b{display:block;font-size:14px;color:var(--az)}
+.vuelve .t span{font-size:11.5px;color:var(--sec)}
+.link-sec{background:none;border:none;color:var(--az-med);font-size:12.5px;font-weight:600;cursor:pointer;padding:8px;text-decoration:underline;font-family:inherit}
+
+.vr-ident{display:flex;align-items:center;gap:13px;margin-bottom:.9rem}
+.vr-ident .av{width:48px;height:48px;border-radius:15px;background:linear-gradient(140deg,var(--az),var(--az-med));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0}
+.vr-ident b{display:block;font-size:17px;color:var(--texto)}
+.vr-ident span{font-size:12.5px;color:var(--sec)}
+
+.nov{background:#fff;border:1.5px solid var(--az-claro);border-left:5px solid var(--az-med);border-radius:14px;margin-bottom:1rem;overflow:hidden;box-shadow:var(--sh)}
+.nov-top{display:flex;align-items:center;gap:9px;padding:12px 15px;background:var(--az-suave)}
+.nov-top b{font-size:13.5px;color:var(--az);flex:1}
+.nov-pill{background:var(--az);color:#fff;font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px}
+.nov-cerrar{background:#fff;border:1px solid var(--borde);border-radius:50%;width:27px;height:27px;cursor:pointer;color:var(--sec);font-size:13px;line-height:1;flex-shrink:0}
+.nov-item{display:flex;gap:11px;padding:11px 15px;border-top:1px solid #eef2f6;font-size:13px;width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;cursor:pointer;color:var(--texto);font-family:inherit}
+.nov-item:hover{background:var(--fondo)}
+.nov-item .ic{width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.nov-item .tx{flex:1;min-width:0;line-height:1.45}
+.nov-item .tx small{display:block;color:var(--sec);font-size:11.5px;margin-top:2px}
+.nov-pie{padding:9px 15px;font-size:11.5px;color:var(--sec);border-top:1px solid #eef2f6;background:var(--fondo)}
+
+/* mes en curso destacado dentro del calendario */
+.vr-mes.hoy{border:none;color:#fff;background:linear-gradient(150deg,#0e5f7a 0%,var(--az) 55%,#17405f 100%);box-shadow:0 7px 22px rgba(31,78,121,.26)}
+.vr-mes.hoy .cab{background:rgba(255,255,255,.13);color:#fff}
+.vr-mes.hoy .cab .aqui{font-size:10.5px;font-weight:700;color:#a9d4e8;white-space:nowrap}
+.vr-mes.hoy .cuerpo b{color:#fff;font-size:13.5px}
+.vr-mes.hoy .cuerpo span{color:rgba(255,255,255,.82)}
+.vr-mes.hoy .pill{align-self:flex-start;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:2px 10px;font-size:11px;color:#fff;margin-top:2px}
+.vr-mes.hoy .recuerda{background:rgba(255,255,255,.15);border-radius:10px;padding:8px 10px;margin-top:7px;font-size:11.5px;color:#fff;line-height:1.45;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.vr-mes.hoy .pie{border-top:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.88)}
+.vr-mes.hoy .pie b{color:#fff!important}
+
+/* ver / reemplazar nota */
+.nota-ok{display:flex;align-items:center;gap:11px;background:var(--teal-bg);border:1px solid #bfe5da;border-radius:12px;padding:11px 13px}
+.nota-ok .ic{font-size:19px}
+.nota-ok .t{flex:1;min-width:0;font-size:13px;color:#0a5f56;line-height:1.4}
+.nota-ok .t small{display:block;color:#3c7a72;font-size:11.5px;margin-top:2px}
+.acc-notas{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn-ch{background:#fff;border:1.5px solid var(--borde);border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:600;color:var(--az);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
+.btn-ch:hover{border-color:var(--az-med);background:var(--az-suave)}
+.btn-ch.peligro{color:#9C0006;border-color:#f0c8ce}
+.btn-ch.peligro:hover{background:#fff3f4;border-color:#e09aa4}
+.btn-ch input{display:none}
+.hint-nota{font-size:11.5px;color:var(--sec);margin-top:8px;line-height:1.5}
+.btn-subir{background:var(--az);color:#fff;border:none;border-radius:11px;padding:12px 18px;font-size:13.5px;font-weight:700;cursor:pointer;width:100%;display:block;text-align:center;font-family:inherit}
+.btn-subir:hover{background:var(--az-med)}
+
+/* recorrido guiado */
+#tour-res{position:fixed;inset:0;z-index:600;display:none}
+#tour-res.on{display:block}
+.foco{position:absolute;border-radius:16px;box-shadow:0 0 0 9999px rgba(16,26,40,.72);border:2px solid #fff;transition:all .35s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.globo{position:absolute;background:#fff;border-radius:16px;padding:16px 17px;max-width:320px;box-shadow:0 12px 36px rgba(0,0,0,.3);transition:all .35s cubic-bezier(.4,0,.2,1)}
+.globo .paso{font-size:11px;color:var(--teal);font-weight:700;letter-spacing:.4px}
+.globo b{display:block;font-size:15px;color:var(--az);margin:4px 0 5px}
+.globo p{font-size:13px;color:var(--sec);line-height:1.55}
+.globo-acc{display:flex;align-items:center;gap:9px;margin-top:13px}
+.puntos{display:flex;gap:5px;flex:1}
+.puntos i{width:7px;height:7px;border-radius:50%;background:var(--borde);display:block}
+.puntos i.on{background:var(--az);width:18px;border-radius:4px}
+.globo .btn-sig{background:var(--az);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.globo .btn-salt{background:none;border:none;color:var(--sec);font-size:12.5px;cursor:pointer;padding:9px 4px;font-family:inherit}
+
+#toast-res{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(140px);background:#17293d;color:#fff;padding:13px 20px;border-radius:30px;font-size:13.5px;z-index:700;transition:transform .3s;box-shadow:0 8px 26px rgba(0,0,0,.3);max-width:90vw;text-align:center}
+#toast-res.on{transform:translateX(-50%) translateY(0)}
+@media(max-width:768px){.globo{max-width:calc(100vw - 28px)}}
+@media(prefers-reduced-motion:reduce){.foco,.globo,#toast-res{transition:none}}
+
 /* ===== RESPONSIVE ===== */
 @media(max-width:768px){
   .hdr{height:58px;padding:0 1rem}
@@ -406,13 +481,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <span class="status-dot cargando" id="status-dot"></span>
         <span id="status-txt">Cargando datos...</span>
       </div>
-      <div class="tabs">
-        <button class="tab on" id="t-coord" onclick="setTab('coord')">Coordinación</button>
-        <button class="tab" id="t-res" onclick="setTab('res')">Soy residente</button>
+      <!-- DISPOSITIVO RECORDADO -->
+      <div id="bloque-vuelve" style="display:none">
+        <div class="vuelve">
+          <div class="ini" id="v-ini"></div>
+          <div class="t">
+            <b id="v-nombre">Residente</b>
+            <span id="v-doc"></span>
+          </div>
+        </div>
+        <button class="btn-ppal" onclick="entrarRecordado()">Entrar</button>
+        <div style="text-align:center;margin-top:6px">
+          <button class="link-sec" onclick="olvidarDispositivo()">Entrar con otro documento</button>
+        </div>
+      </div>
+
+      <div class="tabs" id="bloque-tabs">
+        <button class="tab on" id="t-res" onclick="setTab('res')">Soy residente</button>
+        <button class="tab" id="t-coord" onclick="setTab('coord')">Coordinación</button>
       </div>
 
       <!-- FORMULARIO COORDINACIÓN -->
-      <div id="f-coord" class="form">
+      <div id="f-coord" class="form" style="display:none">
         <div>
           <label>Contraseña de acceso</label>
           <input type="password" id="inp-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')entrarCoord()">
@@ -422,11 +512,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
 
       <!-- FORMULARIO RESIDENTE -->
-      <div id="f-res" class="form" style="display:none">
+      <div id="f-res" class="form">
         <div>
           <label>Número de documento</label>
           <input type="text" id="inp-ced" placeholder="Ej: 1234567890 · CE 123456" onkeydown="if(event.key==='Enter')entrarRes()">
         </div>
+
+        <label class="rec-box">
+          <input type="checkbox" id="chk-recordar" checked>
+          <span>Recordar mi documento en este dispositivo
+            <small>Solo en este celular o computador. Puedes borrarlo cuando quieras desde tu cronograma.</small></span>
+        </label>
 
         <!-- HABEAS DATA -->
         <div class="habeas-box">
@@ -653,7 +749,7 @@ let cedulaActiva = null;
 let pantallaAnterior = null;
 let semFiltro = 'activo';
 
-window.addEventListener('load', () => { cargarDesdeGitHub(); });
+window.addEventListener('load', () => { cargarDesdeGitHub(); mostrarRecordado_(); });
 
 // ============================================================
 // HABEAS DATA TOGGLE
@@ -689,6 +785,7 @@ async function cargarDesdeGitHub() {
         document.getElementById('datos-hdr').style.display = 'inline';
         document.getElementById('info-actualizacion').textContent =
           `Datos cargados automáticamente · ${datos.length} registros · Última actualización: ${ahora}`;
+        mostrarRecordado_();
       },
       error() { throw new Error('Error CSV'); }
     });
@@ -742,23 +839,92 @@ async function entrarCoord() {
 
 function entrarRes() {
   const ced = document.getElementById('inp-ced').value.trim();
+  const recordar = !!(document.getElementById('chk-recordar') || {}).checked;
+  entrarConDoc_(ced, recordar);
+}
+
+// ============================================================
+// DISPOSITIVO RECORDADO
+// (guarda solo el numero de documento en este equipo; el residente
+//  puede borrarlo desde el login o desde su propio cronograma)
+// ============================================================
+const DOC_KEY = 'ces_doc_recordado';
+
+function guardarLocal_(clave, valor) {
+  try { localStorage.setItem(clave, valor); } catch(e) {}
+}
+function leerLocal_(clave) {
+  try { return localStorage.getItem(clave); } catch(e) { return null; }
+}
+function borrarLocal_(clave) {
+  try { localStorage.removeItem(clave); } catch(e) {}
+}
+
+function entrarConDoc_(ced, recordar) {
+  const err = document.getElementById('e-res');
+  if(!ced) {
+    err.textContent='Escribe tu número de documento para continuar.';
+    err.classList.add('on'); return;
+  }
   if(!datos.length) {
-    document.getElementById('e-res').textContent='Los datos aún no están disponibles.';
-    document.getElementById('e-res').classList.add('on'); return;
+    err.textContent='Los datos aún no están disponibles. Espera unos segundos e intenta de nuevo.';
+    err.classList.add('on'); return;
   }
   const ok = datos.some(r=>String(r['ID']||'').trim()===ced);
-  if(ok) {
-    modo='residente';
-    cedulaActiva=ced;
-    setBadge('Residente');
-    pantallaAnterior='login';
-    registrarAcceso(ced);
-    ir('crono');
-    renderCrono(ced);
-  } else {
-    document.getElementById('e-res').textContent='Cédula no encontrada. Verifica el número ingresado.';
-    document.getElementById('e-res').classList.add('on');
+  if(!ok) {
+    err.innerHTML='No encontramos ese documento en el sistema. Revisa el número; si eres residente nuevo o crees que hay un error, escríbele a tu auxiliar de coordinación.';
+    err.classList.add('on');
+    borrarLocal_(DOC_KEY);
+    ocultarRecordado_();
+    return;
   }
+  if(recordar) guardarLocal_(DOC_KEY, ced);
+  modo='residente';
+  cedulaActiva=ced;
+  setBadge('Residente');
+  pantallaAnterior='login';
+  registrarAcceso(ced);
+  ir('crono');
+  renderCrono(ced);
+}
+
+function entrarRecordado() {
+  const ced = leerLocal_(DOC_KEY);
+  if(!ced) { olvidarDispositivo(); return; }
+  entrarConDoc_(ced, true);
+}
+
+// Muestra la tarjeta de "ya te conocemos" en vez del formulario
+function mostrarRecordado_() {
+  const ced = leerLocal_(DOC_KEY);
+  const caja = document.getElementById('bloque-vuelve');
+  if(!ced || !caja) return;
+  const fila = datos.find(r=>String(r['ID']||'').trim()===ced);
+  const nombre = fila ? (fila['Persona']||'') : '';
+  const corto = nombre ? nombre.split(' ').slice(0,2).join(' ') : 'Continuar';
+  const ini = nombre ? nombre.split(' ').slice(0,2).map(n=>n[0]||'').join('').toUpperCase() : '👤';
+  document.getElementById('v-ini').textContent = ini;
+  document.getElementById('v-nombre').textContent = corto;
+  document.getElementById('v-doc').textContent = 'Documento ••••' + String(ced).slice(-4);
+  caja.style.display = 'block';
+  document.getElementById('bloque-tabs').style.display = 'none';
+  document.getElementById('f-res').style.display = 'none';
+  document.getElementById('f-coord').style.display = 'none';
+}
+
+function ocultarRecordado_() {
+  const caja = document.getElementById('bloque-vuelve');
+  if(caja) caja.style.display = 'none';
+  document.getElementById('bloque-tabs').style.display = 'flex';
+  setTab('res');
+}
+
+function olvidarDispositivo(desdeCronograma) {
+  borrarLocal_(DOC_KEY);
+  ocultarRecordado_();
+  const inp = document.getElementById('inp-ced');
+  if(inp) inp.value = '';
+  if(desdeCronograma) { cerrar(); toastR_('Listo, este dispositivo ya no recuerda tu documento'); }
 }
 
 function cerrar() {
@@ -768,7 +934,9 @@ function cerrar() {
   ['e-coord','e-res'].forEach(id=>document.getElementById(id).classList.remove('on'));
   document.getElementById('hdr-badge').style.display='none';
   document.getElementById('btn-salir').style.display='none';
+  cerrarTourR_();
   ir('login');
+  if(leerLocal_(DOC_KEY)) mostrarRecordado_();
 }
 
 function setBadge(txt) {
@@ -1571,6 +1739,13 @@ async function sincronizarConDrive(programa, residente, mapaRotaciones, checklis
       // el estado local se revierte a "pendiente" en vez de quedar "cargada"
       // para siempre por lo que quedo guardado en una visita anterior.
       estados[clave].nota = !!(infoServidor && infoServidor.nota);
+      // Si el backend devuelve el enlace del archivo, se guarda para el boton "Ver lo que subi"
+      if (infoServidor) {
+        const enlace = infoServidor.notaUrl || infoServidor.url || infoServidor.enlace ||
+                       (typeof infoServidor.nota === 'string' ? infoServidor.nota : '');
+        if (enlace && /^https?:/i.test(enlace)) estados[clave].notaUrl = enlace;
+      }
+      if (!estados[clave].nota) delete estados[clave].notaUrl;
     });
     guardarEvalDocs(estados);
     Object.values(mapaRotaciones).forEach(actualizarUIEval);
@@ -1708,7 +1883,7 @@ function archivoABase64(file) {
   });
 }
 
-async function subirArchivo(inputEl, clave, tipoDocumento, programa, residente, rotacion, nombreRotacion) {
+async function subirArchivo(inputEl, clave, tipoDocumento, programa, residente, rotacion, nombreRotacion, reemplaza) {
   const files = Array.from(inputEl.files || []);
   if(!files.length) return;
 
@@ -1757,7 +1932,8 @@ async function subirArchivo(inputEl, clave, tipoDocumento, programa, residente, 
         residente: residente,
         rotacion: rotacion,
         nombreRotacion: nombreRotacion,
-        tipoDocumento: tipoDocumento
+        tipoDocumento: tipoDocumento,
+        reemplazar: !!reemplaza
       })
     });
 
@@ -1766,14 +1942,19 @@ async function subirArchivo(inputEl, clave, tipoDocumento, programa, residente, 
       const estados = leerEvalDocs();
       if(!estados[clave]) estados[clave] = {};
       estados[clave][tipoDocumento] = true;
+      const url = data.url || data.enlace || data.link || data.urlArchivo || '';
+      if(tipoDocumento === 'nota' && url) estados[clave].notaUrl = url;
       guardarEvalDocs(estados);
       actualizarUIEval(clave);
-      status.textContent = tipoDocumento === 'certificado' ? 'Certificado cargado correctamente.' : 'Nota cargada correctamente.';
+      status.textContent = tipoDocumento === 'certificado' ? 'Certificado cargado correctamente.'
+        : (reemplaza ? 'Nota reemplazada correctamente.' : 'Nota cargada correctamente.');
       status.className = 'eval-status ok';
       actualizarResumenEval((VR && VR.clavesEval) || []);
       if (window._checklistResidenteItems) renderChecklistResidente(window._checklistResidenteItems);
       const caja = status.getBoundingClientRect();
       confetiR_(caja.left + 40, caja.top);
+      toastR_(reemplaza ? 'Nota reemplazada' : 'Nota cargada');
+      setTimeout(refrescarHojaVR_, 900);
     } else {
       status.textContent = 'Error al guardar: ' + (data.mensaje || 'intenta de nuevo.');
       status.className = 'eval-status err';
@@ -1898,27 +2079,31 @@ function renderCrono(cedula) {
   const hoySem = semDeAbsR_(hoyAbsR_());
   VR = { cedula, nombre, prog, nivel, filas, clavesEval, mapaRotaciones, checklistItems, perfil: null,
     semSel: semsDatos.includes(hoySem) ? hoySem : semsDatos[semsDatos.length - 1], listaNotasAbierta: false, cumpleCerrado: false, confetiCumple: false };
+  VR.novedades = (modo === 'residente') ? calcularNovedadesR_(cedula, mis) : null;
 
   document.getElementById('crono-contenido').innerHTML = `
     <div id="vr-cumple"></div>
-    <div class="perfil-card">
-      <div class="avatar">${escR_(ini)}</div>
-      <div style="min-width:0">
-        <div class="p-nombre">${escR_(nombre)}</div>
-        <div class="p-meta">${escR_(prog)} · ${escR_(nivel)}</div>
-      </div>
-      <div class="p-stats">
-        <div class="p-stat"><div class="p-stat-n">${total}</div><div class="p-stat-l">Rotaciones</div></div>
-        <div class="p-stat"><div class="p-stat-n">${sems.length}</div><div class="p-stat-l">Semestres</div></div>
-        ${pends ? `<div class="p-stat"><div class="p-stat-n" style="color:var(--nar-txt)">${pends}</div><div class="p-stat-l">Pendientes</div></div>` : ''}
-        ${negados ? `<div class="p-stat"><div class="p-stat-n" style="color:var(--mor-txt)">${negados}</div><div class="p-stat-l">Negados</div></div>` : ''}
-        <div class="p-stat"><div class="p-stat-n" id="eval-pend-n" style="color:var(--nar-txt)">—</div><div class="p-stat-l">Notas pend.</div></div>
+    <div class="vr-card" id="vr-avance">
+      <div class="vr-ident">
+        <div class="av">${escR_(ini)}</div>
+        <div style="min-width:0">
+          <b>${escR_(nombre)}</b>
+          <span>${escR_(prog)}${nivel ? ' · ' + escR_(nivel) : ''}</span>
+        </div>
       </div>
       <div class="vr-progreso" id="vr-progreso"></div>
     </div>
+    <div id="vr-novedades"></div>
     <div class="vr-card" id="vr-tareas"></div>
-    <div class="vr-card">
-      <div class="vr-top"><h3>📋 Checklist de notas <span class="log-count-badge" id="chk-res-count">0</span></h3>
+    <div id="vr-calendario">
+      <div class="vr-titulo">📅 Tu residencia mes a mes</div>
+      <p class="vr-como">La tarjeta azul es el mes en el que estás rotando. Toca cualquier mes para ver el detalle y subir tu nota; los semestres que aún no tienen rotaciones se irán llenando a medida que coordinación los programe.</p>
+      <div class="vr-tabs" id="vr-tabs"></div>
+      <div class="vr-meses" id="vr-meses"></div>
+      <div class="vr-leyenda-est"><span><i style="background:var(--az-claro)"></i>Confirmado</span><span><i style="background:var(--naranja)"></i>Pendiente</span><span><i style="background:var(--morado)"></i>Negado</span><span><i style="background:#FFC7CE"></i>Cambio</span><span><i style="background:var(--teal-bg);border:1px solid var(--teal)"></i>Vacaciones</span><span><i style="background:#fff;border:1px dashed #b8c4d0"></i>Por programar</span></div>
+    </div>
+    <div class="vr-card" style="margin-top:1.2rem">
+      <div class="vr-top"><h3>📋 Tus notas de rotación <span style="font-size:12px;color:var(--nar-txt);font-weight:600"><span id="eval-pend-n">—</span> por subir</span></h3>
         <button class="btn-actualizar-claro" id="btn-actualizar-estado" onclick="actualizarEstadoManual()">🔄 Actualizar estado</button></div>
       <div class="vr-contadores" id="vr-contadores"></div>
       <button class="vr-ver" id="chk-res-arr" onclick="toggleChecklistResidente()">Ver las rotaciones que requieren nota ▾</button>
@@ -1927,6 +2112,7 @@ function renderCrono(cedula) {
           <table class="log-tbl"><thead><tr><th>Mes / Semestre</th><th>Campo</th><th>Rotación</th><th>Estado</th></tr></thead><tbody id="checklist-residente-body"></tbody></table>
         </div>
       </div>
+      <span class="log-count-badge" id="chk-res-count" style="display:none">0</span>
     </div>
     <details class="vr-tips"><summary><span>💡 Antes de subir tus notas (2 recordatorios)</span><span class="flecha">▶</span></summary>
       <div style="margin:0 12px 10px;padding:11px 14px;background:var(--az-suave);border:1px solid var(--az-claro);border-radius:10px;font-size:12px;color:var(--az);line-height:1.6">
@@ -1934,11 +2120,7 @@ function renderCrono(cedula) {
       </div>
       <div class="aviso-multihoja">💡 <strong>¿Tu nota tiene varias hojas?</strong> Al presionar el botón "Nota" puedes seleccionar varias fotos a la vez (una por hoja): el sistema las combina automáticamente en un solo PDF antes de subirlas.</div>
     </details>
-    <div class="vr-titulo">📅 Tu residencia mes a mes</div>
-    <p class="vr-como">Toca un mes para ver el detalle y subir tu nota. Los semestres que aún no tienen rotaciones se irán llenando a medida que coordinación los programe.</p>
-    <div class="vr-tabs" id="vr-tabs"></div>
-    <div class="vr-meses" id="vr-meses"></div>
-    <div class="vr-leyenda-est"><span><i style="background:var(--az-claro)"></i>Confirmado</span><span><i style="background:var(--naranja)"></i>Pendiente</span><span><i style="background:var(--morado)"></i>Negado</span><span><i style="background:#FFC7CE"></i>Cambio</span><span><i style="background:var(--teal-bg);border:1px solid var(--teal)"></i>Vacaciones</span><span><i style="background:#fff;border:1px dashed #b8c4d0"></i>Por programar</span></div>`;
+    ${modo === 'residente' ? '<div style="text-align:center;padding:.3rem 0 1.5rem"><button class="link-sec" onclick="olvidarDispositivo(true)">Olvidar mi documento en este dispositivo</button></div>' : ''}`;
 
   if (!document.getElementById('vr-velo')) {
     const velo = document.createElement('div');
@@ -1946,13 +2128,14 @@ function renderCrono(cedula) {
     velo.innerHTML = '<div class="vr-hoja" id="vr-hoja" role="dialog" aria-modal="true"></div>';
     velo.addEventListener('click', e => { if (e.target.id === 'vr-velo') cerrarHojaVR(); });
     document.body.appendChild(velo);
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarHojaVR(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarHojaVR(); cerrarTourR_(); } });
   }
   clavesEval.forEach(actualizarUIEval);
   actualizarResumenEval(clavesEval);
   renderChecklistResidente(checklistItems);
   sincronizarConDrive(prog, nombre + '_' + cedula, mapaRotaciones, checklistItems);
   cargarPerfilResidente_(cedula);
+  if (modo === 'residente' && !leerLocal_(TOUR_KEY)) setTimeout(iniciarTourR_, 700);
 }
 
 // Fechas del programa y "¿hoy cumple?" desde la base de Residentes (el servidor nunca manda la fecha de nacimiento)
@@ -1994,7 +2177,7 @@ function semestresProgramaR_(plan) {
 
 function repintarVistaResidente_() {
   if (!VR || !document.getElementById('vr-progreso')) return;
-  pintarCumpleR_(); pintarProgresoR_(); pintarTareasR_(); pintarContadoresR_(); pintarMesesR_();
+  pintarCumpleR_(); pintarNovedadesR_(); pintarProgresoR_(); pintarTareasR_(); pintarContadoresR_(); pintarMesesR_();
 }
 
 function pintarCumpleR_() {
@@ -2112,17 +2295,36 @@ function pintarMesesR_() {
         <div class="pie">${dentro ? '⏳ Pronto verás aquí tu rotación' : '—'}</div></div>`;
     }
     const f = t.filas[0], c = colorEstadoR_(f), ev = f.ev;
+    const esVacas = f.camp === 'VACACIONES';
     let pie;
     if (ev.tipo === 'vacas') pie = '😎☀️ ¡Descansa!';
     else if (ev.tipo === 'antes') pie = 'Nota: no aplica en el sistema';
     else if (ev.tipo === 'consolidada') pie = 'ℹ️ Nota en ' + escR_(ev.destino.split(' (')[0]);
     else if (estaCargadaR_(ev.claveRot)) pie = '<b style="color:var(--teal)">✅ Nota cargada</b>';
     else pie = `<b style="color:${f.abs === null || f.abs <= hoy ? '#E8590C' : 'var(--sec)'}">📄 Nota pendiente</b>`;
-    return `<button class="vr-mes ${esHoy ? 'hoy' : ''}" onclick="abrirHojaVR([${t.filas.map(x => x.i).join(',')}])">
-      <div class="cab" style="background:${c[0]};color:${c[1]}"><span>${escR_(t.mes)}${esHoy ? ' · 📍 hoy' : ''}</span><span style="font-size:11px">${f.camp === 'VACACIONES' ? '☀️' : escR_(f.est || '—')}</span></div>
-      <div class="cuerpo">${f.camp === 'VACACIONES' ? '<b>😎 Vacaciones</b>' : `<b>${escR_(f.camp)}</b><span>${escR_(f.rot)}</span>`}
+
+    // En vacaciones se muestra el detalle (fechas) directamente en la tarjeta,
+    // igual que el nombre de la rotación en los demás meses.
+    const detalleVacas = [f.rot, f.obs].filter(x => x && String(x).trim()).map(x => `<span>${escR_(x)}</span>`).join('');
+    const cuerpo = esVacas
+      ? `<b>😎 Vacaciones</b>${detalleVacas}`
+      : `<b>${escR_(f.camp)}</b><span>${escR_(f.rot)}</span>`;
+
+    if (esHoy) {
+      return `<button class="vr-mes hoy" onclick="abrirHojaVR([${t.filas.map(x => x.i).join(',')}])">
+        <div class="cab"><span>${escR_(t.mes)}</span><span class="aqui">📍 Estás aquí</span></div>
+        <div class="cuerpo">${cuerpo}
+          ${esVacas ? '' : `<span class="pill">${escR_(f.est || '—')}</span>`}
+          ${f.est === 'Negado' ? '<span class="recuerda">⚠ Estamos reasignando el campo. No tienes que hacer nada, te avisaremos.</span>' : ''}
+          ${(!esVacas && f.obs) ? `<span class="recuerda">📌 ${escR_(f.obs)}</span>` : ''}
+          ${t.filas.length > 1 ? `<span>+${t.filas.length - 1} registro(s) más este mes</span>` : ''}</div>
+        <div class="pie">${pie}</div></button>`;
+    }
+    return `<button class="vr-mes" onclick="abrirHojaVR([${t.filas.map(x => x.i).join(',')}])">
+      <div class="cab" style="background:${c[0]};color:${c[1]}"><span>${escR_(t.mes)}</span><span style="font-size:11px">${esVacas ? '☀️' : escR_(f.est || '—')}</span></div>
+      <div class="cuerpo">${cuerpo}
         ${f.est === 'Negado' ? '<span style="color:var(--mor-txt);font-weight:600">⚠ Estamos reasignando el campo</span>' : ''}
-        ${t.filas.some(x => x.obs) ? '<span style="color:var(--nar-txt)">💬 Tiene observación</span>' : ''}
+        ${(!esVacas && t.filas.some(x => x.obs)) ? '<span style="color:var(--nar-txt)">💬 Tiene observación</span>' : ''}
         ${t.filas.length > 1 ? `<span style="color:var(--sec)">+${t.filas.length - 1} registro(s) más este mes</span>` : ''}</div>
       <div class="pie">${pie}</div></button>`;
   }).join('') || '<div class="sin">Sin rotaciones en este semestre.</div>';
@@ -2132,6 +2334,7 @@ function pintarMesesR_() {
 function abrirHojaVR(indices) {
   const filas = indices.map(i => VR.filas[i]).filter(Boolean);
   if (!filas.length) return;
+  if (VR) VR.hojaAbierta = indices;
   const f0 = filas[0], hoy = hoyAbsR_();
   document.getElementById('vr-hoja').innerHTML = `
     <div class="vr-hoja-top"><div><div class="k">${escR_(f0.mes)} · ${escR_(f0.sem)}${filas.some(f => f.abs === hoy) ? ' · 📍 este mes' : ''}</div>
@@ -2145,11 +2348,25 @@ function abrirHojaVR(indices) {
       if (f.ev.tipo === 'vacas') evalHtml = '<span class="vacaciones-cell">😎☀️ ¡Descansa!</span>';
       else if (f.ev.tipo === 'antes') evalHtml = `<span class="dash-cell">— (rotación anterior a ${SEMESTRE_CORTE_NOTAS}, no aplica en el sistema)</span>`;
       else if (f.ev.tipo === 'consolidada') evalHtml = `<div class="nota-consolidada">ℹ️ Nota consolidada en <strong>${escR_(f.ev.destino)}</strong>. No debes cargar nada en este mes.</div>`;
+      else if (estaCargadaR_(f.ev.claveRot)) {
+        const enlace = enlaceNotaR_(f.ev.claveRot);
+        evalHtml = `<div class="nota-ok"><span class="ic">✅</span>
+            <span class="t">Nota cargada<small>${escR_(f.camp)} · ${escR_(f.mes)} ${escR_(f.sem)}</small></span></div>
+          <div class="acc-notas">
+            ${enlace ? `<a class="btn-ch" href="${escR_(enlace)}" target="_blank" rel="noopener">👁 Ver lo que subí</a>` : ''}
+            <label class="btn-ch peligro">🔁 Subir otra en su lugar
+              <input type="file" accept=".pdf,image/*" multiple onchange="subirArchivo(this,${f.ev.args},true)">
+            </label>
+          </div>
+          <p class="hint-nota">${enlace ? 'Si subes otra, reemplaza a la anterior: coordinación verá solo la más reciente.' : 'Tu nota quedó guardada. Si necesitas corregirla, sube la correcta y reemplaza a la anterior.'}</p>
+          <div class="eval-status" id="status-${f.ev.claveRot}"></div>`;
+      }
       else evalHtml = `<div class="eval-widget">
-          <label class="btn-upload" id="lbl-nota-${f.ev.claveRot}">
-            <span class="btn-upload-text">📄 Nota</span>
+          <label class="btn-upload btn-subir" id="lbl-nota-${f.ev.claveRot}">
+            <span class="btn-upload-text">📄 Subir mi nota</span>
             <input type="file" accept=".pdf,image/*" multiple style="display:none" onchange="subirArchivo(this,${f.ev.args})">
           </label>
+          <p class="hint-nota">Puedes seleccionar varias fotos a la vez, una por hoja: se unen en un solo PDF automáticamente.</p>
           <div class="eval-status" id="status-${f.ev.claveRot}"></div>
         </div>`;
       return `<div class="vr-hoja-mes">
@@ -2161,10 +2378,207 @@ function abrirHojaVR(indices) {
         <div class="vr-eval"><div class="k">Evaluación y documentos</div>${evalHtml}</div>
       </div>`;
     }).join('')}`;
-  filas.forEach(f => { if (f.ev.tipo === 'nota') actualizarUIEval(f.ev.claveRot); });
+  filas.forEach(f => { if (f.ev.tipo === 'nota' && !estaCargadaR_(f.ev.claveRot)) actualizarUIEval(f.ev.claveRot); });
   document.getElementById('vr-velo').classList.add('on');
 }
+
+// Vuelve a pintar la hoja abierta (por ejemplo, despues de cargar o reemplazar una nota)
+function refrescarHojaVR_() {
+  if (VR && VR.hojaAbierta && document.getElementById('vr-velo').classList.contains('on')) abrirHojaVR(VR.hojaAbierta);
+}
+
+// Enlace del archivo en Drive, si el backend lo devuelve
+const enlaceNotaR_ = clave => ((leerEvalDocs()[clave] || {}).notaUrl) || '';
+
 function cerrarHojaVR() { const v = document.getElementById('vr-velo'); if (v) v.classList.remove('on'); }
+
+// ============================================================
+// NOVEDADES DESDE LA ULTIMA VISITA
+// Compara el cronograma actual contra una foto guardada en este mismo
+// dispositivo la ultima vez que el residente lo revisó. No consulta nada
+// al servidor: si no hay foto previa (primera visita) no muestra nada.
+// ============================================================
+const SNAP_PREFIX = 'ces_snap_';
+const TOUR_KEY = 'ces_tour_residente';
+
+function fotoDeFilas_(mis) {
+  const filas = {};
+  mis.forEach(r => {
+    const k = (r['Semestre'] || '') + '|' + (r['Mes'] || '');
+    filas[k] = {
+      c: String(r['Campo de rotacion'] || '').trim(),
+      r: String(r['Rotacion'] || r['Detalle original'] || '').trim(),
+      e: String(r['Estado confirmacion'] || '').trim()
+    };
+  });
+  return filas;
+}
+
+function guardarFotoR_(cedula, mis) {
+  guardarLocal_(SNAP_PREFIX + cedula, JSON.stringify({ fecha: new Date().toISOString(), filas: fotoDeFilas_(mis) }));
+}
+
+function calcularNovedadesR_(cedula, mis) {
+  let foto = null;
+  try { foto = JSON.parse(leerLocal_(SNAP_PREFIX + cedula) || 'null'); } catch (e) { foto = null; }
+  if (!foto || !foto.filas) { guardarFotoR_(cedula, mis); return null; }   // primera visita: no hay con que comparar
+
+  const ahora = fotoDeFilas_(mis), lista = [];
+  Object.keys(ahora).forEach(k => {
+    const partes = k.split('|'), sem = partes[0], mes = partes[1];
+    const a = ahora[k], b = foto.filas[k];
+    const esVacas = a.c === 'VACACIONES';
+    if (!b) {
+      lista.push({ sem, mes, ic: esVacas ? '😎' : '📅', bg: esVacas ? 'var(--teal-bg)' : 'var(--az-claro)', col: esVacas ? 'var(--teal)' : 'var(--az)',
+        txt: esVacas ? 'Se programaron tus ' + String(mes).toLowerCase() : 'Se programó tu rotación de ' + String(mes).toLowerCase(),
+        sub: esVacas ? (a.r || 'Vacaciones') : (a.c + (a.r ? ' · ' + a.r : '')) });
+      return;
+    }
+    if (a.c !== b.c || a.r !== b.r) {
+      lista.push({ sem, mes, ic: '🔄', bg: '#FFC7CE', col: '#9C0006',
+        txt: capR_(String(mes).toLowerCase()) + ' cambió: ahora es ' + (a.c || a.r),
+        sub: 'Antes: ' + (b.c || b.r || '—') });
+      return;
+    }
+    if (a.e !== b.e) {
+      if (a.e === 'Negado') lista.push({ sem, mes, ic: '⚠️', bg: 'var(--morado)', col: 'var(--mor-txt)',
+        txt: capR_(String(mes).toLowerCase()) + ' quedó negado y estamos reasignando el campo',
+        sub: a.c + ' · no tienes que hacer nada, te avisaremos' });
+      else lista.push({ sem, mes, ic: '✅', bg: 'var(--teal-bg)', col: 'var(--teal)',
+        txt: capR_(String(mes).toLowerCase()) + ' cambió a ' + (a.e || 'sin estado'),
+        sub: a.c + (a.r ? ' · ' + a.r : '') });
+    }
+  });
+  return { fecha: foto.fecha, lista };
+}
+
+function pintarNovedadesR_() {
+  const cont = document.getElementById('vr-novedades');
+  if (!cont) return;
+  const n = VR && VR.novedades;
+  if (!n || !n.lista || !n.lista.length) { cont.innerHTML = ''; return; }
+  let cuando = '';
+  try {
+    const d = new Date(n.fecha);
+    cuando = d.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+  } catch (e) { cuando = ''; }
+  cont.innerHTML = `<div class="nov">
+    <div class="nov-top"><b>Novedades desde tu última visita</b>
+      <span class="nov-pill">${n.lista.length}</span>
+      <button class="nov-cerrar" onclick="cerrarNovedadesR_()" aria-label="Marcar como visto">✕</button></div>
+    ${n.lista.map((x, i) => `<button class="nov-item" onclick="irANovedadR_(${i})">
+      <span class="ic" style="background:${x.bg};color:${x.col}">${x.ic}</span>
+      <span class="tx">${escR_(x.txt)}<small>${escR_(x.sub)}</small></span>
+      <span style="color:var(--sec);font-size:16px;align-self:center">›</span></button>`).join('')}
+    ${cuando ? `<div class="nov-pie">Tu última visita fue el ${escR_(cuando)}.</div>` : ''}
+  </div>`;
+}
+
+function cerrarNovedadesR_() {
+  if (!VR) return;
+  const mis = datos.filter(r => String(r['ID'] || '').trim() === VR.cedula);
+  guardarFotoR_(VR.cedula, mis);
+  VR.novedades = null;
+  pintarNovedadesR_();
+  toastR_('Listo, marcamos las novedades como vistas');
+}
+
+function irANovedadR_(i) {
+  const n = VR && VR.novedades && VR.novedades.lista[i];
+  if (!n) return;
+  if (n.sem) { VR.semSel = n.sem; pintarMesesR_(); }
+  const fila = VR.filas.find(f => f.sem === n.sem && f.mes === n.mes);
+  if (fila) abrirHojaVR([fila.i]);
+  else { const cal = document.getElementById('vr-calendario'); if (cal) cal.scrollIntoView({ block: 'start', behavior: 'smooth' }); }
+}
+
+// ============================================================
+// RECORRIDO GUIADO DE 3 PASOS (solo la primera vez)
+// ============================================================
+const PASOS_R_ = [
+  { sel: '#vr-novedades', tit: 'Lo que cambió', txt: 'Aquí aparece todo lo que se movió en tu cronograma desde la última vez que entraste: cambios de campo, rotaciones negadas y rotaciones nuevas.' },
+  { sel: '#vr-tareas', tit: 'Lo que tienes que hacer', txt: 'Todo lo que está pendiente de tu parte, en un solo lugar. Toca cualquier tarea para ir directo al mes que le corresponde.' },
+  { sel: '#vr-calendario', tit: 'Tu residencia completa', txt: 'La tarjeta azul es el mes en el que estás rotando, con los recordatorios de ese campo. Toca cualquier mes para ver el detalle, subir la nota o reemplazarla.' }
+];
+let pasoR_ = 0;
+
+function cajaTourR_() {
+  let t = document.getElementById('tour-res');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'tour-res';
+    t.innerHTML = '<div class="foco" id="tour-foco"></div><div class="globo" id="tour-globo"></div>';
+    document.body.appendChild(t);
+  }
+  return t;
+}
+
+function iniciarTourR_(forzar) {
+  if (modo !== 'residente') return;
+  if (forzar) borrarLocal_(TOUR_KEY);
+  pasoR_ = 0;
+  cajaTourR_().classList.add('on');
+  pintarPasoR_();
+}
+
+function pintarPasoR_() {
+  const p = PASOS_R_[pasoR_];
+  if (!p) { cerrarTourR_(true); return; }
+  const el = document.querySelector(p.sel);
+  if (!el || !el.offsetHeight) { pasoR_++; return pintarPasoR_(); }   // ej. sin novedades, salta ese paso
+  el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  setTimeout(() => {
+    const c = el.getBoundingClientRect(), m = 8;
+    const foco = document.getElementById('tour-foco');
+    if (!foco) return;
+    foco.style.top = (c.top - m) + 'px';
+    foco.style.left = (c.left - m) + 'px';
+    foco.style.width = (c.width + m * 2) + 'px';
+    foco.style.height = (c.height + m * 2) + 'px';
+
+    const globo = document.getElementById('tour-globo');
+    globo.innerHTML = `<div class="paso">Paso ${pasoR_ + 1} de ${PASOS_R_.length}</div>
+      <b>${escR_(p.tit)}</b><p>${escR_(p.txt)}</p>
+      <div class="globo-acc"><span class="puntos">${PASOS_R_.map((_, i) => `<i class="${i === pasoR_ ? 'on' : ''}"></i>`).join('')}</span>
+      <button class="btn-salt" onclick="cerrarTourR_(true)">Saltar</button>
+      <button class="btn-sig" onclick="siguientePasoR_()">${pasoR_ === PASOS_R_.length - 1 ? 'Entendido' : 'Siguiente'}</button></div>`;
+    const abajo = c.bottom + 210 < window.innerHeight;
+    globo.style.top = abajo ? (c.bottom + 16) + 'px' : 'auto';
+    globo.style.bottom = abajo ? 'auto' : (window.innerHeight - c.top + 16) + 'px';
+    const ancho = Math.min(320, window.innerWidth - 28);
+    globo.style.left = Math.max(14, Math.min(c.left, window.innerWidth - ancho - 14)) + 'px';
+  }, 380);
+}
+
+function siguientePasoR_() {
+  pasoR_++;
+  if (pasoR_ >= PASOS_R_.length) { cerrarTourR_(true); toastR_('¡Listo! Ya conoces tu portal.'); return; }
+  pintarPasoR_();
+}
+
+function cerrarTourR_(marcar) {
+  const t = document.getElementById('tour-res');
+  if (t) t.classList.remove('on');
+  if (marcar) guardarLocal_(TOUR_KEY, 'visto');
+}
+
+window.addEventListener('resize', () => {
+  const t = document.getElementById('tour-res');
+  if (t && t.classList.contains('on')) pintarPasoR_();
+});
+
+// ============================================================
+// AVISO FLOTANTE
+// ============================================================
+let tToastR_;
+function toastR_(msg) {
+  let t = document.getElementById('toast-res');
+  if (!t) { t = document.createElement('div'); t.id = 'toast-res'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(tToastR_);
+  tToastR_ = setTimeout(() => t.classList.remove('on'), 2800);
+}
 
 function confetiR_(x, y) {
   ['🎉', '✨', '⭐', '🎊', '✅', '✨', '🎉', '⭐'].forEach((e, k) => {
