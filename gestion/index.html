@@ -335,6 +335,8 @@
   .sel-cen-it .sg { font-weight:700; color:var(--azul-ces); min-width:80px; }
   .sel-cen-it .nm { color:#55606b; }
   .sel-cen-nada { padding:10px; font-size:12.5px; color:#6b7684; }
+  .sel-cen-lista.pista { border:none; background:transparent; }
+  .sel-cen-lista.pista .sel-cen-nada { padding:6px 2px; font-style:italic; }
   .sel-cen-pie { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px; }
   .sel-cen-ayuda { font-size:11.5px; color:#6b7684; }
   .alias-cod { background:#f1f3f6; padding:1px 6px; border-radius:3px; margin:0 4px 3px 0; display:inline-block; font-size:11.5px; color:#55606b; }
@@ -534,6 +536,10 @@
 
       <!-- INDICADORES — visuales primero; la lectura en texto va debajo, pequeña y en gris -->
       <div id="db-kpis" class="db-kpis"></div>
+      <div style="margin-top:10px;">
+        <button class="btn-secundario btn-pequeno" id="btn-kpis-mas" onclick="alternarKpisMas()">+ Ver más indicadores</button>
+      </div>
+      <div id="db-kpis-mas" class="db-kpis" style="display:none; margin-top:12px;"></div>
       <p id="db-relato" class="db-relato"></p>
       <div id="db-desglose-kpi"></div>
 
@@ -775,6 +781,13 @@
     <div class="panel" id="panel-movilidad" style="display:none;">
       <h2>Movilidad académica <button class="btn-secundario btn-pequeno" onclick="cargarMovilidad(true)" style="float:right;">🔄 Actualizar</button></h2>
       <p style="font-size:12px; color:#888; font-style:italic; margin-top:-8px;">Residentes de Movilidad entrante — para gestionar sus permisos con base en si quedaron aceptados o negados.</p>
+      <div style="margin:10px 0;">
+        <button class="btn-secundario btn-pequeno" id="btn-origenes" onclick="alternarPanelOrigenes()">🌎 Clasificar orígenes</button>
+        <span style="font-size:12px; color:#888; margin-left:8px;">Define cuáles orígenes son nacionales y cuáles internacionales, para separar el indicador.</span>
+      </div>
+      <div id="panel-origenes" style="display:none; border:1px solid #e3e8ee; border-radius:10px; padding:14px; margin-bottom:14px; background:#fafbfc;">
+        <div id="origenes-lista"></div>
+      </div>
       <div id="kpis-movilidad" style="display:flex; gap:12px; margin:12px 0; flex-wrap:wrap;"></div>
       <div class="controles-cuadricula" style="margin-bottom:10px;">
         <div><label>Nombre</label><input id="mov-filtro-nombre" autocomplete="off" placeholder="Escribe..." oninput="buscarMovilidad()"></div>
@@ -1035,6 +1048,7 @@ function entrarAlApp() {
     document.getElementById('cat-btn-nuevo').style.display = 'inline-block';
     document.getElementById('enlace-unificar').style.display = 'block';
     cargarCentros();
+    cargarOrigenes();
     cargarProgramasConocidos();
     cargarMesesFiltro();
     mostrarBannerRespaldoSiAplica();
@@ -2010,23 +2024,66 @@ function dibujarKpisDb() {
   const porProg = {};
   d.forEach(r => { if (r.Programa) (porProg[r.Programa] = porProg[r.Programa] || new Set()).add(r.ResidenteID); });
 
+  // --- Rotaciones negadas: dónde se está trabando el trámite ---
+  const negadas = d.filter(r => r.Estado === 'Negado');
+  const negPorMes = MESES.map(m => negadas.filter(r => r.Mes === m).length);
+  const negInstituciones = new Set(negadas.flatMap(r => separarCampos(r.CampoRotacion))).size;
+
+  // --- Movilidad saliente: se deduce del vínculo del centro, nadie la marca a mano ---
+  let salNac = 0, salInt = 0;
+  ces.forEach(r => salidasDeRegistro(r).forEach(c => { if (c.ambito === 'Internacional') salInt++; else salNac++; }));
+  const nSal = salNac + salInt;
+
+  // --- Movilidad entrante: nacional por universidad, internacional por país ---
+  const personasMov = personasDb_(mov);
+  let entNac = 0, entInt = 0, entSin = 0;
+  personasMov.forEach(p => {
+    const e = etiquetaOrigen((p.registros[0] || {}).UniversidadOrigen);
+    if (e.ambito === 'Nacional') entNac++; else if (e.ambito === 'Internacional') entInt++; else entSin++;
+  });
+  const entSeg = [{ v: entNac, color: 'var(--confirmado-tx)' }, { v: entInt, color: '#7030A0' }, { v: entSin, color: '#d6dde4' }];
+  const salSeg = [{ v: salNac, color: 'var(--confirmado-tx)' }, { v: salInt, color: '#C77700' }];
+
   const tarjetas = [
-    { k: 'residentes', n: nCes, t: 'Residentes CES', color: '#003865', d: delta(nCes, f => unicosDb_(f.filter(r => r.Tipo !== 'Movilidad entrante'), r => r.ResidenteID)),
+    { k: 'residentes', n: nCes, t: 'Residentes CES en rotación', color: '#003865', d: delta(nCes, f => unicosDb_(f.filter(r => r.Tipo !== 'Movilidad entrante'), r => r.ResidenteID)),
       vis: donaDb_(niveles, 64), pie: niveles.map(x => x.n + ' ' + x.v).join(' · ') },
+    { k: 'negadas', n: negadas.length, t: 'Rotaciones negadas', color: '#9C0006', d: delta(negadas.length, f => f.filter(r => r.Estado === 'Negado').length),
+      vis: miniBarrasDb_(negPorMes, '#9C0006'), pie: negadas.length ? `En ${negInstituciones} campos de rotación. Por mes, de julio a junio.` : 'Ninguna negada en el periodo.' },
     { k: 'movilidad', n: nMov, t: 'Movilidad entrante', color: '#C47A1E', d: delta(nMov, f => unicosDb_(f.filter(r => r.Tipo === 'Movilidad entrante'), r => r.ResidenteID)),
-      vis: donaDb_(movSeg, 64), pie: `${movSeg[0].v} aceptados · ${movSeg[1].v} pendientes · ${movSeg[2].v} negados` },
+      vis: donaDb_(entSeg, 64), pie: `${entNac} nacional · ${entInt} internacional` + (entSin ? ` · ${entSin} sin clasificar` : '') },
+    { k: 'saliente', n: nSal, t: 'Movilidad saliente', color: '#7030A0', d: delta(nSal, f => { let c = 0; f.forEach(r => { c += salidasDeRegistro(r).length; }); return c; }),
+      vis: donaDb_(salSeg, 64), pie: nSal ? `${salNac} nacional por convenio · ${salInt} internacional` : 'Sin salidas registradas. Revisa el vínculo de los centros.' }
+  ];
+
+  // --- Indicadores secundarios, ocultos hasta que se piden ---
+  const usadosPeriodo = new Set();
+  d.forEach(r => centrosDeCampo(r.CampoRotacion).forEach(c => usadosPeriodo.add(c.id)));
+  const paises = new Set();
+  (cacheHistoricoCompleto || []).forEach(r => centrosDeCampo(r.CampoRotacion).forEach(c => { if (c.ambito === 'Internacional' && c.pais) paises.add(c.pais); }));
+  const sinUso = cacheCentros.filter(c => c.activo !== false && !usadosPeriodo.has(c.id)).length;
+
+  const secundarias = [
     { k: 'programas', n: nProg, t: 'Programas con residentes', color: '#006100', d: delta(nProg, f => unicosDb_(f, r => r.Programa)),
       vis: miniBarrasDb_(Object.values(porProg).map(s => s.size).sort((a, b) => b - a), 'var(--azul-ces)'), pie: 'Residentes por programa, de mayor a menor' },
     { k: 'campos', n: nCampos, t: 'Campos de rotación en uso', color: '#0d6e5f', d: delta(nCampos, f => new Set(f.flatMap(r => separarCampos(r.CampoRotacion))).size),
-      vis: miniBarrasDb_(Object.values(porCampo).map(s => s.size).sort((a, b) => b - a), '#0d6e5f'), pie: 'Residentes por campo, de mayor a menor' }
+      vis: miniBarrasDb_(Object.values(porCampo).map(s => s.size).sort((a, b) => b - a), '#0d6e5f'), pie: 'Residentes por campo, de mayor a menor' },
+    { k: 'paises', n: paises.size, t: 'Países destino, acumulado', color: '#7030A0', d: '<div class="d db-igual">Histórico completo</div>',
+      vis: miniBarrasDb_(Array.from({ length: Math.min(paises.size, 12) }, () => 1), '#7030A0'), pie: paises.size ? Array.from(paises).slice(0, 4).join(' · ') : 'Ninguno registrado todavía.' },
+    { k: 'sinuso', n: sinUso, t: 'Instituciones sin uso', color: '#C77700', d: '<div class="d db-igual">Del catálogo, en este periodo</div>',
+      vis: donaDb_([{ v: usadosPeriodo.size, color: 'var(--confirmado-tx)' }, { v: sinUso, color: '#F0E4CE' }], 64),
+      pie: `${usadosPeriodo.size} recibieron residentes de ${cacheCentros.length} en el catálogo` }
   ];
-  document.getElementById('db-kpis').innerHTML = tarjetas.map(t => `
+
+  const pintarTarjeta = t => `
     <button class="db-kpi ${dbSel.kpi === t.k ? 'activo' : ''}" style="border-top-color:${t.color};" onclick="elegirKpiDb('${t.k}')">
       <div><div class="n" style="color:${t.color};">${t.n}</div><div class="t">${t.t}</div>${t.d}
         <div class="sub" style="font-size:12px; color:#8a929c; margin-top:4px;">${t.pie}</div>
         <div class="ver">${dbSel.kpi === t.k ? 'Ocultar detalle ▴' : 'Ver detalle ▾'}</div></div>
       <div>${t.vis}</div>
-    </button>`).join('');
+    </button>`;
+
+  document.getElementById('db-kpis').innerHTML = tarjetas.map(pintarTarjeta).join('');
+  document.getElementById('db-kpis-mas').innerHTML = secundarias.map(pintarTarjeta).join('');
 
   // Lectura en texto: pequeña, en gris y debajo de los visuales, para que no les quite protagonismo.
   const topProg = Object.entries(porProg).sort((a, b) => b[1].size - a[1].size)[0];
@@ -2127,6 +2184,78 @@ function dibujarDesgloseKpiDb() {
           <td><div style="display:flex; align-items:center; gap:8px;"><div style="flex:1; height:6px; background:var(--pendiente-bg); border-radius:3px; overflow:hidden; min-width:60px;"><i style="display:block; height:100%; width:${pct}%; background:var(--confirmado-tx);"></i></div>${pct}%</div></td>
           <td style="color:${x.pend ? 'var(--pendiente-tx)' : '#999'}; font-weight:600;">${x.pend || '—'}</td><td style="color:${x.neg ? 'var(--negado-tx)' : '#999'}; font-weight:600;">${x.neg || '—'}</td></tr>`; }).join('')}
       </tbody></table>`;
+  } else if (dbSel.kpi === 'paises') {
+    // Acumulado de todo el histórico: el alcance internacional no se reinicia cada semestre.
+    const porPais = {};
+    (cacheHistoricoCompleto || []).forEach(r => {
+      if (String(r.Tipo || '').indexOf('Movilidad entrante') === 0) return;
+      centrosDeCampo(r.CampoRotacion).forEach(c => {
+        if (c.ambito !== 'Internacional') return;
+        const k = c.pais || 'País por definir';
+        const x = porPais[k] = porPais[k] || { n: 0, inst: new Set(), prog: new Set() };
+        x.n++; x.inst.add(c.nombre); if (r.Programa) x.prog.add(r.Programa);
+      });
+    });
+    const filas = Object.entries(porPais).sort((a, b) => b[1].n - a[1].n);
+    html = `<div class="db-desglose-top"><b>Países destino · histórico completo</b>${cerrar}</div>
+      ${filas.length ? `<table class="lista"><thead><tr><th>País</th><th>Salidas</th><th>Instituciones</th><th>Programas que van</th></tr></thead><tbody>
+        ${filas.map(([pa, x]) => `<tr><td><b>${esc(pa)}</b></td><td>${x.n}</td><td>${x.inst.size}</td>
+          <td style="color:#8a929c;">${esc([...x.prog].slice(0, 4).join(', '))}</td></tr>`).join('')}</tbody></table>`
+        : '<p style="font-size:13px; color:#888;">Todavía no hay centros internacionales con rotaciones registradas.</p>'}`;
+
+  } else if (dbSel.kpi === 'sinuso') {
+    // Para decidir qué convenio renovar hace falta saber cuándo fue la última vez que se usó.
+    const ultimo = {};
+    (cacheHistoricoCompleto || []).forEach(r => {
+      centrosDeCampo(r.CampoRotacion).forEach(c => {
+        if (!ultimo[c.id] || String(r.Semestre) > ultimo[c.id]) ultimo[c.id] = String(r.Semestre || '');
+      });
+    });
+    const usados = new Set();
+    d.forEach(r => centrosDeCampo(r.CampoRotacion).forEach(c => usados.add(c.id)));
+    const filas = cacheCentros.filter(c => c.activo !== false && !usados.has(c.id))
+      .sort((a, b) => String(ultimo[a.id] || '').localeCompare(String(ultimo[b.id] || '')));
+    html = `<div class="db-desglose-top"><b>Instituciones del catálogo sin rotaciones en ${esc(etiquetaPeriodoDb_())}</b>${cerrar}</div>
+      <p class="db-como" style="margin-top:-6px;">Ordenadas por antigüedad de uso: arriba, las que llevan más tiempo quietas.</p>
+      ${filas.length ? `<table class="lista"><thead><tr><th>Institución</th><th>Última vez con rotaciones</th><th>Vínculo</th></tr></thead><tbody>
+        ${filas.map(c => `<tr><td><b>${esc(c.sigla)}</b> <span style="color:#8a929c;">${esc(c.nombre)}</span></td>
+          <td>${ultimo[c.id] ? esc(ultimo[c.id]) : '<span style="color:var(--negado-tx); font-weight:600;">nunca</span>'}</td>
+          <td>${etiquetasCentro(c)}</td></tr>`).join('')}</tbody></table>`
+        : '<p style="font-size:13px; color:#888;">Todas las instituciones del catálogo recibieron residentes este periodo.</p>'}`;
+
+  } else if (dbSel.kpi === 'negadas') {
+    // La tasa importa más que el número: una institución grande niega más en absoluto aunque
+    // acepte una proporción mayor.
+    const porCampo = {};
+    d.forEach(r => separarCampos(r.CampoRotacion).forEach(c => {
+      const x = porCampo[c] = porCampo[c] || { total: 0, neg: 0, meses: {} };
+      x.total++;
+      if (r.Estado === 'Negado') { x.neg++; x.meses[r.Mes] = (x.meses[r.Mes] || 0) + 1; }
+    }));
+    const filas = Object.entries(porCampo).filter(([, x]) => x.neg > 0).sort((a, b) => b[1].neg - a[1].neg);
+    html = `<div class="db-desglose-top"><b>Rotaciones negadas · ${esc(etiquetaPeriodoDb_())}</b>${cerrar}</div>
+      <p class="db-como" style="margin-top:-6px;">La tasa es sobre las rotaciones solicitadas en ese campo, no sobre el total.</p>
+      ${filas.length ? `<table class="lista"><thead><tr><th>Campo de rotación</th><th>Negadas</th><th>Solicitadas</th><th>Tasa</th><th>Meses con más negaciones</th></tr></thead><tbody>
+        ${filas.map(([c, x]) => {
+          const meses = Object.entries(x.meses).sort((a, b) => b[1] - a[1]).slice(0, 3).map(m => m[0]).join(', ');
+          return `<tr><td><b>${esc(c)}</b></td><td style="color:var(--negado-tx); font-weight:600;">${x.neg}</td><td>${x.total}</td>
+            <td>${Math.round(x.neg / x.total * 100)}%</td><td style="color:#8a929c;">${esc(meses)}</td></tr>`;
+        }).join('')}</tbody></table>` : '<p style="font-size:13px; color:#888;">Ninguna rotación negada en este periodo.</p>'}`;
+
+  } else if (dbSel.kpi === 'saliente') {
+    const filas = [];
+    d.filter(r => r.Tipo !== 'Movilidad entrante').forEach(r => salidasDeRegistro(r).forEach(c => filas.push({ r, c })));
+    filas.sort((a, b) => (b.c.ambito === 'Internacional') - (a.c.ambito === 'Internacional') || String(a.r.ResidenteNombre).localeCompare(String(b.r.ResidenteNombre), 'es'));
+    html = `<div class="db-desglose-top"><b>Movilidad saliente · ${esc(etiquetaPeriodoDb_())}</b>${cerrar}</div>
+      <p class="db-como" style="margin-top:-6px;">Sale del vínculo del centro: toda rotación en un sitio que no es de la red CES. Los centros sin clasificar en el catálogo todavía no aparecen aquí.</p>
+      ${filas.length ? `<table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th>Mes</th><th>Destino</th><th>Lugar</th><th>Tipo</th><th>Se llega por</th></tr></thead><tbody>
+        ${filas.map(f => `<tr>
+          <td>${esc(f.r.ResidenteNombre || '')}</td><td>${esc(f.r.Programa || '')}</td><td>${esc(f.r.Mes || '')}</td>
+          <td><b>${esc(f.c.nombre)}</b></td><td>${esc(f.c.ambito === 'Internacional' ? (f.c.pais || 'País por definir') : 'Colombia')}</td>
+          <td>${f.c.ambito === 'Internacional' ? '<span style="color:#7030A0; font-weight:600;">Internacional</span>' : '<span style="color:var(--confirmado-tx); font-weight:600;">Nacional</span>'}</td>
+          <td>${f.c.vinculo === 'Convenio' ? esc(f.c.intermediaria || 'Convenio sin institución registrada') : 'Directa con el hospital'}</td>
+        </tr>`).join('')}</tbody></table>` : '<p style="font-size:13px; color:#888;">No hay salidas registradas. Si esperabas ver algunas, revisa que esos centros tengan vínculo distinto a red CES en el catálogo.</p>'}`;
+
   } else if (dbSel.kpi === 'campos') {
     html = `<div class="db-desglose-top"><b>Todos los campos de rotación · ${esc(etiquetaPeriodoDb_())}</b>${cerrar}</div>
       <input id="db-filtro-tabla-campos" placeholder="Filtrar campo..." value="${esc(dbSel.filtroTablaCampos)}" oninput="dbSel.filtroTablaCampos = this.value; dibujarTablaCamposKpiDb();" style="padding:8px; border:1px solid #ccc; border-radius:5px; min-width:260px; margin-bottom:10px;">
@@ -5790,6 +5919,7 @@ function selCentrosPintar(idBase) {
 
   // La lista solo aparece al escribir: con el catálogo completo ocupaba casi todo el modal.
   const q = claveCentroJS(estado.filtro);
+  cajaLista.className = 'sel-cen-lista' + (q ? '' : ' pista');
   if (!q) {
     cajaLista.innerHTML = '<div class="sel-cen-nada">Escribe arriba para buscar el centro.</div>';
   } else {
@@ -6090,13 +6220,12 @@ function pintarCatalogoCentros() {
     : '';
 
   caja.innerHTML = aviso + `<table class="lista">
-    <thead><tr><th style="width:140px;">Sigla (cuadro)</th><th>Nombre oficial</th><th style="width:300px;">Vínculo</th><th>Formas antiguas reconocidas</th>${esCoord ? '<th style="width:90px;"></th>' : ''}</tr></thead>
+    <thead><tr><th style="width:140px;">Sigla (cuadro)</th><th>Nombre oficial</th><th>Vínculo</th>${esCoord ? '<th style="width:90px;"></th>' : ''}</tr></thead>
     <tbody>${lista.map(c => `
       <tr${c.activo === false ? ' style="opacity:.55;"' : ''}>
         <td><strong style="color:var(--azul-ces);">${esc(c.sigla)}</strong>${c.activo === false ? '<br><span style="font-size:11px; color:#888;">inactivo</span>' : ''}</td>
         <td>${esc(c.nombre)}</td>
         <td>${etiquetasCentro(c)}</td>
-        <td>${(c.alias || []).length ? (c.alias || []).map(a => `<code class="alias-cod">${esc(a)}</code>`).join('') : '<span style="color:#bbb;">—</span>'}</td>
         ${esCoord ? `<td><button class="btn-secundario btn-pequeno" onclick="abrirEditorCentro('${c.id}')">Editar</button></td>` : ''}
       </tr>`).join('')}</tbody></table>`;
 }
@@ -6253,6 +6382,142 @@ async function aplicarUnificacionCampos() {
   unificacionCargada = false;
   await cargarUnificacion(true);
   pintarCatalogoCentros();
+}
+
+
+// ============================================================
+// ORIGENES DE MOVILIDAD ENTRANTE + INDICADORES DERIVADOS
+// ------------------------------------------------------------
+// La entrante nacional se agrupa por universidad de origen; la internacional, por país. La
+// clasificación se hace una vez sobre cada origen y de ahí en adelante el desglose sale solo.
+// ============================================================
+
+let cacheOrigenes = [];
+let origenesCargados = false;
+
+async function cargarOrigenes(forzar) {
+  if (origenesCargados && !forzar) return true;
+  const res = await leerBackend('listarOrigenes');
+  if (!res.ok) return false;
+  cacheOrigenes = res.origenes || [];
+  origenesCargados = true;
+  return true;
+}
+
+function clasificacionOrigen(texto) {
+  const k = claveCentroJS(texto);
+  if (!k) return null;
+  return cacheOrigenes.find(o => o.clave === k) || null;
+}
+
+// Etiqueta de un residente de movilidad entrante: universidad si es nacional, país si es
+// internacional, y "sin clasificar" mientras no se haya definido.
+function etiquetaOrigen(texto) {
+  const o = clasificacionOrigen(texto);
+  if (!o || !o.ambito) return { ambito: '', etiqueta: 'Origen sin clasificar' };
+  if (o.ambito === 'Internacional') return { ambito: 'Internacional', etiqueta: o.pais || 'País sin registrar' };
+  return { ambito: 'Nacional', etiqueta: o.origen };
+}
+
+// ------------------------------------------------------------
+// Asistente de clasificación (vive en la pestaña Movilidad)
+// ------------------------------------------------------------
+let origenesAnalisis = [];
+
+async function alternarPanelOrigenes() {
+  const panel = document.getElementById('panel-origenes');
+  const abierto = panel.style.display !== 'none';
+  panel.style.display = abierto ? 'none' : 'block';
+  document.getElementById('btn-origenes').textContent = abierto ? '🌎 Clasificar orígenes' : '✕ Cerrar clasificación';
+  if (!abierto) await cargarAnalisisOrigenes();
+}
+
+async function cargarAnalisisOrigenes() {
+  const caja = document.getElementById('origenes-lista');
+  caja.innerHTML = '<p style="color:#888; font-size:13px; padding:10px;">⏳ Buscando las universidades de origen registradas...</p>';
+  await cargarOrigenes(true);
+  const res = await leerBackend('analizarOrigenes');
+  if (!res.ok) {
+    caja.innerHTML = `<p style="color:#9C0006; font-size:13px; padding:10px;">No se pudo analizar: ${esc(res.error)}</p>`;
+    return;
+  }
+  origenesAnalisis = res.origenes || [];
+  pintarOrigenes();
+}
+
+function pintarOrigenes() {
+  const caja = document.getElementById('origenes-lista');
+  if (!origenesAnalisis.length) {
+    caja.innerHTML = '<p style="color:#888; font-size:13px; padding:10px;">No hay universidades de origen registradas todavía.</p>';
+    return;
+  }
+  const pendientes = origenesAnalisis.filter(o => !o.ambito).length;
+  caja.innerHTML = `
+    <p style="font-size:12px; color:#6b7684; margin:0 0 12px; line-height:1.5;">
+      Marca cada origen como nacional o internacional. Para los internacionales escribe el país: el desglose se
+      agrupa por país, no por universidad. ${pendientes ? `Quedan <b>${pendientes}</b> sin clasificar.` : 'Están todos clasificados.'}
+    </p>
+    ${origenesAnalisis.map((o, i) => `
+      <div class="uni-var">
+        <code class="alias-cod">${esc(o.origen)}</code>
+        <span class="uni-n">${o.n} registros</span>
+        <span class="uni-marca ${!o.ambito ? 'rev' : 'ok'}" id="om-${i}">${!o.ambito ? 'decidir' : o.ambito}</span>
+        <span style="margin-left:auto; display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+          <button class="${o.ambito === 'Nacional' ? 'btn-primario' : 'btn-secundario'} btn-pequeno" onclick="fijarOrigen(${i},'Nacional')">Nacional</button>
+          <button class="${o.ambito === 'Internacional' ? 'btn-primario' : 'btn-secundario'} btn-pequeno" onclick="fijarOrigen(${i},'Internacional')">Internacional</button>
+          ${o.ambito === 'Internacional'
+            ? `<input class="uni-asig" style="width:180px;" placeholder="País" autocomplete="off" value="${esc(o.pais || '')}" oninput="origenesAnalisis[${i}].pais = this.value;">`
+            : ''}
+        </span>
+      </div>`).join('')}
+    <div style="margin-top:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+      <button class="btn-primario" onclick="guardarClasificacionOrigenes()">Guardar clasificación</button>
+      <span style="font-size:12px; color:#6b7684;">Puedes guardar por tandas; lo que dejes sin marcar queda para después.</span>
+    </div>
+    <div id="origenes-msg" style="margin-top:10px;"></div>`;
+}
+
+function fijarOrigen(i, ambito) {
+  origenesAnalisis[i].ambito = origenesAnalisis[i].ambito === ambito ? '' : ambito;
+  if (origenesAnalisis[i].ambito !== 'Internacional') origenesAnalisis[i].pais = '';
+  pintarOrigenes();
+}
+
+async function guardarClasificacionOrigenes() {
+  const items = origenesAnalisis.filter(o => o.ambito).map(o => ({ origen: o.origen, ambito: o.ambito, pais: o.pais || '' }));
+  const msg = document.getElementById('origenes-msg');
+  if (!items.length) { msg.innerHTML = '<p style="color:#823C00; font-size:12.5px;">Todavía no has marcado ningún origen.</p>'; return; }
+  const res = await llamarBackend('guardarOrigenes', { items });
+  if (!res.ok) { msg.innerHTML = `<p style="color:#9C0006; font-size:12.5px;">${esc(res.error)}</p>`; return; }
+  cacheOrigenes = res.origenes || cacheOrigenes;
+  msg.innerHTML = `<p style="color:#006100; font-size:12.5px;">Guardado: ${res.nuevos} nuevos y ${res.actualizados} actualizados. El desglose del dashboard ya los usa.</p>`;
+  if (typeof dibujarPanoramaDb === 'function' && cacheHistoricoCompleto && cacheHistoricoCompleto.length) dibujarKpisDb();
+}
+
+// ------------------------------------------------------------
+// Derivaciones para los indicadores
+// ------------------------------------------------------------
+
+// Devuelve los centros del catálogo que hay detrás del texto de un campo de rotación.
+function centrosDeCampo(texto) {
+  const indice = indiceCentrosJS();
+  return separarCampos(texto).map(t => {
+    const id = indice[claveCentroJS(t)];
+    return id && id.indexOf('CEN-') === 0 ? cacheCentros.find(c => c.id === id) : null;
+  }).filter(Boolean);
+}
+
+// Es movilidad saliente toda rotación en un centro que no sea de la red CES.
+function salidasDeRegistro(reg) {
+  if (String(reg.Tipo || '').indexOf('Movilidad entrante') === 0) return [];
+  return centrosDeCampo(reg.CampoRotacion).filter(c => c.ambito === 'Internacional' || c.vinculo === 'Convenio');
+}
+
+function alternarKpisMas() {
+  const caja = document.getElementById('db-kpis-mas');
+  const abierto = caja.style.display !== 'none';
+  caja.style.display = abierto ? 'none' : 'grid';
+  document.getElementById('btn-kpis-mas').textContent = abierto ? '+ Ver más indicadores' : '− Ocultar indicadores';
 }
 
 </script>
