@@ -1062,9 +1062,25 @@ function volverAtras() { if(modo==='coord') ir('coord'); else cerrar(); }
 let LOG_USO = null;      // filas crudas de LogAccesos
 let DIAS_USO = 30;       // periodo seleccionado (0 = todo)
 
-const AVISO_LOG = '<div class="sin-log"><b>Falta activar el registro de accesos</b>' +
-  'Este bloque necesita la hoja <strong>LogAccesos</strong> en el backend de Gestion Operativa. ' +
-  'Mientras no exista, no hay forma de saber quien entro: hoy cada ingreso queda guardado solo en el navegador del residente.</div>';
+// Motivo por el que no hay datos de accesos, para que el aviso sea util y no generico
+let MOTIVO_LOG = 'pendiente';   // 'pendiente' | 'sin-accion' | 'no-autorizado' | 'sin-conexion' | 'error'
+
+function avisoLog_() {
+  const textos = {
+    'sin-accion': ['El backend todavia no reconoce el registro',
+      'El servidor respondio, pero no tiene la accion <strong>logAccesos</strong>. Falta guardar el <strong>Code.gs</strong> nuevo en el proyecto de Apps Script de Gestion Operativa.'],
+    'no-autorizado': ['El backend rechazo la consulta',
+      'El registro existe, pero la clave con la que se identifica este panel no coincide con la del <strong>Code.gs</strong>. Hay que igualar la constante <strong>CLAVE_PANEL_USO</strong>.'],
+    'sin-conexion': ['No se pudo consultar el registro',
+      'No hubo respuesta del backend de Gestion Operativa. Puede ser la conexion o la implementacion del Web App. Vuelve a intentar en un momento.'],
+    'error': ['El backend respondio con un error',
+      'La consulta llego, pero el servidor devolvio un error. Revisa el registro de ejecuciones en Apps Script.'],
+    'pendiente': ['Consultando el registro de accesos...',
+      'Un momento.']
+  };
+  const t = textos[MOTIVO_LOG] || textos['error'];
+  return '<div class="sin-log"><b>' + t[0] + '</b>' + t[1] + '</div>';
+}
 
 function fmtDurUso(seg) {
   if (!seg && seg !== 0) return '—';
@@ -1102,9 +1118,18 @@ async function cargarUso(forzar) {
   try {
     const resp = await fetch(URL_BACKEND_GESTION + '?accion=logAccesos&clave=' + HASH_PASS + '&t=' + Date.now());
     const data = await resp.json();
-    LOG_USO = (data && data.ok && Array.isArray(data.accesos)) ? data.accesos : [];
+    if (data && data.ok && Array.isArray(data.accesos)) {
+      LOG_USO = data.accesos;          // puede venir vacio: significa que aun nadie ha entrado
+      MOTIVO_LOG = 'ok';
+    } else {
+      LOG_USO = null;
+      const err = String((data && data.error) || '').toLowerCase();
+      MOTIVO_LOG = err.indexOf('no reconocida') !== -1 ? 'sin-accion'
+        : (err.indexOf('autorizado') !== -1 ? 'no-autorizado' : 'error');
+    }
   } catch (e) {
-    LOG_USO = null;     // no se pudo consultar: se mantiene el aviso
+    LOG_USO = null;
+    MOTIVO_LOG = 'sin-conexion';
   }
   renderPanelUso();
 }
@@ -1161,7 +1186,7 @@ function renderPanelUso() {
 
   // ---------- cobertura por programa ----------
   const cob = document.getElementById('pu-cobertura');
-  if (!hayLog) cob.innerHTML = AVISO_LOG;
+  if (!hayLog) cob.innerHTML = avisoLog_();
   else {
     const porProg = {};
     Object.values(roster).forEach(r => {
@@ -1178,7 +1203,7 @@ function renderPanelUso() {
   // ---------- nunca han entrado ----------
   const cajaNunca = document.getElementById('pu-nunca');
   document.getElementById('pu-nunca-n').textContent = hayLog ? (nunca.length + ' residentes') : '';
-  if (!hayLog) cajaNunca.innerHTML = '<div style="padding:14px 15px">' + AVISO_LOG + '</div>';
+  if (!hayLog) cajaNunca.innerHTML = '<div style="padding:14px 15px">' + avisoLog_() + '</div>';
   else if (!nunca.length) cajaNunca.innerHTML = '<div class="log-empty">🎉 Todos los residentes vigentes han entrado al menos una vez.</div>';
   else cajaNunca.innerHTML = nunca.sort((a, b) => a.prog.localeCompare(b.prog, 'es') || a.nombre.localeCompare(b.nombre, 'es')).map(r =>
     '<button class="pers" onclick="verResidente(\'' + escUso(r.id) + '\')"><span class="av">' + escUso(inicialesUso(r.nombre)) + '</span>' +
@@ -1188,7 +1213,7 @@ function renderPanelUso() {
   // ---------- ingresos por dia ----------
   const cajaBarras = document.getElementById('pu-barras');
   const eje = document.getElementById('pu-eje');
-  if (!hayLog) { cajaBarras.innerHTML = ''; cajaBarras.parentNode.innerHTML = AVISO_LOG; }
+  if (!hayLog) { cajaBarras.innerHTML = ''; cajaBarras.parentNode.innerHTML = avisoLog_(); }
   else {
     const dias = DIAS_USO || 30, hoy = new Date(); hoy.setHours(0, 0, 0, 0);
     const serie = new Array(dias).fill(0);
@@ -1211,7 +1236,7 @@ function renderPanelUso() {
 
   // ---------- dispositivo ----------
   const disp = document.getElementById('pu-dispositivo');
-  if (!hayLog) disp.innerHTML = AVISO_LOG;
+  if (!hayLog) disp.innerHTML = avisoLog_();
   else {
     const movil = acc.filter(a => String(a.dispositivo || '').toLowerCase().indexOf('m') === 0).length;
     const pct = acc.length ? Math.round(movil / acc.length * 100) : 0;
@@ -1226,7 +1251,7 @@ function renderPanelUso() {
   // ---------- franja horaria ----------
   const horas = document.getElementById('pu-horas');
   const pico = document.getElementById('pu-pico');
-  if (!hayLog) { horas.innerHTML = ''; pico.innerHTML = AVISO_LOG; }
+  if (!hayLog) { horas.innerHTML = ''; pico.innerHTML = avisoLog_(); }
   else {
     const hh = new Array(24).fill(0);
     acc.forEach(a => { const t = new Date(a.fecha); if (!isNaN(t)) hh[t.getHours()]++; });
@@ -1242,7 +1267,7 @@ function renderPanelUso() {
 
   // ---------- duracion de sesiones ----------
   const ses = document.getElementById('pu-sesiones');
-  if (!hayLog) ses.innerHTML = AVISO_LOG;
+  if (!hayLog) ses.innerHTML = avisoLog_();
   else if (!dur.length) ses.innerHTML = '<div class="log-empty">Aún no hay sesiones con duración registrada.</div>';
   else {
     const b = [0, 0, 0, 0];
@@ -1292,7 +1317,7 @@ function renderPanelUso() {
 
   // ---------- accesos recientes ----------
   const tb = document.getElementById('pu-accesos');
-  if (!hayLog) tb.innerHTML = '<tr><td colspan="5">' + AVISO_LOG + '</td></tr>';
+  if (!hayLog) tb.innerHTML = '<tr><td colspan="5">' + avisoLog_() + '</td></tr>';
   else if (!acc.length) tb.innerHTML = '<tr><td colspan="5" class="log-empty">Sin accesos en este periodo.</td></tr>';
   else tb.innerHTML = acc.slice().sort((a, b) => Date.parse(b.fecha) - Date.parse(a.fecha)).slice(0, 60).map(a => {
     const t = new Date(a.fecha);
