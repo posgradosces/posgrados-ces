@@ -2497,12 +2497,15 @@ function pintarSaludoR_() {
   const escena = esCumple ? 'fiesta' : m;
   const animo = (esCumple || caso === 'aldia') ? 'feliz' : (m === 'madrugada' ? 'dormido' : 'normal');
 
-  if (chico) chico.innerHTML = buhoR_(escena, animo, true, 'chico');
-
-  // El saludo completo sale una vez al dia (el cumpleanos siempre)
+  // El saludo se queda arriba mientras el residente no lo cierre.
+  // Si lo cierra, queda solo el buho pequeno al lado del nombre.
   const hoyTxt = new Date().toISOString().slice(0, 10);
-  const visto = leerLocal_(SALUDO_KEY + VR.cedula);
-  if (VR.saludoCerrado || (!esCumple && visto === hoyTxt)) { cont.innerHTML = ''; return; }
+  if (VR.saludoCerrado) {
+    cont.innerHTML = '';
+    if (chico) chico.innerHTML = buhoR_(escena, animo, true, 'chico');
+    return;
+  }
+  if (chico) chico.innerHTML = '';
 
   const nombre = capR_(String(VR.nombre).trim().split(' ')[0].toLowerCase());
   const titulo = esCumple ? '\u00a1Feliz cumplea\u00f1os, ' + escR_(nombre) + '!' : TITULOS_R_[m](escR_(nombre));
@@ -2521,6 +2524,16 @@ function pintarSaludoR_() {
 }
 
 function cerrarSaludoR_() { if (VR) { VR.saludoCerrado = true; pintarSaludoR_(); } }
+
+// Si el residente deja el portal abierto y cambia la franja del dia (por ejemplo,
+// entra a las 6:50 p. m. y sigue ahi a las 7:10), el saludo se actualiza solo.
+let momentoVistoR_ = null;
+setInterval(() => {
+  if (modo !== 'residente' || !VR || !document.getElementById('vr-cumple')) return;
+  const m = momentoDeR_(new Date().getHours());
+  if (momentoVistoR_ && momentoVistoR_ !== m) pintarSaludoR_();
+  momentoVistoR_ = m;
+}, 120000);
 
 // ============================================================
 // NOVEDADES DESDE LA ULTIMA VISITA
