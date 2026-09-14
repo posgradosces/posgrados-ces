@@ -768,6 +768,10 @@
       <h2>Residentes <button class="btn-secundario btn-pequeno" onclick="cargarResidentes(true)" style="float:right;">🔄 Actualizar</button>
         <button class="btn-primario btn-pequeno" onclick="abrirFichaResidente(null)" style="float:right; margin-right:8px;">+ Residente nuevo</button></h2>
       <p style="font-size:12px; color:#888; margin-top:-8px;">Base maestra de residentes CES, organizada por programa. Clic en un residente para editar sus datos y registrar novedades.</p>
+      <div class="cen-subtabs">
+        <button class="btn-primario btn-pequeno" id="res-st-act" onclick="verSubResidentes('act')">Activos</button>
+        <button class="btn-secundario btn-pequeno" id="res-st-ina" onclick="verSubResidentes('ina')">Inactivos</button>
+      </div>
       <div class="res-barra">
         <div><label>Buscar</label><input id="res-q" autocomplete="off" placeholder="Nombre o cédula" oninput="pintarResidentes()" style="min-width:240px;"></div>
         <div><label>Programa</label><select id="res-prog" onchange="pintarResidentes()"><option value="">Todos</option></select></div>
@@ -2462,13 +2466,24 @@ function dibujarDesgloseKpiDb() {
     const grupos = [['Confirmado', 'Aceptados', ['Confirmado']], ['Pendiente', 'Esperando respuesta', ['Pendiente', 'Cambio']], ['Negado', 'Negados', ['Negado']]];
     html = `<div class="db-desglose-top"><b>Movilidad entrante · ${esc(etiquetaPeriodoDb_())}</b><div class="db-fila">
       ${usuarioActual && usuarioActual.rol === 'coordinadora' ? `<button class="db-mini" onclick="cambiarTab('movilidad')">Gestionar en la pestaña Movilidad</button>` : ''}${cerrar}</div></div>
-      <div style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:12px;">${grupos.map(([e, titulo, estados]) => {
-        const personas = personasDb_(mov.filter(r => estados.includes(r.Estado)));
-        const c = COLORES_ESTADO[e];
-        return `<div><div class="db-nivel-titulo" style="color:${c.tx};"><i style="background:${c.bg}; border:1px solid ${c.tx};"></i>${titulo} (${personas.length})</div>
-          ${personas.map(p => tarjetaPersonaDb_(p, esc(p.programa) + '<br>' + esc(p.registros.map(r => r.Mes + ' · ' + (r.CampoRotacion || '')).join(' / ')),
-            () => irACeldaDesdeComentario(p.registros[0].ClaveUnica, p.programa, p.registros[0].Semestre), 'desglose')).join('') || '<div style="font-size:12px; color:#999;">Nadie en este estado.</div>'}</div>`;
-      }).join('')}</div>`;
+      ${(() => {
+        // Solo se muestran los estados que tienen gente: con tres columnas fijas, cuando dos
+        // estaban vacías quedaba una tira angosta a la izquierda y el resto en blanco. El grupo
+        // que sí tiene gente reparte en tantas columnas como quepan.
+        const conGente = grupos.map(([e, titulo, estados]) => ({ e, titulo, personas: personasDb_(mov.filter(r => estados.includes(r.Estado))) }))
+          .filter(g => g.personas.length);
+        if (!conGente.length) return '<p style="font-size:13px; color:#999;">Nadie en movilidad entrante en este periodo.</p>';
+        const vacios = grupos.length - conGente.length;
+        return conGente.map(g => {
+          const c = COLORES_ESTADO[g.e];
+          return `<div style="margin-bottom:16px;">
+            <div class="db-nivel-titulo" style="color:${c.tx};"><i style="background:${c.bg}; border:1px solid ${c.tx};"></i>${g.titulo} (${g.personas.length})</div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:8px;">
+              ${g.personas.map(p => tarjetaPersonaDb_(p, esc(p.programa) + '<br>' + esc(p.registros.map(r => r.Mes + ' · ' + (r.CampoRotacion || '')).join(' / ')),
+                () => irACeldaDesdeComentario(p.registros[0].ClaveUnica, p.programa, p.registros[0].Semestre), 'desglose')).join('')}
+            </div></div>`;
+        }).join('') + (vacios ? `<p style="font-size:11.5px; color:#a8b0b8; margin:0;">Los otros ${vacios === 1 ? 'estados no tienen' : 'estados no tienen'} a nadie, así que no ocupan espacio.</p>` : '');
+      })()}`;
   } else if (dbSel.kpi === 'programas') {
     const porProg = {};
     d.forEach(r => { if (!r.Programa) return; const p = porProg[r.Programa] = porProg[r.Programa] || { ids: new Set(), mov: new Set(), campos: new Set(), total: 0, conf: 0, pend: 0, neg: 0 };
@@ -3268,6 +3283,33 @@ async function cargarResidentes(forzar) {
   return cargandoResidentes;
 }
 
+async function confirmarGrado(id) {
+  const r = cacheResidentes.find(x => String(x.ResidenteID) === String(id));
+  if (!r) return;
+  const fecha = prompt('Fecha de grado de ' + r.NombreCompleto + ' (aaaa-mm-dd). Sus rotaciones posteriores quedarán cerradas.',
+    String(r.FechaFinalizacion || '').slice(0, 10));
+  if (fecha === null) return;
+  const res = await llamarBackend('confirmarGradoResidente', { id: String(id), fecha: fecha.trim() });
+  if (!res.ok) { mostrarMensaje('Error: ' + res.error, 'error'); return; }
+  mostrarMensaje(`${res.nombre} pasa a egresado. Se cerraron ${res.cerradas} rotaciones posteriores.`, 'ok');
+  await cargarResidentes(true);
+  await cargarCola();
+  dibujarKpisResidentesDb();
+}
+
+async function aplazarGrado(id) {
+  const r = cacheResidentes.find(x => String(x.ResidenteID) === String(id));
+  if (!r) return;
+  const fecha = prompt('Nueva fecha de finalización de ' + r.NombreCompleto + ' (aaaa-mm). El aviso volverá cuando se acerque.',
+    String(r.FechaFinalizacion || '').slice(0, 7));
+  if (fecha === null || !fecha.trim()) return;
+  const res = await llamarBackend('aplazarGradoResidente', { id: String(id), fecha: fecha.trim() });
+  if (!res.ok) { mostrarMensaje('Error: ' + res.error, 'error'); return; }
+  mostrarMensaje('Se corrió la fecha de finalización de ' + res.nombre + '.', 'ok');
+  await cargarResidentes(true);
+  dibujarKpisResidentesDb();
+}
+
 function pintarResidentesSiVisible_() {
   if (document.getElementById('panel-residentes').style.display === 'block') pintarResidentes();
 }
@@ -3319,24 +3361,48 @@ function resumenResidentes_() {
     pendientes: cacheResidentes.filter(r => (r.Pendientes || []).length).length };
 }
 
+// Activos e inactivos se separan porque mezclarlos infla el conteo con gente que ya no está.
+let vistaResidentes = 'act';
+const ESTADOS_ACTIVOS_RES = ['Activo', 'Suspendido'];
+const ESTADOS_INACTIVOS_RES = ['Retirado', 'Egresado'];
+
+function verSubResidentes(v) {
+  vistaResidentes = v;
+  filtroResumenRes = '';
+  document.getElementById('res-st-act').className = v === 'act' ? 'btn-primario btn-pequeno' : 'btn-secundario btn-pequeno';
+  document.getElementById('res-st-ina').className = v === 'ina' ? 'btn-primario btn-pequeno' : 'btn-secundario btn-pequeno';
+  const sel = document.getElementById('res-estado');
+  if (sel) sel.value = '';
+  pintarResidentes();
+}
+
 function pintarResidentes() {
   const cont = document.getElementById('res-lista');
   if (!residentesCargados) { cont.innerHTML = '<p style="color:#999;">⏳ Cargando residentes...</p>'; cargarResidentes(); return; }
+  const estadosVista = vistaResidentes === 'ina' ? ESTADOS_INACTIVOS_RES : ESTADOS_ACTIVOS_RES;
   const q = document.getElementById('res-q').value.trim().toLowerCase();
   const prog = document.getElementById('res-prog').value;
   const estado = document.getElementById('res-estado').value;
   const s = resumenResidentes_();
   const botonResumen = (clave, n, texto, color) => `<button class="${filtroResumenRes === clave ? 'activo' : ''}" onclick="filtroResumenRes = filtroResumenRes === '${clave}' ? '' : '${clave}'; pintarResidentes();"><b style="${color ? 'color:' + color : ''}">${n}</b>${texto}</button>`;
-  document.getElementById('res-resumen').innerHTML =
-    botonResumen('Activo', s.Activo, 'activos') + botonResumen('Suspendido', s.Suspendido, 'suspendidos') +
-    botonResumen('Retirado', s.Retirado, 'retirados') + botonResumen('Egresado', s.Egresado, 'egresados') +
-    botonResumen('pendientes', s.pendientes, 'con datos pendientes', '#9C0006');
+  document.getElementById('res-st-act').textContent = 'Activos (' + (s.Activo + s.Suspendido) + ')';
+  document.getElementById('res-st-ina').textContent = 'Inactivos (' + (s.Retirado + s.Egresado) + ')';
+  document.getElementById('res-resumen').innerHTML = vistaResidentes === 'ina'
+    ? botonResumen('Egresado', s.Egresado, 'egresados') + botonResumen('Retirado', s.Retirado, 'retirados')
+    : botonResumen('Activo', s.Activo, 'activos') + botonResumen('Suspendido', s.Suspendido, 'suspendidos') +
+      botonResumen('pendientes', s.pendientes, 'con datos pendientes', '#9C0006');
 
   const filas = cacheResidentes.filter(r =>
     (!q || String(r.NombreCompleto || '').toLowerCase().includes(q) || String(r.ResidenteID || '').toLowerCase().includes(q)) &&
     (!prog || r.Programa === prog) && (!estado || r.Estado === estado) &&
+    estadosVista.indexOf(String(r.Estado || '').trim()) !== -1 &&
     (!filtroResumenRes || (filtroResumenRes === 'pendientes' ? (r.Pendientes || []).length > 0 : r.Estado === filtroResumenRes)));
-  if (!filas.length) { cont.innerHTML = '<p style="color:#999; font-size:13px;">Ningún residente coincide con la búsqueda.</p>'; return; }
+  if (!filas.length) {
+    cont.innerHTML = vistaResidentes === 'ina'
+      ? '<p style="color:#999; font-size:13px;">Todavía no hay residentes egresados ni retirados.</p>'
+      : '<p style="color:#999; font-size:13px;">Ningún residente coincide con la búsqueda.</p>';
+    return;
+  }
 
   const porPrograma = {};
   filas.forEach(r => { const p = r.Programa || 'Sin programa'; (porPrograma[p] = porPrograma[p] || []).push(r); });
@@ -3515,14 +3581,21 @@ function dibujarKpisResidentesDb() {
   const novedades = cacheResidentes.flatMap(r => (r.Novedades || []).map(n => Object.assign({ residente: r }, n)))
     .filter(n => String(n.Fecha) >= hace30).sort((a, b) => String(b.Fecha).localeCompare(String(a.Fecha)));
   const mesHoy = hoy.getFullYear() * 12 + hoy.getMonth();
-  const finalizan = cacheResidentes.filter(r => { const f = mesAbsRes_(r.FechaFinalizacion); return (r.Estado === 'Activo' || r.Estado === 'Suspendido') && f !== null && f >= mesHoy && f <= mesHoy + 3; })
+  const finalizan = cacheResidentes.filter(r => { const f = mesAbsRes_(r.FechaFinalizacion); return (r.Estado === 'Activo' || r.Estado === 'Suspendido') && f !== null && f >= mesHoy - 24 && f <= mesHoy + 3; })
     .sort((a, b) => mesAbsRes_(a.FechaFinalizacion) - mesAbsRes_(b.FechaFinalizacion));
+  // A un mes o menos (incluida la fecha ya pasada) hay que confirmar si se graduó o no.
+  const porConfirmarGrado = finalizan.filter(r => mesAbsRes_(r.FechaFinalizacion) <= mesHoy + 1);
+  const masAdelanteGrado = finalizan.filter(r => mesAbsRes_(r.FechaFinalizacion) > mesHoy + 1);
   const esCoord = usuarioActual && usuarioActual.rol === 'coordinadora';
 
   const tarjetas = [
     { k: 'cumple', n: cumpleHoy.length, t: '🎂 Cumplen años hoy', color: '#b0306a', d: `${cumpleProx.length} en los próximos 30 días` },
     { k: 'novedades', n: novedades.length, t: '📝 Novedades del último mes', color: '#823C00', d: 'Suspensiones, licencias, reintegros, retiros...' },
-    { k: 'finalizan', n: finalizan.length, t: '🏁 Finalizan en los próximos 3 meses', color: '#1F4E79', d: 'Según su fecha de finalización' }
+    { k: 'finalizan', n: finalizan.length, t: '🏁 Finalizan en los próximos 3 meses' + (porConfirmarGrado.length ? ` <span class="res-pend" style="background:var(--pendiente-bg); color:var(--pendiente-tx);">${porConfirmarGrado.length} por confirmar</span>` : ''),
+      color: '#1F4E79',
+      d: porConfirmarGrado.length
+        ? `A ${porConfirmarGrado.length} ${porConfirmarGrado.length === 1 ? 'le falta' : 'les falta'} un mes o menos. Confirma su grado en el detalle.`
+        : 'Según su fecha de finalización' }
   ];
   cont.innerHTML = tarjetas.map(t => `<button class="db-kpi ${kpiResidentesDb === t.k ? 'activo' : ''}" style="border-top-color:${t.color};" onclick="kpiResidentesDb = kpiResidentesDb === '${t.k}' ? null : '${t.k}'; dibujarKpisResidentesDb();">
     <div><div class="n" style="color:${t.color};">${t.n}</div><div class="t">${t.t}</div><div class="d db-igual">${t.d}</div><div class="ver">${kpiResidentesDb === t.k ? 'Ocultar detalle ▴' : 'Ver detalle ▾'}</div></div></button>`).join('');
@@ -3547,10 +3620,24 @@ function dibujarKpisResidentesDb() {
         esCoord ? [n.CambiosFechas ? '📅 ' + esc(n.CambiosFechas) : '', n.Motivo ? '<b>Motivo:</b> ' + esc(n.Motivo) : '', n.Detalle ? esc(n.Detalle) : ''].filter(Boolean).join('<br>') : '')).join('')}
       </tbody></table>${novedades.length ? '' : '<p style="color:#999; font-size:13px;">Sin novedades en el último mes.</p>'}`;
   } else if (kpiResidentesDb === 'finalizan') {
+    // El sistema no gradúa a nadie solo: aquí se confirma o se corre la fecha.
+    const acc = r => esCoord ? `<span style="display:inline-flex; gap:6px; margin-left:8px;">
+        <button class="btn-primario btn-pequeno" onclick="event.stopPropagation(); confirmarGrado('${String(r.ResidenteID).replace(/'/g, "\\'")}')">🎓 Confirmar grado</button>
+        <button class="btn-secundario btn-pequeno" onclick="event.stopPropagation(); aplazarGrado('${String(r.ResidenteID).replace(/'/g, "\\'")}')">Aún no se gradúa</button>
+      </span>` : '';
     html = `<div class="db-desglose-top"><b>🏁 Finalizan en los próximos 3 meses</b></div>
-      <table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th style="text-align:right;">Finalización</th></tr></thead><tbody>
-      ${finalizan.map(r => filaPersona(r, `<span class="pastilla" style="background:var(--confirmado-bg); color:var(--confirmado-tx);">${esc(textoMesAnioRes(r.FechaFinalizacion))}</span>`)).join('')}
-      </tbody></table>${finalizan.length ? '' : '<p style="color:#999; font-size:13px;">Nadie finaliza en los próximos 3 meses.</p>'}`;
+      ${porConfirmarGrado.length ? `
+        <div class="db-nivel-titulo" style="color:var(--pendiente-tx);"><i style="background:var(--pendiente-bg); border:1px solid var(--pendiente-tx);"></i>Por confirmar — su fecha ya pasó o falta un mes o menos (${porConfirmarGrado.length})</div>
+        <table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th style="text-align:right;">Finalización</th></tr></thead><tbody>
+        ${porConfirmarGrado.map(r => filaPersona(r, `<span class="pastilla" style="background:var(--pendiente-bg); color:var(--pendiente-tx);">${esc(textoMesAnioRes(r.FechaFinalizacion))}</span>${acc(r)}`)).join('')}
+        </tbody></table>`
+      : '<p style="color:#999; font-size:13px;">Nadie pendiente por confirmar en este momento.</p>'}
+      ${masAdelanteGrado.length ? `
+        <div class="db-nivel-titulo" style="color:var(--confirmado-tx); margin-top:16px;"><i style="background:var(--confirmado-bg); border:1px solid var(--confirmado-tx);"></i>En dos o tres meses (${masAdelanteGrado.length})</div>
+        <table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th style="text-align:right;">Finalización</th></tr></thead><tbody>
+        ${masAdelanteGrado.map(r => filaPersona(r, `<span class="pastilla" style="background:var(--confirmado-bg); color:var(--confirmado-tx);">${esc(textoMesAnioRes(r.FechaFinalizacion))}</span>`)).join('')}
+        </tbody></table>` : ''}
+      <p style="font-size:11px; color:#888; margin:10px 0 0;">Al confirmar, el residente pasa a inactivos como egresado y sus rotaciones posteriores a la fecha quedan cerradas: se conservan, pero salen de la cola de gestión.</p>`;
   }
   det.innerHTML = html ? `<div class="db-desglose" style="margin-top:14px;">${html}</div>` : '';
 }
@@ -6911,6 +6998,7 @@ function etiquetaOrigen(reg) {
 // ------------------------------------------------------------
 let origenesAnalisis = [];
 let residentesSinOrigen = [];
+let verOrigenesListos = false;
 
 async function alternarPanelOrigenes() {
   const panel = document.getElementById('panel-origenes');
@@ -6976,19 +7064,36 @@ function pintarOrigenes() {
       </span>
     </div>`;
 
+  // Solo aparece lo que falta. Lo ya clasificado no vuelve a necesitar atención, así que queda
+  // detrás de un enlace por si hay que corregirlo.
+  const pendientesOrigen = origenesAnalisis.filter(o => !o.ambito);
+  const listosOrigen = origenesAnalisis.filter(o => o.ambito);
+  const pendientesRes = residentesSinOrigen.filter(r => !r.ambito || !r.origen);
+  const hayPendientes = pendientesOrigen.length || pendientesRes.length;
+
   caja.innerHTML = alerta + `
-    <h4 style="font-size:13px; color:var(--azul-ces); margin:16px 0 2px;">Orígenes ya registrados</h4>
-    <p style="font-size:12px; color:#8a929c; margin:0 0 8px;">En los internacionales lo que cuenta es el país, no la universidad.</p>
-    ${origenesAnalisis.length ? origenesAnalisis.map(filaOrigen).join('') : '<p style="font-size:12.5px; color:#888;">Ninguno registrado todavía.</p>'}
+    ${pendientesOrigen.length ? `
+      <h4 style="font-size:13px; color:var(--azul-ces); margin:16px 0 2px;">Orígenes sin clasificar</h4>
+      <p style="font-size:12px; color:#8a929c; margin:0 0 8px;">En los internacionales lo que cuenta es el país, no la universidad.</p>
+      ${pendientesOrigen.map(o => filaOrigen(o, origenesAnalisis.indexOf(o))).join('')}` : ''}
 
-    <h4 style="font-size:13px; color:var(--azul-ces); margin:22px 0 2px;">Residentes sin origen registrado</h4>
-    <p style="font-size:12px; color:#8a929c; margin:0 0 8px;">Entraron por importación o copia y quedaron sin el dato. Al guardarlo se escribe en todas sus rotaciones.</p>
-    ${residentesSinOrigen.length ? residentesSinOrigen.map(filaResidente).join('') : '<p style="font-size:12.5px; color:#888;">Ninguno: todos tienen origen.</p>'}
+    ${pendientesRes.length ? `
+      <h4 style="font-size:13px; color:var(--azul-ces); margin:22px 0 2px;">Residentes sin origen registrado</h4>
+      <p style="font-size:12px; color:#8a929c; margin:0 0 8px;">Entraron por importación o copia y quedaron sin el dato. Al guardarlo se escribe en todas sus rotaciones.</p>
+      ${pendientesRes.map(r => filaResidente(r, residentesSinOrigen.indexOf(r))).join('')}` : ''}
 
-    <div style="margin-top:16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-      <button class="btn-primario" onclick="guardarClasificacionOrigenes()">Guardar</button>
-      <span style="font-size:12px; color:#6b7684;">Puedes guardar por tandas; lo que dejes sin marcar queda para después.</span>
-    </div>
+    ${hayPendientes ? `
+      <div style="margin-top:16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <button class="btn-primario" onclick="guardarClasificacionOrigenes()">Guardar</button>
+        <span style="font-size:12px; color:#6b7684;">Puedes guardar por tandas; lo que dejes sin marcar queda para después.</span>
+      </div>` : ''}
+
+    ${listosOrigen.length ? `
+      <p style="margin-top:18px; font-size:12px;">
+        <a href="javascript:void(0)" onclick="verOrigenesListos = !verOrigenesListos; pintarOrigenes();" style="color:var(--azul-ces);">
+          ${verOrigenesListos ? 'Ocultar' : 'Ver'} los ${listosOrigen.length} orígenes ya clasificados</a></p>
+      ${verOrigenesListos ? listosOrigen.map(o => filaOrigen(o, origenesAnalisis.indexOf(o))).join('') : ''}` : ''}
+
     <div id="origenes-msg" style="margin-top:10px;"></div>`;
 }
 
