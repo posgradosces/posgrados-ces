@@ -468,6 +468,15 @@
   .nt-seg { display:flex; gap:3px; flex-shrink:0; }
   .nt-seg i { width:14px; height:6px; border-radius:3px; background:#e2e7ec; }
   .nt-seg i.v { background:var(--gestionado-tx); }
+  .nt-nivel { display:flex; align-items:center; gap:8px; margin:8px 0 2px; padding:3px 12px 3px 26px; font-size:11.5px; font-weight:700; color:#5a6a7a; letter-spacing:.04em; }
+  .nt-nivel i { flex:1; height:1px; background:#e2e7ec; display:block; }
+  .nt-nivel-chip { background:#E4E8EE; color:#44506b; }
+  .nt-egr { background:#F6F7F9; border:1px dashed #c8d0da; border-radius:8px; padding:10px 12px; margin-top:12px; }
+  .nt-egr-cab { display:flex; align-items:center; gap:10px; cursor:pointer; color:#44506b; font-size:13px; }
+  .nt-egr-nota { font-size:11.5px; color:#667; margin-top:5px; }
+  .nt-egr-fila { display:flex; align-items:center; gap:10px; padding:8px 2px; border-top:1px solid #e6eaef; font-size:13px; }
+  .nt-egr-fila .nom { flex:1; min-width:0; }
+  .nt-egr-fila .nom small { color:#888; font-size:11.5px; margin-left:6px; }
   .nt-falta { background:#FFF6E0; border:1px solid var(--pendiente-bg); border-radius:8px; padding:8px 12px; color:var(--pendiente-tx); font-size:12.5px; line-height:1.5; }
   .nt-falta.listo { background:#EAF6EC; border-color:var(--gestionado-bg); color:var(--gestionado-tx); }
   .nt-detalle { display:none; background:#fafbfc; border:1px solid #e3e8ee; border-radius:8px; margin:0 0 8px 30px; padding:10px 14px 14px; }
@@ -2087,10 +2096,14 @@ function construirNotasGrado_() {
     if (String(r['Tipo'] || '').toUpperCase().trim() !== 'RESIDENTE CES') return;
     const id = String(r['ID'] || '').trim();
     if (!id) return;
-    const g = porId[id] = porId[id] || { id, nombre: String(r['Persona'] || '').trim(), prog: String(r['Programa'] || '').trim(), rots: [], maxAbs: null };
+    const g = porId[id] = porId[id] || { id, nombre: String(r['Persona'] || '').trim(), prog: String(r['Programa'] || '').trim(), rots: [], maxAbs: null, niveles: [] };
     const mes = r['Mes'] || '', sem = r['Semestre'] || '', camp = String(r['Campo de rotacion'] || '').trim();
     const abs = absG_(sem, mes);
-    if (abs !== null) g.maxAbs = g.maxAbs === null ? abs : Math.max(g.maxAbs, abs);
+    if (abs !== null) {
+      g.maxAbs = g.maxAbs === null ? abs : Math.max(g.maxAbs, abs);
+      const niv = String(r['Nivel / Origen'] || '').trim();
+      if (niv) g.niveles.push({ abs, niv });
+    }
     if (!camp || camp === 'VACACIONES' || !desdeCorteG_(sem)) return;
     if (String(r['Aplica nota'] || 'Si').trim() === 'No') return;
     g.rots.push({ mes, sem, camp, rot: r['Rotacion'] || r['Detalle original'] || '', abs, carpeta: claveCarpetaG_(camp, mes, sem) });
@@ -2100,12 +2113,12 @@ function construirNotasGrado_() {
   Object.values(base).forEach(b => {
     if (porId[b.ResidenteID]) return;
     if (b.Estado !== 'Activo' && b.Estado !== 'Suspendido') return;
-    porId[b.ResidenteID] = { id: String(b.ResidenteID), nombre: b.NombreCompleto, prog: b.Programa, rots: [], maxAbs: null };
+    porId[b.ResidenteID] = { id: String(b.ResidenteID), nombre: b.NombreCompleto, prog: b.Programa, rots: [], maxAbs: null, niveles: [] };
   });
 
-  NT.lista = Object.values(porId).filter(g => {
+  const todos = Object.values(porId).filter(g => {
     const b = base[g.id];
-    if (b) return b.Estado === 'Activo' || b.Estado === 'Suspendido';
+    if (b) return b.Estado === 'Activo' || b.Estado === 'Suspendido';   // los ya egresados nunca entran
     return !hayBase || (g.maxAbs !== null && g.maxAbs >= hoy - 6);
   }).map(g => {
     const d = idx[g.id] || { rot: {}, req: {}, reqUrl: {}, reqCoord: {} };
@@ -2119,9 +2132,40 @@ function construirNotasGrado_() {
     const notasVencidas = rots.filter(x => !x.nota && !x.futura).length;
     const certPend = certs.filter(c => !c.ok).length;
     const listo = certPend === 0 && notasOk === rots.length;
-    return { ...g, rots, certs, notasOk, notasVencidas, certPend, listo, grado: b.FechaGradoProbable || '', fin: b.FechaFinalizacion || '' };
+    const finAbs = absFechaG_(b.FechaFinalizacion);
+    // Terminó rotaciones o ya pasó su fecha de finalización, pero sigue marcado activo:
+    // no cuenta en los indicadores; espera que coordinación confirme el grado.
+    const porConfirmar = (g.maxAbs !== null && g.maxAbs < hoy) || (finAbs !== null && finAbs < hoy);
+    return { ...g, rots, certs, notasOk, notasVencidas, certPend, listo, nivel: nivelActualG_(g, hoy),
+      grado: b.FechaGradoProbable || '', fin: b.FechaFinalizacion || '', finAbs, porConfirmar };
   });
+
+  NT.lista = todos.filter(g => !g.porConfirmar);
+  NT.porConfirmar = todos.filter(g => g.porConfirmar).sort((a, b2) =>
+    (a.prog || '').localeCompare(b2.prog || '', 'es') || a.nombre.localeCompare(b2.nombre, 'es'));
   actualizarBadgeNotas_();
+}
+
+// Nivel del residente: el de su rotación vigente (la más cercana a hoy sin pasarse);
+// si todas son futuras, el de la primera que viene.
+function nivelActualG_(g, hoy) {
+  if (!g.niveles || !g.niveles.length) return '';
+  const pasadas = g.niveles.filter(x => x.abs <= hoy).sort((a, b) => b.abs - a.abs);
+  if (pasadas.length) return pasadas[0].niv;
+  return g.niveles.slice().sort((a, b) => a.abs - b.abs)[0].niv;
+}
+function absFechaG_(v) {
+  const m = String(v || '').match(/^(\d{4})-(\d{2})/);
+  return m ? Number(m[1]) * 12 + Number(m[2]) - 1 : null;
+}
+function ordenNivelG_(niv) {
+  const m = String(niv || '').match(/(\d+)/);
+  return m ? Number(m[1]) : 99;   // "Sin nivel" queda de último
+}
+function textoMesG_(abs) {
+  if (abs === null || abs === undefined) return '—';
+  const n = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  return n[abs % 12] + ' ' + Math.floor(abs / 12);
 }
 
 function actualizarBadgeNotas_() {
@@ -2200,11 +2244,95 @@ function pintarNotasGrado() {
     return `<div class="nt-prog ${abierto ? 'abierto' : ''}" onclick="alternarProgNotas('${progEsc}')">
         <span class="nt-flecha">${abierto ? '▼' : '▶'}</span>
         <span class="tit">${esc(prog)}</span>
-        <span class="met">${res.length} residente${res.length === 1 ? '' : 's'} · ${listos} listo${listos === 1 ? '' : 's'} · ${vencidas} nota${vencidas === 1 ? '' : 's'} vencida${vencidas === 1 ? '' : 's'}</span>
+        <span class="met">${res.length} residente${res.length === 1 ? '' : 's'} · ${resumenNivelesNt_(res)} · ${listos} listo${listos === 1 ? '' : 's'} · ${vencidas} nota${vencidas === 1 ? '' : 's'} vencida${vencidas === 1 ? '' : 's'}</span>
         <span class="nt-barra" title="${pct}% listos para grado"><i style="width:${pct}%"></i></span>
       </div>
-      ${abierto ? res.map(filaNotasGrado_).join('') : ''}`;
+      ${abierto ? porNivelNt_(res) : ''}`;
+  }).join('') + bloquePorConfirmarNt_();
+}
+
+// Dentro de cada especialidad: R1, R2, R3... y al final los que no traen nivel
+function porNivelNt_(res) {
+  const niveles = [...new Set(res.map(g => g.nivel || 'Sin nivel'))]
+    .sort((a, b) => ordenNivelG_(a) - ordenNivelG_(b) || a.localeCompare(b, 'es'));
+  return niveles.map(niv => {
+    const grupo = res.filter(g => (g.nivel || 'Sin nivel') === niv);
+    return `<div class="nt-nivel">${esc(niv)} · ${grupo.length} residente${grupo.length === 1 ? '' : 's'}<i></i></div>` +
+      grupo.map(filaNotasGrado_).join('');
   }).join('');
+}
+
+// Residentes que ya terminaron pero siguen marcados activos: aparte y sin contar en los totales
+function bloquePorConfirmarNt_() {
+  const lista = NT.porConfirmar || [];
+  if (!lista.length) return '';
+  const abierto = !!NT.porConfirmarAbierto;
+  const filas = lista.map(g => `<div class="nt-egr-fila">
+      <span class="nom"><b>${esc(g.nombre)}</b><small>${esc(g.id)} · ${esc(g.prog)} · última rotación ${textoMesG_(g.maxAbs)}${g.fin ? ' · finaliza ' + textoGradoG_(g.fin) : ''}</small></span>
+      ${g.nivel ? `<span class="nt-chip nt-nivel-chip">${esc(g.nivel)}</span>` : ''}
+      <button class="nt-subir" onclick="confirmarGradoDesdeNotas_('${esc(g.id).replace(/'/g, "\\'")}')">Confirmar grado</button>
+    </div>`).join('');
+  return `<div class="nt-egr">
+      <div class="nt-egr-cab" onclick="NT.porConfirmarAbierto = !NT.porConfirmarAbierto; pintarNotasGrado();">
+        <span class="nt-flecha">${abierto ? '▼' : '▶'}</span><b>Grado por confirmar · ${lista.length} residente${lista.length === 1 ? '' : 's'}</b>
+      </div>
+      <div class="nt-egr-nota">Terminaron sus rotaciones o ya pasó su fecha de finalización, pero siguen marcados como activos en la hoja de Residentes. No cuentan en los totales de arriba. Al confirmar el grado pasan a egresados y quedan solo en el histórico.
+        <div style="margin-top:6px;"><button class="btn-secundario btn-pequeno" onclick="marcarEgresadosHastaNt_()">🎓 Marcar como egresados los que finalizaron hasta junio de 2026</button></div>
+      </div>
+      ${abierto ? filas : ''}
+    </div>`;
+}
+
+// Fecha propuesta: la de finalización si existe; si no, el último día del mes de su última rotación
+function fechaGradoSugeridaNt_(g) {
+  const fin = String(g.fin || '').trim();
+  if (fin.length >= 10) return fin.slice(0, 10);
+  if (/^\d{4}-\d{2}$/.test(fin)) return fin + '-28';
+  if (g.maxAbs !== null && g.maxAbs !== undefined) {
+    const anio = Math.floor(g.maxAbs / 12), mes = String(g.maxAbs % 12 + 1).padStart(2, '0');
+    return anio + '-' + mes + '-28';
+  }
+  return '';
+}
+
+// Confirma el grado de uno solo, con la misma acción de la pestaña Residentes
+async function confirmarGradoDesdeNotas_(id) {
+  const g = (NT.porConfirmar || []).find(x => String(x.id) === String(id));
+  if (!g) return;
+  const sugerida = fechaGradoSugeridaNt_(g);
+  const fecha = prompt('Fecha de grado de ' + g.nombre + ' (aaaa-mm-dd). Sus rotaciones posteriores quedarán cerradas.', sugerida);
+  if (fecha === null || !fecha.trim()) return;
+  const res = await llamarBackend('confirmarGradoResidente', { id: String(id), fecha: fecha.trim() });
+  if (!res.ok) { mostrarMensaje('Error: ' + res.error, 'error'); return; }
+  mostrarMensaje(`${res.nombre} pasa a egresado. Se cerraron ${res.cerradas} rotaciones posteriores.`, 'ok');
+  await cargarResidentes(true);
+  construirNotasGrado_();
+  pintarNotasGrado();
+}
+
+// Marcado por lotes, una sola vez: los que finalizaron hasta junio de 2026
+async function marcarEgresadosHastaNt_() {
+  const corte = absFechaG_('2026-06');
+  const lista = (NT.porConfirmar || []).filter(g => g.finAbs !== null ? g.finAbs <= corte : (g.maxAbs !== null && g.maxAbs <= corte));
+  if (!lista.length) { mostrarMensaje('No hay residentes con finalización hasta junio de 2026.', 'ok'); return; }
+  if (!confirm('Se marcarán como egresados ' + lista.length + ' residentes que finalizaron hasta junio de 2026, y se cerrarán sus rotaciones posteriores. ¿Continuar?')) return;
+  let hechos = 0, fallidos = [];
+  for (const g of lista) {
+    const res = await llamarBackend('confirmarGradoResidente', { id: String(g.id), fecha: fechaGradoSugeridaNt_(g) });
+    if (res.ok) hechos++; else fallidos.push(g.nombre);
+    mostrarMensaje('Marcando egresados: ' + (hechos + fallidos.length) + ' de ' + lista.length + '...', 'ok');
+  }
+  await cargarResidentes(true);
+  construirNotasGrado_();
+  pintarNotasGrado();
+  mostrarMensaje(hechos + ' residentes pasaron a egresados' + (fallidos.length ? '. No se pudo con: ' + fallidos.join(', ') : '.'), fallidos.length ? 'error' : 'ok');
+}
+
+function resumenNivelesNt_(res) {
+  const cuenta = {};
+  res.forEach(g => { const n = g.nivel || 'Sin nivel'; cuenta[n] = (cuenta[n] || 0) + 1; });
+  return Object.keys(cuenta).sort((a, b) => ordenNivelG_(a) - ordenNivelG_(b) || a.localeCompare(b, 'es'))
+    .map(n => n + ' ' + cuenta[n]).join(' · ');
 }
 
 function alternarProgNotas(prog) {
@@ -2223,6 +2351,7 @@ function filaNotasGrado_(g) {
   return `<div class="nt-res ${abierto ? 'abierto' : ''}" onclick="alternarNotasResidente('${gid}')">
       <span class="nt-flecha">${abierto ? '▼' : '▶'}</span>
       <span class="nom"><b>${esc(g.nombre)}</b><small>${esc(g.id)}${g.grado ? ' · grado ' + textoGradoG_(g.grado) : ''}</small></span>
+      ${g.nivel ? `<span class="nt-chip nt-nivel-chip">${esc(g.nivel)}</span>` : ''}
       <span class="nt-seg">${seg}</span>${ind}
     </div>
     ${abierto ? `<div class="nt-detalle abierto">${resumenFaltaNt_(g)}${detalleNotasGrado_(g)}</div>` : ''}`;
