@@ -6,6 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gestión Operativa — Posgrados Clínicos</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root {
     --pendiente-bg: #FFD580; --pendiente-tx: #823C00;
@@ -435,6 +437,37 @@
   .uni-marca.ok { background:var(--gestionado-bg); color:var(--gestionado-tx); }
   .uni-marca.rev { background:var(--pendiente-bg); color:var(--pendiente-tx); }
   .uni-marca.no { background:#ececec; color:#666; }
+  /* ===== NOTAS Y REQUISITOS DE GRADO ===== */
+  .nt-kpis { display:flex; gap:10px; flex-wrap:wrap; margin:12px 0 14px; }
+  .nt-kpi { background:#f4f6f8; border:2px solid transparent; border-radius:10px; padding:10px 16px; cursor:pointer; text-align:left; min-width:140px; }
+  .nt-kpi b { display:block; font-size:22px; color:var(--azul-ces); }
+  .nt-kpi span { font-size:12px; color:#555; }
+  .nt-kpi.activo { border-color:var(--azul-ces); background:#eef4fa; }
+  .nt-kpi.verde b { color:var(--gestionado-tx); } .nt-kpi.naranja b { color:var(--pendiente-tx); }
+  .nt-cols { display:grid; grid-template-columns:minmax(180px,1.4fr) minmax(120px,1fr) 90px minmax(260px,2fr) 24px; gap:10px; }
+  .nt-fila { align-items:center; padding:9px 8px; border-bottom:1px solid #eee; cursor:pointer; font-size:13px; }
+  .nt-fila:hover { background:#f7f9fb; }
+  .nt-fila .nom b { display:block; } .nt-fila .nom small { color:#888; }
+  .nt-cab { padding:0 8px 6px; font-size:11.5px; color:#777; font-weight:600; border-bottom:1px solid #ddd; }
+  .nt-chip { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11.5px; font-weight:600; margin:1px 2px 1px 0; white-space:nowrap; }
+  .nt-ok { background:var(--gestionado-bg); color:var(--gestionado-tx); }
+  .nt-pend { background:var(--pendiente-bg); color:var(--pendiente-tx); }
+  .nt-prox { background:#eef1f5; color:#667; }
+  .nt-coord { background:var(--confirmado-bg); color:var(--confirmado-tx); }
+  .nt-detalle { display:none; background:#fafbfc; border-bottom:1px solid #e3e8ee; padding:12px 16px 16px; }
+  .nt-detalle.abierto { display:block; }
+  .nt-detalle h4 { margin:10px 0 6px; font-size:13px; color:var(--azul-ces); }
+  .nt-detalle table { width:100%; border-collapse:collapse; font-size:12.5px; background:white; }
+  .nt-detalle td, .nt-detalle th { padding:6px 8px; border-bottom:1px solid #eef0f3; text-align:left; }
+  .nt-detalle th { font-size:11.5px; color:#777; font-weight:600; }
+  .nt-subir { display:inline-block; background:white; border:1px solid var(--azul-ces); color:var(--azul-ces); border-radius:6px; padding:3px 10px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .nt-subir:hover { background:#eef4fa; }
+  .nt-subir input { display:none; }
+  .nt-subir.ocupado { opacity:.55; pointer-events:none; }
+  .nt-accion { margin-left:4px; font-family:inherit; }
+  .nt-msg { font-size:11.5px; margin-left:6px; }
+  .nt-msg.err { color:var(--cambio-tx); } .nt-msg.ok { color:var(--gestionado-tx); }
+  @media (max-width:900px) { .nt-cols { grid-template-columns:1fr; } .nt-cab { display:none; } .nt-fila > span:last-child { display:none; } }
 </style>
 </head>
 <body>
@@ -471,6 +504,7 @@
       <button class="btn-secundario btn-pequeno" id="tab-btn-historico" onclick="cambiarTab('historico')">Histórico</button>
       <button class="btn-secundario btn-pequeno" id="tab-btn-movilidad" onclick="cambiarTab('movilidad')" style="display:none;">Movilidad <span id="badge-movilidad" style="display:none; background:var(--confirmado-tx); color:white; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:4px;"></span></button>
       <button class="btn-secundario btn-pequeno" id="tab-btn-residentes" onclick="cambiarTab('residentes')" style="display:none;">Residentes</button>
+      <button class="btn-secundario btn-pequeno" id="tab-btn-notas" onclick="cambiarTab('notas')" style="display:none;">Notas <span id="badge-notas" style="display:none; background:var(--pendiente-tx); color:white; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:4px;"></span></button>
       <button class="btn-secundario btn-pequeno" id="tab-btn-centros" onclick="cambiarTab('centros')" style="display:none;">Centros de práctica</button>
       <button class="btn-secundario btn-pequeno" id="boton-publicar-github" onclick="publicarAlMicrositioPublico()" style="display:none; margin-left:auto; background:#003865; color:white;" title="Sube ahora mismo lo más reciente al micrositio público, sin esperar al disparador de las 9 PM">📤 Publicar al micrositio público</button>
     </div>
@@ -782,6 +816,20 @@
       <div id="res-lista"></div>
     </div>
 
+    <!-- Notas y requisitos de grado — solo coordinadora. Sube por el residente a su carpeta de Drive. -->
+    <div class="panel" id="panel-notas" style="display:none;">
+      <h2>Notas y requisitos de grado <button class="btn-secundario btn-pequeno" onclick="cargarNotasGrado(true)" style="float:right;">🔄 Actualizar desde Drive</button></h2>
+      <p style="font-size:12px; color:#888; font-style:italic; margin-top:-8px;">Sube notas y certificados por el residente, de cualquier centro. Quedan en su carpeta de Drive, igual que si él los subiera, y se reflejan en su portal.</p>
+      <div class="nt-kpis" id="nt-kpis"></div>
+      <div class="controles-cuadricula" style="margin-bottom:10px;">
+        <div><label>Residente o documento</label><input id="nt-filtro-texto" autocomplete="off" placeholder="Escribe..." oninput="pintarNotasGrado()"></div>
+        <div><label>Programa</label><select id="nt-filtro-programa" onchange="pintarNotasGrado()" style="padding:8px; border:1px solid #ccc; border-radius:5px; min-width:200px;"><option value="">Todos</option></select></div>
+        <div style="align-self:flex-end;"><button class="btn-secundario" onclick="limpiarFiltrosNotas()">🧹 Limpiar</button></div>
+      </div>
+      <div class="nt-cols nt-cab"><span>Residente</span><span>Programa</span><span>Grado probable</span><span>Requisitos</span><span></span></div>
+      <div id="nt-lista"><div style="text-align:center; color:#888; padding:20px;">⏳ Cargando...</div></div>
+    </div>
+
     <!-- Centros de práctica — recordatorios automáticos. Coordinadoras editan; auxiliares consultan. -->
     <div class="panel" id="panel-centros" style="display:none;">
       <div class="cen-subtabs">
@@ -839,7 +887,7 @@
       </div>
     </div>
 
-    <!-- Movilidad — solo coordinadora. -->
+    <!-- Movilidad — coordinadoras y auxiliares (sin clasificar orígenes para auxiliares). -->
     <div class="panel" id="panel-movilidad" style="display:none;">
       <h2>Movilidad académica <button class="btn-secundario btn-pequeno" onclick="cargarMovilidad(true)" style="float:right;">🔄 Actualizar</button></h2>
       <p style="font-size:12px; color:#888; font-style:italic; margin-top:-8px;">Residentes de Movilidad entrante — para gestionar sus permisos con base en si quedaron aceptados o negados.</p>
@@ -1122,6 +1170,8 @@ function entrarAlApp() {
     document.getElementById('tab-btn-dashboard').style.display = 'inline-block';
     document.getElementById('tab-btn-historico').style.display = 'inline-block';
     document.getElementById('tab-btn-movilidad').style.display = 'inline-block';
+    document.getElementById('btn-origenes').style.display = 'inline-block';
+    document.getElementById('tab-btn-notas').style.display = 'inline-block';
     document.getElementById('tab-btn-residentes').style.display = 'inline-block';
     document.getElementById('tab-btn-centros').style.display = 'inline-block';
     document.getElementById('boton-publicar-github').style.display = 'inline-block';
@@ -1142,11 +1192,17 @@ function entrarAlApp() {
     document.getElementById('vista-gestion-coordinadora').style.display = 'none';
     document.getElementById('vista-gestion-auxiliar').style.display = 'block';
     document.getElementById('tab-btn-residentes').style.display = 'none';
+    document.getElementById('tab-btn-notas').style.display = 'none';
+    // Movilidad: igual que coordinadoras, sin "Clasificar orígenes" (es configuración del indicador).
+    document.getElementById('tab-btn-movilidad').style.display = 'inline-block';
+    document.getElementById('btn-origenes').style.display = 'none';
+    document.getElementById('panel-origenes').style.display = 'none';
     document.getElementById('tab-btn-centros').style.display = 'inline-block';
     document.getElementById('tab-btn-gestion').style.display = 'inline-block';
     document.getElementById('tab-btn-dashboard').style.display = 'inline-block';
     document.getElementById('tab-btn-historico').style.display = 'inline-block';
     cargarCentros();
+    cargarOrigenes();
     cargarProgramasConocidos();
     cargarMesesFiltro();
     cargarCola();
@@ -1474,6 +1530,9 @@ function cambiarTab(tab) {
   const panelRes = document.getElementById('panel-residentes');
   const btnCen = document.getElementById('tab-btn-centros');
   const panelCen = document.getElementById('panel-centros');
+  const btnNot = document.getElementById('tab-btn-notas');
+  const panelNot = document.getElementById('panel-notas');
+  panelNot.style.display = 'none'; btnNot.className = 'btn-secundario btn-pequeno';
 
   panelCuad.style.display = 'none'; panelGes.style.display = 'none'; panelDb.style.display = 'none';
   panelHist.style.display = 'none'; panelMov.style.display = 'none'; panelRes.style.display = 'none';
@@ -1501,6 +1560,9 @@ function cambiarTab(tab) {
   } else if (tab === 'residentes') {
     panelRes.style.display = 'block'; btnRes.className = 'btn-primario btn-pequeno';
     pintarResidentes();
+  } else if (tab === 'notas') {
+    panelNot.style.display = 'block'; btnNot.className = 'btn-primario btn-pequeno';
+    cargarNotasGrado();
   } else if (tab === 'centros') {
     panelCen.style.display = 'block'; btnCen.className = 'btn-primario btn-pequeno';
     cambiarSubCentros(subCentrosActual);
@@ -1899,7 +1961,419 @@ function aplicarFiltrosHistorico() {
 }
 
 // ============================================================
-// MOVILIDAD ACADÉMICA — solo coordinadora. Se carga sola (no requiere buscar), justo para que
+// NOTAS Y REQUISITOS DE GRADO — solo coordinadora.
+// Lee las rotaciones del mismo CSV que usa el portal de residentes (así las carpetas coinciden
+// exactamente) y el estado de Drive del puente de carga. Sube notas y certificados por el
+// residente, sin importar el centro de práctica; el archivo queda marcado como de coordinación.
+// ============================================================
+const URL_CSV_NOTAS = 'https://raw.githubusercontent.com/posgradosces/posgrados-ces/main/datos/BASE_GENERAL.csv';
+const URL_PUENTE_DRIVE = 'https://script.google.com/macros/s/AKfycbwGfR900KCT1-jzZqT9NoaqYSymtxonSB0ZYTX-EAfbKOLBKo0vVSGNWq4IMFSOS4T2/exec';
+const SEMESTRE_CORTE_NOTAS_G = '2026-2';   // igual que en el portal de residentes
+const REQUISITOS_GRADO_G = [
+  { cod: 'CATEDRA_CES', nombre: 'Cátedra CES', corto: 'Cátedra' },
+  { cod: 'DERECHOS_AUTOR', nombre: 'Curso derechos de autor', corto: 'Der. autor' },
+  { cod: 'ZOTERO', nombre: 'Curso Zotero', corto: 'Zotero' }
+];
+const MESES_NUM_G = { ENERO: 1, FEBRERO: 2, MARZO: 3, ABRIL: 4, MAYO: 5, JUNIO: 6, JULIO: 7, AGOSTO: 8, SEPTIEMBRE: 9, OCTUBRE: 10, NOVIEMBRE: 11, DICIEMBRE: 12 };
+
+const NT = { filasCsv: null, drive: null, cargando: null, lista: [], filtroKpi: 'pendientes', abiertos: {}, meta: {}, subiendo: {}, msg: {} };
+
+// Debe coincidir con saneaTexto() del portal y sanear() del puente
+function saneaG_(t) { return String(t).trim().replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, '_'); }
+function mesNumG_(mes) {
+  const m = String(mes || '').toUpperCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (MESES_NUM_G[m]) return MESES_NUM_G[m];
+  const k = Object.keys(MESES_NUM_G).find(x => m.indexOf(x) !== -1);
+  return k ? MESES_NUM_G[k] : null;
+}
+function claveCarpetaG_(camp, mes, sem) {
+  const anio = String(sem || '').split('-')[0].trim();
+  const n = mesNumG_(mes);
+  if (anio && n) return saneaG_(`${anio}-${String(n).padStart(2, '0')}_${camp}`);
+  return saneaG_(`${anio}_${mes}_${camp}`);
+}
+function desdeCorteG_(sem) {
+  const m = String(sem || '').match(/^(\d{4})-(\d)/);
+  if (!m) return false;
+  const [ac, pc] = SEMESTRE_CORTE_NOTAS_G.split('-').map(Number);
+  const a = Number(m[1]), p = Number(m[2]);
+  return a !== ac ? a > ac : p >= pc;
+}
+function absG_(sem, mes) {
+  const a = Number(String(sem || '').split('-')[0]); const n = mesNumG_(mes);
+  return a && n ? a * 12 + n - 1 : null;
+}
+// Drive puede tardar más que el backend normal al recorrer todas las carpetas: 90 s de margen
+async function fetchLargoG_(url, opciones) {
+  const c = new AbortController();
+  const t = setTimeout(() => c.abort(), 90000);
+  try { return await fetch(url, Object.assign({}, opciones, { signal: c.signal })); }
+  finally { clearTimeout(t); }
+}
+function hoyAbsG_() { const d = new Date(); return d.getFullYear() * 12 + d.getMonth(); }
+
+async function cargarNotasGrado(forzar) {
+  if (NT.cargando) return NT.cargando;
+  if (NT.filasCsv && NT.drive && !forzar) { construirNotasGrado_(); pintarNotasGrado(); return; }
+  document.getElementById('nt-lista').innerHTML = '<div style="text-align:center; color:#888; padding:20px;">⏳ Consultando rotaciones y Drive (puede tardar unos segundos)...</div>';
+  NT.cargando = (async () => {
+    try {
+      const [csv, drive] = await Promise.all([
+        fetchConTimeout_(URL_CSV_NOTAS + '?t=' + Date.now()).then(r => r.text()),
+        fetchLargoG_(URL_PUENTE_DRIVE + '?accion=listado').then(r => r.json()),
+        cargarResidentes()
+      ]);
+      NT.filasCsv = Papa.parse(csv, { header: true, skipEmptyLines: true }).data;
+      if (!drive || !drive.ok) throw new Error((drive && drive.mensaje) || 'Drive no respondió');
+      NT.drive = drive.datos || {};
+      construirNotasGrado_();
+      llenarProgramasNotas_();
+      pintarNotasGrado();
+    } catch (err) {
+      const msg = err && err.name === 'AbortError' ? 'Drive tardó demasiado en responder.' : 'No se pudo cargar la información (' + esc(err && err.message || 'sin conexión') + ').';
+      document.getElementById('nt-lista').innerHTML = `<div style="text-align:center; color:var(--cambio-tx); padding:20px;">${msg} <button class="btn-secundario btn-pequeno" onclick="cargarNotasGrado(true)">Reintentar</button></div>`;
+    } finally { NT.cargando = null; }
+  })();
+  return NT.cargando;
+}
+
+// Índice de Drive por cédula (sufijo de la carpeta NOMBRE_CEDULA), para no depender de
+// mayúsculas o variaciones del nombre del programa.
+function indiceDrivePorId_() {
+  const idx = {};
+  Object.keys(NT.drive || {}).forEach(prog => {
+    Object.keys(NT.drive[prog] || {}).forEach(res => {
+      const id = res.split('_').pop();
+      const dest = idx[id] = idx[id] || { rot: {}, req: {}, reqUrl: {}, reqCoord: {} };
+      const carpetas = NT.drive[prog][res] || {};
+      Object.keys(carpetas).forEach(k => {
+        const c = carpetas[k] || {};
+        if (c.esRequisitos || k === 'REQUISITOS_GRADO') {
+          Object.assign(dest.req, c.requisitos || {});
+          Object.assign(dest.reqUrl, c.requisitosUrl || {});
+          Object.assign(dest.reqCoord, c.requisitosCoord || {});
+        } else if (c.nota && !(dest.rot[k] && dest.rot[k].nota)) dest.rot[k] = c;
+        else if (!dest.rot[k]) dest.rot[k] = c;
+      });
+    });
+  });
+  return idx;
+}
+
+function construirNotasGrado_() {
+  const hoy = hoyAbsG_();
+  const idx = indiceDrivePorId_();
+  const base = {};
+  (cacheResidentes || []).forEach(r => { base[String(r.ResidenteID).trim()] = r; });
+  const hayBase = Object.keys(base).length > 0;
+
+  const porId = {};
+  (NT.filasCsv || []).forEach(r => {
+    if (String(r['Tipo'] || '').toUpperCase().trim() !== 'RESIDENTE CES') return;
+    const id = String(r['ID'] || '').trim();
+    if (!id) return;
+    const g = porId[id] = porId[id] || { id, nombre: String(r['Persona'] || '').trim(), prog: String(r['Programa'] || '').trim(), rots: [], maxAbs: null };
+    const mes = r['Mes'] || '', sem = r['Semestre'] || '', camp = String(r['Campo de rotacion'] || '').trim();
+    const abs = absG_(sem, mes);
+    if (abs !== null) g.maxAbs = g.maxAbs === null ? abs : Math.max(g.maxAbs, abs);
+    if (!camp || camp === 'VACACIONES' || !desdeCorteG_(sem)) return;
+    if (String(r['Aplica nota'] || 'Si').trim() === 'No') return;
+    g.rots.push({ mes, sem, camp, rot: r['Rotacion'] || r['Detalle original'] || '', abs, carpeta: claveCarpetaG_(camp, mes, sem) });
+  });
+
+  // Residentes vigentes de la base que aún no tienen rotaciones en el CSV
+  Object.values(base).forEach(b => {
+    if (porId[b.ResidenteID]) return;
+    if (b.Estado !== 'Activo' && b.Estado !== 'Suspendido') return;
+    porId[b.ResidenteID] = { id: String(b.ResidenteID), nombre: b.NombreCompleto, prog: b.Programa, rots: [], maxAbs: null };
+  });
+
+  NT.lista = Object.values(porId).filter(g => {
+    const b = base[g.id];
+    if (b) return b.Estado === 'Activo' || b.Estado === 'Suspendido';
+    return !hayBase || (g.maxAbs !== null && g.maxAbs >= hoy - 6);
+  }).map(g => {
+    const d = idx[g.id] || { rot: {}, req: {}, reqUrl: {}, reqCoord: {} };
+    const b = base[g.id] || {};
+    const rots = g.rots.map(x => {
+      const e = d.rot[x.carpeta] || {};
+      return { ...x, nota: !!e.nota, url: e.notaUrl || '', coord: !!e.notaCoord, futura: x.abs !== null && x.abs > hoy };
+    }).sort((a, b2) => (a.abs || 0) - (b2.abs || 0));
+    const certs = REQUISITOS_GRADO_G.map(q => ({ ...q, ok: !!d.req[q.cod], url: d.reqUrl[q.cod] || '', coord: !!d.reqCoord[q.cod] }));
+    const notasOk = rots.filter(x => x.nota).length;
+    const notasVencidas = rots.filter(x => !x.nota && !x.futura).length;
+    const certPend = certs.filter(c => !c.ok).length;
+    const listo = certPend === 0 && notasOk === rots.length;
+    return { ...g, rots, certs, notasOk, notasVencidas, certPend, listo, grado: b.FechaGradoProbable || '', fin: b.FechaFinalizacion || '' };
+  });
+  actualizarBadgeNotas_();
+}
+
+function actualizarBadgeNotas_() {
+  const n = NT.lista.reduce((a, g) => a + g.notasVencidas, 0);
+  const b = document.getElementById('badge-notas');
+  if (!b) return;
+  b.textContent = n; b.style.display = n ? 'inline-block' : 'none';
+}
+
+function llenarProgramasNotas_() {
+  const sel = document.getElementById('nt-filtro-programa');
+  const actual = sel.value;
+  const progs = [...new Set(NT.lista.map(g => g.prog).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+  sel.innerHTML = '<option value="">Todos</option>' + progs.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  if (progs.includes(actual)) sel.value = actual;
+}
+
+function limpiarFiltrosNotas() {
+  document.getElementById('nt-filtro-texto').value = '';
+  document.getElementById('nt-filtro-programa').value = '';
+  NT.filtroKpi = 'pendientes';
+  pintarNotasGrado();
+}
+
+function filtrarKpiNotas(k) { NT.filtroKpi = k; pintarNotasGrado(); }
+
+function textoGradoG_(v) {
+  const m = String(v || '').match(/^(\d{4})-(\d{2})/);
+  if (!m) return '—';
+  const nombres = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  return nombres[Number(m[2]) - 1] + ' ' + m[1];
+}
+
+function pintarNotasGrado() {
+  if (!NT.filasCsv) return;
+  const texto = document.getElementById('nt-filtro-texto').value.trim().toLowerCase();
+  const prog = document.getElementById('nt-filtro-programa').value;
+  const base = NT.lista.filter(g => (!prog || g.prog === prog) &&
+    (!texto || g.nombre.toLowerCase().includes(texto) || g.id.includes(texto)));
+
+  const k = {
+    todos: base.length,
+    listos: base.filter(g => g.listo).length,
+    pendientes: base.filter(g => !g.listo).length,
+    notas: base.reduce((a, g) => a + g.notasVencidas, 0),
+    certs: base.reduce((a, g) => a + g.certPend, 0)
+  };
+  const kpi = (id, n, txt, cls) => `<button class="nt-kpi ${cls || ''} ${NT.filtroKpi === id ? 'activo' : ''}" onclick="filtrarKpiNotas('${id}')"><b>${n}</b><span>${txt}</span></button>`;
+  document.getElementById('nt-kpis').innerHTML =
+    kpi('todos', k.todos, 'residentes vigentes') +
+    kpi('listos', k.listos, 'listos para grado', 'verde') +
+    kpi('pendientes', k.pendientes, 'con requisitos pendientes', 'naranja') +
+    kpi('notas', k.notas, 'notas vencidas por subir', 'naranja') +
+    kpi('certs', k.certs, 'certificados por subir', 'naranja');
+
+  let lista = base;
+  if (NT.filtroKpi === 'listos') lista = base.filter(g => g.listo);
+  else if (NT.filtroKpi === 'pendientes') lista = base.filter(g => !g.listo);
+  else if (NT.filtroKpi === 'notas') lista = base.filter(g => g.notasVencidas);
+  else if (NT.filtroKpi === 'certs') lista = base.filter(g => g.certPend);
+  lista = lista.slice().sort((a, b) => (b.notasVencidas + b.certPend) - (a.notasVencidas + a.certPend) || a.nombre.localeCompare(b.nombre, 'es'));
+
+  const cont = document.getElementById('nt-lista');
+  if (!lista.length) { cont.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">Sin residentes con estos filtros.</div>'; return; }
+  NT.meta = {};
+  cont.innerHTML = lista.map(filaNotasGrado_).join('');
+}
+
+function filaNotasGrado_(g) {
+  const abierto = !!NT.abiertos[g.id];
+  const chips = g.listo
+    ? '<span class="nt-chip nt-ok">✅ Listo para grado</span>'
+    : g.certs.map(c => `<span class="nt-chip ${c.ok ? 'nt-ok' : 'nt-pend'}">${c.ok ? '✓' : '!'} ${esc(c.corto)}</span>`).join('') +
+      `<span class="nt-chip ${g.notasOk === g.rots.length ? 'nt-ok' : 'nt-pend'}">Notas ${g.notasOk}/${g.rots.length}</span>`;
+  return `<div class="nt-cols nt-fila" onclick="alternarNotasResidente('${esc(g.id)}')">
+      <span class="nom"><b>${esc(g.nombre)}</b><small>${esc(g.id)}</small></span>
+      <span>${esc(g.prog)}</span>
+      <span>${textoGradoG_(g.grado)}</span>
+      <span>${chips}</span>
+      <span style="color:#999;">${abierto ? '▼' : '▶'}</span>
+    </div>
+    <div class="nt-detalle ${abierto ? 'abierto' : ''}" id="nt-det-${esc(g.id)}">${abierto ? detalleNotasGrado_(g) : ''}</div>`;
+}
+
+function alternarNotasResidente(id) {
+  NT.abiertos[id] = !NT.abiertos[id];
+  pintarNotasGrado();
+}
+
+function botonSubirNt_(clave, meta) {
+  NT.meta[clave] = meta;
+  const sub = NT.subiendo[clave];
+  return `<label class="nt-subir ${sub ? 'ocupado' : ''}" onclick="event.stopPropagation()">${sub ? 'Subiendo...' : (meta.yaHay ? 'Subir otra' : '⬆ Subir')}
+    <input type="file" accept="image/*,application/pdf" multiple onchange="subirDesdeNotas_(this,'${clave}')"></label>`;
+}
+// Ver / Descargar sin cuenta de Drive: el puente entrega el archivo más reciente y sigue privado
+function botonesVerNt_(clave) {
+  const ocupado = NT.abriendo && NT.abriendo[clave];
+  return `<button class="nt-subir nt-accion ${ocupado ? 'ocupado' : ''}" onclick="event.stopPropagation(); abrirArchivoNt_('${clave}', false)">${ocupado ? 'Abriendo...' : 'Ver'}</button>
+    <button class="nt-subir nt-accion ${ocupado ? 'ocupado' : ''}" onclick="event.stopPropagation(); abrirArchivoNt_('${clave}', true)">Descargar</button>`;
+}
+
+async function abrirArchivoNt_(clave, descargar) {
+  const meta = NT.meta[clave];
+  if (!meta) return;
+  NT.abriendo = NT.abriendo || {};
+  const ventana = descargar ? null : window.open('', '_blank');
+  if (ventana) ventana.document.write('<p style="font-family:sans-serif;color:#003865;padding:20px">Abriendo archivo...</p>');
+  NT.abriendo[clave] = true; delete NT.msg[clave]; pintarNotasGrado();
+  try {
+    let url = URL_PUENTE_DRIVE + '?accion=archivo&programa=' + encodeURIComponent(meta.programa) +
+      '&residente=' + encodeURIComponent(meta.residente);
+    url += meta.tipo === 'requisito'
+      ? '&rotacion=REQUISITOS_GRADO&requisito=' + encodeURIComponent(meta.requisito)
+      : '&rotacion=' + encodeURIComponent(meta.rotacion);
+    const data = await (await fetchLargoG_(url)).json();
+    if (!data.ok) throw new Error(data.mensaje || 'No se encontró el archivo');
+    const bytes = Uint8Array.from(atob(data.base64), c => c.charCodeAt(0));
+    const blobUrl = URL.createObjectURL(new Blob([bytes], { type: data.mime || 'application/pdf' }));
+    if (descargar) {
+      const ext = (String(data.nombre || '').match(/\.[0-9a-zA-Z]+$/) || ['.pdf'])[0];
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = (meta.nombreDescarga + ' ' + meta.residente).replace(/[^\w\-]+/g, '_') + ext;
+      document.body.appendChild(a); a.click(); a.remove();
+    } else if (ventana) {
+      ventana.location.href = blobUrl;
+    }
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+  } catch (err) {
+    if (ventana) ventana.close();
+    NT.msg[clave] = { txt: 'No se pudo abrir', err: true };
+    mostrarMensaje('No se pudo abrir el archivo: ' + (err && err.message || 'intenta de nuevo'), 'error');
+  } finally {
+    NT.abriendo[clave] = false;
+    pintarNotasGrado();
+  }
+}
+
+function msgNt_(clave) {
+  const m = NT.msg[clave];
+  return m ? `<span class="nt-msg ${m.err ? 'err' : 'ok'}">${esc(m.txt)}</span>` : '';
+}
+
+function detalleNotasGrado_(g) {
+  const residente = g.nombre + '_' + g.id;
+  const certRows = g.certs.map(c => {
+    const clave = 'req_' + saneaG_(g.id) + '_' + c.cod;
+    const estado = c.ok ? `<span class="nt-chip ${c.coord ? 'nt-coord' : 'nt-ok'}">${c.coord ? 'Cargado por coordinación' : 'Cargado'}</span>` : '<span class="nt-chip nt-pend">Pendiente</span>';
+    return `<tr><td>${esc(c.nombre)}</td><td>${estado}</td><td style="text-align:right; white-space:nowrap;">
+      ${botonSubirNt_(clave, { tipo: 'requisito', programa: g.prog, residente, requisito: c.cod, id: g.id, yaHay: c.ok, nombreDescarga: c.nombre })}
+      ${c.ok ? botonesVerNt_(clave) : ''}${msgNt_(clave)}</td></tr>`;
+  }).join('');
+
+  const notaRows = g.rots.length ? g.rots.map(x => {
+    const clave = 'nota_' + saneaG_(g.id) + '_' + x.carpeta;
+    const estado = x.nota
+      ? `<span class="nt-chip ${x.coord ? 'nt-coord' : 'nt-ok'}">${x.coord ? 'Cargada por coordinación' : 'Cargada'}</span>`
+      : x.futura ? '<span class="nt-chip nt-prox">Próxima</span>' : '<span class="nt-chip nt-pend">Pendiente</span>';
+    return `<tr><td>${esc(x.mes)} · ${esc(x.sem)}</td><td>${esc(x.camp)}</td><td>${esc(x.rot)}</td><td>${estado}</td>
+      <td style="text-align:right; white-space:nowrap;">
+      ${botonSubirNt_(clave, { tipo: 'nota', programa: g.prog, residente, rotacion: x.carpeta, nombreRotacion: x.rot || x.camp, id: g.id, yaHay: x.nota, nombreDescarga: 'Nota ' + (x.rot || x.camp) + ' ' + x.mes + ' ' + x.sem })}
+      ${x.nota ? botonesVerNt_(clave) : ''}${msgNt_(clave)}</td></tr>`;
+  }).join('') : '<tr><td colspan="5" style="color:#999;">Sin rotaciones que requieran nota desde ' + SEMESTRE_CORTE_NOTAS_G + '.</td></tr>';
+
+  return `<h4>Certificados de grado</h4>
+    <table><tbody>${certRows}</tbody></table>
+    <h4>Notas de rotación <span style="font-weight:400; color:#888;">(${g.notasOk} de ${g.rots.length} cargadas · desde ${SEMESTRE_CORTE_NOTAS_G})</span></h4>
+    <table><thead><tr><th>Mes / semestre</th><th>Campo</th><th>Rotación</th><th>Estado</th><th></th></tr></thead><tbody>${notaRows}</tbody></table>
+    <p style="font-size:11.5px; color:#888; margin:8px 0 0;">Si la nota tiene varias hojas, selecciona todas las fotos juntas y se combinan en un solo PDF. Lo que subas se conserva junto a lo anterior; el portal toma siempre lo más reciente.</p>`;
+}
+
+function comprimirImagenG_(file) {
+  return new Promise(resolve => {
+    if (!file.type.startsWith('image/')) { resolve(file); return; }
+    const lector = new FileReader();
+    lector.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1600; let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) { if (w > h) { h = Math.round(h * MAX / w); w = MAX; } else { w = Math.round(w * MAX / h); h = MAX; } }
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        c.toBlob(b => resolve(b ? new File([b], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }) : file), 'image/jpeg', 0.7);
+      };
+      img.onerror = () => resolve(file);
+      img.src = ev.target.result;
+    };
+    lector.onerror = () => resolve(file);
+    lector.readAsDataURL(file);
+  });
+}
+
+async function combinarImagenesG_(files) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt' });
+  for (let i = 0; i < files.length; i++) {
+    const f = await comprimirImagenG_(files[i]);
+    const dataUrl = await new Promise((res, rej) => { const l = new FileReader(); l.onload = () => res(l.result); l.onerror = rej; l.readAsDataURL(f); });
+    const img = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = dataUrl; });
+    const pw = doc.internal.pageSize.getWidth(), ph = doc.internal.pageSize.getHeight();
+    const r = Math.min(pw / img.width, ph / img.height), w = img.width * r, h = img.height * r;
+    if (i > 0) doc.addPage();
+    doc.addImage(dataUrl, 'JPEG', (pw - w) / 2, (ph - h) / 2, w, h);
+  }
+  return new File([doc.output('blob')], 'documento.pdf', { type: 'application/pdf' });
+}
+
+function base64G_(file) {
+  return new Promise((res, rej) => { const l = new FileReader(); l.onload = () => res(l.result.split(',')[1]); l.onerror = rej; l.readAsDataURL(file); });
+}
+
+async function subirDesdeNotas_(inputEl, clave) {
+  const files = Array.from(inputEl.files || []);
+  inputEl.value = '';
+  const meta = NT.meta[clave];
+  if (!files.length || !meta) return;
+  if (files.length > 1 && !files.every(f => f.type.startsWith('image/'))) {
+    NT.msg[clave] = { txt: 'Varias hojas deben ser todas fotos', err: true }; pintarNotasGrado(); return;
+  }
+  NT.subiendo[clave] = true; delete NT.msg[clave]; pintarNotasGrado();
+  try {
+    const archivo = files.length > 1 ? await combinarImagenesG_(files) : await comprimirImagenG_(files[0]);
+    const cuerpo = {
+      archivoBase64: await base64G_(archivo),
+      nombreArchivo: archivo.name || files[0].name,
+      tipoMime: archivo.type || files[0].type || 'application/pdf',
+      programa: meta.programa,
+      residente: meta.residente,
+      tipoDocumento: meta.tipo,
+      cargadoPor: 'coordinacion',
+      subidoPor: usuarioActual ? usuarioActual.usuarioCorto : ''
+    };
+    if (meta.tipo === 'requisito') { cuerpo.requisito = meta.requisito; cuerpo.rotacion = 'REQUISITOS_GRADO'; cuerpo.nombreRotacion = meta.requisito; }
+    else { cuerpo.rotacion = meta.rotacion; cuerpo.nombreRotacion = meta.nombreRotacion; }
+    const resp = await fetchLargoG_(URL_PUENTE_DRIVE, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(cuerpo) });
+    const data = await resp.json();
+    if (!data.ok) throw new Error(data.mensaje || 'Drive no guardó el archivo');
+    marcarSubidoLocal_(meta, data.url || '');
+    NT.msg[clave] = { txt: 'Cargado', err: false };
+    mostrarMensaje('Archivo guardado en la carpeta del residente.', 'ok');
+  } catch (err) {
+    NT.msg[clave] = { txt: err && err.name === 'AbortError' ? 'Drive tardó demasiado; revisa con Actualizar' : 'No se pudo subir', err: true };
+    mostrarMensaje('No se pudo subir: ' + (err && err.message || 'intenta de nuevo'), 'error');
+  } finally {
+    NT.subiendo[clave] = false;
+    pintarNotasGrado();
+  }
+}
+
+// Refleja el cargue sin volver a recorrer todo Drive
+function marcarSubidoLocal_(meta, url) {
+  const progKey = saneaG_(meta.programa), resKey = saneaG_(meta.residente);
+  NT.drive[progKey] = NT.drive[progKey] || {};
+  const res = NT.drive[progKey][resKey] = NT.drive[progKey][resKey] || {};
+  if (meta.tipo === 'requisito') {
+    const r = res.REQUISITOS_GRADO = res.REQUISITOS_GRADO || { esRequisitos: true, requisitos: {}, requisitosUrl: {}, requisitosCoord: {} };
+    r.requisitos = r.requisitos || {}; r.requisitosUrl = r.requisitosUrl || {}; r.requisitosCoord = r.requisitosCoord || {};
+    r.requisitos[meta.requisito] = true; r.requisitosUrl[meta.requisito] = url; r.requisitosCoord[meta.requisito] = true;
+  } else {
+    res[meta.rotacion] = { ...(res[meta.rotacion] || {}), nota: true, notaUrl: url, notaCoord: true };
+  }
+  construirNotasGrado_();
+}
+
+// ============================================================
+// MOVILIDAD ACADÉMICA — coordinadoras y auxiliares. Se carga sola (no requiere buscar), justo para que
 // no tenga que salir a buscar quién quedó aceptado o negado.
 // ============================================================
 let movilidadFiltroActivo = null; // null = nada elegido todavía; 'Confirmado' | 'Negado' | 'Pendiente'
@@ -2465,7 +2939,7 @@ function dibujarDesgloseKpiDb() {
     const mov = d.filter(r => r.Tipo === 'Movilidad entrante');
     const grupos = [['Confirmado', 'Aceptados', ['Confirmado']], ['Pendiente', 'Esperando respuesta', ['Pendiente', 'Cambio']], ['Negado', 'Negados', ['Negado']]];
     html = `<div class="db-desglose-top"><b>Movilidad entrante · ${esc(etiquetaPeriodoDb_())}</b><div class="db-fila">
-      ${usuarioActual && usuarioActual.rol === 'coordinadora' ? `<button class="db-mini" onclick="cambiarTab('movilidad')">Gestionar en la pestaña Movilidad</button>` : ''}${cerrar}</div></div>
+      ${usuarioActual && (usuarioActual.rol === 'coordinadora' || usuarioActual.rol === 'auxiliar') ? `<button class="db-mini" onclick="cambiarTab('movilidad')">Gestionar en la pestaña Movilidad</button>` : ''}${cerrar}</div></div>
       ${(() => {
         // Solo se muestran los estados que tienen gente: con tres columnas fijas, cuando dos
         // estaban vacías quedaba una tira angosta a la izquierda y el resto en blanco. El grupo
@@ -2819,7 +3293,7 @@ function dibujarMovilidadDb() {
   const i = grupos.findIndex(g => g[0] === dbSel.mov);
   if (i === -1) { det.innerHTML = ''; return; }
   det.innerHTML = `<div class="db-panel-detalle"><div class="top"><b style="color:var(--azul-ces);">${grupos[i][1]} (${conteo[i].length})</b>
-      ${usuarioActual && usuarioActual.rol === 'coordinadora' ? `<button class="db-mini" onclick="cambiarTab('movilidad')">Gestionar en Movilidad</button>` : ''}</div>
+      ${usuarioActual && (usuarioActual.rol === 'coordinadora' || usuarioActual.rol === 'auxiliar') ? `<button class="db-mini" onclick="cambiarTab('movilidad')">Gestionar en Movilidad</button>` : ''}</div>
     <div class="cuerpo"><div class="db-personas">${conteo[i].map(p => tarjetaPersonaDb_(p, esc(p.programa) + '<br>' + esc(p.registros.map(r => r.Mes + ' · ' + (r.CampoRotacion || '')).join(' / ')),
       () => irACeldaDesdeComentario(p.registros[0].ClaveUnica, p.programa, p.registros[0].Semestre), 'mov')).join('') || '<span style="font-size:12px; color:#999;">Nadie en este estado.</span>'}</div></div></div>`;
 }
