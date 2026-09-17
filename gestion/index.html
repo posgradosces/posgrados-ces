@@ -2053,6 +2053,9 @@ async function cargarNotasGrado(forzar) {
       construirNotasGrado_();
       llenarProgramasNotas_();
       pintarNotasGrado();
+      if (!cacheResidentes || !cacheResidentes.length) {
+        document.getElementById('nt-lista').innerHTML = '<div style="text-align:center; color:var(--cambio-tx); padding:20px;">No se pudo leer la base de residentes, así que la lista queda vacía. <button class="btn-secundario btn-pequeno" onclick="cargarNotasGrado(true)">Reintentar</button></div>';
+      }
     } catch (err) {
       const msg = err && err.name === 'AbortError' ? 'Drive tardó demasiado en responder.' : 'No se pudo cargar la información (' + esc(err && err.message || 'sin conexión') + ').';
       document.getElementById('nt-lista').innerHTML = `<div style="text-align:center; color:var(--cambio-tx); padding:20px;">${msg} <button class="btn-secundario btn-pequeno" onclick="cargarNotasGrado(true)">Reintentar</button></div>`;
@@ -2084,24 +2087,35 @@ function indiceDrivePorId_() {
   return idx;
 }
 
+// Los documentos vienen con formatos distintos (cédula, pasaporte, CE): se comparan sin puntos ni espacios
+function idKeyG_(v) { return String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+// "R 2" y "R2" son el mismo nivel; la movilidad entrante trae la universidad de origen en esta columna
+function normNivelG_(v) { return String(v || '').trim().replace(/^R\s+(\d)/i, 'R$1'); }
+function esMovilidadG_(niv) {
+  return String(niv || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').indexOf('MOVILIDAD') !== -1;
+}
+
 function construirNotasGrado_() {
   const hoy = hoyAbsG_();
   const idx = indiceDrivePorId_();
+  // La lista se cruza con la base real de residentes: solo los vigentes entran a la pestaña
   const base = {};
-  (cacheResidentes || []).forEach(r => { base[String(r.ResidenteID).trim()] = r; });
+  (cacheResidentes || []).forEach(r => { base[idKeyG_(r.ResidenteID)] = r; });
   const hayBase = Object.keys(base).length > 0;
 
   const porId = {};
   (NT.filasCsv || []).forEach(r => {
     if (String(r['Tipo'] || '').toUpperCase().trim() !== 'RESIDENTE CES') return;
+    // La movilidad entrante se gestiona en su propia pestaña y no entra en estos indicadores
+    if (esMovilidadG_(r['Nivel / Origen'])) return;
     const id = String(r['ID'] || '').trim();
-    if (!id) return;
-    const g = porId[id] = porId[id] || { id, nombre: String(r['Persona'] || '').trim(), prog: String(r['Programa'] || '').trim(), rots: [], maxAbs: null, niveles: [] };
+    if (!id || !base[idKeyG_(id)]) return;
+    const g = porId[idKeyG_(id)] = porId[idKeyG_(id)] || { id, nombre: String(r['Persona'] || '').trim(), prog: String(r['Programa'] || '').trim(), rots: [], maxAbs: null, niveles: [] };
     const mes = r['Mes'] || '', sem = r['Semestre'] || '', camp = String(r['Campo de rotacion'] || '').trim();
     const abs = absG_(sem, mes);
     if (abs !== null) {
       g.maxAbs = g.maxAbs === null ? abs : Math.max(g.maxAbs, abs);
-      const niv = String(r['Nivel / Origen'] || '').trim();
+      const niv = normNivelG_(r['Nivel / Origen']);
       if (niv) g.niveles.push({ abs, niv });
     }
     if (!camp || camp === 'VACACIONES' || !desdeCorteG_(sem)) return;
@@ -2110,19 +2124,20 @@ function construirNotasGrado_() {
   });
 
   // Residentes vigentes de la base que aún no tienen rotaciones en el CSV
+  // Residentes vigentes de la base que aún no tienen rotaciones cargadas en el CSV
   Object.values(base).forEach(b => {
-    if (porId[b.ResidenteID]) return;
+    const k = idKeyG_(b.ResidenteID);
+    if (porId[k]) return;
     if (b.Estado !== 'Activo' && b.Estado !== 'Suspendido') return;
-    porId[b.ResidenteID] = { id: String(b.ResidenteID), nombre: b.NombreCompleto, prog: b.Programa, rots: [], maxAbs: null, niveles: [] };
+    porId[k] = { id: String(b.ResidenteID), nombre: b.NombreCompleto, prog: b.Programa, rots: [], maxAbs: null, niveles: [] };
   });
 
   const todos = Object.values(porId).filter(g => {
-    const b = base[g.id];
-    if (b) return b.Estado === 'Activo' || b.Estado === 'Suspendido';   // los ya egresados nunca entran
-    return !hayBase || (g.maxAbs !== null && g.maxAbs >= hoy - 6);
+    const b = base[idKeyG_(g.id)];
+    return !!b && (b.Estado === 'Activo' || b.Estado === 'Suspendido');   // egresados y retirados nunca entran
   }).map(g => {
-    const d = idx[g.id] || { rot: {}, req: {}, reqUrl: {}, reqCoord: {} };
-    const b = base[g.id] || {};
+    const d = idx[g.id] || idx[idKeyG_(g.id)] || { rot: {}, req: {}, reqUrl: {}, reqCoord: {} };
+    const b = base[idKeyG_(g.id)] || {};
     const rots = g.rots.map(x => {
       const e = d.rot[x.carpeta] || {};
       return { ...x, nota: !!e.nota, url: e.notaUrl || '', coord: !!e.notaCoord, futura: x.abs !== null && x.abs > hoy };
@@ -2132,10 +2147,11 @@ function construirNotasGrado_() {
     const notasVencidas = rots.filter(x => !x.nota && !x.futura).length;
     const certPend = certs.filter(c => !c.ok).length;
     const listo = certPend === 0 && notasOk === rots.length;
-    const finAbs = absFechaG_(b.FechaFinalizacion);
+    const finAbs = absFechaG_(b.FechaFinalizacion || b.FechaGradoProbable);
     // Terminó rotaciones o ya pasó su fecha de finalización, pero sigue marcado activo:
     // no cuenta en los indicadores; espera que coordinación confirme el grado.
-    const porConfirmar = (g.maxAbs !== null && g.maxAbs < hoy) || (finAbs !== null && finAbs < hoy);
+    // Manda la fecha de finalización de la base; si no la tiene, se mira su última rotación
+    const porConfirmar = finAbs !== null ? finAbs < hoy : (g.maxAbs !== null && g.maxAbs < hoy);
     return { ...g, rots, certs, notasOk, notasVencidas, certPend, listo, nivel: nivelActualG_(g, hoy),
       grado: b.FechaGradoProbable || '', fin: b.FechaFinalizacion || '', finAbs, porConfirmar };
   });
