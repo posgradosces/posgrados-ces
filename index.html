@@ -441,6 +441,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 @media(max-width:980px){.grid2,.grid3{grid-template-columns:1fr}.grid3 .caja[style]{grid-column:auto!important}}
 @media(max-width:768px){.horas{grid-template-columns:repeat(8,1fr)}.panel-top h1{font-size:18px}}
 
+/* ===== REQUISITOS DE GRADO (franja bajo la linea de recorrido) ===== */
+.vr-req{border-top:1px dashed var(--borde);margin-top:12px;padding-top:11px}
+.vr-req-cab{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.vr-req-cab b{font-size:13.5px;color:var(--az)}
+.vr-req-seg{display:flex;gap:4px}
+.vr-req-seg i{width:20px;height:6px;border-radius:3px;background:#e6edf4}
+.vr-req-seg i.ok{background:var(--teal)}
+.vr-req-n{font-size:12px;color:var(--sec)}
+.vr-req-sello{margin-left:auto;background:#C6EFCE;color:#006100;border-radius:20px;padding:3px 11px;font-size:12px;font-weight:700}
+.vr-req-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.vr-req-it{display:flex;align-items:center;gap:8px;border:1px solid var(--borde);border-radius:10px;padding:8px 10px;font-size:12.5px;background:#fff;min-width:0}
+.vr-req-it .ic{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;font-weight:700}
+.vr-req-it.ok .ic{background:#C6EFCE;color:#006100}
+.vr-req-it.pend .ic{background:#FFD580;color:#823C00}
+.vr-req-it .tx{min-width:0;line-height:1.25}
+.vr-req-it .tx small{display:block;font-size:11px;color:var(--sec)}
+.vr-req-it .tx small.err{color:#9C0006}
+.vr-req-sub{margin-left:auto;flex-shrink:0;font-size:11.5px;padding:4px 9px;border-radius:8px;border:1px solid var(--az);color:var(--az);background:#fff;cursor:pointer;font-weight:600;white-space:nowrap}
+.vr-req-sub:hover{background:var(--az-suave)}
+.vr-req-sub input{display:none}
+.vr-req-sub.ocupado{opacity:.6;pointer-events:none}
+.vr-req-nota{font-size:11.5px;color:var(--sec);margin-top:7px;line-height:1.5}
+@media(max-width:768px){.vr-req-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:400px){.vr-req-grid{grid-template-columns:1fr}}
+
 /* ===== MEJORAS 2026: recordar dispositivo, novedades, recorrido ===== */
 .rec-box{display:flex;align-items:flex-start;gap:10px;background:var(--teal-bg);border:1px solid #bfe5da;border-radius:11px;padding:11px 13px;cursor:pointer}
 .rec-box input{width:19px;height:19px;margin-top:1px;accent-color:var(--teal);flex-shrink:0}
@@ -1666,6 +1691,13 @@ async function sincronizarConDrive(programa, residente, mapaRotaciones, checklis
       if (!estados[clave].nota) delete estados[clave].notaUrl;
     });
     guardarEvalDocs(estados);
+    // Requisitos de grado: viven en la carpeta REQUISITOS_GRADO del residente
+    if (VR && String(residente).slice(-(VR.cedula.length + 1)) === '_' + VR.cedula) {
+      const infoReq = data.rotaciones[CARPETA_REQUISITOS_R] || {};
+      VR.requisitos = {};
+      REQUISITOS_GRADO_R.forEach(q => { if (infoReq.requisitos && infoReq.requisitos[q.cod]) VR.requisitos[q.cod] = true; });
+      guardarLocal_(REQ_KEY + VR.cedula, JSON.stringify(VR.requisitos));
+    }
     Object.values(mapaRotaciones).forEach(actualizarUIEval);
     actualizarResumenEval(Object.values(mapaRotaciones));
     if(checklistItems) renderChecklistResidente(checklistItems);
@@ -1851,7 +1883,8 @@ async function subirArchivo(inputEl, clave, tipoDocumento, programa, residente, 
         rotacion: rotacion,
         nombreRotacion: nombreRotacion,
         tipoDocumento: tipoDocumento,
-        reemplazar: !!reemplaza
+        reemplazar: !!reemplaza,
+        cargadoPor: modo === 'coord' ? 'coordinacion' : 'residente'
       })
     });
 
@@ -1997,7 +2030,8 @@ function renderCrono(cedula) {
   const semsDatos = [...new Set(filas.map(f => f.sem))];
   const hoySem = semDeAbsR_(hoyAbsR_());
   VR = { cedula, nombre, prog, nivel, filas, clavesEval, mapaRotaciones, checklistItems, perfil: null,
-    semSel: semsDatos.includes(hoySem) ? hoySem : semsDatos[semsDatos.length - 1], listaNotasAbierta: false, cumpleCerrado: false, confetiCumple: false };
+    semSel: semsDatos.includes(hoySem) ? hoySem : semsDatos[semsDatos.length - 1], listaNotasAbierta: false, cumpleCerrado: false, confetiCumple: false,
+    requisitos: leerRequisitosLocalR_(cedula), reqSubiendo: {}, reqMsg: {} };
   VR.novedades = (modo === 'residente') ? calcularNovedadesR_(cedula, mis) : null;
 
   document.getElementById('crono-contenido').innerHTML = `
@@ -2012,6 +2046,7 @@ function renderCrono(cedula) {
         <span class="buho-chico" id="vr-buho-chico"></span>
       </div>
       <div class="vr-progreso" id="vr-progreso"></div>
+      <div id="vr-requisitos"></div>
     </div>
     <div id="vr-novedades"></div>
     <div class="vr-card" id="vr-tareas"></div>
@@ -2036,7 +2071,7 @@ function renderCrono(cedula) {
     </div>
     <details class="vr-tips"><summary><span>💡 Antes de subir tus notas (2 recordatorios)</span><span class="flecha">▶</span></summary>
       <div style="margin:0 12px 10px;padding:11px 14px;background:var(--az-suave);border:1px solid var(--az-claro);border-radius:10px;font-size:12px;color:var(--az);line-height:1.6">
-        <strong>ℹ Nota sobre cargue de notas:</strong> Los campos de rotación en <strong>HPTU</strong>, <strong>HGM</strong> y <strong>SOMA</strong> entregan las notas directamente a la coordinación. Si tu rotación fue en alguno de estos, no debes cargarla aquí.
+        <strong>ℹ Nota sobre cargue de notas:</strong> Los campos de rotación en <strong>HPTU</strong>, <strong>HGM</strong> y <strong>SOMA</strong> entregan las notas directamente a la coordinación, y coordinación las sube por ti. Si la tienes en tus manos, también puedes subirla tú: todas las notas cuentan para tu grado.
       </div>
       <div class="aviso-multihoja">💡 <strong>¿Tu nota tiene varias hojas?</strong> Al presionar el botón "Nota" puedes seleccionar varias fotos a la vez (una por hoja): el sistema las combina automáticamente en un solo PDF antes de subirlas.</div>
     </details>
@@ -2097,7 +2132,7 @@ function semestresProgramaR_(plan) {
 
 function repintarVistaResidente_() {
   if (!VR || !document.getElementById('vr-progreso')) return;
-  pintarSaludoR_(); pintarNovedadesR_(); pintarProgresoR_(); pintarTareasR_(); pintarContadoresR_(); pintarMesesR_();
+  pintarSaludoR_(); pintarNovedadesR_(); pintarProgresoR_(); pintarRequisitosR_(); pintarTareasR_(); pintarContadoresR_(); pintarMesesR_();
 }
 
 function pintarProgresoR_() {
@@ -2126,6 +2161,123 @@ function pintarProgresoR_() {
     ${plan.exacto ? '' : '<div style="font-size:11px;color:var(--sec);margin-top:4px">Avance aproximado con las rotaciones cargadas.</div>'}`;
 }
 
+// ============================================================
+// REQUISITOS DE GRADO — Catedra CES, Derechos de autor, Zotero y todas las notas.
+// Los certificados se guardan en Drive en la carpeta REQUISITOS_GRADO de cada residente.
+// Queda en verde apenas el archivo se sube (sin revision previa).
+// ============================================================
+const REQUISITOS_GRADO_R = [
+  { cod: 'CATEDRA_CES', nombre: 'C\u00e1tedra CES' },
+  { cod: 'DERECHOS_AUTOR', nombre: 'Curso derechos de autor' },
+  { cod: 'ZOTERO', nombre: 'Curso Zotero' }
+];
+const CARPETA_REQUISITOS_R = 'REQUISITOS_GRADO';
+const REQ_KEY = 'ces_req_';
+
+function leerRequisitosLocalR_(cedula) {
+  try { return JSON.parse(leerLocal_(REQ_KEY + cedula) || '{}') || {}; } catch (e) { return {}; }
+}
+
+function estadoRequisitosR_() {
+  const notas = VR.filas.filter(f => f.ev.tipo === 'nota');
+  const notasOk = notas.filter(f => estaCargadaR_(f.ev.claveRot)).length;
+  const certs = REQUISITOS_GRADO_R.map(q => ({ ...q, ok: !!(VR.requisitos || {})[q.cod] }));
+  const notasCumple = notasOk === notas.length;
+  const cumplidos = certs.filter(c => c.ok).length + (notasCumple ? 1 : 0);
+  return { certs, notasTotal: notas.length, notasOk, notasCumple, cumplidos, total: certs.length + 1 };
+}
+
+function pintarRequisitosR_() {
+  const cont = document.getElementById('vr-requisitos');
+  if (!cont || !VR) return;
+  const e = estadoRequisitosR_();
+  const listo = e.cumplidos === e.total;
+  const seg = Array.from({ length: e.total }, (_, k) => `<i class="${k < e.cumplidos ? 'ok' : ''}"></i>`).join('');
+  const chipCert = c => {
+    const sub = VR.reqSubiendo[c.cod];
+    const msg = VR.reqMsg[c.cod];
+    const detalle = msg ? `<small class="${msg.err ? 'err' : ''}">${escR_(msg.txt)}</small>`
+      : `<small>${c.ok ? 'Certificado cargado' : 'Pendiente de subir'}</small>`;
+    const boton = `<label class="vr-req-sub ${sub ? 'ocupado' : ''}" title="${c.ok ? 'Subir otra versi\u00f3n' : 'Subir certificado'}">${sub ? 'Subiendo...' : (c.ok ? 'Cambiar' : '\u2b06 Subir')}
+        <input type="file" accept="image/*,application/pdf" multiple onchange="subirRequisitoR_(this,'${c.cod}')"></label>`;
+    return `<div class="vr-req-it ${c.ok ? 'ok' : 'pend'}"><span class="ic">${c.ok ? '\u2713' : '!'}</span>
+      <span class="tx">${escR_(c.nombre)}${detalle}</span>${boton}</div>`;
+  };
+  const chipNotas = `<div class="vr-req-it ${e.notasCumple ? 'ok' : 'pend'}" style="cursor:pointer" onclick="irANotasR_()" title="Ver tus notas de rotaci\u00f3n">
+      <span class="ic">${e.notasCumple ? '\u2713' : '!'}</span>
+      <span class="tx">Notas de rotaci\u00f3n<small>${e.notasTotal ? e.notasOk + ' de ' + e.notasTotal + ' cargadas' : 'Sin rotaciones que la requieran'}</small></span></div>`;
+  cont.innerHTML = `<div class="vr-req">
+    <div class="vr-req-cab"><b>\ud83c\udf93 Requisitos de grado</b><span class="vr-req-seg">${seg}</span>
+      <span class="vr-req-n">${e.cumplidos} de ${e.total}</span>
+      ${listo ? '<span class="vr-req-sello">\u2705 Listo para grado</span>' : ''}</div>
+    <div class="vr-req-grid">${e.certs.map(chipCert).join('')}${chipNotas}</div>
+    <div class="vr-req-nota">Sube cada certificado en PDF o foto (si tiene varias hojas, selecci\u00f3nalas juntas). Las notas cuentan todas tus rotaciones, incluidas las que entregan HPTU, HGM y SOMA a coordinaci\u00f3n.</div>
+  </div>`;
+}
+
+function irARequisitosR_() {
+  const c = document.getElementById('vr-requisitos');
+  if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function irANotasR_() {
+  const det = document.getElementById('checklist-residente-detalle');
+  if (det && !det.classList.contains('open')) toggleChecklistResidente();
+  const destino = document.getElementById('chk-res-arr');
+  if (destino) destino.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function subirRequisitoR_(inputEl, cod) {
+  const files = Array.from(inputEl.files || []);
+  inputEl.value = '';
+  if (!files.length || !VR) return;
+  const req = REQUISITOS_GRADO_R.find(q => q.cod === cod);
+  const aviso = (txt, err) => { VR.reqMsg[cod] = { txt, err }; pintarRequisitosR_(); };
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf('PEGA_AQUI') !== -1) { aviso('Sistema de cargue no configurado.', true); return; }
+  if (files.length > 1 && !files.every(f => f.type.startsWith('image/'))) {
+    aviso('Varias hojas deben ser todas fotos.', true); return;
+  }
+  const cedula = VR.cedula;
+  VR.reqSubiendo[cod] = true;
+  aviso(files.length > 1 ? 'Combinando ' + files.length + ' hojas...' : 'Enviando...', false);
+  try {
+    const archivo = files.length > 1 ? await combinarImagenesEnPDF(files) : await comprimirImagen(files[0]);
+    const base64 = await archivoABase64(archivo);
+    const resp = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        archivoBase64: base64,
+        nombreArchivo: files.length > 1 ? cod + '.pdf' : (archivo.name || files[0].name),
+        tipoMime: archivo.type || files[0].type || 'application/pdf',
+        programa: VR.prog,
+        residente: VR.nombre + '_' + VR.cedula,
+        tipoDocumento: 'requisito',
+        requisito: cod,
+        rotacion: CARPETA_REQUISITOS_R,
+        nombreRotacion: cod,
+        cargadoPor: modo === 'coord' ? 'coordinacion' : 'residente'
+      })
+    });
+    const data = await resp.json();
+    if (!VR || VR.cedula !== cedula) return;
+    VR.reqSubiendo[cod] = false;
+    if (data.ok) {
+      VR.requisitos[cod] = true;
+      guardarLocal_(REQ_KEY + cedula, JSON.stringify(VR.requisitos));
+      aviso('Certificado cargado', false);
+      toastR_(req.nombre + ' cargado');
+      const caja = document.getElementById('vr-requisitos');
+      if (caja) { const r = caja.getBoundingClientRect(); confetiR_(r.left + r.width / 2, r.top + 20); }
+      setTimeout(() => { if (VR && VR.cedula === cedula) { delete VR.reqMsg[cod]; pintarRequisitosR_(); } }, 4000);
+    } else {
+      aviso('No se pudo guardar: ' + (data.mensaje || 'intenta de nuevo'), true);
+    }
+  } catch (err) {
+    if (VR && VR.cedula === cedula) { VR.reqSubiendo[cod] = false; aviso('Sin conexi\u00f3n. Intenta de nuevo.', true); }
+  }
+}
+
 function pintarTareasR_() {
   const cont = document.getElementById('vr-tareas');
   const hoy = hoyAbsR_();
@@ -2137,11 +2289,15 @@ function pintarTareasR_() {
   });
   VR.filas.filter(f => f.est === 'Negado' && (f.abs === null || f.abs >= hoy)).forEach(f =>
     tareas.push({ info: true, txt: `${f.mes}: estamos reasignando tu campo`, sub: `${f.camp} fue negado · no tienes que hacer nada, te avisaremos`, i: f.i }));
+  const faltanCert = REQUISITOS_GRADO_R.filter(q => !(VR.requisitos || {})[q.cod]);
+  const planReq = planResidenciaR_();
+  if (faltanCert.length && planReq && planReq.fin - hoy <= 12)
+    tareas.push({ info: true, req: true, txt: 'Sube tus certificados de grado', sub: 'Faltan: ' + faltanCert.map(q => q.nombre).join(', ') });
   const actual = VR.filas.find(f => f.abs === hoy);
   const prox = VR.filas.find(f => f.abs !== null && f.abs > hoy && f.camp !== 'VACACIONES' && (!actual || f.camp !== actual.camp || f.rot !== actual.rot));
   if (prox) tareas.push({ info: true, txt: `Prepárate: en ${prox.mes} empiezas en ${prox.camp}`, sub: prox.rot + (prox.obs ? ' · ' + prox.obs : ''), i: prox.i });
   cont.innerHTML = '<h3 style="margin-bottom:6px">✅ Tus tareas de hoy</h3>' + (tareas.length ? tareas.map(t =>
-    `<button class="vr-tarea ${t.hecha ? 'hecha' : ''}" onclick="abrirHojaVR([${t.i}])"><span class="caja" style="${t.info ? 'border-color:var(--az-claro);color:var(--az)' : ''}">${t.hecha ? '✓' : t.info ? 'i' : ''}</span><span class="txt">${escR_(t.txt)}<small>${escR_(t.sub)}</small></span></button>`).join('')
+    `<button class="vr-tarea ${t.hecha ? 'hecha' : ''}" onclick="${t.req ? 'irARequisitosR_()' : 'abrirHojaVR([' + t.i + '])'}"><span class="caja" style="${t.info ? 'border-color:var(--az-claro);color:var(--az)' : ''}">${t.hecha ? '✓' : t.info ? 'i' : ''}</span><span class="txt">${escR_(t.txt)}<small>${escR_(t.sub)}</small></span></button>`).join('')
     : '<div style="font-size:13px;color:var(--teal);padding:6px">🎉 ¡Estás al día! No tienes tareas pendientes.</div>');
 }
 
@@ -2254,14 +2410,14 @@ function abrirHojaVR(indices) {
       else if (f.ev.tipo === 'antes') evalHtml = `<span class="dash-cell">— (rotación anterior a ${SEMESTRE_CORTE_NOTAS}, no aplica en el sistema)</span>`;
       else if (f.ev.tipo === 'consolidada') evalHtml = `<div class="nota-consolidada">ℹ️ Nota consolidada en <strong>${escR_(f.ev.destino)}</strong>. No debes cargar nada en este mes.</div>`;
       else if (estaCargadaR_(f.ev.claveRot)) {
-        const enlace = enlaceNotaR_(f.ev.claveRot);
         evalHtml = `<div class="nota-ok"><span class="ic">✅</span>
             <span class="t">Nota cargada<small>${escR_(f.camp)} · ${escR_(f.mes)} ${escR_(f.sem)}</small></span></div>
           <div class="acc-notas">
-            ${enlace ? `<a class="btn-ch" href="${escR_(enlace)}" target="_blank" rel="noopener">👁 Ver lo que subí</a>` : ''}
             <label class="btn-ch">📎 Subir otra
               <input type="file" accept=".pdf,image/*" multiple onchange="subirArchivo(this,${f.ev.args},true)">
             </label>
+            <button class="btn-ch" onclick="abrirNotaR_('${f.ev.claveRot}',false,this)">👁 Ver mi nota</button>
+            <button class="btn-ch" onclick="abrirNotaR_('${f.ev.claveRot}',true,this)">⬇ Descargar</button>
           </div>
           <p class="hint-nota">¿Te faltó una hoja o la foto salió movida? Sube otra sin problema: se guardan todas y coordinación toma la más reciente.</p>
           <div class="eval-status" id="status-${f.ev.claveRot}"></div>`;
@@ -2292,8 +2448,46 @@ function refrescarHojaVR_() {
   if (VR && VR.hojaAbierta && document.getElementById('vr-velo').classList.contains('on')) abrirHojaVR(VR.hojaAbierta);
 }
 
-// Enlace del archivo en Drive, si el backend lo devuelve
-const enlaceNotaR_ = clave => ((leerEvalDocs()[clave] || {}).notaUrl) || '';
+// Ver o descargar la nota mas reciente (la haya subido el residente o coordinacion).
+// El archivo sigue privado en Drive: el puente lo entrega directamente al portal.
+async function abrirNotaR_(clave, descargar, btn) {
+  if (!VR) return;
+  const f = VR.filas.find(x => x.ev.tipo === 'nota' && x.ev.claveRot === clave);
+  if (!f) return;
+  const status = document.getElementById('status-' + clave);
+  const txtOriginal = btn ? btn.textContent : '';
+  // En "Ver" se abre la pestaña de una vez para que el navegador no la bloquee
+  const ventana = descargar ? null : window.open('', '_blank');
+  if (ventana) ventana.document.write('<p style="font-family:sans-serif;color:#1F4E79;padding:20px">Abriendo tu nota...</p>');
+  if (btn) { btn.disabled = true; btn.textContent = 'Abriendo...'; }
+  try {
+    const url = APPS_SCRIPT_URL + '?accion=archivo&programa=' + encodeURIComponent(VR.prog) +
+      '&residente=' + encodeURIComponent(VR.nombre + '_' + VR.cedula) +
+      '&rotacion=' + encodeURIComponent(claveCarpetaRotacion(f.camp, f.mes, f.sem));
+    const data = await (await fetch(url)).json();
+    if (!data.ok) throw new Error(data.mensaje || 'No se encontró la nota');
+    const bytes = Uint8Array.from(atob(data.base64), c => c.charCodeAt(0));
+    const blobUrl = URL.createObjectURL(new Blob([bytes], { type: data.mime || 'application/pdf' }));
+    if (descargar) {
+      const ext = (String(data.nombre || '').match(/\.[0-9a-zA-Z]+$/) || ['.pdf'])[0];
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = ('Nota_' + f.rot + '_' + f.mes + '_' + f.sem).replace(/[^\w\-]+/g, '_') + ext;
+      document.body.appendChild(a); a.click(); a.remove();
+    } else if (ventana) {
+      ventana.location.href = blobUrl;
+    } else {
+      window.location.href = blobUrl;
+    }
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    if (status) { status.textContent = ''; status.className = 'eval-status'; }
+  } catch (e) {
+    if (ventana) ventana.close();
+    if (status) { status.textContent = 'No se pudo abrir la nota. Intenta de nuevo en unos segundos.'; status.className = 'eval-status err'; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = txtOriginal; }
+  }
+}
 
 function cerrarHojaVR() { const v = document.getElementById('vr-velo'); if (v) v.classList.remove('on'); }
 
