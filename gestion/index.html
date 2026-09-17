@@ -454,7 +454,23 @@
   .nt-pend { background:var(--pendiente-bg); color:var(--pendiente-tx); }
   .nt-prox { background:#eef1f5; color:#667; }
   .nt-coord { background:var(--confirmado-bg); color:var(--confirmado-tx); }
-  .nt-detalle { display:none; background:#fafbfc; border-bottom:1px solid #e3e8ee; padding:12px 16px 16px; }
+  .nt-prog { display:flex; align-items:center; gap:10px; padding:10px 12px; background:#f4f6f8; border-radius:8px; margin-top:6px; cursor:pointer; font-size:13px; }
+  .nt-prog:hover, .nt-prog.abierto { background:#eef4fa; }
+  .nt-prog .tit { flex:1; min-width:0; font-weight:700; color:var(--azul-ces); }
+  .nt-prog .met { font-size:12px; color:#666; white-space:nowrap; }
+  .nt-barra { width:90px; height:6px; border-radius:3px; background:#e2e7ec; overflow:hidden; flex-shrink:0; }
+  .nt-barra i { display:block; height:100%; background:var(--gestionado-tx); }
+  .nt-flecha { color:#999; width:12px; flex-shrink:0; }
+  .nt-res { display:flex; align-items:center; gap:10px; padding:8px 12px 8px 30px; border-bottom:1px solid #eee; cursor:pointer; font-size:13px; }
+  .nt-res:hover, .nt-res.abierto { background:#f7f9fb; }
+  .nt-res .nom { flex:1; min-width:0; }
+  .nt-res .nom small { color:#888; font-size:11.5px; margin-left:6px; }
+  .nt-seg { display:flex; gap:3px; flex-shrink:0; }
+  .nt-seg i { width:14px; height:6px; border-radius:3px; background:#e2e7ec; }
+  .nt-seg i.v { background:var(--gestionado-tx); }
+  .nt-falta { background:#FFF6E0; border:1px solid var(--pendiente-bg); border-radius:8px; padding:8px 12px; color:var(--pendiente-tx); font-size:12.5px; line-height:1.5; }
+  .nt-falta.listo { background:#EAF6EC; border-color:var(--gestionado-bg); color:var(--gestionado-tx); }
+  .nt-detalle { display:none; background:#fafbfc; border:1px solid #e3e8ee; border-radius:8px; margin:0 0 8px 30px; padding:10px 14px 14px; }
   .nt-detalle.abierto { display:block; }
   .nt-detalle h4 { margin:10px 0 6px; font-size:13px; color:var(--azul-ces); }
   .nt-detalle table { width:100%; border-collapse:collapse; font-size:12.5px; background:white; }
@@ -467,7 +483,7 @@
   .nt-accion { margin-left:4px; font-family:inherit; }
   .nt-msg { font-size:11.5px; margin-left:6px; }
   .nt-msg.err { color:var(--cambio-tx); } .nt-msg.ok { color:var(--gestionado-tx); }
-  @media (max-width:900px) { .nt-cols { grid-template-columns:1fr; } .nt-cab { display:none; } .nt-fila > span:last-child { display:none; } }
+  @media (max-width:900px) { .nt-prog { flex-wrap:wrap; } .nt-res { flex-wrap:wrap; padding-left:14px; } .nt-detalle { margin-left:0; } }
 </style>
 </head>
 <body>
@@ -826,7 +842,6 @@
         <div><label>Programa</label><select id="nt-filtro-programa" onchange="pintarNotasGrado()" style="padding:8px; border:1px solid #ccc; border-radius:5px; min-width:200px;"><option value="">Todos</option></select></div>
         <div style="align-self:flex-end;"><button class="btn-secundario" onclick="limpiarFiltrosNotas()">🧹 Limpiar</button></div>
       </div>
-      <div class="nt-cols nt-cab"><span>Residente</span><span>Programa</span><span>Grado probable</span><span>Requisitos</span><span></span></div>
       <div id="nt-lista"><div style="text-align:center; color:#888; padding:20px;">⏳ Cargando...</div></div>
     </div>
 
@@ -1976,7 +1991,7 @@ const REQUISITOS_GRADO_G = [
 ];
 const MESES_NUM_G = { ENERO: 1, FEBRERO: 2, MARZO: 3, ABRIL: 4, MAYO: 5, JUNIO: 6, JULIO: 7, AGOSTO: 8, SEPTIEMBRE: 9, OCTUBRE: 10, NOVIEMBRE: 11, DICIEMBRE: 12 };
 
-const NT = { filasCsv: null, drive: null, cargando: null, lista: [], filtroKpi: 'pendientes', abiertos: {}, meta: {}, subiendo: {}, msg: {} };
+const NT = { filasCsv: null, drive: null, cargando: null, lista: [], filtroKpi: 'pendientes', abiertos: {}, progAbiertos: {}, meta: {}, subiendo: {}, msg: {} };
 
 // Debe coincidir con saneaTexto() del portal y sanear() del puente
 function saneaG_(t) { return String(t).trim().replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, '_'); }
@@ -2167,28 +2182,64 @@ function pintarNotasGrado() {
   else if (NT.filtroKpi === 'pendientes') lista = base.filter(g => !g.listo);
   else if (NT.filtroKpi === 'notas') lista = base.filter(g => g.notasVencidas);
   else if (NT.filtroKpi === 'certs') lista = base.filter(g => g.certPend);
-  lista = lista.slice().sort((a, b) => (b.notasVencidas + b.certPend) - (a.notasVencidas + a.certPend) || a.nombre.localeCompare(b.nombre, 'es'));
-
   const cont = document.getElementById('nt-lista');
   if (!lista.length) { cont.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">Sin residentes con estos filtros.</div>'; return; }
+
+  // Desplegables por especialidad, en orden alfabético; dentro, residentes en orden alfabético
+  const grupos = {};
+  lista.forEach(g => { (grupos[g.prog || 'SIN PROGRAMA'] = grupos[g.prog || 'SIN PROGRAMA'] || []).push(g); });
+  const hayBusqueda = !!texto;
   NT.meta = {};
-  cont.innerHTML = lista.map(filaNotasGrado_).join('');
+  cont.innerHTML = Object.keys(grupos).sort((a, b) => a.localeCompare(b, 'es')).map(prog => {
+    const res = grupos[prog].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+    const abierto = hayBusqueda || !!NT.progAbiertos[prog];
+    const listos = res.filter(g => g.listo).length;
+    const vencidas = res.reduce((a, g) => a + g.notasVencidas, 0);
+    const pct = Math.round(listos / res.length * 100);
+    const progEsc = esc(prog).replace(/'/g, "\\'");
+    return `<div class="nt-prog ${abierto ? 'abierto' : ''}" onclick="alternarProgNotas('${progEsc}')">
+        <span class="nt-flecha">${abierto ? '▼' : '▶'}</span>
+        <span class="tit">${esc(prog)}</span>
+        <span class="met">${res.length} residente${res.length === 1 ? '' : 's'} · ${listos} listo${listos === 1 ? '' : 's'} · ${vencidas} nota${vencidas === 1 ? '' : 's'} vencida${vencidas === 1 ? '' : 's'}</span>
+        <span class="nt-barra" title="${pct}% listos para grado"><i style="width:${pct}%"></i></span>
+      </div>
+      ${abierto ? res.map(filaNotasGrado_).join('') : ''}`;
+  }).join('');
+}
+
+function alternarProgNotas(prog) {
+  NT.progAbiertos[prog] = !NT.progAbiertos[prog];
+  pintarNotasGrado();
 }
 
 function filaNotasGrado_(g) {
   const abierto = !!NT.abiertos[g.id];
-  const chips = g.listo
-    ? '<span class="nt-chip nt-ok">✅ Listo para grado</span>'
-    : g.certs.map(c => `<span class="nt-chip ${c.ok ? 'nt-ok' : 'nt-pend'}">${c.ok ? '✓' : '!'} ${esc(c.corto)}</span>`).join('') +
-      `<span class="nt-chip ${g.notasOk === g.rots.length ? 'nt-ok' : 'nt-pend'}">Notas ${g.notasOk}/${g.rots.length}</span>`;
-  return `<div class="nt-cols nt-fila" onclick="alternarNotasResidente('${esc(g.id)}')">
-      <span class="nom"><b>${esc(g.nombre)}</b><small>${esc(g.id)}</small></span>
-      <span>${esc(g.prog)}</span>
-      <span>${textoGradoG_(g.grado)}</span>
-      <span>${chips}</span>
-      <span style="color:#999;">${abierto ? '▼' : '▶'}</span>
+  const cumplidos = g.certs.filter(c => c.ok).length + (g.notasOk === g.rots.length ? 1 : 0);
+  const seg = [0, 1, 2, 3].map(k => `<i class="${k < cumplidos ? 'v' : ''}"></i>`).join('');
+  const ind = g.listo
+    ? '<span class="nt-chip nt-ok">4/4 · Listo para grado</span>'
+    : `<span class="nt-chip nt-pend">${cumplidos}/4 requisitos</span>`;
+  const gid = esc(g.id).replace(/'/g, "\\'");
+  return `<div class="nt-res ${abierto ? 'abierto' : ''}" onclick="alternarNotasResidente('${gid}')">
+      <span class="nt-flecha">${abierto ? '▼' : '▶'}</span>
+      <span class="nom"><b>${esc(g.nombre)}</b><small>${esc(g.id)}${g.grado ? ' · grado ' + textoGradoG_(g.grado) : ''}</small></span>
+      <span class="nt-seg">${seg}</span>${ind}
     </div>
-    <div class="nt-detalle ${abierto ? 'abierto' : ''}" id="nt-det-${esc(g.id)}">${abierto ? detalleNotasGrado_(g) : ''}</div>`;
+    ${abierto ? `<div class="nt-detalle abierto">${resumenFaltaNt_(g)}${detalleNotasGrado_(g)}</div>` : ''}`;
+}
+
+function resumenFaltaNt_(g) {
+  if (g.listo) return '<div class="nt-falta listo"><b>Completo:</b> tiene los cuatro requisitos de grado.</div>';
+  const partes = g.certs.filter(c => !c.ok).map(c => esc(c.nombre));
+  const venc = g.rots.filter(x => !x.nota && !x.futura);
+  if (venc.length) {
+    const lista = venc.slice(0, 4).map(x => esc(x.mes + ' ' + x.camp)).join(', ');
+    partes.push(`${venc.length} nota${venc.length === 1 ? '' : 's'} vencida${venc.length === 1 ? '' : 's'} (${lista}${venc.length > 4 ? ' y ' + (venc.length - 4) + ' más' : ''})`);
+  }
+  const prox = g.rots.filter(x => !x.nota && x.futura).length;
+  let txt = partes.length ? '<b>Le falta:</b> ' + partes.join(' · ') : '<b>Al día:</b> no tiene nada vencido.';
+  if (prox) txt += `<br><span style="color:#667;">Además, ${prox} nota${prox === 1 ? '' : 's'} de rotaciones próximas.</span>`;
+  return `<div class="nt-falta">${txt}</div>`;
 }
 
 function alternarNotasResidente(id) {
