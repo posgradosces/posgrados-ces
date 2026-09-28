@@ -2162,13 +2162,14 @@ function pintarProgresoR_() {
 }
 
 // ============================================================
-// REQUISITOS DE GRADO — Catedra CES, Derechos de autor y todas las notas.
+// REQUISITOS DE GRADO — Catedra CES, Derechos de autor, Trabajo de grado (carta de cumplimiento) y todas las notas.
 // Los certificados se guardan en Drive en la carpeta REQUISITOS_GRADO de cada residente.
 // Queda en verde apenas el archivo se sube (sin revision previa).
 // ============================================================
 const REQUISITOS_GRADO_R = [
   { cod: 'CATEDRA_CES', nombre: 'C\u00e1tedra CES' },
-  { cod: 'DERECHOS_AUTOR', nombre: 'Curso derechos de autor' }
+  { cod: 'DERECHOS_AUTOR', nombre: 'Curso derechos de autor' },
+  { cod: 'TRABAJO_GRADO', nombre: 'Trabajo de grado', ayudaPend: 'Anexa aqu\u00ed la carta que indica que cumpliste el requisito de trabajo de grado (si aplica)', ayudaOk: 'Carta de cumplimiento cargada' }
 ];
 const CARPETA_REQUISITOS_R = 'REQUISITOS_GRADO';
 const REQ_KEY = 'ces_req_';
@@ -2196,7 +2197,7 @@ function pintarRequisitosR_() {
     const sub = VR.reqSubiendo[c.cod];
     const msg = VR.reqMsg[c.cod];
     const detalle = msg ? `<small class="${msg.err ? 'err' : ''}">${escR_(msg.txt)}</small>`
-      : `<small>${c.ok ? 'Certificado cargado' : 'Pendiente de subir'}</small>`;
+      : `<small>${c.ok ? (c.ayudaOk || 'Certificado cargado') : (c.ayudaPend || 'Pendiente de subir')}</small>`;
     const boton = `<label class="vr-req-sub ${sub ? 'ocupado' : ''}" title="${c.ok ? 'Subir otra versi\u00f3n' : 'Subir certificado'}">${sub ? 'Subiendo...' : (c.ok ? 'Cambiar' : '\u2b06 Subir')}
         <input type="file" accept="image/*,application/pdf" multiple onchange="subirRequisitoR_(this,'${c.cod}')"></label>`;
     return `<div class="vr-req-it ${c.ok ? 'ok' : 'pend'}"><span class="ic">${c.ok ? '\u2713' : '!'}</span>
