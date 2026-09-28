@@ -542,8 +542,17 @@
           <input id="cg-programa" autocomplete="off" placeholder="Escribe para buscar..." oninput="mostrarSugerenciasPrograma()" onfocus="mostrarSugerenciasPrograma()">
           <div id="sugerencias-programa" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #ccc; border-radius:0 0 6px 6px; max-height:220px; overflow-y:auto; z-index:50; box-shadow:0 4px 10px rgba(0,0,0,0.1);"></div>
         </div>
-        <div style="position:relative;"><label>Año académico (inicio, ej: 2027)</label><input id="cg-periodo" autocomplete="off" placeholder="2027" oninput="mostrarSugerencias('cg-periodo')" onfocus="mostrarSugerencias('cg-periodo')"><div id="sug-cg-periodo" class="caja-sugerencias"></div></div>
-        <div><label>Hasta (opcional, para ver varios años)</label><input id="cg-periodo-hasta" autocomplete="off" placeholder="ej: 2028"></div>
+        <div style="position:relative;">
+          <label>Año académico (inicio, ej: 2027)</label>
+          <input id="cg-periodo" autocomplete="off" placeholder="2027" oninput="mostrarSugerencias('cg-periodo'); mostrarHintSemestre('cg-periodo','hint-cg-periodo')" onfocus="mostrarSugerencias('cg-periodo')">
+          <div id="sug-cg-periodo" class="caja-sugerencias"></div>
+          <div id="hint-cg-periodo" style="font-size:10px; color:#888; font-style:italic; margin-top:2px;"></div>
+        </div>
+        <div>
+          <label>Hasta (opcional, para ver varios años)</label>
+          <input id="cg-periodo-hasta" autocomplete="off" placeholder="ej: 2028" oninput="mostrarHintSemestre('cg-periodo-hasta','hint-cg-periodo-hasta')">
+          <div id="hint-cg-periodo-hasta" style="font-size:10px; color:#888; font-style:italic; margin-top:2px;"></div>
+        </div>
         <div><button class="btn-primario" id="boton-cargar-cuadricula" onclick="cargarCuadricula()" title="Carga la cuadrícula de este programa y año académico">Cargar cuadrícula</button></div>
       </div>
       <div class="acciones-cuadricula">
@@ -3621,6 +3630,15 @@ const CAMPOS_MULTI = new Set([
 ]);
 let seleccionesMulti = {};
 CAMPOS_MULTI.forEach(id => { seleccionesMulti[id] = []; });
+
+// Un año de inicio solo ("2027") es fácil de confundir con el año siguiente. Este hint traduce
+// en vivo, mientras se escribe, a los dos semestres que realmente cubre ese año académico.
+function mostrarHintSemestre(idInput, idHint) {
+  const el = document.getElementById(idInput), hint = document.getElementById(idHint);
+  if (!el || !hint) return;
+  const anio = parseInt(el.value, 10);
+  hint.textContent = (anio && anio > 2000 && anio < 2100) ? ('↳ ' + anio + '-2, ' + (anio + 1) + '-1') : '';
+}
 
 function mostrarSugerencias(idInput) {
   const input = document.getElementById(idInput);
