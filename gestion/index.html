@@ -4987,12 +4987,44 @@ async function procesarArchivoExcel(evento) {
     return;
   }
 
-  mostrarMensaje('Subiendo ' + filasParaEnviar.length + ' residentes de "' + programa + '"...', 'ok');
-
-  const resultado = await llamarBackend('importarCuadro', { programa, anioInicio, filas: filasParaEnviar });
   evento.target.value = '';
 
-  if (!resultado.ok) { mostrarMensaje('Error: ' + resultado.error, 'error'); return; }
+  // Antes de escribir nada: se revisa cada "Campo de rotación" del archivo contra el catálogo de
+  // centros. Lo exacto pasa directo; lo parecido o desconocido necesita que la coordinadora lo
+  // confirme en la pantalla de revisión — el import nunca inventa ni crea un centro solo.
+  mostrarMensaje('Revisando centros de práctica contra el catálogo...', 'ok');
+  await cargarCentros();
+  const analisis = await llamarBackend('analizarCentrosImportacion', { programa, anioInicio, filas: filasParaEnviar });
+  if (!analisis.ok) { mostrarMensaje('Error: ' + analisis.error, 'error'); return; }
+
+  if (analisis.listoParaImportar) {
+    await ejecutarImportacionFinal(programa, anioInicio, filasParaEnviar, {});
+    return;
+  }
+  abrirRevisionImportacion(programa, anioInicio, filasParaEnviar, analisis);
+}
+
+// Hace la escritura real (llama importarCuadro). Se usa tanto cuando el archivo ya viene limpio
+// (todo exacto) como después de que la coordinadora confirma la pantalla de revisión de centros.
+async function ejecutarImportacionFinal(programa, anioInicio, filas, resolucionCentros) {
+  mostrarMensaje('Subiendo ' + filas.length + ' residentes de "' + programa + '"...', 'ok');
+
+  const resultado = await llamarBackend('importarCuadro', { programa, anioInicio, filas, resolucionCentros });
+
+  if (!resultado.ok) {
+    // Si igual faltó algo por resolver (por ejemplo, la coordinadora cerró la revisión sin
+    // terminar), se reabre la pantalla en vez de perder el archivo ya leído.
+    if (resultado.pendientes) {
+      mostrarMensaje('Todavía hay centros de práctica sin confirmar.', 'error');
+      abrirRevisionImportacion(programa, anioInicio, filas, {
+        ok: true, listoParaImportar: false, exactos: {},
+        sugeridos: resultado.sugeridos || [], noReconocidos: resultado.noReconocidos || []
+      }, resolucionCentros);
+      return;
+    }
+    mostrarMensaje('Error: ' + resultado.error, 'error');
+    return;
+  }
 
   let mensaje = 'Importado: ' + resultado.importadas + ' celdas nuevas para "' + programa + '".';
   if (resultado.residentes) {
@@ -5010,6 +5042,112 @@ async function procesarArchivoExcel(evento) {
     cargarCuadricula();
   }
   cargarCola();
+}
+
+// ============================================================
+// REVISIÓN DE CENTROS AL IMPORTAR — pantalla de aval antes de escribir
+// ------------------------------------------------------------
+// Lo EXACTO ya pasó automático (no aparece aquí). Lo que queda son "sugeridos" (se parece a un
+// centro del catálogo, con % de similitud) y "no reconocidos" (no se parece a nada). Cada fila
+// tiene un desplegable con el catálogo completo — para lo sugerido viene preseleccionado, para
+// lo no reconocido empieza vacío — y la opción de crear el centro si de verdad es nuevo.
+// ============================================================
+let revisionImportEstado = null;
+
+function opcionesCentrosSelect(seleccionId) {
+  const opts = ['<option value="">— elegir centro —</option>'];
+  if (cacheNoCentros && cacheNoCentros.length) {
+    opts.push('<optgroup label="No es un centro de práctica">');
+    cacheNoCentros.filter(c => c.sigla).forEach(c => {
+      opts.push(`<option value="${esc(c.id)}" ${c.id === seleccionId ? 'selected' : ''}>${esc(c.sigla)} — ${esc(c.nombre)}</option>`);
+    });
+    opts.push('</optgroup>');
+  }
+  opts.push('<optgroup label="Catálogo de centros">');
+  centrosOrdenados().filter(c => c.activo !== false).forEach(c => {
+    opts.push(`<option value="${esc(c.id)}" ${c.id === seleccionId ? 'selected' : ''}>${esc(c.sigla)} — ${esc(c.nombre)}</option>`);
+  });
+  opts.push('</optgroup>');
+  opts.push(`<option value="__crear__">+ Crear centro nuevo…</option>`);
+  return opts.join('');
+}
+
+function filaRevisionImport(item, tipo) {
+  const seleccionActual = revisionImportEstado.resolucion[item.clave] || (tipo === 'sugerido' ? item.centroSugeridoId : '');
+  if (tipo === 'sugerido' && !revisionImportEstado.resolucion[item.clave]) {
+    revisionImportEstado.resolucion[item.clave] = item.centroSugeridoId;
+  }
+  return `
+    <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #eee;">
+      <div style="flex:1; min-width:0;">
+        <div style="font-size:13px; font-weight:600;">"${esc(item.texto)}"</div>
+        <div style="font-size:11px; color:#888;">
+          aparece ${item.apariciones} vez${item.apariciones === 1 ? '' : 'es'} en el archivo
+          ${tipo === 'sugerido' ? ' · se parece ' + item.similitud + '% a <b>' + esc(item.centroSugeridoTexto) + '</b>' : ' · no se parece a nada del catálogo'}
+        </div>
+      </div>
+      <select style="width:230px; padding:6px; border:1px solid #ccc; border-radius:4px; font-size:12px;"
+              onchange="cambiarResolucionImport('${item.clave}', this.value)">
+        ${opcionesCentrosSelect(seleccionActual)}
+      </select>
+    </div>`;
+}
+
+function abrirRevisionImportacion(programa, anioInicio, filas, analisis, resolucionPrevia) {
+  revisionImportEstado = {
+    programa, anioInicio, filas,
+    sugeridos: analisis.sugeridos || [],
+    noReconocidos: analisis.noReconocidos || [],
+    resolucion: Object.assign({}, resolucionPrevia || {})
+  };
+  pintarRevisionImportacion();
+  document.getElementById('overlay-modal').style.display = 'flex';
+}
+
+function pintarRevisionImportacion() {
+  const e = revisionImportEstado;
+  const html = `
+    <h3>🗂️ Antes de importar: revisa los centros de práctica</h3>
+    <p style="font-size:12px; color:#888;">
+      "${esc(e.programa)}" — ${e.filas.length} residente(s). Lo que ya coincidía exacto con el catálogo ya quedó listo
+      y no aparece aquí. Confirma o corrige lo de abajo; solo se importa cuando todo quede resuelto.
+    </p>
+    ${e.sugeridos.length > 0 ? `
+      <div style="margin-top:10px;">
+        <div style="font-size:12px; font-weight:600; color:#823C00;">🟠 Se parecen a un centro conocido — confirma o corrige (${e.sugeridos.length})</div>
+        ${e.sugeridos.map(item => filaRevisionImport(item, 'sugerido')).join('')}
+      </div>` : ''}
+    ${e.noReconocidos.length > 0 ? `
+      <div style="margin-top:14px;">
+        <div style="font-size:12px; font-weight:600; color:#9C0006;">🔴 No se reconocen — elige el centro o crea uno nuevo (${e.noReconocidos.length})</div>
+        ${e.noReconocidos.map(item => filaRevisionImport(item, 'no_reconocido')).join('')}
+      </div>` : ''}
+    <div class="fila-botones" style="margin-top:16px;">
+      <button class="btn-secundario" onclick="cerrarModal()">Cancelar, no importar</button>
+      <button class="btn-primario" onclick="confirmarImportacionRevision()">Importar con esta resolución</button>
+    </div>`;
+  document.getElementById('contenido-modal').innerHTML = html;
+}
+
+function cambiarResolucionImport(clave, valor) {
+  if (valor === '__crear__') {
+    abrirEditorCentro(null, 'imp:' + clave);
+    return;
+  }
+  if (valor) revisionImportEstado.resolucion[clave] = valor;
+  else delete revisionImportEstado.resolucion[clave];
+}
+
+async function confirmarImportacionRevision() {
+  const e = revisionImportEstado;
+  const pendientes = e.sugeridos.concat(e.noReconocidos).filter(item => !e.resolucion[item.clave]);
+  if (pendientes.length > 0) {
+    mostrarMensaje('Faltan ' + pendientes.length + ' centro(s) por confirmar antes de importar.', 'error');
+    return;
+  }
+  cerrarModal();
+  await ejecutarImportacionFinal(e.programa, e.anioInicio, e.filas, e.resolucion);
+  revisionImportEstado = null;
 }
 
 // ============================================================
@@ -7382,8 +7520,17 @@ async function guardarEditorCentro(id) {
   const desde = centroEditandoDesde;
   cerrarEditorCentro();
   mostrarMensaje(id ? 'Centro actualizado.' : 'Centro creado.', 'ok');
-  // Si se creó desde una celda, queda marcado de una vez en el selector que lo pidió.
-  if (desde && !id && selCentrosEstado[desde]) {
+  // Si se creó desde una celda del cuadro (selector de chips), queda marcado de una vez ahí.
+  if (desde && desde.startsWith('imp:')) {
+    // Se creó desde la pantalla de revisión de una importación: resuelve esa fila con el centro
+    // recién creado y vuelve a mostrar la revisión (que seguía abierta detrás del editor).
+    const clave = desde.slice(4);
+    if (revisionImportEstado && !id) revisionImportEstado.resolucion[clave] = res.id;
+    if (revisionImportEstado) {
+      pintarRevisionImportacion();
+      document.getElementById('overlay-modal').style.display = 'flex';
+    }
+  } else if (desde && !id && selCentrosEstado[desde]) {
     selCentrosEstado[desde].ids.push(res.id);
     selCentrosEstado[desde].filtro = '';
     const q = document.getElementById(desde + '-q');
