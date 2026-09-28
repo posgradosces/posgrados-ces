@@ -1995,7 +1995,8 @@ const URL_PUENTE_DRIVE = 'https://script.google.com/macros/s/AKfycbwGfR900KCT1-j
 const SEMESTRE_CORTE_NOTAS_G = '2026-2';   // igual que en el portal de residentes
 const REQUISITOS_GRADO_G = [
   { cod: 'CATEDRA_CES', nombre: 'Cátedra CES', corto: 'Cátedra' },
-  { cod: 'DERECHOS_AUTOR', nombre: 'Curso derechos de autor', corto: 'Der. autor' }
+  { cod: 'DERECHOS_AUTOR', nombre: 'Curso derechos de autor', corto: 'Der. autor' },
+  { cod: 'TRABAJO_GRADO', nombre: 'Trabajo de grado', corto: 'Trab. grado', nota: 'Carta de cumplimiento del requisito, si aplica' }
 ];
 const MESES_NUM_G = { ENERO: 1, FEBRERO: 2, MARZO: 3, ABRIL: 4, MAYO: 5, JUNIO: 6, JULIO: 7, AGOSTO: 8, SEPTIEMBRE: 9, OCTUBRE: 10, NOVIEMBRE: 11, DICIEMBRE: 12 };
 
@@ -2358,10 +2359,11 @@ function alternarProgNotas(prog) {
 function filaNotasGrado_(g) {
   const abierto = !!NT.abiertos[g.id];
   const cumplidos = g.certs.filter(c => c.ok).length + (g.notasOk === g.rots.length ? 1 : 0);
-  const seg = [0, 1, 2, 3].map(k => `<i class="${k < cumplidos ? 'v' : ''}"></i>`).join('');
+  const totalReq = REQUISITOS_GRADO_G.length + 1;   // certificados + todas las notas
+  const seg = Array.from({ length: totalReq }, (_, k) => k).map(k => `<i class="${k < cumplidos ? 'v' : ''}"></i>`).join('');
   const ind = g.listo
-    ? '<span class="nt-chip nt-ok">4/4 · Listo para grado</span>'
-    : `<span class="nt-chip nt-pend">${cumplidos}/4 requisitos</span>`;
+    ? `<span class="nt-chip nt-ok">${totalReq}/${totalReq} · Listo para grado</span>`
+    : `<span class="nt-chip nt-pend">${cumplidos}/${totalReq} requisitos</span>`;
   const gid = esc(g.id).replace(/'/g, "\\'");
   return `<div class="nt-res ${abierto ? 'abierto' : ''}" onclick="alternarNotasResidente('${gid}')">
       <span class="nt-flecha">${abierto ? '▼' : '▶'}</span>
@@ -2373,7 +2375,7 @@ function filaNotasGrado_(g) {
 }
 
 function resumenFaltaNt_(g) {
-  if (g.listo) return '<div class="nt-falta listo"><b>Completo:</b> tiene los cuatro requisitos de grado.</div>';
+  if (g.listo) return '<div class="nt-falta listo"><b>Completo:</b> tiene todos los requisitos de grado.</div>';
   const partes = g.certs.filter(c => !c.ok).map(c => esc(c.nombre));
   const venc = g.rots.filter(x => !x.nota && !x.futura);
   if (venc.length) {
@@ -2451,7 +2453,7 @@ function detalleNotasGrado_(g) {
   const certRows = g.certs.map(c => {
     const clave = 'req_' + saneaG_(g.id) + '_' + c.cod;
     const estado = c.ok ? `<span class="nt-chip ${c.coord ? 'nt-coord' : 'nt-ok'}">${c.coord ? 'Cargado por coordinación' : 'Cargado'}</span>` : '<span class="nt-chip nt-pend">Pendiente</span>';
-    return `<tr><td>${esc(c.nombre)}</td><td>${estado}</td><td style="text-align:right; white-space:nowrap;">
+    return `<tr><td>${esc(c.nombre)}${c.nota ? `<div style="font-size:11px;color:#888;">${esc(c.nota)}</div>` : ''}</td><td>${estado}</td><td style="text-align:right; white-space:nowrap;">
       ${botonSubirNt_(clave, { tipo: 'requisito', programa: g.prog, residente, requisito: c.cod, id: g.id, yaHay: c.ok, nombreDescarga: c.nombre })}
       ${c.ok ? botonesVerNt_(clave) : ''}${msgNt_(clave)}</td></tr>`;
   }).join('');
