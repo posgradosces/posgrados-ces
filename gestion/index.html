@@ -4514,6 +4514,18 @@ function calcularAnioSemestre(mes, anioInicio) {
 // silencioso=true se usa en el refresco automático de fondo: actualiza los datos SIN pasar por
 // el mensaje "⏳ Cargando..." — así la cuadrícula que ya estás viendo no desaparece un momento
 // y reaparece; simplemente se reemplaza de una vez por la versión actualizada cuando ya está lista.
+// El "Nivel" de cada residente queda guardado por fila (un valor distinto por año académico),
+// porque cada julio los residentes suben de nivel y el cuadro de un periodo nuevo ya se llena con
+// el nivel QUE VAN A TENER ahí, aunque todavía falten meses para que ese periodo empiece. Para que
+// el banner de la cuadrícula (R1/R2/R3...) no cambie antes de tiempo, se muestra siempre el nivel
+// del año académico VIGENTE hoy (julio a junio) — y si ese año no está cargado en pantalla, el más
+// reciente de los que sí están cargados y ya empezaron.
+function anioAcademicoVigenteHoy_() {
+  const hoy = new Date();
+  const inicio = hoy.getMonth() >= 6 ? hoy.getFullYear() : hoy.getFullYear() - 1; // getMonth(): 6 = julio
+  return inicio + '-' + (inicio + 1);
+}
+
 async function cargarCuadricula(silencioso) {
   const programa = document.getElementById('cg-programa').value.trim();
   const anioDesde = document.getElementById('cg-periodo').value.trim();
@@ -4569,13 +4581,28 @@ async function cargarCuadricula(silencioso) {
 
   // Los residentes de esta cuadrícula salen de lo que ya está registrado para este programa+periodo(s).
   // Si no hay ninguno todavía (cuadro nuevo), usa "+ Agregar residente" para empezar a llenarlo.
-  const vistos = new Set();
-  filasGridActual = [];
+  const anioVigente = anioAcademicoVigenteHoy_();
+  const porResidente = {}; // ResidenteID -> { nombre, correo, niveles: { anioAcademico: nivel } }
   registrosGridActual.forEach(r => {
-    if (!vistos.has(r.ResidenteID)) {
-      vistos.add(r.ResidenteID);
-      filasGridActual.push({ id: r.ResidenteID, nombre: r.ResidenteNombre, nivel: r.Nivel, correo: r.Correo || '' });
+    if (!porResidente[r.ResidenteID]) porResidente[r.ResidenteID] = { nombre: r.ResidenteNombre, correo: r.Correo || '', niveles: {} };
+    const p = porResidente[r.ResidenteID];
+    if (r.ResidenteNombre) p.nombre = r.ResidenteNombre;
+    if (r.Correo) p.correo = r.Correo;
+    if (r.Nivel && !p.niveles[r.AnioAcademico]) p.niveles[r.AnioAcademico] = r.Nivel;
+  });
+  filasGridActual = Object.keys(porResidente).map(id => {
+    const p = porResidente[id];
+    const anios = Object.keys(p.niveles);
+    let nivel = p.niveles[anioVigente];
+    if (!nivel) {
+      // El año vigente no está entre los cargados: se prefiere el más reciente que ya pasó, y si
+      // ninguno pasó todavía (solo se cargaron periodos futuros), el más próximo de esos.
+      const pasados = anios.filter(a => a <= anioVigente).sort();
+      const futuros = anios.filter(a => a > anioVigente).sort();
+      const elegido = pasados.length > 0 ? pasados[pasados.length - 1] : futuros[0];
+      nivel = p.niveles[elegido] || p.niveles[anios[0]];
     }
+    return { id, nombre: p.nombre, nivel, correo: p.correo };
   });
 
   try {
@@ -4730,6 +4757,21 @@ function redibujarCuadricula() {
     ).join(' · ');
     avisoDatos = `<div style="background:#FFC7CE; color:#9C0006; border-radius:8px; padding:10px 14px; margin-bottom:10px; font-size:13px; line-height:1.5;">
       ⚠️ ${filasSinNombre.length} residente(s) de este cuadro tienen el nombre vacío o guardado en un formato que no es texto en HistoricoBaseGeneral (columna ResidenteNombre). Corrígelo allá y vuelve a cargar: ${detalle}
+    </div>`;
+  }
+
+  // Personas sin documento: comparten identificador vacio, asi que el cuadro las confunde y las
+  // rotaciones de una se pintan en la fila de otra. Se avisa aqui en vez de dejarlo invisible.
+  const nombresSinDoc = [];
+  registrosGridActual.forEach(r => {
+    if (String(r.ResidenteID === null || r.ResidenteID === undefined ? '' : r.ResidenteID).trim() === '') {
+      const n = String(r.ResidenteNombre || '').trim() || '(sin nombre)';
+      if (!nombresSinDoc.includes(n)) nombresSinDoc.push(n);
+    }
+  });
+  if (nombresSinDoc.length > 0) {
+    avisoDatos += `<div style="background:#FFF3CD; color:#7A4B00; border-radius:8px; padding:10px 14px; margin-bottom:10px; font-size:13px; line-height:1.5;">
+      ⚠️ ${nombresSinDoc.length} persona(s) de este cuadro no tienen documento registrado: ${nombresSinDoc.map(esc).join(' · ')}. ${nombresSinDoc.length > 1 ? 'Al compartir el mismo identificador vacío, sus rotaciones pueden verse cruzadas.' : 'Sin documento pueden cruzarse con otras personas en la misma situación.'} Asígnales un identificador provisional desde Apps Script (aplicarIdsProvisionalesSinDocumento) y no las elimines mientras tanto.
     </div>`;
   }
 
@@ -5252,6 +5294,10 @@ async function ejecutarEditarResidente(residenteIdViejo) {
 }
 
 function confirmarEliminarResidente(residenteId, nombre) {
+  if (String(residenteId === null || residenteId === undefined ? '' : residenteId).trim() === '') {
+    mostrarMensaje('Esta persona no tiene documento registrado: eliminarla podría borrar a otras que tampoco lo tienen. Asígnales primero un identificador provisional.', 'error');
+    return;
+  }
   const registrosDelResidente = registrosGridActual.filter(r => String(r.ResidenteID) === String(residenteId));
 
   if (registrosDelResidente.length === 0) {
