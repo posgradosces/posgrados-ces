@@ -5234,9 +5234,51 @@ function abrirEditarResidente(residenteId, nombreActual, nivelActual, correoActu
     </div>
     <div class="fila-botones" style="border-top:1px solid #eee; margin-top:14px; padding-top:12px;">
       <button style="background:none; border:1px solid #9C0006; color:#9C0006; border-radius:5px; padding:6px 12px; cursor:pointer; font-size:12px;" onclick="confirmarEliminarResidente('${residenteId}', '${nombreActual.replace(/'/g, "\\'")}')">🗑 Eliminar este residente de la cuadrícula</button>
-    </div>`;
+    </div>
+    ${htmlFusionarResidente_(residenteId)}`;
   document.getElementById('contenido-modal').innerHTML = html;
   document.getElementById('overlay-modal').style.display = 'flex';
+}
+
+// Cuando la misma persona quedó con dos filas distintas (típicamente porque una cédula se leyó
+// mal al importar), en vez de mandar a editar la hoja de cálculo a mano se ofrece fusionar aquí
+// mismo: se elige cuál de las otras filas de este cuadro es la misma persona y el servidor mueve
+// sus rotaciones a la fila correcta, mes por mes.
+function htmlFusionarResidente_(residenteId) {
+  const otros = filasGridActual.filter(f => String(f.id) !== String(residenteId));
+  if (otros.length === 0) return '';
+  const opciones = otros.map(f => `<option value="${esc(f.id)}">${esc(f.nombre)} (${esc(f.id)} · ${esc(f.nivel || '')})</option>`).join('');
+  return `
+    <div style="border-top:1px solid #eee; margin-top:14px; padding-top:12px;">
+      <label style="font-size:12px; color:#555;">¿Es la misma persona que otra fila de este cuadro? (ej: quedó duplicada por una cédula mal leída)</label>
+      <select id="modal-fusionar-otro" style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px; font-size:12px; margin-top:4px;">
+        <option value="">— elegir la otra fila —</option>
+        ${opciones}
+      </select>
+      <button style="margin-top:8px; background:none; border:1px solid #1F4E79; color:#1F4E79; border-radius:5px; padding:6px 12px; cursor:pointer; font-size:12px;"
+              onclick="ejecutarFusionarResidente('${residenteId}')">🔗 Fusionar con la fila elegida</button>
+      <p style="font-size:11px; color:#888; margin-top:4px;">Las rotaciones de esta fila se mueven a la otra. Si algún mes ya está ocupado en ambas, ese mes no se toca y queda avisado para revisar a mano.</p>
+    </div>`;
+}
+
+async function ejecutarFusionarResidente(residenteId) {
+  const idBueno = document.getElementById('modal-fusionar-otro').value;
+  if (!idBueno) { mostrarMensaje('Elige con cuál fila fusionar.', 'error'); return; }
+  const buenoInfo = filasGridActual.find(f => String(f.id) === idBueno);
+  if (!confirm('¿Fusionar esta fila con "' + (buenoInfo ? buenoInfo.nombre : idBueno) + '"? Esta acción no se puede deshacer.')) return;
+
+  const resultado = await llamarBackend('fusionarResidentesDuplicados', {
+    programa: contextoGrid.programa, idBueno, idDuplicado: residenteId
+  });
+  if (!resultado.ok) { mostrarMensaje('Error: ' + resultado.error, 'error'); return; }
+
+  let mensaje = 'Fusionado: ' + resultado.movidasHistorico + ' rotación(es) movidas.';
+  if (resultado.conflictos && resultado.conflictos.length > 0) {
+    mensaje += ' ⚠️ ' + resultado.conflictos.length + ' mes(es) ya tenían asignación en ambas filas y no se tocaron: ' + resultado.conflictos.join(', ') + '. Revísalos a mano.';
+  }
+  mostrarMensaje(mensaje, resultado.conflictos && resultado.conflictos.length > 0 ? 'error' : 'ok');
+  cerrarModal();
+  await cargarCuadricula(true);
 }
 
 async function ejecutarEditarResidente(residenteIdViejo) {
