@@ -1,22 +1,29 @@
 <!DOCTYPE html>
+<!-- PORTAL: COORDINADORES DE PROGRAMA (solo lectura) · destino en GitHub: /cronograma-coordinador/index.html · NO subir a la raiz ni a /gestion/ -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cronograma de Rotaciones · Coordinador de Programa</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#003865">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cronograma">
 <style>
   :root {
-    --pendiente-tx: #823C00;
-    --confirmado-tx: #1F4E79;
-    --negado-tx: #7030A0;
-    --cambio-tx: #9C0006;
     --azul-ces: #003865;
+    /* Paleta de estados: se conserva exactamente la del sistema */
+    --pendiente-bg: #FFD580; --pendiente-tx: #823C00;
+    --confirmado-bg: #BDD7EE; --confirmado-tx: #1F4E79;
+    --negado-bg: #EBDAE9; --negado-tx: #7030A0;
+    --cambio-bg: #FFC7CE; --cambio-tx: #9C0006;
   }
   * { box-sizing: border-box; }
   body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; background: #f4f6f8; color: #222; }
   header { background: var(--azul-ces); color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
   header h1 { font-size: 17px; margin: 0; }
-  header .usuario { font-size: 13px; display: flex; align-items: center; gap: 12px; }
+  header .usuario { font-size: 13px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   button { cursor: pointer; border: none; border-radius: 6px; padding: 8px 14px; font-size: 14px; }
   .btn-primario { background: var(--azul-ces); color: white; }
   .btn-secundario { background: #e0e0e0; color: #333; }
@@ -27,19 +34,39 @@
   .caja-login h2 { margin-top: 0; color: var(--azul-ces); font-size: 18px; }
   .caja-login p.subtitulo { font-size: 13px; color: #666; margin-top: -8px; margin-bottom: 18px; }
   .caja-login input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+  .caja-login .ayuda-login { font-size: 12px; color: #777; margin: 14px 0 0; line-height: 1.4; }
   .error { color: #9C0006; font-size: 13px; margin-top: 6px; min-height: 16px; }
 
   #app-screen { display: none; }
   .contenedor { padding: 20px; max-width: 1300px; margin: 0 auto; }
   .panel { background: white; border-radius: 10px; padding: 18px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
   .panel h2 { margin-top: 0; font-size: 16px; color: var(--azul-ces); }
-  .aviso-tiempo-real { font-size: 12px; color: #888; display: flex; align-items: center; gap: 6px; }
-  .punto-vivo { width: 8px; height: 8px; border-radius: 50%; background: #2e7d32; display: inline-block; animation: latido 2s infinite; }
+  .aviso-tiempo-real { font-size: 12px; color: #dfe8f1; display: flex; align-items: center; gap: 6px; }
+  .punto-vivo { width: 8px; height: 8px; border-radius: 50%; background: #66bb6a; display: inline-block; animation: latido 2s infinite; }
   @keyframes latido { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+  /* Etiquetas de estado (misma paleta del sistema) */
+  .chip { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .3px; padding: 2px 7px; border-radius: 5px; white-space: nowrap; line-height: 1.4; }
+  .chip-pendiente { background: var(--pendiente-bg); color: var(--pendiente-tx); }
+  .chip-confirmado { background: var(--confirmado-bg); color: var(--confirmado-tx); }
+  .chip-negado { background: var(--negado-bg); color: var(--negado-tx); }
+  .chip-cambio { background: var(--cambio-bg); color: var(--cambio-tx); }
+  .chip-movilidad { background: var(--confirmado-bg); color: var(--confirmado-tx); }
+
+  /* Novedades de la semana */
+  .cabecera-novedades { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+  .cabecera-novedades h2 { margin: 0; }
+  .resumen-novedades { display: flex; gap: 6px; flex-wrap: wrap; }
+  .lista-novedades { max-height: 280px; overflow-y: auto; }
+  .fila-novedad { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-top: 1px solid #ececec; font-size: 14px; line-height: 1.45; }
+  .fila-novedad .chip { margin-top: 2px; min-width: 68px; text-align: center; }
+  .fila-novedad .detalle { color: #555; font-size: 13px; }
+  .fila-novedad .programa-nov { color: #888; font-size: 11px; }
+  .nota-novedades { font-size: 12px; color: #888; margin: 10px 0 0; }
 
   .controles-cuadricula { display: flex; gap: 14px; align-items: end; flex-wrap: wrap; margin-bottom: 16px; }
   .controles-cuadricula label { font-size: 12px; color: #555; display: block; margin-bottom: 3px; }
-  .controles-cuadricula select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; min-width: 200px; font-size: 14px; }
+  .controles-cuadricula select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; min-width: 200px; max-width: 100%; font-size: 14px; }
 
   .contenedor-scroll-cuadricula { max-height: 68vh; overflow: auto; border: 1px solid #e2e2e2; border-radius: 6px; }
   table.cuadricula { border-collapse: collapse; width: 100%; font-size: 12px; }
@@ -47,20 +74,41 @@
   table.cuadricula thead th { background: #f0f2f5; padding: 8px 4px; font-size: 11px; color: #555; white-space: nowrap; position: sticky; top: 0; z-index: 2; }
   table.cuadricula thead tr:first-child th { top: 0; }
   table.cuadricula thead tr:last-child th { top: 33px; }
+  table.cuadricula thead th.mes-actual { background: #FFF3BF; color: #5c4400; font-weight: 700; }
   table.cuadricula th.esquina { position: sticky; left: 0; z-index: 3; text-align: left; background: #f0f2f5; }
   table.cuadricula td.col-residente { text-align: left; padding: 8px; white-space: nowrap; background: #fafbfc; font-weight: 600; position: sticky; left: 0; z-index: 1; }
   tr.fila-grupo td { background: var(--azul-ces); color: white; font-weight: 700; padding: 6px 10px !important; text-align: left; position: sticky; left: 0; }
-  .celda { width: 110px; height: 52px; padding: 4px !important; font-size: 11px; line-height: 1.25; cursor: default; }
+  .celda { min-width: 110px; width: 110px; height: 64px; padding: 4px !important; font-size: 11px; line-height: 1.25; cursor: default; vertical-align: top; }
+  .celda.con-dato { cursor: pointer; }
+  .celda.con-dato:hover { filter: brightness(.96); }
+  .celda .chip { display: block; width: fit-content; margin: 0 auto 3px; }
   .celda-vacia { color: #ccc; }
+  .celda-vacia.mes-actual { background: #fffbe6; }
   .icono-comentario { position: absolute; top: 2px; right: 3px; font-size: 10px; line-height: 1; }
 
-  .leyenda { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 12px; color: #555; }
-  .leyenda span.punto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
+  .leyenda { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; font-size: 12px; color: #555; align-items: center; }
   .mensaje-vacio { color: #999; padding: 20px 4px; }
+
+  /* Detalle de una celda (se abre al tocarla; sirve en celular, donde no hay "pasar el mouse") */
+  .detalle-celda { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 560px; background: white; border-radius: 14px 14px 0 0; box-shadow: 0 -4px 24px rgba(0,0,0,0.22); padding: 16px 18px 20px; z-index: 998; display: none; font-size: 14px; line-height: 1.5; }
+  .detalle-celda.visible { display: block; }
+  .detalle-celda .cerrar { position: absolute; top: 8px; right: 10px; background: transparent; font-size: 18px; color: #666; padding: 4px 8px; }
+  .detalle-celda .nombre-res { font-weight: 700; color: var(--azul-ces); padding-right: 30px; }
+  .detalle-celda .linea { margin-top: 6px; }
+  .detalle-celda .etiqueta { color: #888; font-size: 12px; }
+  .detalle-celda .comentario { margin-top: 10px; background: #f6f7f9; border-radius: 8px; padding: 9px 11px; font-size: 13px; }
+
   .mensaje-flotante { position: fixed; bottom: 18px; right: 18px; background: #333; color: white; padding: 10px 16px; border-radius: 6px; font-size: 13px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; }
   .mensaje-flotante.visible { opacity: 1; }
   .mensaje-flotante.error { background: #9C0006; }
   .mensaje-flotante.ok { background: #1F4E79; }
+
+  @media (max-width: 600px) {
+    .contenedor { padding: 12px; }
+    .panel { padding: 14px; }
+    .controles-cuadricula select { min-width: 0; width: 100%; }
+    .controles-cuadricula > div { flex: 1 1 100%; }
+  }
 </style>
 </head>
 <body>
@@ -72,6 +120,7 @@
     <input type="password" id="login-password" placeholder="Clave de acceso" autocomplete="current-password">
     <button class="btn-primario" style="width:100%; margin-top:8px;" onclick="intentarLogin()">Entrar</button>
     <div class="error" id="login-error"></div>
+    <p class="ayuda-login">¿Problemas con tu acceso? Comunícate con la coordinación académica de tu programa.</p>
   </div>
 </div>
 
@@ -87,6 +136,16 @@
 
   <div class="contenedor">
     <p id="bienvenida" style="font-size:15px; color:#444; margin: 4px 0 16px;"></p>
+
+    <div class="panel" id="panel-novedades">
+      <div class="cabecera-novedades">
+        <h2>🔔 Novedades de la semana</h2>
+        <div class="resumen-novedades" id="resumen-novedades"></div>
+      </div>
+      <div class="lista-novedades" id="lista-novedades"><p class="mensaje-vacio">Cargando novedades…</p></div>
+      <p class="nota-novedades">Últimos 7 días: rotaciones negadas, rotaciones con cambio y residentes nuevos de movilidad académica.</p>
+    </div>
+
     <div class="panel">
       <h2 id="titulo-programa">Cargando programa…</h2>
 
@@ -107,14 +166,19 @@
       <div id="contenedor-cuadricula"><p class="mensaje-vacio">Cargando cronograma…</p></div>
 
       <div class="leyenda">
-        <span><span class="punto" style="background:var(--pendiente-tx);"></span>Pendiente</span>
-        <span><span class="punto" style="background:var(--confirmado-tx);"></span>Confirmado</span>
-        <span><span class="punto" style="background:var(--negado-tx);"></span>Negado</span>
-        <span><span class="punto" style="background:var(--cambio-tx);"></span>Cambio</span>
-        <span>💬 Comentario del equipo interno (pasa el mouse para leerlo)</span>
+        <span><span class="chip chip-pendiente">PENDIENTE</span></span>
+        <span><span class="chip chip-confirmado">CONFIRMADO</span> <span style="color:#888;">(sin etiqueta en la cuadrícula)</span></span>
+        <span><span class="chip chip-negado">NEGADO</span></span>
+        <span><span class="chip chip-cambio">CAMBIO</span></span>
+        <span>💬 Comentario del equipo interno (toca la celda para leerlo)</span>
       </div>
     </div>
   </div>
+</div>
+
+<div class="detalle-celda" id="detalle-celda" role="dialog" aria-live="polite">
+  <button class="cerrar" onclick="cerrarDetalleCelda()" aria-label="Cerrar">✕</button>
+  <div id="detalle-celda-contenido"></div>
 </div>
 
 <div class="mensaje-flotante" id="mensaje-flotante"></div>
@@ -127,8 +191,16 @@ const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwgzWT4TQgmE87Kbc2v
 
 const MESES = ['Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre','Enero','Febrero','Marzo','Abril','Mayo','Junio'];
 const MESES_VACACIONES = ['Vacaciones 1', 'Vacaciones 2'];
+const NOMBRES_MES_CALENDARIO = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+// Color del texto de cada celda según su estado (igual que el Excel y Gestión Operativa)
 const COLOR_TEXTO_ESTADO = { 'Pendiente': '#C00000', 'Confirmado': '#000000', 'Negado': '#7030A0', 'Cambio': '#C00000' };
-const NIVELES_ORDEN = ['R1', 'R2', 'R3', 'R4', 'R5', 'Movilidad Académica'];
+const CLASE_CHIP_ESTADO = { 'Pendiente': 'chip-pendiente', 'Confirmado': 'chip-confirmado', 'Negado': 'chip-negado', 'Cambio': 'chip-cambio' };
+const NIVELES_ORDEN = ['R1', 'R2', 'R3', 'R4', 'R5', 'Movilidad Académica', 'Sin nivel'];
+
+// Cómo entró la persona: el enlace del correo trae ?origen=correo&vista=novedades
+const PARAMS_URL = new URLSearchParams(location.search);
+const ORIGEN_ENTRADA = PARAMS_URL.get('origen') === 'correo' ? 'correo' : 'directo';
+let irANovedadesAlEntrar = PARAMS_URL.get('vista') === 'novedades';
 
 const cacheColorCampo = {};
 function colorDeFondoPorCampo(campo, rotacion) {
@@ -147,11 +219,20 @@ function esc(valor) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+function esMovilidad(f) {
+  return /^movilidad/i.test(String(f.tipo || '').trim()) || /movilidad/i.test(String(f.nivel || ''));
+}
+
+// R1–R5 en su grupo; movilidad en su grupo; cualquier otra cosa (nivel vacío o mal escrito) queda
+// aparte en "Sin nivel" para revisarla, en vez de mezclarse con Movilidad.
 function agruparPorNivel(filas) {
-  const grupos = { 'R1': [], 'R2': [], 'R3': [], 'R4': [], 'R5': [], 'Movilidad Académica': [] };
+  const grupos = { 'R1': [], 'R2': [], 'R3': [], 'R4': [], 'R5': [], 'Movilidad Académica': [], 'Sin nivel': [] };
   filas.forEach(f => {
     const nivelLimpio = String(f.nivel || '').trim().toUpperCase();
-    const clave = grupos.hasOwnProperty(nivelLimpio) ? nivelLimpio : 'Movilidad Académica';
+    let clave;
+    if (esMovilidad(f)) clave = 'Movilidad Académica';
+    else if (grupos.hasOwnProperty(nivelLimpio)) clave = nivelLimpio;
+    else clave = 'Sin nivel';
     grupos[clave].push(f);
   });
   return grupos;
@@ -166,11 +247,16 @@ const MINUTOS_INACTIVIDAD = 20;
 let usuarioActual = null;      // { usuarioCorto, claveHash, nombreCompleto }
 let programasPermitidos = [];  // array de nombres de programa que puede ver este usuario
 let programaSeleccionado = null;
-let anioSeleccionado = null;   // "2026" (año de inicio del académico 2026-2027)
+let anioSeleccionado = null;   // "2026-2027"
 let datosCompletos = [];       // todo lo que devolvió el backend (ya filtrado server-side)
+let ultimaHuellaDatos = '';    // para no redibujar si nada cambió
+let ultimaHuellaNovedades = '';
 let ultimaActividadMs = Date.now();
 let ultimoGuardadoActividadMs = 0;
 let intervaloRefresco = null;
+let monitorInactividadIniciado = false;
+let pendienteScrollMesActual = true;
+let celdaRegistros = [];       // registros de la cuadrícula dibujada (para el detalle al tocar)
 
 function guardarSesion() {
   try {
@@ -209,6 +295,8 @@ function marcarActividad() {
 }
 
 function iniciarMonitorInactividad() {
+  if (monitorInactividadIniciado) return;
+  monitorInactividadIniciado = true;
   ['click', 'keydown', 'mousemove', 'touchstart', 'scroll'].forEach(evento =>
     document.addEventListener(evento, marcarActividad, { passive: true })
   );
@@ -265,6 +353,18 @@ async function intentarLogin() {
   usuarioActual = { usuarioCorto: '', claveHash, nombreCompleto: resultado.nombreCompleto };
   guardarSesion();
   entrarAlApp();
+  registrarAccesoPortal();
+}
+
+// Deja constancia del ingreso (fecha, nombre, dispositivo y si vino del correo) para medir el uso.
+// Nunca interrumpe: si falla, no pasa nada.
+async function registrarAccesoPortal() {
+  try {
+    await llamarBackend('registrarAccesoCoordinador', {
+      dispositivo: /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'Celular' : 'Computador',
+      origen: ORIGEN_ENTRADA
+    });
+  } catch (err) { /* sin efecto para la persona */ }
 }
 
 function entrarAlApp() {
@@ -272,15 +372,20 @@ function entrarAlApp() {
   document.getElementById('app-screen').style.display = 'block';
   document.getElementById('nombre-usuario-header').textContent = usuarioActual.nombreCompleto;
   document.getElementById('bienvenida').textContent = 'Bienvenido/a Dr(a). ' + usuarioActual.nombreCompleto;
+  pendienteScrollMesActual = true;
   iniciarMonitorInactividad();
   cargarCronograma(false);
-  if (!intervaloRefresco) intervaloRefresco = setInterval(() => cargarCronograma(true), 60000); // silencioso, cada 60s
+  // Refresco silencioso cada 60 s: solo si la pestaña está visible y solo redibuja si algo cambió.
+  if (!intervaloRefresco) intervaloRefresco = setInterval(() => { if (!document.hidden) cargarCronograma(true); }, 60000);
 }
 
 function cerrarSesion() {
   usuarioActual = null;
   programasPermitidos = [];
   datosCompletos = [];
+  ultimaHuellaDatos = '';
+  ultimaHuellaNovedades = '';
+  cerrarDetalleCelda();
   if (intervaloRefresco) { clearInterval(intervaloRefresco); intervaloRefresco = null; }
   try { sessionStorage.removeItem(CLAVE_SESION); } catch (err) {}
   document.getElementById('app-screen').style.display = 'none';
@@ -322,25 +427,100 @@ async function llamarBackend(accion, datos) {
 async function cargarCronograma(silencioso) {
   if (!silencioso) document.getElementById('contenedor-cuadricula').innerHTML = '<p class="mensaje-vacio">⏳ Cargando cronograma…</p>';
 
-  const resultado = await leerBackend('listarHistoricoCoordinador');
+  let resultado;
+  try { resultado = await leerBackend('listarHistoricoCoordinador'); }
+  catch (err) {
+    if (!silencioso) document.getElementById('contenedor-cuadricula').innerHTML = '<p class="mensaje-vacio">No se pudo conectar. Revisa tu conexión e intenta de nuevo.</p>';
+    return;
+  }
+  if (!usuarioActual) return; // la sesión se cerró mientras esperaba
   if (!resultado.ok) {
     if (!silencioso) document.getElementById('contenedor-cuadricula').innerHTML = '<p class="mensaje-vacio">' + esc(resultado.error || 'No se pudo cargar el cronograma.') + '</p>';
     return;
   }
 
   programasPermitidos = resultado.programas || [];
-  datosCompletos = resultado.datos || [];
+  const huella = JSON.stringify(resultado.datos || []);
+  const cambioDatos = huella !== ultimaHuellaDatos;
 
-  if (!programaSeleccionado || !programasPermitidos.includes(programaSeleccionado)) {
-    programaSeleccionado = programasPermitidos[0] || null;
+  if (!silencioso || cambioDatos) {
+    ultimaHuellaDatos = huella;
+    datosCompletos = resultado.datos || [];
+    if (!programaSeleccionado || !programasPermitidos.includes(programaSeleccionado)) {
+      programaSeleccionado = programasPermitidos[0] || null;
+    }
+    poblarSelectorProgramas();
+    poblarSelectorAniosAcademicos();
+    redibujarCuadricula();
+    guardarSesion();
   }
 
-  poblarSelectorProgramas();
-  poblarSelectorAniosAcademicos();
-  redibujarCuadricula();
-  guardarSesion();
+  cargarNovedades();
 }
 
+// ============================================================
+// NOVEDADES DE LA SEMANA — negadas, cambios y movilidad nueva de los últimos 7 días
+// ============================================================
+async function cargarNovedades() {
+  let resultado;
+  try { resultado = await leerBackend('novedadesCoordinador'); }
+  catch (err) { return; }
+  if (!usuarioActual) return;
+
+  const contenedor = document.getElementById('lista-novedades');
+  if (!resultado || !resultado.ok) {
+    if (!ultimaHuellaNovedades) contenedor.innerHTML = '<p class="mensaje-vacio">Las novedades no están disponibles por ahora.</p>';
+    return;
+  }
+  const huella = JSON.stringify(resultado);
+  if (huella === ultimaHuellaNovedades) return;
+  ultimaHuellaNovedades = huella;
+  dibujarNovedades(resultado);
+
+  if (irANovedadesAlEntrar) {
+    irANovedadesAlEntrar = false;
+    const panel = document.getElementById('panel-novedades');
+    if (panel && panel.scrollIntoView) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function dibujarNovedades(datos) {
+  const negadas = datos.negadas || [], cambios = datos.cambios || [], movilidad = datos.movilidad || [];
+  const varios = programasPermitidos.length > 1;
+  const prog = p => (varios && p) ? `<div class="programa-nov">${esc(p)}</div>` : '';
+
+  document.getElementById('resumen-novedades').innerHTML =
+    (negadas.length ? `<span class="chip chip-negado">${negadas.length} negada${negadas.length === 1 ? '' : 's'}</span>` : '') +
+    (cambios.length ? `<span class="chip chip-cambio">${cambios.length} cambio${cambios.length === 1 ? '' : 's'}</span>` : '') +
+    (movilidad.length ? `<span class="chip chip-movilidad">${movilidad.length} movilidad nueva</span>` : '');
+
+  if (!negadas.length && !cambios.length && !movilidad.length) {
+    document.getElementById('lista-novedades').innerHTML = '<p class="mensaje-vacio" style="padding:10px 0;">Sin novedades en los últimos 7 días. 🎉</p>';
+    return;
+  }
+
+  const mesTxt = n => (n.mes ? esc(n.mes) + (n.semestre ? ' (' + esc(n.semestre) + ')' : '') : '');
+  const nombreNivel = n => esc(n.residente) + (n.nivel ? ' · ' + esc(n.nivel) : '');
+  let html = '';
+
+  negadas.forEach(n => {
+    html += `<div class="fila-novedad"><span class="chip chip-negado">NEGADA</span><div>${prog(n.programa)}<strong>${nombreNivel(n)}</strong>
+      <div class="detalle">${esc(n.antes || 'sin dato')}${mesTxt(n) ? ' · ' + mesTxt(n) : ''}</div></div></div>`;
+  });
+  cambios.forEach(c => {
+    html += `<div class="fila-novedad"><span class="chip chip-cambio">CAMBIO</span><div>${prog(c.programa)}<strong>${nombreNivel(c)}</strong>
+      <div class="detalle">${mesTxt(c) ? mesTxt(c) + ' · ' : ''}Antes: ${esc(c.antes || 'sin dato')} → Ahora: ${esc(c.ahora || 'sin dato')}</div></div></div>`;
+  });
+  movilidad.forEach(m => {
+    html += `<div class="fila-novedad"><span class="chip chip-movilidad">MOVILIDAD</span><div>${prog(m.programa)}<strong>${esc(m.residente)}</strong>
+      <div class="detalle">Nuevo en el programa${m.origen ? ' · ' + esc(m.origen) : ''}${m.detalle ? ' · ' + esc(m.detalle) : ''}</div></div></div>`;
+  });
+  document.getElementById('lista-novedades').innerHTML = html;
+}
+
+// ============================================================
+// SELECTORES
+// ============================================================
 function poblarSelectorProgramas() {
   const wrap = document.getElementById('selector-programa-wrap');
   const select = document.getElementById('sel-programa');
@@ -359,6 +539,7 @@ function poblarSelectorProgramas() {
 function cambiarPrograma() {
   programaSeleccionado = document.getElementById('sel-programa').value;
   anioSeleccionado = null; // el año disponible puede variar de un programa a otro
+  pendienteScrollMesActual = true;
   poblarSelectorAniosAcademicos();
   redibujarCuadricula();
   guardarSesion();
@@ -394,13 +575,30 @@ function poblarSelectorAniosAcademicos() {
 
 function cambiarAnioAcademico() {
   anioSeleccionado = document.getElementById('sel-anio-academico').value;
+  pendienteScrollMesActual = true;
   redibujarCuadricula();
   guardarSesion();
+}
+
+// ¿El año académico "2026-2027" (julio 2026 a junio 2027) incluye hoy? Devuelve el nombre del mes actual o null.
+function mesActualDelAnio(anioAcademico) {
+  const m = /^(\d{4})-(\d{4})$/.exec(anioAcademico || '');
+  if (!m) return null;
+  const hoy = new Date();
+  const inicio = new Date(Number(m[1]), 6, 1);
+  const fin = new Date(Number(m[2]), 6, 1);
+  if (hoy < inicio || hoy >= fin) return null;
+  return NOMBRES_MES_CALENDARIO[hoy.getMonth()];
 }
 
 // ============================================================
 // DIBUJO DE LA CUADRÍCULA — mismo formato visual que Gestión Operativa, solo lectura
 // ============================================================
+function subtituloResidente(res) {
+  if (esMovilidad(res)) return res.origen ? 'Movilidad · ' + res.origen : 'Movilidad académica';
+  return res.nivel || '';
+}
+
 function redibujarCuadricula() {
   document.getElementById('titulo-programa').textContent = programaSeleccionado
     ? programaSeleccionado + (anioSeleccionado ? ' · ' + anioSeleccionado : '')
@@ -408,19 +606,29 @@ function redibujarCuadricula() {
   document.getElementById('btn-descargar').disabled = !programaSeleccionado || !anioSeleccionado;
 
   const contenedor = document.getElementById('contenedor-cuadricula');
+  celdaRegistros = [];
   if (!programaSeleccionado || !anioSeleccionado) {
     contenedor.innerHTML = '<p class="mensaje-vacio">No hay cronograma disponible todavía.</p>';
     return;
   }
 
+  // Se recuerda dónde estaba la persona leyendo para no devolverla al inicio al refrescar.
+  const scrollPrevio = contenedor.querySelector('.contenedor-scroll-cuadricula');
+  const posArriba = scrollPrevio ? scrollPrevio.scrollTop : 0;
+  const posIzquierda = scrollPrevio ? scrollPrevio.scrollLeft : 0;
+
   const registros = datosCompletos.filter(r => r.Programa === programaSeleccionado && String(r.AnioAcademico) === anioSeleccionado);
   const partes = anioSeleccionado.split('-');
   const anioInicio = partes[0], anioSiguiente = partes[1];
+  const mesActual = mesActualDelAnio(anioSeleccionado);
 
   const vistos = new Set();
   const filas = [];
   registros.forEach(r => {
-    if (!vistos.has(r.ResidenteID)) { vistos.add(r.ResidenteID); filas.push({ id: r.ResidenteID, nombre: r.ResidenteNombre, nivel: r.Nivel }); }
+    if (!vistos.has(r.ResidenteID)) {
+      vistos.add(r.ResidenteID);
+      filas.push({ id: r.ResidenteID, nombre: r.ResidenteNombre, nivel: r.Nivel, tipo: r.Tipo, origen: r.UniversidadOrigen });
+    }
   });
 
   if (filas.length === 0) {
@@ -437,23 +645,28 @@ function redibujarCuadricula() {
     <th colspan="6" style="background:#003865; color:white;">${esc(anioSiguiente)}-1</th>
     <th rowspan="2" style="background:#5b7fa6; color:white;">Vacaciones 1</th>
     <th rowspan="2" style="background:#5b7fa6; color:white;">Vacaciones 2</th></tr><tr>`;
-  MESES.forEach(mes => html += `<th>${mes}</th>`);
+  MESES.forEach(mes => html += `<th data-mes="${esc(mes)}"${mes === mesActual ? ' class="mes-actual"' : ''}>${mes}</th>`);
   html += '</tr></thead><tbody>';
 
   function renderCelda(res, mes) {
     const registro = registros.find(r => String(r.ResidenteID) === String(res.id) && r.Mes === mes);
-    if (!registro) return '<td class="celda celda-vacia" style="cursor:default;"></td>';
+    const claseMes = mes === mesActual ? ' mes-actual' : '';
+    if (!registro) return `<td class="celda celda-vacia${claseMes}" style="cursor:default;"></td>`;
+
     const colorTexto = COLOR_TEXTO_ESTADO[registro.Estado] || '#333';
     const colorFondo = colorDeFondoPorCampo(registro.CampoRotacion, registro.Rotacion);
     const comentario = String(registro.ObservacionInterna || '').trim();
+    const idx = celdaRegistros.push({ registro, nombre: res.nombre }) - 1;
     let titulo = (registro.CampoRotacion || '') + ' — ' + (registro.Rotacion || '') + ' (' + (registro.Estado || '') + ')';
     let iconoComentario = '';
     if (comentario) {
       titulo += '\n💬 ' + comentario + (registro.ComentarioPor ? ' — ' + registro.ComentarioPor : '');
       iconoComentario = '<span class="icono-comentario">💬</span>';
     }
-    return `<td class="celda" style="color:${colorTexto}; background:${colorFondo}; position:relative;" title="${esc(titulo)}">
-      ${iconoComentario}<strong>${esc(registro.CampoRotacion || '')}</strong><br>${esc(registro.Rotacion || '')}
+    const clase = CLASE_CHIP_ESTADO[registro.Estado];
+    const chip = (clase && registro.Estado !== 'Confirmado') ? `<span class="chip ${clase}">${esc(String(registro.Estado).toUpperCase())}</span>` : '';
+    return `<td class="celda con-dato${claseMes}" style="color:${colorTexto}; background:${colorFondo}; position:relative;" title="${esc(titulo)}" onclick="abrirDetalleCelda(${idx})">
+      ${iconoComentario}${chip}<strong>${esc(registro.CampoRotacion || '')}</strong><br>${esc(registro.Rotacion || '')}
     </td>`;
   }
 
@@ -462,7 +675,7 @@ function redibujarCuadricula() {
     if (!filasGrupo || filasGrupo.length === 0) return;
     html += `<tr class="fila-grupo"><td colspan="${totalColumnas}">${esc(nombreGrupo)}</td></tr>`;
     filasGrupo.forEach(res => {
-      html += `<tr><td class="col-residente">${esc(res.nombre)}<br><span style="color:#888; font-weight:400;">${esc(res.id)} · ${esc(res.nivel || '')}</span></td>`;
+      html += `<tr><td class="col-residente">${esc(res.nombre)}<br><span style="color:#888; font-weight:400;">${esc(subtituloResidente(res))}</span></td>`;
       MESES.forEach(mes => { html += renderCelda(res, mes); });
       MESES_VACACIONES.forEach(mes => { html += renderCelda(res, mes); });
       html += '</tr>';
@@ -471,10 +684,54 @@ function redibujarCuadricula() {
 
   html += '</tbody></table></div>';
   contenedor.innerHTML = html;
+
+  const scrollNuevo = contenedor.querySelector('.contenedor-scroll-cuadricula');
+  if (pendienteScrollMesActual) {
+    // Primera vez con este programa/año: se lleva la vista al mes en curso.
+    pendienteScrollMesActual = false;
+    const th = mesActual ? scrollNuevo.querySelector('th[data-mes="' + mesActual + '"]') : null;
+    if (th) scrollNuevo.scrollLeft = Math.max(0, th.offsetLeft - 190);
+  } else {
+    scrollNuevo.scrollTop = posArriba;
+    scrollNuevo.scrollLeft = posIzquierda;
+  }
 }
 
 // ============================================================
-// DESCARGAR EXCEL — reutiliza exportarCuadricula_ del backend (mismos colores, mismo formato)
+// DETALLE DE UNA CELDA — se abre al tocarla (sirve en celular)
+// ============================================================
+function abrirDetalleCelda(idx) {
+  const item = celdaRegistros[idx];
+  if (!item) return;
+  const r = item.registro;
+  const clase = CLASE_CHIP_ESTADO[r.Estado] || 'chip-confirmado';
+  const antesCampo = String(r.ValorConfirmado_Campo || '').trim();
+  const antesRot = String(r.ValorConfirmado_Rotacion || '').trim();
+  const antesTxt = [antesCampo, antesRot].filter(Boolean).join(' / ');
+  const ahoraTxt = [String(r.CampoRotacion || '').trim(), String(r.Rotacion || '').trim()].filter(Boolean).join(' / ');
+  const comentario = String(r.ObservacionInterna || '').trim();
+
+  let html = `<div class="nombre-res">${esc(item.nombre)}</div>
+    <div class="linea"><span class="etiqueta">${esc(r.Mes || '')}${r.Semestre ? ' (' + esc(r.Semestre) + ')' : ''}</span> &nbsp;<span class="chip ${clase}">${esc(String(r.Estado || '').toUpperCase())}</span></div>
+    <div class="linea"><strong>${esc(ahoraTxt || 'Sin rotación')}</strong></div>`;
+  if (r.Estado === 'Cambio' && antesTxt && antesTxt !== ahoraTxt) {
+    html += `<div class="linea"><span class="etiqueta">Antes:</span> ${esc(antesTxt)}</div>`;
+  }
+  if (comentario) {
+    html += `<div class="comentario">💬 ${esc(comentario)}${r.ComentarioPor ? '<br><span class="etiqueta">— ' + esc(r.ComentarioPor) + '</span>' : ''}</div>`;
+  }
+  document.getElementById('detalle-celda-contenido').innerHTML = html;
+  document.getElementById('detalle-celda').classList.add('visible');
+}
+
+function cerrarDetalleCelda() {
+  const panel = document.getElementById('detalle-celda');
+  if (panel) panel.classList.remove('visible');
+}
+
+// ============================================================
+// DESCARGAR EXCEL — reutiliza exportarCuadricula_ del backend (mismos colores, mismo formato).
+// Para coordinadores sale sin cédula ni correo de los residentes (lo decide el servidor).
 // ============================================================
 async function descargarCuadriculaExcel() {
   if (!programaSeleccionado || !anioSeleccionado) return;
@@ -491,14 +748,17 @@ async function descargarCuadriculaExcel() {
   const partes = anioSeleccionado.split('-');
   const bloque = { anioInicio: partes[0], anioSiguiente: partes[1], anioAcademico: anioSeleccionado };
 
-  const resultado = await llamarBackend('exportarCuadricula', {
-    programa: programaSeleccionado,
-    anioInicio: bloque.anioInicio,
-    anioSiguiente: bloque.anioSiguiente,
-    bloques: [bloque],
-    filas,
-    registros
-  });
+  let resultado;
+  try {
+    resultado = await llamarBackend('exportarCuadricula', {
+      programa: programaSeleccionado,
+      anioInicio: bloque.anioInicio,
+      anioSiguiente: bloque.anioSiguiente,
+      bloques: [bloque],
+      filas,
+      registros
+    });
+  } catch (err) { mostrarMensaje('No se pudo conectar. Intenta de nuevo.', 'error'); return; }
 
   if (!resultado.ok) { mostrarMensaje('Error: ' + resultado.error, 'error'); return; }
 
@@ -531,6 +791,7 @@ function mostrarMensaje(texto, tipo) {
 // INICIO
 // ============================================================
 document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') intentarLogin(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarDetalleCelda(); });
 restaurarSesionSiVigente();
 </script>
 </body>
