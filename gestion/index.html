@@ -296,6 +296,7 @@
   .rec-check { display:flex; align-items:center; gap:8px; padding:4px 10px; font-size:13px; cursor:pointer; }
   .rec-checklist .rec-check:hover { background:#f5f8fb; }
   .rec-check .n { margin-left:auto; font-size:11px; color:#999; white-space:nowrap; }
+  .rec-check .sub { display:block; font-size:11px; color:#888; margin-top:1px; }
   .rec-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px; }
   .rec-chip { display:inline-flex; align-items:center; gap:6px; background:#e8eef5; color:var(--azul-ces); font-size:12px; font-weight:600; padding:3px 10px; border-radius:12px; }
   .rec-chip b { cursor:pointer; font-size:14px; }
@@ -6573,9 +6574,11 @@ let recordatoriosCargados = false;
 let recDisparadorActivo = null;
 let recFiltroEstado = '';
 let recEdicion = null;            // recordatorio que está abierto en el editor (o uno nuevo)
-let recCamposSel = new Set();
+let recCamposSel = new Map();    // clave de la institución -> nombre con el que se guarda
 let recProgramasSel = new Set();
-let recCamposExtra = [];
+let recCamposExtra = [];         // instituciones escritas a mano: {clave, nombre}
+let recRevisar = [];             // combinaciones de un recordatorio viejo que no se pudieron asignar solas
+let recIndiceCentros = {};       // clave de texto -> id del catálogo de centros
 const recAbiertos = new Set();   // centros con los requisitos desplegados en la lista
 let recVistaSegundo = false;      // vista previa: primer o segundo envío
 let recVistaContinua = false;     // vista previa: residente que empieza o que continúa rotando
@@ -6828,7 +6831,7 @@ function pintarRecordatorios() {
     return `<div class="rec-item ${r.activo ? '' : 'pausado'}">
       <div class="rec-item-top">
         <div><div class="rec-centro">${esc(r.centro)}</div>
-          <div class="rec-sub">Campos del cuadro: ${esc(r.campos.join(', '))} · Programas: ${r.programas.length ? esc(r.programas.join(', ')) : 'todos'}${r.incluirPendientes ? '' : ' · solo rotaciones confirmadas'}</div></div>
+          <div class="rec-sub">Instituciones: ${esc(r.campos.join(', '))} · Programas: ${r.programas.length ? esc(r.programas.join(', ')) : 'todos'}${r.incluirPendientes ? '' : ' · solo rotaciones confirmadas'}</div></div>
         <div style="display:flex; gap:6px; flex-shrink:0;">
           <span class="pastilla" style="background:${r.tipo === 'Puntual' ? '#E0F2F1; color:#00695C' : '#E8EEF5; color:var(--azul-ces)'};">${r.tipo === 'Puntual' ? 'Anuncio puntual' : 'Recurrente'}</span>
           <span class="pastilla" style="background:${est.bg}; color:${est.tx};">${est.texto}</span></div>
@@ -6864,16 +6867,39 @@ async function cambiarEstadoRecordatorio(id, activo) {
 }
 
 // ---------- Editor ----------
+// Cada institución es UNA opción, esté sola o combinada con otras en el cuadro. Si el catálogo la
+// reconoce (sigla, nombre oficial o alias) se agrupa por su id; si no, por su texto limpio.
+function claveInstRec_(texto) {
+  const k = claveCentroJS(texto);
+  if (!k) return '';
+  return recIndiceCentros[k] ? 'ID:' + recIndiceCentros[k] : 'T:' + k;
+}
+function nombreInstRec_(texto) {
+  const id = recIndiceCentros[claveCentroJS(texto)];
+  return (id && siglaCentroCat(id)) || limpiarNombreCentroJS(texto);
+}
+function esNoCentroRec_(texto) {
+  const id = recIndiceCentros[claveCentroJS(texto)];
+  return /^VACACIONES/.test(limpiarNombreCentroJS(texto)) || !!(id && cacheNoCentros.some(c => c.id === id));
+}
 function camposDisponiblesRec_() {
-  const conteo = {};
+  const inst = {};
   (cacheHistoricoCompleto || []).forEach(f => {
     const c = String(f.CampoRotacion || '').replace(/\s+/g, ' ').trim();
     if (!c || /^vacaciones/i.test(c)) return;
-    conteo[c] = (conteo[c] || 0) + 1;
+    const partes = separarCampos(c);
+    const vistas = new Set();
+    partes.forEach(t => {
+      const k = claveInstRec_(t);
+      if (!k || vistas.has(k) || esNoCentroRec_(t)) return;
+      vistas.add(k);
+      if (!inst[k]) inst[k] = { nombre: nombreInstRec_(t), solas: 0, comb: 0 };
+      if (partes.length === 1) inst[k].solas++; else inst[k].comb++;
+    });
   });
-  recCamposExtra.forEach(c => { if (!(c in conteo)) conteo[c] = 0; });
-  recCamposSel.forEach(c => { if (!(c in conteo)) conteo[c] = 0; });
-  return conteo;
+  recCamposExtra.forEach(e => { if (!inst[e.clave]) inst[e.clave] = { nombre: e.nombre, solas: 0, comb: 0 }; });
+  recCamposSel.forEach((nombre, k) => { if (!inst[k]) inst[k] = { nombre, solas: 0, comb: 0 }; });
+  return inst;
 }
 
 async function abrirEditorRecordatorio(id) {
@@ -6881,6 +6907,8 @@ async function abrirEditorRecordatorio(id) {
     const res = await leerBackend('listarHistorico');
     if (res.ok) cacheHistoricoCompleto = res.datos;
   }
+  try { await cargarCentros(); } catch (e) { /* sin catálogo se agrupa por texto */ }
+  recIndiceCentros = indiceCentrosJS();
   const r = id ? cacheRecordatorios.find(x => x.id === id) : null;
   recEdicion = r ? JSON.parse(JSON.stringify(r)) : {
     id: '', centro: '', campos: [], tipo: 'Recurrente', activo: true, programas: [], mesesAntes: 1, diaLimite: 18, diasEnvio: [10],
@@ -6889,9 +6917,22 @@ async function abrirEditorRecordatorio(id) {
   recEdicion.diasEnvio = recEdicion.diasEnvio && recEdicion.diasEnvio.length ? recEdicion.diasEnvio : [10];
   recEdicion.documentosActualizar = recEdicion.documentosActualizar || [];
   recVistaSegundo = false; recVistaContinua = false;
-  recCamposSel = new Set(recEdicion.campos);
   recProgramasSel = new Set(recEdicion.programas);
+  recCamposSel = new Map();
   recCamposExtra = [];
+  recRevisar = [];
+  // Un recordatorio anterior pudo guardar celdas combinadas completas. Las instituciones sueltas se
+  // conservan; una combinación queda cubierta si alguna de sus instituciones ya está elegida, y si
+  // no, se avisa para que la coordinadora marque cuál corresponde.
+  const combinadasViejas = [];
+  (recEdicion.campos || []).forEach(c => {
+    if (separarCampos(c).length > 1) { combinadasViejas.push(c); return; }
+    const k = claveInstRec_(c);
+    if (k) recCamposSel.set(k, nombreInstRec_(c));
+  });
+  combinadasViejas.forEach(c => {
+    if (!separarCampos(c).some(t => recCamposSel.has(claveInstRec_(t)))) recRevisar.push(c);
+  });
   pintarEditorRecordatorio_();
   document.getElementById('overlay-rec').style.display = 'flex';
   document.getElementById('overlay-rec').scrollTop = 0;
@@ -6914,14 +6955,15 @@ function pintarEditorRecordatorio_() {
         <div class="rec-bloque"><label class="et">Nombre del centro (así lo verá el residente)</label>
           <input type="text" id="rec-centro" value="${esc(r.centro)}" placeholder="Hospital General de Medellín (HGM)" oninput="actualizarVistaPreviaRec_()"></div>
 
-        <div class="rec-bloque"><label class="et">Campos del cuadro de rotaciones que corresponden a este centro</label>
+        <div class="rec-bloque"><label class="et">Instituciones del cuadro que corresponden a este centro</label>
+          <div id="rec-campos-revisar"></div>
           <div class="rec-chips" id="rec-campos-sel"></div>
           <div style="${coord ? '' : 'display:none;'}">
           <input type="text" id="rec-campos-filtro" placeholder="Filtrar campos..." oninput="pintarCamposRec_()" style="margin-bottom:6px;">
           <div class="rec-checklist" id="rec-campos-lista"></div>
           <div style="display:flex; gap:6px; margin-top:6px;"><input type="text" id="rec-campo-nuevo" placeholder="¿No aparece? Escríbelo tal como irá en el cuadro" onkeydown="if(event.key==='Enter'){event.preventDefault(); agregarCampoRec();}">
             <button class="btn-secundario btn-pequeno" style="white-space:nowrap;" onclick="agregarCampoRec()">+ Agregar</button></div>
-          <div class="rec-ayuda">Marca todos los nombres con los que aparece el centro en el cuadro (ej. "HGM" y "HOSPITAL GENERAL").</div></div></div>
+          <div class="rec-ayuda">Marca la institución: el recordatorio le llega a todos los que rotan allí, solos o combinados con otras instituciones. Si el cuadro la escribe también con otro nombre (ej. "HGM" y "HOSPITAL GENERAL"), marca ambos.</div></div></div>
 
         <div class="rec-bloque"><label class="et">Tipo</label>
           <div class="rec-segmento"><button type="button" id="rec-tipo-rec" onclick="cambiarTipoRec('Recurrente')">Recurrente (cada mes)</button><button type="button" id="rec-tipo-pun" onclick="cambiarTipoRec('Puntual')">Anuncio puntual</button></div></div>
@@ -6992,28 +7034,47 @@ function pintarEditorRecordatorio_() {
 }
 
 function pintarCamposRec_() {
-  const conteo = camposDisponiblesRec_();
+  const inst = camposDisponiblesRec_();
   const filtro = normalizarBusquedaRec_((document.getElementById('rec-campos-filtro') || {}).value);
-  const nombres = Object.keys(conteo)
-    .filter(c => !filtro || normalizarBusquedaRec_(c).includes(filtro))
-    .sort((a, b) => (recCamposSel.has(b) - recCamposSel.has(a)) || a.localeCompare(b, 'es'));
-  document.getElementById('rec-campos-lista').innerHTML = nombres.map(c =>
-    `<label class="rec-check"><input type="checkbox" data-campo="${esc(c)}" ${recCamposSel.has(c) ? 'checked' : ''} onchange="toggleCampoRec(this)"> ${esc(c)}<span class="n">${conteo[c] ? conteo[c] + ' rotaciones' : 'nuevo'}</span></label>`).join('')
-    || '<div style="padding:6px 10px; font-size:12px; color:#999;">Ningún campo coincide.</div>';
+  const claves = Object.keys(inst)
+    .filter(k => !filtro || normalizarBusquedaRec_(inst[k].nombre).includes(filtro))
+    .sort((a, b) => (recCamposSel.has(b) - recCamposSel.has(a)) || inst[a].nombre.localeCompare(inst[b].nombre, 'es'));
+  const detalle = o => {
+    const p = [];
+    if (o.solas) p.push(o.solas + (o.solas === 1 ? ' sola' : ' solas'));
+    if (o.comb) p.push(o.comb + (o.comb === 1 ? ' combinada' : ' combinadas') + ' con otras');
+    return p.join(' y ');
+  };
+  document.getElementById('rec-campos-lista').innerHTML = claves.map(k => {
+    const o = inst[k], total = o.solas + o.comb;
+    return `<label class="rec-check"><input type="checkbox" data-clave="${esc(k)}" ${recCamposSel.has(k) ? 'checked' : ''} onchange="toggleCampoRec(this)"><span>${esc(o.nombre)}${total ? `<span class="sub">${esc(detalle(o))}</span>` : ''}</span><span class="n">${total ? total + ' rotaciones' : 'nuevo'}</span></label>`;
+  }).join('') || '<div style="padding:6px 10px; font-size:12px; color:#999;">Ninguna institución coincide.</div>';
   const deshabilitado = !esCoordinadoraRec_();
-  document.getElementById('rec-campos-sel').innerHTML = [...recCamposSel].map((c, i) =>
-    `<span class="rec-chip">${esc(c)}${deshabilitado ? '' : ` <b onclick="quitarCampoRec(${i})" title="Quitar">×</b>`}</span>`).join('')
-    || '<span style="font-size:12px; color:#9C0006;">Aún no has elegido ningún campo.</span>';
+  document.getElementById('rec-campos-sel').innerHTML = [...recCamposSel.entries()].map(([k, nombre]) =>
+    `<span class="rec-chip">${esc(nombre)}${deshabilitado ? '' : ` <b onclick="quitarCampoRec('${esc(k)}')" title="Quitar">×</b>`}</span>`).join('')
+    || '<span style="font-size:12px; color:#9C0006;">Aún no has elegido ninguna institución.</span>';
+  const pendientes = recRevisar.filter(c => !separarCampos(c).some(t => recCamposSel.has(claveInstRec_(t))));
+  document.getElementById('rec-campos-revisar').innerHTML = (!deshabilitado && pendientes.length)
+    ? `<div class="rec-aviso">Este recordatorio usaba combinaciones que no se pudieron asignar a una sola institución: <b>${pendientes.map(esc).join('; ')}</b>. Marca abajo la institución que corresponde; si no, esas rotaciones dejarán de recibirlo al guardar.</div>` : '';
 }
-function toggleCampoRec(el) { if (el.checked) recCamposSel.add(el.dataset.campo); else recCamposSel.delete(el.dataset.campo); pintarCamposRec_(); }
-function quitarCampoRec(i) { recCamposSel.delete([...recCamposSel][i]); pintarCamposRec_(); }
+function toggleCampoRec(el) {
+  const k = el.dataset.clave;
+  if (el.checked) { const o = camposDisponiblesRec_()[k]; if (o) recCamposSel.set(k, o.nombre); }
+  else recCamposSel.delete(k);
+  pintarCamposRec_();
+}
+function quitarCampoRec(k) { recCamposSel.delete(k); pintarCamposRec_(); }
 function agregarCampoRec() {
   const input = document.getElementById('rec-campo-nuevo');
-  const c = String(input.value || '').replace(/\s+/g, ' ').trim();
-  if (!c) return;
-  const existente = Object.keys(camposDisponiblesRec_()).find(x => normalizarBusquedaRec_(x) === normalizarBusquedaRec_(c));
-  if (!existente) recCamposExtra.push(c);
-  recCamposSel.add(existente || c);
+  const texto = String(input.value || '');
+  if (!limpiarNombreCentroJS(texto)) return;
+  if (texto.indexOf('+') !== -1) { mostrarMensaje('Escribe una sola institución; las combinadas se reconocen solas.', 'error'); return; }
+  const k = claveInstRec_(texto);
+  if (!k) return;
+  const inst = camposDisponiblesRec_();
+  const nombre = inst[k] ? inst[k].nombre : nombreInstRec_(texto);
+  if (!inst[k]) recCamposExtra.push({ clave: k, nombre });
+  recCamposSel.set(k, nombre);
   input.value = '';
   pintarCamposRec_();
 }
@@ -7055,7 +7116,7 @@ function cambiarTipoRec(tipo, sinPreview) {
 function leerFormularioRec_() {
   const val = id => (document.getElementById(id) || {}).value || '';
   return {
-    id: recEdicion.id, centro: val('rec-centro').trim(), campos: [...recCamposSel], tipo: recEdicion.tipo,
+    id: recEdicion.id, centro: val('rec-centro').trim(), campos: [...recCamposSel.values()], tipo: recEdicion.tipo,
     activo: document.getElementById('rec-activo').checked, programas: [...recProgramasSel],
     mesesAntes: Number(val('rec-meses-antes')) === 2 ? 2 : 1, diaLimite: val('rec-dia-limite'),
     diasEnvio: [val('rec-dia-1'), document.getElementById('rec-segundo-chk').checked ? val('rec-dia-2') : ''].filter(Boolean).join(', '),
