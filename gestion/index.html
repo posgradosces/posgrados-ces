@@ -710,6 +710,7 @@
     <div class="panel" id="panel-gestion-operativa" style="display:none;">
       <h2>Gestión operativa</h2>
       <div id="alertas-comentarios"></div>
+      <div id="alertas-cartas-mov"></div>
 
       <!-- Vista auxiliares: cola simple con Gestionado/Negado -->
       <div id="vista-gestion-auxiliar" style="display:none;">
@@ -925,6 +926,7 @@
     <div class="panel" id="panel-movilidad" style="display:none;">
       <h2>Movilidad académica <button class="btn-secundario btn-pequeno" onclick="cargarMovilidad(true)" style="float:right;">🔄 Actualizar</button></h2>
       <p style="font-size:12px; color:#888; font-style:italic; margin-top:-8px;">Residentes de Movilidad entrante — para gestionar sus permisos con base en si quedaron aceptados o negados.</p>
+      <div id="mov-banner-cartas"></div>
       <div style="margin:10px 0;">
         <button class="btn-secundario btn-pequeno" id="btn-origenes" onclick="alternarPanelOrigenes()">🌎 Clasificar orígenes</button>
         <span style="font-size:12px; color:#888; margin-left:8px;">Define cuáles orígenes son nacionales y cuáles internacionales, para separar el indicador.</span>
@@ -949,7 +951,7 @@
       </div>
       <div style="overflow-x:auto;">
         <table class="lista">
-          <thead><tr><th>Residente</th><th>ID</th><th>Programa</th><th>Origen</th><th>Periodo</th><th>Mes</th><th>Campo de rotación</th><th>Rotación</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>Residente</th><th>ID</th><th>Programa</th><th>Origen</th><th>Periodo</th><th>Mes</th><th>Campo de rotación</th><th>Rotación</th><th>Estado</th><th>Carta de aval</th><th>Acciones</th></tr></thead>
           <tbody id="tabla-movilidad"></tbody>
         </table>
       </div>
@@ -1480,6 +1482,7 @@ async function cargarCola() {
   cacheColaCompleta = resultado.datos;
   dibujarLista(resultado.datos, 'tabla-cola');
   dibujarAlertasComentarios(resultado.datos);
+  cargarCartasMov(); // cartas de aval a Movilidad: sin esperar, no frena la cola
 }
 
 // Botón "Actualizar" de auxiliares: refresca los datos Y la tabla visible (cargarCola por sí
@@ -1591,6 +1594,7 @@ function cambiarTab(tab) {
   } else if (tab === 'movilidad') {
     panelMov.style.display = 'block'; btnMov.className = 'btn-primario btn-pequeno';
     cargarMovilidad();
+    cargarCartasMov();
   } else if (tab === 'residentes') {
     panelRes.style.display = 'block'; btnRes.className = 'btn-primario btn-pequeno';
     pintarResidentes();
@@ -2719,7 +2723,7 @@ function dibujarSalienteMovilidad() {
 
 async function cargarMovilidad(forzarRecarga) {
   if (cacheHistoricoCompleto.length === 0 || forzarRecarga) {
-    document.getElementById('tabla-movilidad').innerHTML = '<tr><td colspan="10" style="text-align:center; color:#888; padding:20px;">⏳ Cargando...</td></tr>';
+    document.getElementById('tabla-movilidad').innerHTML = '<tr><td colspan="11" style="text-align:center; color:#888; padding:20px;">⏳ Cargando...</td></tr>';
     const res = await leerBackend('listarHistorico');
     if (!res.ok) { mostrarMensaje('Error cargando movilidad: ' + res.error, 'error'); return; }
     cacheHistoricoCompleto = res.datos;
@@ -2746,7 +2750,7 @@ function buscarMovilidad() {
   } else if (hayTexto) {
     dibujarTablaMovilidad('Todos');
   } else {
-    document.getElementById('tabla-movilidad').innerHTML = '<tr><td colspan="10" style="text-align:center; color:#999; padding:24px;">Elige "Aceptados", "Negados" o "Pendientes" arriba, o escribe un nombre/documento para buscar en todos los estados.</td></tr>';
+    document.getElementById('tabla-movilidad').innerHTML = '<tr><td colspan="11" style="text-align:center; color:#999; padding:24px;">Elige "Aceptados", "Negados" o "Pendientes" arriba, o escribe un nombre/documento para buscar en todos los estados.</td></tr>';
   }
 }
 
@@ -2763,18 +2767,14 @@ function actualizarKpisMovilidad() {
   const negados = cacheMovilidad.filter(r => r.Estado === 'Negado');
   const pendientes = cacheMovilidad.filter(r => r.Estado !== 'Confirmado' && r.Estado !== 'Negado');
 
-  // Recién aprobados = Confirmados a los que todavía no les marcaste la X (carta enviada).
-  // El aviso vive solo aquí (el badge de esta pestaña), no en el panel general de Avisos, y
-  // NO se limpia solo por abrir la pestaña — se limpia cuando tú le das la X a cada uno.
-  const nuevosAprobados = aceptados.filter(r => String(r.MovilidadNotificada || '').trim() !== 'Si');
-
-  const badge = document.getElementById('badge-movilidad');
-  badge.textContent = nuevosAprobados.length > 0 ? nuevosAprobados.length : '';
-  badge.style.display = nuevosAprobados.length > 0 ? 'inline-block' : 'none';
+  // Ya no hay botón de "carta enviada": la carta la envía el sistema. El aviso de esta pestaña
+  // cuenta las cartas que necesitan atención (información pendiente o decisión tuya).
+  const cartasPorRevisar = contarAvisosCartasMov_();
+  actualizarBadgeMovilidad_();
 
   document.getElementById('kpis-movilidad').innerHTML = `
     <div onclick="filtrarMovilidadPorEstado('Confirmado')" style="cursor:pointer; background:var(--confirmado-bg); color:var(--confirmado-tx); padding:14px 20px; border-radius:8px; ${movilidadFiltroActivo === 'Confirmado' ? 'outline:3px solid var(--confirmado-tx);' : ''}">
-      <div style="font-size:11px; text-transform:uppercase; font-weight:600;">Aceptados ${nuevosAprobados.length > 0 ? '🆕 ' + nuevosAprobados.length + ' nuevo(s)' : ''}</div>
+      <div style="font-size:11px; text-transform:uppercase; font-weight:600;">Aceptados ${cartasPorRevisar > 0 ? '✉️ ' + cartasPorRevisar + ' carta(s) por revisar' : ''}</div>
       <div style="font-size:26px; font-weight:700;">${aceptados.length}</div>
     </div>
     <div onclick="filtrarMovilidadPorEstado('Negado')" style="cursor:pointer; background:var(--negado-bg); color:var(--negado-tx); padding:14px 20px; border-radius:8px; ${movilidadFiltroActivo === 'Negado' ? 'outline:3px solid var(--negado-tx);' : ''}">
@@ -2821,17 +2821,16 @@ function dibujarTablaMovilidad(estado) {
   );
 
   if (filtrado.length === 0) {
-    cuerpo.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#999; padding:20px;">Sin registros en esta categoría.</td></tr>';
+    cuerpo.innerHTML = '<tr><td colspan="11" style="text-align:center; color:#999; padding:20px;">Sin registros en esta categoría.</td></tr>';
     return;
   }
 
   cuerpo.innerHTML = filtrado.map(r => {
     const colores = COLORES_ESTADO[r.Estado] || { bg: '#eee', tx: '#333' };
-    const esNuevo = r.Estado === 'Confirmado' && String(r.MovilidadNotificada || '').trim() !== 'Si';
     const claveEsc = r.ClaveUnica.replace(/'/g, "\\'");
     const programaEsc = (r.Programa || '').replace(/'/g, "\\'");
     return `<tr>
-      <td>${esNuevo ? '<span title="Recién aprobado, sin marcar" style="margin-right:4px;">🆕</span>' : ''}${esc(r.ResidenteNombre || '')}</td>
+      <td>${esc(r.ResidenteNombre || '')}</td>
       <td>${esc(r.ResidenteID || '')}</td>
       <td>${esc(r.Programa || '')}</td>
       <td>${origenColumna_(r)}</td>
@@ -2840,8 +2839,8 @@ function dibujarTablaMovilidad(estado) {
       <td>${esc(r.CampoRotacion || '')}</td>
       <td>${esc(r.Rotacion || '')}</td>
       <td><span class="pastilla" style="background:${colores.bg}; color:${colores.tx};">${esc(r.Estado || '')}</span></td>
+      <td>${pastillaCartaMov_(r)}</td>
       <td style="white-space:nowrap;">
-        ${esNuevo ? `<button title="Marcar carta de movilidad enviada" style="background:var(--confirmado-bg); color:var(--confirmado-tx); border:none; border-radius:5px; padding:4px 10px; cursor:pointer; font-size:12px; font-weight:600; margin-right:4px;" onclick="marcarCartaEnviada('${claveEsc}')">✕ Carta enviada</button>` : ''}
         <button class="btn-secundario btn-pequeno" title="Ver esta rotación en el cuadro" onclick="irACeldaDesdeComentario('${claveEsc}', '${programaEsc}', '${r.Semestre || ''}')">🔗 Ver en cuadro</button>
       </td>
     </tr>`;
@@ -2857,20 +2856,6 @@ function origenColumna_(r) {
     return `<b>${esc(e.etiqueta)}</b><br><span style="color:#8a929c; font-size:11.5px;">${esc(r.UniversidadOrigen || '')}</span>`;
   }
   return `<b>${esc(e.etiqueta)}</b>`;
-}
-
-// Marca que ya se envió la carta de movilidad para este residente — deja de contar como
-// "nuevo" y desaparece del badge de la pestaña.
-async function marcarCartaEnviada(clave) {
-  const resultado = await llamarBackend('marcarMovilidadNotificada', { claves: [clave] });
-  if (!resultado.ok) { mostrarMensaje('Error: ' + resultado.error, 'error'); return; }
-  const fila = cacheMovilidad.find(r => r.ClaveUnica === clave);
-  if (fila) fila.MovilidadNotificada = 'Si';
-  const filaHist = cacheHistoricoCompleto.find(r => r.ClaveUnica === clave);
-  if (filaHist) filaHist.MovilidadNotificada = 'Si';
-  actualizarKpisMovilidad();
-  dibujarTablaMovilidad(movilidadFiltroActivo);
-  mostrarMensaje('Marcado — carta enviada.', 'ok');
 }
 
 // Un periodo válido siempre tiene forma AAAA-N (ej: 2026-2). Cualquier otra cosa (como un mes suelto) es dato corrupto y se ignora aquí.
@@ -6272,6 +6257,191 @@ const ESTILO_AVISO = {
   comentario: { fondo: '#FFF3CD', borde: '#ffe69c', color: '#664d03', titulo: '🔔 Avisos — Comentarios', pastilla: null }
 };
 
+// ============================================================
+// CARTAS DE AVAL A MOVILIDAD (movilidad entrante)
+// El servidor las genera y las envía solo. Aquí solo se ven los avisos y se decide:
+// reenviar la anterior, enviar una corregida, o no enviar.
+// ============================================================
+let cacheCartasMov = { cargado: false, cartas: [], pendientes: 0, modoPrueba: false, destino: '' };
+let conteoAvisosFilas_ = 0;
+let ocupadoCartasMov_ = false;
+
+function escAttrCarta_(t) { return esc(t).replace(/"/g, '&quot;'); }
+
+function contarAvisosCartasMov_() {
+  return (usuarioActual && usuarioActual.rol === 'coordinadora') ? (cacheCartasMov.pendientes || 0) : 0;
+}
+
+// Número de la pestaña Movilidad = cartas de aval que piden atención.
+function actualizarBadgeMovilidad_() {
+  const badge = document.getElementById('badge-movilidad');
+  if (!badge) return;
+  const n = contarAvisosCartasMov_();
+  badge.textContent = n > 0 ? n : '';
+  badge.style.display = n > 0 ? 'inline-block' : 'none';
+  badge.title = n > 0 ? n + ' carta(s) de aval necesitan tu atención' : '';
+}
+
+// Número rojo de la pestaña Gestión operativa = avisos de la cola + cartas que piden atención.
+function actualizarBadgeGestion_() {
+  actualizarBadgeMovilidad_();
+  const badge = document.getElementById('badge-comentarios');
+  if (!badge) return;
+  const total = conteoAvisosFilas_ + contarAvisosCartasMov_();
+  badge.textContent = total > 0 ? total : '';
+  badge.style.display = total > 0 ? 'inline-block' : 'none';
+}
+
+function aplicarRespuestaCartasMov_(res) {
+  cacheCartasMov = {
+    cargado: true, cartas: res.cartas || [], pendientes: res.pendientes || 0,
+    modoPrueba: !!res.modoPrueba, destino: res.destino || ''
+  };
+  dibujarAvisosCartasMov();
+  dibujarBannerCartasMov_();
+  actualizarBadgeGestion_();
+  if (document.getElementById('panel-movilidad').style.display === 'block') { actualizarKpisMovilidad(); buscarMovilidad(); }
+}
+
+async function cargarCartasMov() {
+  if (!usuarioActual || usuarioActual.rol !== 'coordinadora') return;
+  const res = await leerBackend('listarCartasMovilidad');
+  if (!res || !res.ok) return; // si el servidor aún no tiene las cartas, simplemente no se muestran
+  aplicarRespuestaCartasMov_(res);
+}
+
+function dibujarBannerCartasMov_() {
+  const el = document.getElementById('mov-banner-cartas');
+  if (!el) return;
+  if (!cacheCartasMov.cargado || !cacheCartasMov.modoPrueba) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div style="background:#fff3cd; border:1px solid #ffe69c; color:#664d03; border-radius:8px; padding:8px 12px; font-size:12.5px; margin:8px 0;">
+    🧪 <b>Cartas de aval en modo prueba:</b> se generan y llegan a <b>${esc(cacheCartasMov.destino)}</b>, no a Movilidad.</div>`;
+}
+
+// Estado de la carta de este residente, en la tabla de Movilidad entrante.
+function cartaDeFilaMov_(r) {
+  const id = String(r.ResidenteID || '').trim(), prog = String(r.Programa || '').trim();
+  const nom = String(r.ResidenteNombre || '').trim().toUpperCase();
+  const lista = cacheCartasMov.cartas || [];
+  return lista.find(c => c.programa === prog && ((id && c.residenteId === id) || (nom && String(c.residente || '').toUpperCase() === nom))) || null;
+}
+
+function pastillaCartaMov_(r) {
+  if (!cacheCartasMov.cargado) return '<span style="color:#c3c9d0;">…</span>';
+  const c = cartaDeFilaMov_(r);
+  if (!c) return '<span style="color:#b0b8c0;" title="Todavía no hay carta para este residente">—</span>';
+  const ESTILOS = {
+    'Enviada': ['#E2F0D9', '#375623', 'Carta enviada'],
+    'Enviada (prueba)': ['#DDEBF7', '#1F4E79', 'Enviada (prueba)'],
+    'Pendiente por información': ['#FFF2CC', '#7F6000', 'Falta información'],
+    'Requiere decisión': ['#F8D7DA', '#9C0006', 'Decidir carta'],
+    'Error de envío': ['#F8D7DA', '#9C0006', 'Error de envío'],
+    'En espera': ['#EEF1F4', '#5b6770', 'En espera'],
+    'No se enviará': ['#EEF1F4', '#5b6770', 'No se enviará'],
+    'No aplica': ['#EEF1F4', '#5b6770', 'No aplica']
+  };
+  const e = ESTILOS[c.estado] || ['#EEF1F4', '#5b6770', c.estado];
+  const tip = [c.motivo, c.fechaEnvio ? 'Enviada: ' + c.fechaEnvio : '', c.enviadoA ? 'A: ' + c.enviadoA : ''].filter(Boolean).join(' · ');
+  const pdf = c.urlPdf ? ` <a href="${escAttrCarta_(c.urlPdf)}" target="_blank" rel="noopener" title="Ver el PDF" style="text-decoration:none;">📄</a>` : '';
+  const fecha = String(c.fechaEnvio || '').slice(0, 10);
+  const enviada = c.estado === 'Enviada' || c.estado === 'Enviada (prueba)';
+  const detalle = (c.estado === 'Pendiente por información' || c.estado === 'Requiere decisión' || c.estado === 'Error de envío')
+    ? `<div style="font-size:11px; color:${e[1]}; margin-top:3px; max-width:230px; white-space:normal; line-height:1.3;">${esc(c.motivo || '')}</div>`
+    : (enviada && fecha ? `<div style="font-size:11px; color:#6b7684; margin-top:3px;">${esc(fecha)}${c.version > 1 ? ' · v' + esc(c.version) : ''}</div>` : '');
+  const icono = enviada ? '✅ ' : (c.estado === 'Pendiente por información' ? '⚠️ ' : (c.estado === 'Requiere decisión' || c.estado === 'Error de envío' ? '❗ ' : ''));
+  return `<span class="pastilla" title="${escAttrCarta_(tip)}" style="background:${e[0]}; color:${e[1]};">${icono}${esc(e[2])}</span>${pdf}${detalle}`;
+}
+
+function dibujarAvisosCartasMov() {
+  const cont = document.getElementById('alertas-cartas-mov');
+  if (!cont) return;
+  if (!usuarioActual || usuarioActual.rol !== 'coordinadora') { cont.innerHTML = ''; return; }
+  const items = (cacheCartasMov.cartas || []).filter(c => c.requiereAtencion);
+  if (items.length === 0) { cont.innerHTML = ''; return; }
+  const col = '#1F3864', fondo = '#eaf0fa', borde = '#c7d6ee';
+  const pastillas = { 'Pendiente por información': ['#FFF2CC', '#7F6000'], 'Requiere decisión': ['#F8D7DA', '#9C0006'], 'Error de envío': ['#F8D7DA', '#9C0006'] };
+  const prueba = cacheCartasMov.modoPrueba
+    ? `<div style="font-size:11.5px; color:#664d03; background:#fff3cd; border-radius:6px; padding:4px 8px; margin-top:6px; display:inline-block;">🧪 Modo prueba: lo que se envíe llega a ${esc(cacheCartasMov.destino)}, no a Movilidad.</div>` : '';
+  cont.innerHTML = `
+  <div style="background:${fondo}; border:1px solid ${borde}; border-radius:8px; padding:12px 16px; margin-bottom:12px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+      <strong style="color:${col};">✉️ Avisos — Cartas de aval a Movilidad (${items.length})</strong>
+      <button class="btn-secundario btn-pequeno" onclick="revisarCartasMovAhora()" title="Vuelve a revisar el cuadro ahora mismo, sin esperar los 5 minutos">🔄 Revisar ahora</button>
+    </div>
+    ${prueba}
+    <div style="margin-top:8px;">
+      ${items.map(c => {
+        const p = pastillas[c.estado] || ['#EEF1F4', '#5b6770'];
+        const id = escAttrCarta_(JSON.stringify(c.idCarta));
+        const a = c.acciones || {};
+        return `
+        <div style="padding:8px 0; border-top:1px solid ${borde}; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div style="min-width:260px; flex:1;">
+            <strong>${esc(c.residente)}</strong> — ${esc(c.programa)}${c.periodos ? ' · ' + esc(c.periodos) : ''}
+            <span class="pastilla" style="background:${p[0]}; color:${p[1]}; margin-left:6px;">${esc(c.estado)}</span>
+            <div style="color:${col}; margin-top:2px;">${esc(c.motivo || '')}</div>
+            ${c.fechaEnvio ? `<div style="font-size:11px; color:#6b7684; margin-top:2px;">Última carta enviada: ${esc(c.fechaEnvio)}${c.version ? ' (versión ' + esc(c.version) + ')' : ''}${c.urlPdf ? ` · <a href="${escAttrCarta_(c.urlPdf)}" target="_blank" rel="noopener">ver PDF</a>` : ''}</div>` : ''}
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+            <button class="btn-secundario btn-pequeno" style="white-space:nowrap;" onclick="verCartaEnMovilidad(${escAttrCarta_(JSON.stringify(c.residente))})">🔗 Ver en Movilidad</button>
+            ${a.reenviar ? `<button class="btn-secundario btn-pequeno" style="white-space:nowrap;" onclick="decidirCartaMov(${id}, 'reenviar')">↩ Reenviar la anterior</button>` : ''}
+            ${a.enviarCorregida ? `<button class="btn-primario btn-pequeno" style="white-space:nowrap;" onclick="decidirCartaMov(${id}, 'enviar_corregida')">✉ Enviar corregida</button>` : ''}
+            ${a.noEnviar ? `<button class="btn-secundario btn-pequeno" style="white-space:nowrap;" onclick="decidirCartaMov(${id}, 'no_enviar')">🚫 No enviar</button>` : ''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function verCartaEnMovilidad(nombre) {
+  cambiarTab('movilidad');
+  const campo = document.getElementById('mov-filtro-nombre');
+  if (campo) { campo.value = nombre; }
+  buscarMovilidad();
+}
+
+async function decidirCartaMov(idCarta, decision) {
+  if (ocupadoCartasMov_) return;
+  const c = (cacheCartasMov.cartas || []).find(x => x.idCarta === idCarta);
+  if (!c) return;
+  const destino = cacheCartasMov.destino || 'Movilidad Académica';
+  const quien = `${c.residente} (${c.programa})`;
+  const textos = {
+    reenviar: `Se reenviará a ${destino} la última carta ya emitida de ${quien}, sin cambios.\n\n¿Continuar?`,
+    enviar_corregida: `Se generará una carta NUEVA de ${quien} con los datos actuales del cuadro y se enviará a ${destino}, indicando que reemplaza a la anterior.\n\n¿Continuar?`,
+    no_enviar: `No se enviará carta de ${quien}. El aviso se quitará y volverá a aparecer solo si los datos cambian de nuevo.\n\n¿Continuar?`
+  };
+  if (!confirm(textos[decision] || '¿Continuar?')) return;
+  ocupadoCartasMov_ = true;
+  mostrarMensaje(decision === 'no_enviar' ? 'Guardando…' : 'Generando y enviando la carta…', 'ok');
+  try {
+    const res = await llamarBackend('decidirCartaMovilidad', { idCarta, decision });
+    if (!res.ok) { mostrarMensaje('Error: ' + (res.error || 'no se pudo completar'), 'error'); return; }
+    aplicarRespuestaCartasMov_(res);
+    mostrarMensaje(res.mensaje || 'Listo.', 'ok');
+  } finally {
+    ocupadoCartasMov_ = false;
+  }
+}
+
+async function revisarCartasMovAhora() {
+  if (ocupadoCartasMov_) return;
+  ocupadoCartasMov_ = true;
+  mostrarMensaje('Revisando las cartas…', 'ok');
+  try {
+    const res = await llamarBackend('revisarCartasMovilidad', {});
+    if (!res.ok) { mostrarMensaje('Error: ' + (res.error || 'no se pudo revisar'), 'error'); return; }
+    aplicarRespuestaCartasMov_(res);
+    const partes = [];
+    if (res.enviadas) partes.push(res.enviadas + ' carta(s) enviada(s)');
+    if (res.errores) partes.push(res.errores + ' con error');
+    mostrarMensaje(partes.length ? 'Revisión lista: ' + partes.join(', ') + '.' : 'Revisión lista: nada nuevo por enviar.', res.errores ? 'error' : 'ok');
+  } finally {
+    ocupadoCartasMov_ = false;
+  }
+}
+
 function dibujarAlertasComentarios(filas) {
   const esCoordinadora = usuarioActual.rol === 'coordinadora';
 
@@ -6280,9 +6450,8 @@ function dibujarAlertasComentarios(filas) {
     .map(f => ({ fila: f, info: determinarAviso_(f, esCoordinadora) }))
     .filter(a => a.info !== null);
 
-  const badge = document.getElementById('badge-comentarios');
-  if (badge) badge.textContent = avisos.length > 0 ? avisos.length : '';
-  if (badge) badge.style.display = avisos.length > 0 ? 'inline-block' : 'none';
+  conteoAvisosFilas_ = avisos.length;
+  actualizarBadgeGestion_();
 
   const contenedor = document.getElementById('alertas-comentarios');
   if (!contenedor) return;
