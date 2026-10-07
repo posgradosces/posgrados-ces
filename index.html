@@ -591,6 +591,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .kpi-n{font-size:22px}
   .tab{font-size:12px;padding:8px 6px}
 }
+/* ===== AVISO: DOCUMENTOS DEL CENTRO DE PRÁCTICA (comunidad de residentes) ===== */
+.aviso-docs-centro{display:flex;align-items:center;gap:14px;background:var(--az-suave);border:2px solid var(--az-med);border-radius:12px;padding:14px 18px;margin-bottom:1.25rem}
+.aviso-docs-centro .ad-ico{width:44px;height:44px;border-radius:12px;background:var(--az);display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0}
+.aviso-docs-centro .ad-tit{font-size:15px;font-weight:700;color:var(--az);line-height:1.35}
+.aviso-docs-centro .ad-txt{font-size:13px;color:#3d5266;line-height:1.55;margin-top:3px}
+.aviso-docs-centro .ad-txt a{color:var(--az);font-weight:700;text-decoration:underline}
+.aviso-docs-centro .ad-txt a:hover{color:var(--az-med)}
 </style>
 </head>
 <body>
@@ -2047,6 +2054,13 @@ function renderCrono(cedula) {
       </div>
       <div class="vr-progreso" id="vr-progreso"></div>
       <div id="vr-requisitos"></div>
+    </div>
+    <div class="aviso-docs-centro">
+      <div class="ad-ico" aria-hidden="true">📂</div>
+      <div>
+        <div class="ad-tit">Recuerda enviar los documentos del centro de práctica a tiempo</div>
+        <div class="ad-txt"><a href="https://virtual.ces.edu.co/course/view.php?id=39&section=2" target="_blank" rel="noopener">Revísalos aquí</a>, en la Comunidad de Residentes CES.</div>
+      </div>
     </div>
     <div id="vr-novedades"></div>
     <div class="vr-card" id="vr-tareas"></div>
