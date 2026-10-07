@@ -6737,6 +6737,7 @@ async function descartarAlerta(clave) {
 const REC_MESES_ES = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
 const REC_DIAS_SEMANA = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
 const REC_URL_PORTAL = 'https://posgradosces.github.io/posgrados-ces/';
+const URL_COMUNIDAD_RESIDENTES = 'https://virtual.ces.edu.co/course/view.php?id=39&section=2';   // Comunidad de Residentes CES (CES Virtual): aquí están todos los documentos
 
 let cacheRecordatorios = [];
 let recordatoriosCargados = false;
@@ -6897,10 +6898,15 @@ function construirCorreoRecordatorio_(rec, envio, d) {
     (detalle ? '<p style="margin:0 0 8px;font-size:13px;color:#6b7684;">' + detalle + '</p>' : '') +
     '</td></tr>' +
     (bloques ? '<tr><td style="padding:8px 28px 18px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #D6E4F5;border-radius:10px;overflow:hidden;">' + bloques + '</table></td></tr>' : '') +
+    (!envio.puntual || rec.documentos.length ? '<tr><td style="padding:0 28px 22px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#EAF3FB;border:2px solid #003865;border-radius:12px;"><tr><td align="center" style="padding:22px 18px;font-family:Arial,Helvetica,sans-serif;">' +
+    '<div style="font-size:19px;font-weight:bold;color:#003865;line-height:25px;">&#128229; Ingresa aquí para descargar la documentación</div>' +
+    '<div style="font-size:14px;color:#333333;line-height:21px;margin:8px 0 16px;">Todos los formatos y documentos de tu centro de práctica están en un solo lugar: la Comunidad de Residentes CES.</div>' +
+    '<a href="' + escHtmlRec_(URL_COMUNIDAD_RESIDENTES) + '" style="background:#003865;color:#ffffff;padding:14px 30px;border-radius:8px;text-decoration:none;display:inline-block;font-size:16px;font-weight:bold;">Descargar documentación &rarr;</a>' +
+    '</td></tr></table></td></tr>' : '') +
     '<tr><td style="padding:0 28px 22px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#555555;line-height:20px;">' +
     (envio.puntual ? '' : '<p style="margin:0 0 10px;">' + (envio.segundo ? (continua ? 'Si ya los actualizaste, puedes ignorar este mensaje.' : 'Si ya la enviaste completa, puedes ignorar este mensaje.') : (continua ? 'Si ya los actualizaste, puedes ignorar este mensaje.' : 'Si ya enviaste la documentación, puedes ignorar este mensaje.')) + '</p>') +
     '<p style="margin:0 0 16px;">Si tienes alguna duda, comunícate con la Coordinación de Posgrados Clínicos.</p>' +
-    '<a href="' + REC_URL_PORTAL + '" style="background:#003865;color:#ffffff;padding:10px 18px;border-radius:6px;text-decoration:none;display:inline-block;font-size:14px;">Ver mi cronograma</a>' +
+    '<a href="' + REC_URL_PORTAL + '" style="background:#ffffff;color:#003865;border:1px solid #003865;padding:9px 18px;border-radius:6px;text-decoration:none;display:inline-block;font-size:14px;">Ver mi cronograma</a>' +
     '</td></tr>' +
     '<tr><td align="center" style="background:#f4f7fb;padding:16px;font-family:Arial,Helvetica,sans-serif;">' +
     '<div style="font-size:14px;font-weight:bold;color:#003865;">Coordinación de Posgrados Clínicos</div>' +
