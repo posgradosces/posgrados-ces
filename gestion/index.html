@@ -4571,8 +4571,12 @@ async function cargarCuadricula(silencioso) {
   const anioVigente = anioAcademicoVigenteHoy_();
   const porResidente = {}; // ResidenteID -> { nombre, correo, niveles: { anioAcademico: nivel } }
   registrosGridActual.forEach(r => {
-    if (!porResidente[r.ResidenteID]) porResidente[r.ResidenteID] = { nombre: r.ResidenteNombre, correo: r.Correo || '', niveles: {} };
+    if (!porResidente[r.ResidenteID]) porResidente[r.ResidenteID] = { nombre: r.ResidenteNombre, correo: r.Correo || '', niveles: {}, universidadOrigen: '', ambitoOrigen: '', paisOrigen: '', esMovilidad: false };
     const p = porResidente[r.ResidenteID];
+    if (r.UniversidadOrigen && !p.universidadOrigen) p.universidadOrigen = r.UniversidadOrigen;
+    if (r.AmbitoOrigen && !p.ambitoOrigen) p.ambitoOrigen = r.AmbitoOrigen;
+    if (r.PaisOrigen && !p.paisOrigen) p.paisOrigen = r.PaisOrigen;
+    if (String(r.Tipo || '').toLowerCase().indexOf('movilidad') === 0) p.esMovilidad = true;
     if (r.ResidenteNombre) p.nombre = r.ResidenteNombre;
     if (r.Correo) p.correo = r.Correo;
     if (r.Nivel && !p.niveles[r.AnioAcademico]) p.niveles[r.AnioAcademico] = r.Nivel;
@@ -4589,7 +4593,12 @@ async function cargarCuadricula(silencioso) {
       const elegido = pasados.length > 0 ? pasados[pasados.length - 1] : futuros[0];
       nivel = p.niveles[elegido] || p.niveles[anios[0]];
     }
-    return { id, nombre: p.nombre, nivel, correo: p.correo };
+    const fila = { id, nombre: p.nombre, nivel, correo: p.correo };
+    if (p.esMovilidad) {
+      fila.tipo = 'Movilidad entrante'; fila.universidadOrigen = p.universidadOrigen;
+      fila.ambitoOrigen = p.ambitoOrigen; fila.paisOrigen = p.paisOrigen;
+    }
+    return fila;
   });
 
   try {
@@ -5442,12 +5451,24 @@ function abrirModalAgregarResidente() {
       <option value="Movilidad entrante">Movilidad académica (entrante)</option>
     </select>
     <label>Nombre</label><input id="modal-res-nombre">
-    <label>Documento de identidad</label><input id="modal-res-cc" placeholder="Cédula, pasaporte u otro — letras y números">
+    <label id="etiqueta-res-cc">Documento de identidad</label><input id="modal-res-cc" placeholder="Cédula, pasaporte u otro — letras y números">
     <div id="campos-residente-ces">
       <label>Nivel</label><input id="modal-res-nivel" placeholder="R2">
     </div>
     <div id="campos-residente-movilidad" style="display:none;">
-      <label>Universidad de origen</label><input id="modal-res-universidad">
+      <p style="font-size:11px; color:#0d6e5f; margin:10px 0 0;">Todos estos datos son obligatorios: con ellos se genera la carta de aval a Movilidad.</p>
+      <label>Procedencia</label>
+      <select id="modal-res-ambito" onchange="actualizarCamposOrigenMovilidad()" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">
+        <option value="" selected>Elige: nacional o internacional…</option>
+        <option value="Nacional">Nacional (universidad colombiana)</option>
+        <option value="Internacional">Internacional</option>
+      </select>
+      <div id="campo-mov-universidad" style="display:none;">
+        <label id="etiqueta-mov-universidad">Universidad de origen</label><input id="modal-res-universidad" placeholder="Nombre completo de la universidad">
+      </div>
+      <div id="campo-mov-pais" style="display:none;">
+        <label>País de origen</label><input id="modal-res-pais" placeholder="Ej.: Ecuador">
+      </div>
     </div>
     <label>Correo electrónico</label><input id="modal-res-correo" type="email" placeholder="para poder notificarle desde el sistema">
     <div id="campos-base-residente">
@@ -5469,6 +5490,16 @@ function actualizarCamposTipoResidente() {
   document.getElementById('campos-residente-ces').style.display = esMovilidad ? 'none' : 'block';
   document.getElementById('campos-residente-movilidad').style.display = esMovilidad ? 'block' : 'none';
   document.getElementById('campos-base-residente').style.display = esMovilidad ? 'none' : 'block';
+  if (esMovilidad) actualizarCamposOrigenMovilidad();
+}
+
+// Movilidad: según la procedencia se pide la universidad (nacional) o el país (internacional).
+function actualizarCamposOrigenMovilidad() {
+  const ambito = document.getElementById('modal-res-ambito').value;
+  document.getElementById('campo-mov-universidad').style.display = ambito ? 'block' : 'none';
+  document.getElementById('campo-mov-pais').style.display = ambito === 'Internacional' ? 'block' : 'none';
+  document.getElementById('etiqueta-mov-universidad').textContent = ambito === 'Internacional' ? 'Universidad o institución de origen' : 'Universidad de origen';
+  document.getElementById('etiqueta-res-cc').textContent = ambito === 'Internacional' ? 'Pasaporte o documento de identidad' : 'Documento de identidad';
 }
 
 async function confirmarAgregarResidente() {
@@ -5477,11 +5508,20 @@ async function confirmarAgregarResidente() {
   const cc = document.getElementById('modal-res-cc').value.trim();
   if (!nombre || !cc) { mostrarMensaje('Completa nombre y documento.', 'error'); return; }
 
-  let nivel = '', universidadOrigen = '';
+  let nivel = '', universidadOrigen = '', ambitoOrigen = '', paisOrigen = '';
   const correo = document.getElementById('modal-res-correo').value.trim();
   if (tipo === 'Movilidad entrante') {
+    ambitoOrigen = document.getElementById('modal-res-ambito').value;
     universidadOrigen = document.getElementById('modal-res-universidad').value.trim();
-    if (!universidadOrigen) { mostrarMensaje('Completa la universidad de origen.', 'error'); return; }
+    paisOrigen = document.getElementById('modal-res-pais').value.trim();
+    const faltan = [];
+    if (!ambitoOrigen) faltan.push('procedencia (nacional o internacional)');
+    if (ambitoOrigen && !universidadOrigen) faltan.push(ambitoOrigen === 'Internacional' ? 'universidad o institución de origen' : 'universidad de origen');
+    if (ambitoOrigen === 'Internacional' && !paisOrigen) faltan.push('país de origen');
+    if (!correo) faltan.push('correo electrónico');
+    if (/^SIN-?DOC/i.test(cc)) faltan.push('documento real (no uno provisional)');
+    if (faltan.length) { mostrarMensaje('Para movilidad falta: ' + faltan.join(', ') + '.', 'error'); return; }
+    if (ambitoOrigen === 'Nacional') paisOrigen = '';
   } else {
     nivel = document.getElementById('modal-res-nivel').value.trim();
   }
@@ -5512,7 +5552,7 @@ async function confirmarAgregarResidente() {
     }
   }
 
-  filasGridActual.push({ id: cc, nombre, nivel, tipo, universidadOrigen, correo });
+  filasGridActual.push({ id: cc, nombre, nivel, tipo, universidadOrigen, ambitoOrigen, paisOrigen, correo });
   cerrarModal();
   redibujarCuadricula();
   mostrarMensaje('Residente agregado. Ahora asigna sus rotaciones dando clic en cada mes.', 'ok');
@@ -5558,11 +5598,15 @@ async function guardarCeldaNueva(residenteId, mes) {
   const rotacion = document.getElementById('modal-rotacion').value;
   const tipo = document.getElementById('modal-tipo').value;
   if (!campoRotacion || !rotacion) { mostrarMensaje('Completa campo y rotación.', 'error'); return; }
+  if (tipo === 'Movilidad entrante' && (!residente.ambitoOrigen && !residente.universidadOrigen && !residente.paisOrigen)) {
+    mostrarMensaje('Este residente no tiene origen registrado. Quítalo de la cuadrícula y agrégalo de nuevo como movilidad, con su procedencia.', 'error'); return;
+  }
 
   const { anioAcademico, semestre } = calcularAnioSemestre(mes, anioInicioBloqueCeldaVacia || contextoGrid.anioInicio);
   const resultado = await llamarBackend('guardarPendiente', {
     residenteId: residente.id, residenteNombre: residente.nombre, nivel: residente.nivel,
-    universidadOrigen: residente.universidadOrigen || '', correo: residente.correo || '',
+    universidadOrigen: residente.universidadOrigen || '', ambitoOrigen: residente.ambitoOrigen || '', paisOrigen: residente.paisOrigen || '',
+    correo: residente.correo || '',
     mes, programa: contextoGrid.programa, periodo: semestre,
     anioAcademico, semestre,
     tipo, campoRotacion, rotacion
