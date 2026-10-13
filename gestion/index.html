@@ -709,6 +709,7 @@
 
     <div class="panel" id="panel-gestion-operativa" style="display:none;">
       <h2>Gestión operativa</h2>
+      <div id="alertas-recordatorios-mov"></div>
       <div id="alertas-comentarios"></div>
       <div id="alertas-cartas-mov"></div>
 
@@ -6272,14 +6273,20 @@ function contarAvisosCartasMov_() {
   return (usuarioActual && usuarioActual.rol === 'coordinadora') ? (cacheCartasMov.pendientes || 0) : 0;
 }
 
+// Recordatorios de movilidad por gestionar: solo para las auxiliares.
+function contarRecordatoriosMov_() {
+  return (usuarioActual && usuarioActual.rol === 'auxiliar') ? recordatoriosMov_.length : 0;
+}
+
 // Número de la pestaña Movilidad = cartas de aval que piden atención.
 function actualizarBadgeMovilidad_() {
   const badge = document.getElementById('badge-movilidad');
   if (!badge) return;
-  const n = contarAvisosCartasMov_();
+  const esAux = usuarioActual && usuarioActual.rol === 'auxiliar';
+  const n = esAux ? contarRecordatoriosMov_() : contarAvisosCartasMov_();
   badge.textContent = n > 0 ? n : '';
   badge.style.display = n > 0 ? 'inline-block' : 'none';
-  badge.title = n > 0 ? n + ' carta(s) de aval necesitan tu atención' : '';
+  badge.title = n > 0 ? (esAux ? n + ' residente(s) de movilidad por gestionar con los centros' : n + ' carta(s) de aval necesitan tu atención') : '';
 }
 
 // Número rojo de la pestaña Gestión operativa = avisos de la cola + cartas que piden atención.
@@ -6287,7 +6294,7 @@ function actualizarBadgeGestion_() {
   actualizarBadgeMovilidad_();
   const badge = document.getElementById('badge-comentarios');
   if (!badge) return;
-  const total = conteoAvisosFilas_ + contarAvisosCartasMov_();
+  const total = conteoAvisosFilas_ + contarAvisosCartasMov_() + contarRecordatoriosMov_();
   badge.textContent = total > 0 ? total : '';
   badge.style.display = total > 0 ? 'inline-block' : 'none';
 }
@@ -6304,9 +6311,15 @@ function aplicarRespuestaCartasMov_(res) {
 }
 
 async function cargarCartasMov() {
-  if (!usuarioActual || usuarioActual.rol !== 'coordinadora') return;
+  // Coordinadoras y auxiliares leen las cartas; solo las coordinadoras pueden decidir (el servidor lo exige).
+  if (!usuarioActual || (usuarioActual.rol !== 'coordinadora' && usuarioActual.rol !== 'auxiliar')) return;
   const res = await leerBackend('listarCartasMovilidad');
-  if (!res || !res.ok) return; // si el servidor aún no tiene las cartas, simplemente no se muestran
+  if (!res || !res.ok) {
+    // No lo ocultamos: la columna "Carta de aval" debe decir que no pudo consultar el estado, y por qué.
+    cacheCartasMov = Object.assign({}, cacheCartasMov, { cargado: false, error: (res && res.error) ? String(res.error) : 'El servidor no respondió' });
+    if (document.getElementById('panel-movilidad').style.display === 'block') buscarMovilidad();
+    return;
+  }
   aplicarRespuestaCartasMov_(res);
 }
 
@@ -6327,48 +6340,60 @@ function cartaDeFilaMov_(r) {
 }
 
 function pastillaCartaMov_(r) {
-  if (!cacheCartasMov.cargado) return '<span style="color:#c3c9d0;">…</span>';
+  if (!cacheCartasMov.cargado) {
+    if (cacheCartasMov.error) return `<span class="pastilla" style="background:#F8D7DA; color:#9C0006;" title="${escAttrCarta_(cacheCartasMov.error)}">⚠ No se pudo consultar</span> <a href="#" onclick="cargarCartasMov(); return false;" style="font-size:11px;">reintentar</a><div style="font-size:11px; color:#9C0006; margin-top:3px; max-width:200px; white-space:normal;">${esc(cacheCartasMov.error)}</div>`;
+    return '<span style="color:#c3c9d0;" title="Consultando el estado de las cartas…">…</span>';
+  }
   const c = cartaDeFilaMov_(r);
-  if (!c) return '<span style="color:#b0b8c0;" title="Todavía no hay carta para este residente">—</span>';
+  if (!c) return '<span class="pastilla" style="background:#EEF1F4; color:#5b6770;" title="La revisión de cartas todavía no ha registrado a este residente. Se revisa cada 5 minutos; si sigue así, falta algo en el cuadro (tipo/nivel de movilidad, origen o centro).">Sin registro de carta</span>';
   const ESTILOS = {
     'Enviada': ['#E2F0D9', '#375623', 'Carta enviada'],
     'Enviada (prueba)': ['#DDEBF7', '#1F4E79', 'Enviada (prueba)'],
     'Pendiente por información': ['#FFF2CC', '#7F6000', 'Falta información'],
     'Requiere decisión': ['#F8D7DA', '#9C0006', 'Decidir carta'],
     'Error de envío': ['#F8D7DA', '#9C0006', 'Error de envío'],
+    'Negada (avisada)': ['#EBDAE9', '#7030A0', 'Todo negado · avisada'],
+    'Negada (avisada, prueba)': ['#EBDAE9', '#7030A0', 'Todo negado · avisada (prueba)'],
     'En espera': ['#EEF1F4', '#5b6770', 'En espera'],
     'No se enviará': ['#EEF1F4', '#5b6770', 'No se enviará'],
     'No aplica': ['#EEF1F4', '#5b6770', 'No aplica']
   };
-  const e = ESTILOS[c.estado] || ['#EEF1F4', '#5b6770', c.estado];
+  const e = (c.estado === 'Requiere decisión' && c.todoNegado)
+    ? ['#F8D7DA', '#9C0006', 'Decidir aviso (todo negado)']
+    : (ESTILOS[c.estado] || ['#EEF1F4', '#5b6770', c.estado]);
   const tip = [c.motivo, c.fechaEnvio ? 'Enviada: ' + c.fechaEnvio : '', c.enviadoA ? 'A: ' + c.enviadoA : ''].filter(Boolean).join(' · ');
   const pdf = c.urlPdf ? ` <a href="${escAttrCarta_(c.urlPdf)}" target="_blank" rel="noopener" title="Ver el PDF" style="text-decoration:none;">📄</a>` : '';
-  const fecha = String(c.fechaEnvio || '').slice(0, 10);
-  const enviada = c.estado === 'Enviada' || c.estado === 'Enviada (prueba)';
+  const fecha = String(/^Negada \(avisada/.test(c.estado) ? (c.fechaAvisoNegado || '') : (c.fechaEnvio || '')).slice(0, 10);
+  const enviada = c.estado === 'Enviada' || c.estado === 'Enviada (prueba)' || /^Negada \(avisada/.test(c.estado);
   const detalle = (c.estado === 'Pendiente por información' || c.estado === 'Requiere decisión' || c.estado === 'Error de envío')
     ? `<div style="font-size:11px; color:${e[1]}; margin-top:3px; max-width:230px; white-space:normal; line-height:1.3;">${esc(c.motivo || '')}</div>`
     : (enviada && fecha ? `<div style="font-size:11px; color:#6b7684; margin-top:3px;">${esc(fecha)}${c.version > 1 ? ' · v' + esc(c.version) : ''}</div>` : '');
-  const icono = enviada ? '✅ ' : (c.estado === 'Pendiente por información' ? '⚠️ ' : (c.estado === 'Requiere decisión' || c.estado === 'Error de envío' ? '❗ ' : ''));
+  const icono = /^Negada \(avisada/.test(c.estado) ? '✉️ ' : enviada ? '✅ ' : (c.estado === 'Pendiente por información' ? '⚠️ ' : (c.estado === 'Requiere decisión' || c.estado === 'Error de envío' ? '❗ ' : ''));
   return `<span class="pastilla" title="${escAttrCarta_(tip)}" style="background:${e[0]}; color:${e[1]};">${icono}${esc(e[2])}</span>${pdf}${detalle}`;
 }
 
 function dibujarAvisosCartasMov() {
   const cont = document.getElementById('alertas-cartas-mov');
   if (!cont) return;
-  if (!usuarioActual || usuarioActual.rol !== 'coordinadora') { cont.innerHTML = ''; return; }
+  const rol = usuarioActual && usuarioActual.rol;
+  if (rol !== 'coordinadora' && rol !== 'auxiliar') { cont.innerHTML = ''; return; }
+  const soloLectura = rol === 'auxiliar';   // las auxiliares ven el estado, pero no deciden nada
   const items = (cacheCartasMov.cartas || []).filter(c => c.requiereAtencion);
   if (items.length === 0) { cont.innerHTML = ''; return; }
   const col = '#1F3864', fondo = '#eaf0fa', borde = '#c7d6ee';
   const pastillas = { 'Pendiente por información': ['#FFF2CC', '#7F6000'], 'Requiere decisión': ['#F8D7DA', '#9C0006'], 'Error de envío': ['#F8D7DA', '#9C0006'] };
   const prueba = cacheCartasMov.modoPrueba
     ? `<div style="font-size:11.5px; color:#664d03; background:#fff3cd; border-radius:6px; padding:4px 8px; margin-top:6px; display:inline-block;">🧪 Modo prueba: lo que se envíe llega a ${esc(cacheCartasMov.destino)}, no a Movilidad.</div>` : '';
+  const nota = soloLectura
+    ? `<div style="font-size:11.5px; color:#5b6770; margin-top:6px;">👁️ Solo lectura: estas cartas y avisos los decide la coordinación. Si ves algo por corregir en el cuadro, avísale a una coordinadora.</div>` : '';
   cont.innerHTML = `
   <div style="background:${fondo}; border:1px solid ${borde}; border-radius:8px; padding:12px 16px; margin-bottom:12px;">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
       <strong style="color:${col};">✉️ Avisos — Cartas de aval a Movilidad (${items.length})</strong>
-      <button class="btn-secundario btn-pequeno" onclick="revisarCartasMovAhora()" title="Vuelve a revisar el cuadro ahora mismo, sin esperar los 5 minutos">🔄 Revisar ahora</button>
+      ${soloLectura ? '' : `<button class="btn-secundario btn-pequeno" onclick="revisarCartasMovAhora()" title="Vuelve a revisar el cuadro ahora mismo, sin esperar los 5 minutos">🔄 Revisar ahora</button>`}
     </div>
     ${prueba}
+    ${nota}
     <div style="margin-top:8px;">
       ${items.map(c => {
         const p = pastillas[c.estado] || ['#EEF1F4', '#5b6770'];
@@ -6378,15 +6403,16 @@ function dibujarAvisosCartasMov() {
         <div style="padding:8px 0; border-top:1px solid ${borde}; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
           <div style="min-width:260px; flex:1;">
             <strong>${esc(c.residente)}</strong> — ${esc(c.programa)}${c.periodos ? ' · ' + esc(c.periodos) : ''}
-            <span class="pastilla" style="background:${p[0]}; color:${p[1]}; margin-left:6px;">${esc(c.estado)}</span>
+            <span class="pastilla" style="background:${p[0]}; color:${p[1]}; margin-left:6px;">${esc(c.todoNegado && c.estado === 'Requiere decisión' ? 'Todo negado · requiere decisión' : c.estado)}</span>
             <div style="color:${col}; margin-top:2px;">${esc(c.motivo || '')}</div>
-            ${c.fechaEnvio ? `<div style="font-size:11px; color:#6b7684; margin-top:2px;">Última carta enviada: ${esc(c.fechaEnvio)}${c.version ? ' (versión ' + esc(c.version) + ')' : ''}${c.urlPdf ? ` · <a href="${escAttrCarta_(c.urlPdf)}" target="_blank" rel="noopener">ver PDF</a>` : ''}</div>` : ''}
+            ${c.fechaEnvio && !c.todoNegado ? `<div style="font-size:11px; color:#6b7684; margin-top:2px;">Última carta enviada: ${esc(c.fechaEnvio)}${c.version ? ' (versión ' + esc(c.version) + ')' : ''}${c.urlPdf ? ` · <a href="${escAttrCarta_(c.urlPdf)}" target="_blank" rel="noopener">ver PDF</a>` : ''}</div>` : ''}
           </div>
           <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
             <button class="btn-secundario btn-pequeno" style="white-space:nowrap;" onclick="verCartaEnMovilidad(${escAttrCarta_(JSON.stringify(c.residente))})">🔗 Ver en Movilidad</button>
-            ${a.reenviar ? `<button class="btn-secundario btn-pequeno" style="white-space:nowrap;" onclick="decidirCartaMov(${id}, 'reenviar')">↩ Reenviar la anterior</button>` : ''}
-            ${a.enviarCorregida ? `<button class="btn-primario btn-pequeno" style="white-space:nowrap;" onclick="decidirCartaMov(${id}, 'enviar_corregida')">✉ Enviar corregida</button>` : ''}
-            ${a.noEnviar ? `<button class="btn-secundario btn-pequeno" style="white-space:nowrap;" onclick="decidirCartaMov(${id}, 'no_enviar')">🚫 No enviar</button>` : ''}
+            ${!soloLectura && a.reenviar ? `<button class="btn-secundario btn-pequeno" style="white-space:nowrap;" onclick="decidirCartaMov(${id}, 'reenviar')">↩ Reenviar la anterior</button>` : ''}
+            ${!soloLectura && a.enviarCorregida ? `<button class="btn-primario btn-pequeno" style="white-space:nowrap;" onclick="decidirCartaMov(${id}, 'enviar_corregida')">✉ Enviar corregida</button>` : ''}
+            ${!soloLectura && a.avisarNegado ? `<button class="btn-primario btn-pequeno" style="white-space:nowrap;" onclick="decidirCartaMov(${id}, 'avisar_negado')">✉ Avisar que todo fue negado</button>` : ''}
+            ${!soloLectura && a.noEnviar ? `<button class="btn-secundario btn-pequeno" style="white-space:nowrap;" onclick="decidirCartaMov(${id}, 'no_enviar')">🚫 No enviar</button>` : ''}
           </div>
         </div>`;
       }).join('')}
@@ -6403,6 +6429,7 @@ function verCartaEnMovilidad(nombre) {
 
 async function decidirCartaMov(idCarta, decision) {
   if (ocupadoCartasMov_) return;
+  if (!usuarioActual || usuarioActual.rol !== 'coordinadora') { mostrarMensaje('Esta decisión es de la coordinación.', 'error'); return; }
   const c = (cacheCartasMov.cartas || []).find(x => x.idCarta === idCarta);
   if (!c) return;
   const destino = cacheCartasMov.destino || 'Movilidad Académica';
@@ -6410,6 +6437,7 @@ async function decidirCartaMov(idCarta, decision) {
   const textos = {
     reenviar: `Se reenviará a ${destino} la última carta ya emitida de ${quien}, sin cambios.\n\n¿Continuar?`,
     enviar_corregida: `Se generará una carta NUEVA de ${quien} con los datos actuales del cuadro y se enviará a ${destino}, indicando que reemplaza a la anterior.\n\n¿Continuar?`,
+    avisar_negado: `Se enviará a ${destino} un aviso de que TODO lo de movilidad de ${quien} quedó negado, con la observación del cuadro (sin carta).\n\n¿Continuar?`,
     no_enviar: `No se enviará carta de ${quien}. El aviso se quitará y volverá a aparecer solo si los datos cambian de nuevo.\n\n¿Continuar?`
   };
   if (!confirm(textos[decision] || '¿Continuar?')) return;
@@ -6427,6 +6455,7 @@ async function decidirCartaMov(idCarta, decision) {
 
 async function revisarCartasMovAhora() {
   if (ocupadoCartasMov_) return;
+  if (!usuarioActual || usuarioActual.rol !== 'coordinadora') return;
   ocupadoCartasMov_ = true;
   mostrarMensaje('Revisando las cartas…', 'ok');
   try {
@@ -6442,7 +6471,87 @@ async function revisarCartasMovAhora() {
   }
 }
 
+// ============================================================
+// RECORDATORIOS DE MOVILIDAD PARA LAS AUXILIARES
+// La movilidad hay que gestionarla rápido: los centros necesitan tiempo para responder. Apenas se
+// ingresa una rotación de movilidad entrante que empieza dentro de los próximos 3 meses (o que ya
+// empezó) y sigue sin respuesta de los centros (Pendiente o Cambio), le sale el recordatorio a las
+// auxiliares, con los más urgentes arriba. Sale de la cola que ya está en memoria: no pide nada nuevo.
+// ============================================================
+const VENTANA_RECORDATORIO_MOV_ = 3;   // meses de anticipación
+let recordatoriosMov_ = [];
+
+function calcularRecordatoriosMov_(filas) {
+  const hoy = referenciaMes_(0).indice;
+  const grupos = {};
+  (filas || []).forEach(f => {
+    if (String(f.Tipo || '').indexOf('Movilidad entrante') !== 0) return;
+    if (f.Estado !== 'Pendiente' && f.Estado !== 'Cambio') return;
+    const idx = indiceMesGestion_(f.Periodo, f.Mes);
+    if (idx === null) return;
+    const falta = idx - hoy;
+    if (falta > VENTANA_RECORDATORIO_MOV_) return;
+    const clave = [f.Programa, f.ResidenteID || f.ResidenteNombre].join('|');
+    const g = grupos[clave] || (grupos[clave] = { nombre: f.ResidenteNombre, programa: f.Programa, universidad: f.UniversidadOrigen || '', filas: [], minFalta: falta, primera: f });
+    g.filas.push(f);
+    if (falta < g.minFalta) { g.minFalta = falta; g.primera = f; }
+  });
+  return Object.keys(grupos).map(k => grupos[k])
+    .sort((a, b) => a.minFalta - b.minFalta || String(a.nombre).localeCompare(String(b.nombre)));
+}
+
+function textoCuandoMov_(falta, mes) {
+  if (falta < 0) return `ya empezó (${mes})`;
+  if (falta === 0) return `empieza este mes (${mes})`;
+  if (falta === 1) return `empieza el próximo mes (${mes})`;
+  return `empieza en ${falta} meses (${mes})`;
+}
+
+function dibujarRecordatoriosMovilidad_(filas) {
+  const cont = document.getElementById('alertas-recordatorios-mov');
+  const esAux = usuarioActual && usuarioActual.rol === 'auxiliar';
+  recordatoriosMov_ = esAux ? calcularRecordatoriosMov_(filas) : [];
+  if (!cont) return;
+  if (!esAux || recordatoriosMov_.length === 0) { cont.innerHTML = ''; return; }
+  const hoy = referenciaMes_(0).indice;
+  const LIMITE = 8;
+  const ordenados = recordatoriosMov_;
+  const urgentes = ordenados.filter(g => g.minFalta <= 1).length;
+  const filaHtml = g => {
+    const f = g.primera;
+    const falta = g.minFalta;
+    const urgente = falta <= 1;
+    const color = urgente ? '#9C0006' : '#7F6000';
+    const centros = [...new Set(g.filas.map(x => String(x.CampoRotacion || '').trim()).filter(Boolean))];
+    const centrosTxt = centros.length ? centros.slice(0, 3).join(' · ') + (centros.length > 3 ? '…' : '') : 'sin centro asignado';
+    const claveEsc = String(f.ClaveUnica || '').replace(/'/g, "\\'");
+    const progEsc = String(f.Programa || '').replace(/'/g, "\\'");
+    const perEsc = String(f.Periodo || '').replace(/'/g, "\\'");
+    return `
+      <div style="padding:7px 0; border-top:1px solid ${urgente ? '#f3c6c6' : '#ffe69c'}; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div style="min-width:260px; flex:1;">
+          <strong>${esc(g.nombre)}</strong> — ${esc(g.programa)}${g.universidad ? ' · ' + esc(g.universidad) : ''}
+          <span class="pastilla" style="background:${urgente ? '#F8D7DA' : '#FFF2CC'}; color:${color}; margin-left:6px;">${esc(textoCuandoMov_(falta, f.Mes))}</span>
+          <div style="color:${color}; font-size:12px; margin-top:2px;">${g.filas.length} mes(es) sin respuesta de los centros · ${esc(centrosTxt)}</div>
+        </div>
+        <button class="btn-secundario btn-pequeno" style="white-space:nowrap;" onclick="irACeldaDesdeComentario('${claveEsc}', '${progEsc}', '${perEsc}')">🔗 Ver en cuadro</button>
+      </div>`;
+  };
+  const visibles = ordenados.slice(0, LIMITE);
+  cont.innerHTML = `
+  <div style="background:${urgentes ? '#fbe4e4' : '#FFF3CD'}; border:1px solid ${urgentes ? '#f3c6c6' : '#ffe69c'}; border-radius:8px; padding:12px 16px; margin-bottom:12px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+      <strong style="color:${urgentes ? '#9C0006' : '#664d03'};">⏰ Recordatorio — Movilidad por gestionar (${ordenados.length})</strong>
+      <button class="btn-secundario btn-pequeno" onclick="cambiarTab('movilidad')">Abrir Movilidad</button>
+    </div>
+    <div style="font-size:12px; color:#6b5a1f; margin-top:4px;">La movilidad hay que gestionarla rápido: los centros necesitan tiempo para responder. Aquí salen las que empiezan en los próximos ${VENTANA_RECORDATORIO_MOV_} meses (o ya empezaron) y siguen sin respuesta.</div>
+    <div style="margin-top:8px;">${visibles.map(filaHtml).join('')}</div>
+    ${ordenados.length > LIMITE ? `<div style="font-size:12px; color:#6b5a1f; padding-top:8px; border-top:1px solid #ffe69c;">Y ${ordenados.length - LIMITE} más. Las ves todas en Movilidad → Pendientes.</div>` : ''}
+  </div>`;
+}
+
 function dibujarAlertasComentarios(filas) {
+  dibujarRecordatoriosMovilidad_(filas);
   const esCoordinadora = usuarioActual.rol === 'coordinadora';
 
   const avisos = filas
