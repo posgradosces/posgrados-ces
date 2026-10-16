@@ -8,6 +8,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
     --pendiente-bg: #FFD580; --pendiente-tx: #823C00;
@@ -15,7 +17,7 @@
     --negado-bg: #EBDAE9; --negado-tx: #7030A0;
     --cambio-bg: #FFC7CE; --cambio-tx: #9C0006;
     --gestionado-bg: #C6EFCE; --gestionado-tx: #006100;
-    --azul-ces: #003865;
+    --azul-ces: #15284b; --lima: #cadd30; --cielo: #429be2;
   }
   * { box-sizing: border-box; }
   body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; background: #f4f6f8; color: #222; }
@@ -494,6 +496,36 @@
   .nt-msg { font-size:11.5px; margin-left:6px; }
   .nt-msg.err { color:var(--cambio-tx); } .nt-msg.ok { color:var(--gestionado-tx); }
   @media (max-width:900px) { .nt-prog { flex-wrap:wrap; } .nt-res { flex-wrap:wrap; padding-left:14px; } .nt-detalle { margin-left:0; } }
+
+  /* ===== PALETA COMUNIDAD DE RESIDENTES (version sobria para la herramienta interna) =====
+     Solo cambia la marca (azul marino, lima, azul CES) y la tipografia de los titulos.
+     Los colores de estado (pendiente, confirmado, negado, cambio, gestionado) no se tocan:
+     coinciden con los del Excel y significan algo. */
+  body { background: #f4f7fb; }
+  body::after { content:''; display:block; height:6px; background:linear-gradient(90deg,#15284b 0 65%,#429be2 65% 88%,#cadd30 88% 100%); }
+  header { border-bottom: 4px solid var(--lima); padding: 12px 20px; }
+  header h1, .panel h2, .db-caja h3, .db-titulo-buscar, #caja-modal h3, .caja-login h2 { font-family: 'Montserrat', -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+  header h1 { font-weight: 800; letter-spacing: -.2px; }
+  .panel h2, .db-caja h3 { font-weight: 800; }
+  .panel { border-radius: 14px; border: 1px solid rgba(21,40,75,.08); box-shadow: 0 4px 14px rgba(21,40,75,.06); }
+  .db-caja { border-radius: 14px; border-color: rgba(21,40,75,.10); }
+  .btn-primario:hover { background: #004e8c; }
+  .btn-secundario { background: #e3edf7; color: #15284b; }
+  .btn-secundario:hover { background: #d3e3f3; }
+  .tabs button { border-radius: 999px; }
+  #login-screen { background: linear-gradient(135deg,#15284b 0%,#0f1d38 55%,#004e8c 100%); position: relative; overflow: hidden; }
+  #login-screen::before { content:''; position:absolute; top:-110px; right:-70px; width:380px; height:380px; border-radius:50%; background:rgba(202,221,48,.14); }
+  #login-screen::after { content:''; position:absolute; bottom:-130px; left:-80px; width:320px; height:320px; border-radius:50%; background:rgba(66,155,226,.20); }
+  .caja-login { position: relative; z-index: 1; width: 360px; max-width: 92vw; border-radius: 20px; padding: 34px 32px; box-shadow: 0 14px 40px rgba(0,0,0,.25); }
+  .caja-login h2 { font-weight: 800; font-size: 20px; line-height: 1.25; }
+  .caja-login h2::after { content:''; display:block; width:56px; height:4px; border-radius:3px; background:var(--lima); margin-top:10px; }
+  .caja-login select, .caja-login input { border: 1.5px solid #15284b; border-radius: 10px; }
+  .caja-login .btn-primario { border-radius: 999px; padding: 11px 14px; }
+  table.cuadricula thead th, table.cuadricula th.esquina { background: #e9f0f8; color: #15284b; }
+  table.lista th { color: #556070; }
+  .db-caja-buscar { background: #f4f7fb; border-color: #d3e3f3; border-top: 3px solid var(--lima); }
+  .db-tabs-busqueda button.activo { border-bottom-color: var(--lima); }
+  .db-chip.activo { box-shadow: 0 0 0 2px rgba(202,221,48,.55); }
 </style>
 </head>
 <body>
@@ -532,7 +564,7 @@
       <button class="btn-secundario btn-pequeno" id="tab-btn-residentes" onclick="cambiarTab('residentes')" style="display:none;">Residentes</button>
       <button class="btn-secundario btn-pequeno" id="tab-btn-notas" onclick="cambiarTab('notas')" style="display:none;">Notas <span id="badge-notas" style="display:none; background:var(--pendiente-tx); color:white; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:4px;"></span></button>
       <button class="btn-secundario btn-pequeno" id="tab-btn-centros" onclick="cambiarTab('centros')" style="display:none;">Centros de práctica</button>
-      <button class="btn-secundario btn-pequeno" id="boton-publicar-github" onclick="publicarAlMicrositioPublico()" style="display:none; margin-left:auto; background:#003865; color:white;" title="Sube ahora mismo lo más reciente al micrositio público, sin esperar al disparador de las 9 PM">📤 Publicar al micrositio público</button>
+      <button class="btn-secundario btn-pequeno" id="boton-publicar-github" onclick="publicarAlMicrositioPublico()" style="display:none; margin-left:auto; background:#15284b; color:white;" title="Sube ahora mismo lo más reciente al micrositio público, sin esperar al disparador de las 9 PM">📤 Publicar al micrositio público</button>
     </div>
 
     <div class="panel" id="panel-cuadricula" style="display:none;">
