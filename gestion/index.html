@@ -4309,6 +4309,42 @@ function descargarFinalizanDb_() {
   XLSX.utils.book_append_sheet(wb, ws, 'Finalizan');
   XLSX.writeFile(wb, 'Residentes_por_graduar_' + new Date().toISOString().slice(0, 10) + '.xlsx');
 }
+// Formato para Word: un bloque por especialidad, con Identificación y Nombre.
+function nombrePropioDb_(t) {
+  const chicas = ['de', 'del', 'la', 'las', 'los', 'y', 'e', 'da', 'di', 'van', 'von'];
+  return String(t || '').trim().toLocaleLowerCase('es').split(/\s+/).map((w, i) => (i > 0 && chicas.includes(w)) ? w : w.charAt(0).toLocaleUpperCase('es') + w.slice(1)).join(' ');
+}
+function gruposWordDb_() {
+  const g = {};
+  listaFinalizanDb_.forEach(f => { (g[f.programa || 'SIN PROGRAMA'] = g[f.programa || 'SIN PROGRAMA'] || []).push(f); });
+  return Object.keys(g).sort((a, b) => a.localeCompare(b, 'es')).map(prog => ({
+    titulo: 'ESPECIALIZACIÓN EN ' + String(prog).toLocaleUpperCase('es'),
+    filas: g[prog].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')).map(f => [f.cedula, nombrePropioDb_(f.nombre)]) }));
+}
+function htmlWordDb_() {
+  const fuente = 'font-family:Poppins,Arial,sans-serif; font-size:11pt;';
+  return gruposWordDb_().map(gr => `<p style="${fuente} font-weight:bold; margin:14pt 0 2pt;"><b>${esc(gr.titulo)}</b></p>
+    <table style="border-collapse:collapse; ${fuente}"><tr><td style="width:120pt; padding:1pt 6pt 1pt 0;">Identificación</td><td style="padding:1pt 0;">Nombre</td></tr>
+    ${gr.filas.map(f => `<tr><td style="width:120pt; padding:1pt 6pt 1pt 0;">${esc(f[0])}</td><td style="padding:1pt 0;">${esc(f[1])}</td></tr>`).join('')}</table>`).join('');
+}
+function verWordDb_() {
+  const cont = document.getElementById('db-word-prev');
+  if (!cont) return;
+  if (cont.innerHTML) { cont.innerHTML = ''; return; }
+  cont.innerHTML = `<div style="border:1px solid #d5dbe3; border-radius:8px; padding:12px 16px; margin:10px 0; background:#fff;">
+    <div style="text-align:right; margin-bottom:6px;"><button class="btn-primario btn-pequeno" onclick="copiarWordDb_()">📋 Copiar para Word</button></div>${htmlWordDb_()}</div>`;
+}
+async function copiarWordDb_() {
+  if (!listaFinalizanDb_.length) { mostrarMensaje('No hay residentes por finalizar.', 'error'); return; }
+  const txt = gruposWordDb_().map(gr => gr.titulo + '\nIdentificación\tNombre\n' + gr.filas.map(f => f.join('\t')).join('\n')).join('\n\n');
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([htmlWordDb_()], { type: 'text/html' }), 'text/plain': new Blob([txt], { type: 'text/plain' }) })]);
+    mostrarMensaje('Copiado. Pégalo en Word.', 'ok');
+  } catch (e) {
+    try { await navigator.clipboard.writeText(txt); mostrarMensaje('Copiado como texto. Pégalo en Word.', 'ok'); }
+    catch (e2) { mostrarMensaje('No se pudo copiar; selecciona la vista y copia con Ctrl + C.', 'error'); }
+  }
+}
 async function copiarFinalizanDb_() {
   if (!listaFinalizanDb_.length) { mostrarMensaje('No hay residentes por finalizar.', 'error'); return; }
   const filas = [['Cédula', 'Nombre', 'Programa', 'Finalización'], ...listaFinalizanDb_.map(f => [f.cedula, f.nombre, f.programa, f.finalizacion])];
@@ -4386,9 +4422,10 @@ function dibujarKpisResidentesDb() {
       situacion: mesAbsRes_(r.FechaFinalizacion) <= mesHoy + 1 ? 'Por confirmar' : 'En dos o tres meses' }));
     html = `<div class="db-desglose-top" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><b>🏁 Finalizan en los próximos 3 meses</b>
       <span style="display:inline-flex; gap:6px;">
-        <button class="btn-secundario btn-pequeno" onclick="copiarFinalizanDb_()" title="Copia la tabla para pegarla en Excel o en un correo">📋 Copiar tabla</button>
+        <button class="btn-secundario btn-pequeno" onclick="verWordDb_()" title="Lista por especialidad con cédula y nombre, para pegar en Word">📄 Vista para Word</button>
+        <button class="btn-secundario btn-pequeno" onclick="copiarFinalizanDb_()" title="Copia la tabla plana para pegarla en Excel">📋 Copiar tabla</button>
         <button class="btn-primario btn-pequeno" onclick="descargarFinalizanDb_()">⬇️ Descargar Excel</button>
-      </span></div>
+      </span></div><div id="db-word-prev"></div>
       ${porConfirmarGrado.length ? `
         <div class="db-nivel-titulo" style="color:var(--pendiente-tx);"><i style="background:var(--pendiente-bg); border:1px solid var(--pendiente-tx);"></i>Por confirmar — su fecha ya pasó o falta un mes o menos (${porConfirmarGrado.length})</div>
         <table class="lista"><thead><tr><th>Residente</th><th>Cédula</th><th>Programa</th><th style="text-align:right;">Finalización</th></tr></thead><tbody>
