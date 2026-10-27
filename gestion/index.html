@@ -2083,18 +2083,41 @@ async function fetchLargoG_(url, opciones) {
 }
 function hoyAbsG_() { const d = new Date(); return d.getFullYear() * 12 + d.getMonth(); }
 
+// Arma las filas desde la hoja viva (Apps Script) con los mismos nombres de columna que usaba el CSV,
+// para que el resto de la pestaña Notas funcione igual y no dependa de GitHub raw.
+async function filasParaNotas_() {
+  if (!cacheHistoricoCompleto.length) {
+    const res = await leerBackend('listarHistorico');
+    if (!res.ok) throw new Error(res.error || 'No se pudo leer el histórico');
+    cacheHistoricoCompleto = res.datos;
+  }
+  return cacheHistoricoCompleto.map(r => ({
+    'Programa': r.Programa,
+    'Semestre': String(r.Semestre || ''),
+    'Tipo': r.Tipo,
+    'Nivel / Origen': r.Nivel,
+    'ID': r.ResidenteID,
+    'Persona': r.ResidenteNombre,
+    'Mes': r.Mes,
+    'Campo de rotacion': r.CampoRotacion,
+    'Rotacion': r.Rotacion,
+    'Detalle original': r.DetalleOriginal,
+    'Aplica nota': r.AplicaNota
+  }));
+}
+
 async function cargarNotasGrado(forzar) {
   if (NT.cargando) return NT.cargando;
   if (NT.filasCsv && NT.drive && !forzar) { construirNotasGrado_(); pintarNotasGrado(); return; }
   document.getElementById('nt-lista').innerHTML = '<div style="text-align:center; color:#888; padding:20px;">⏳ Consultando rotaciones y Drive (puede tardar unos segundos)...</div>';
   NT.cargando = (async () => {
     try {
-      const [csv, drive] = await Promise.all([
-        fetchConTimeout_(URL_CSV_NOTAS + '?t=' + Date.now()).then(r => r.text()),
+      const [filas, drive] = await Promise.all([
+        filasParaNotas_(),
         fetchLargoG_(URL_PUENTE_DRIVE + '?accion=listado').then(r => r.json()),
         cargarResidentes()
       ]);
-      NT.filasCsv = Papa.parse(csv, { header: true, skipEmptyLines: true }).data;
+      NT.filasCsv = filas;
       if (!drive || !drive.ok) throw new Error((drive && drive.mensaje) || 'Drive no respondió');
       NT.drive = drive.datos || {};
       construirNotasGrado_();
