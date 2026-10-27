@@ -4298,6 +4298,30 @@ async function agregarNovedadResidente() {
 
 // ---------- Dashboard: cumpleaños, novedades y finalizaciones (van al final del panel) ----------
 let kpiResidentesDb = null;
+let listaFinalizanDb_ = [];
+// Lista de quienes finalizan (cédula, nombre, programa, fecha) para enviar a admisiones.
+function descargarFinalizanDb_() {
+  if (!listaFinalizanDb_.length) { mostrarMensaje('No hay residentes por finalizar.', 'error'); return; }
+  const filas = listaFinalizanDb_.map(f => ({ 'Cédula': f.cedula, 'Nombre': f.nombre, 'Programa': f.programa, 'Finalización': f.finalizacion, 'Situación': f.situacion }));
+  const ws = XLSX.utils.json_to_sheet(filas);
+  ws['!cols'] = [{ wch: 14 }, { wch: 42 }, { wch: 46 }, { wch: 16 }, { wch: 20 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Finalizan');
+  XLSX.writeFile(wb, 'Residentes_por_graduar_' + new Date().toISOString().slice(0, 10) + '.xlsx');
+}
+async function copiarFinalizanDb_() {
+  if (!listaFinalizanDb_.length) { mostrarMensaje('No hay residentes por finalizar.', 'error'); return; }
+  const filas = [['Cédula', 'Nombre', 'Programa', 'Finalización'], ...listaFinalizanDb_.map(f => [f.cedula, f.nombre, f.programa, f.finalizacion])];
+  const tsv = filas.map(f => f.join('\t')).join('\n');
+  const html = '<table border="1" style="border-collapse:collapse;">' + filas.map((f, i) => '<tr>' + f.map(c => (i ? '<td>' : '<th>') + esc(c) + (i ? '</td>' : '</th>')).join('') + '</tr>').join('') + '</table>';
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ 'text/plain': new Blob([tsv], { type: 'text/plain' }), 'text/html': new Blob([html], { type: 'text/html' }) })]);
+    mostrarMensaje('Tabla copiada. Pégala en Excel o en el correo.', 'ok');
+  } catch (e) {
+    try { await navigator.clipboard.writeText(tsv); mostrarMensaje('Tabla copiada. Pégala en Excel.', 'ok'); }
+    catch (e2) { mostrarMensaje('No se pudo copiar; usa Descargar Excel.', 'error'); }
+  }
+}
 function dibujarKpisResidentesDb() {
   const cont = document.getElementById('db-kpis-res');
   if (!cont) return;
@@ -4332,9 +4356,9 @@ function dibujarKpisResidentesDb() {
     <div><div class="n" style="color:${t.color};">${t.n}</div><div class="t">${t.t}</div><div class="d db-igual">${t.d}</div><div class="ver">${kpiResidentesDb === t.k ? 'Ocultar detalle ▴' : 'Ver detalle ▾'}</div></div></button>`).join('');
 
   const det = document.getElementById('db-desglose-res');
-  const filaPersona = (r, derecha, extra) => {
+  const filaPersona = (r, derecha, extra, conCedula) => {
     const nAcc = esCoord ? regDb(() => { cambiarTab('residentes'); abrirFichaResidente(String(r.ResidenteID)); }, 'kpires') : null;
-    return `<tr><td>${esCoord ? `<button class="db-link" onclick="dbAcc(${nAcc})">${esc(r.NombreCompleto)}</button>` : `<b>${esc(r.NombreCompleto)}</b>`}${extra ? `<div style="font-size:12px; color:#666;">${extra}</div>` : ''}</td><td>${esc(r.Programa)}</td><td style="text-align:right;">${derecha}</td></tr>`;
+    return `<tr><td>${esCoord ? `<button class="db-link" onclick="dbAcc(${nAcc})">${esc(r.NombreCompleto)}</button>` : `<b>${esc(r.NombreCompleto)}</b>`}${extra ? `<div style="font-size:12px; color:#666;">${extra}</div>` : ''}</td>${conCedula ? `<td style="white-space:nowrap;">${esc(r.ResidenteID)}</td>` : ''}<td>${esc(r.Programa)}</td><td style="text-align:right;">${derecha}</td></tr>`;
   };
   let html = '';
   if (kpiResidentesDb === 'cumple') {
@@ -4356,17 +4380,25 @@ function dibujarKpisResidentesDb() {
         <button class="btn-primario btn-pequeno" onclick="event.stopPropagation(); confirmarGrado('${String(r.ResidenteID).replace(/'/g, "\\'")}')">🎓 Confirmar grado</button>
         <button class="btn-secundario btn-pequeno" onclick="event.stopPropagation(); aplazarGrado('${String(r.ResidenteID).replace(/'/g, "\\'")}')">Aún no se gradúa</button>
       </span>` : '';
-    html = `<div class="db-desglose-top"><b>🏁 Finalizan en los próximos 3 meses</b></div>
+    listaFinalizanDb_ = finalizan.map(r => ({
+      cedula: String(r.ResidenteID || '').trim(), nombre: r.NombreCompleto || '', programa: r.Programa || '',
+      finalizacion: textoMesAnioRes(r.FechaFinalizacion) || '',
+      situacion: mesAbsRes_(r.FechaFinalizacion) <= mesHoy + 1 ? 'Por confirmar' : 'En dos o tres meses' }));
+    html = `<div class="db-desglose-top" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><b>🏁 Finalizan en los próximos 3 meses</b>
+      <span style="display:inline-flex; gap:6px;">
+        <button class="btn-secundario btn-pequeno" onclick="copiarFinalizanDb_()" title="Copia la tabla para pegarla en Excel o en un correo">📋 Copiar tabla</button>
+        <button class="btn-primario btn-pequeno" onclick="descargarFinalizanDb_()">⬇️ Descargar Excel</button>
+      </span></div>
       ${porConfirmarGrado.length ? `
         <div class="db-nivel-titulo" style="color:var(--pendiente-tx);"><i style="background:var(--pendiente-bg); border:1px solid var(--pendiente-tx);"></i>Por confirmar — su fecha ya pasó o falta un mes o menos (${porConfirmarGrado.length})</div>
-        <table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th style="text-align:right;">Finalización</th></tr></thead><tbody>
-        ${porConfirmarGrado.map(r => filaPersona(r, `<span class="pastilla" style="background:var(--pendiente-bg); color:var(--pendiente-tx);">${esc(textoMesAnioRes(r.FechaFinalizacion))}</span>${acc(r)}`)).join('')}
+        <table class="lista"><thead><tr><th>Residente</th><th>Cédula</th><th>Programa</th><th style="text-align:right;">Finalización</th></tr></thead><tbody>
+        ${porConfirmarGrado.map(r => filaPersona(r, `<span class="pastilla" style="background:var(--pendiente-bg); color:var(--pendiente-tx);">${esc(textoMesAnioRes(r.FechaFinalizacion))}</span>${acc(r)}`, '', true)).join('')}
         </tbody></table>`
       : '<p style="color:#999; font-size:13px;">Nadie pendiente por confirmar en este momento.</p>'}
       ${masAdelanteGrado.length ? `
         <div class="db-nivel-titulo" style="color:var(--confirmado-tx); margin-top:16px;"><i style="background:var(--confirmado-bg); border:1px solid var(--confirmado-tx);"></i>En dos o tres meses (${masAdelanteGrado.length})</div>
-        <table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th style="text-align:right;">Finalización</th></tr></thead><tbody>
-        ${masAdelanteGrado.map(r => filaPersona(r, `<span class="pastilla" style="background:var(--confirmado-bg); color:var(--confirmado-tx);">${esc(textoMesAnioRes(r.FechaFinalizacion))}</span>`)).join('')}
+        <table class="lista"><thead><tr><th>Residente</th><th>Cédula</th><th>Programa</th><th style="text-align:right;">Finalización</th></tr></thead><tbody>
+        ${masAdelanteGrado.map(r => filaPersona(r, `<span class="pastilla" style="background:var(--confirmado-bg); color:var(--confirmado-tx);">${esc(textoMesAnioRes(r.FechaFinalizacion))}</span>`, '', true)).join('')}
         </tbody></table>` : ''}
       <p style="font-size:11px; color:#888; margin:10px 0 0;">Al confirmar, el residente pasa a inactivos como egresado y sus rotaciones posteriores a la fecha quedan cerradas: se conservan, pero salen de la cola de gestión.</p>`;
   }
