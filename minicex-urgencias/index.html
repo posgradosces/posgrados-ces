@@ -51,6 +51,27 @@ body { background: var(--page); color: var(--ink); font-family: var(--font); fon
 .mx-btn:disabled { opacity: .45; cursor: not-allowed; }
 .mx-btn.sec { background: #fff; color: var(--navy); border-color: rgba(21, 40, 75, .25); }
 .mx-btn.sec:hover { background: var(--paper); }
+.mx-seg { display: inline-flex; gap: 6px; padding: 4px; border-radius: 999px; background: var(--tint); }
+.mx-seg .mx-pillink { border-color: transparent; background: transparent; }
+.mx-seg .mx-pillink.on { background: var(--navy); color: #fff; }
+.mx-final { margin-top: 18px; padding: 18px 20px; border-radius: 16px; background: var(--navy); color: #fff; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
+.mx-final p { margin: 0; font-size: 13.5px; opacity: .9; flex: 1 1 260px; }
+.mx-final .mx-btn { min-height: 52px; padding: 12px 36px; font-size: 16px; }
+.mx-final-msg { margin: 10px 0 0; font-size: 13.5px; font-weight: 600; color: #8a2a1f; }
+.mx-okbox { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; padding: 22px; border-radius: 16px; background: #effbf1; border: 1px solid #b7e4c0; border-left: 6px solid #2e9d4a; }
+.mx-okbox .tick { flex: 0 0 auto; width: 46px; height: 46px; border-radius: 50%; background: #2e9d4a; color: #fff; display: grid; place-items: center; font-size: 26px; font-weight: 800; }
+.mx-okbox h3 { margin: 0; color: #14532d; font-size: 17px; }
+.mx-okbox p { margin: 2px 0 0; color: #2f4f38; font-size: 14px; }
+.mx-okbox .mx-row { margin-left: auto; }
+.mx-edit { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); }
+.mx-eh { margin: 18px 0 8px; color: var(--navy); font-size: 14.5px; }
+.mx-er { display: grid; grid-template-columns: 34px 1fr 96px 40px; gap: 10px; align-items: start; padding: 12px; margin-bottom: 10px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.mx-er .stack { display: grid; gap: 8px; min-width: 0; }
+.mx-er .mx-in, .mx-er .mx-ta { min-height: 38px; padding: 7px 12px; font-size: 13.5px; }
+.mx-er .mx-ta { min-height: 60px; }
+.mx-er .lab { display: block; margin: 0 0 3px; font-size: 11px; font-weight: 700; letter-spacing: .5px; color: var(--muted); text-transform: uppercase; }
+.mx-er .num0 { width: 28px; height: 28px; border-radius: 50%; background: var(--navy); color: var(--lime); display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+@media (max-width: 640px) { .mx-er { grid-template-columns: 30px 1fr 40px; } .mx-er .pts { grid-column: 2 / 4; } }
 .mx-btn.lime { background: var(--lime); border-color: var(--lime); color: var(--navy); }
 .mx-btn.lime:hover { background: #bfd22a; }
 .mx-btn.danger { background: var(--badbg); border-color: var(--bad); color: var(--badtx); }
@@ -227,7 +248,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
   var CFG = window.MX_CONFIG || {};
   var DEMO = !!CFG.demo;
   var BASES = ['Gestión Administrativa', 'Malas Noticias', 'Vía Aérea', 'Marcapasos', 'Taquicardia Ventricular Inestable', 'Toxicología'];
-  var NOTA_MAX = 100; 
+  var NOTA_MAX = 5; 
   var SYNC_MS = CFG.syncMs || 25000;
   var SAVE_MS = CFG.saveMs || 1500;
   var APP = document.getElementById('mx-root');
@@ -242,6 +263,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
   function fechaLarga(iso) { var p = String(iso || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : (iso || ''); }
   function red(n) { return Math.round(n * 100) / 100; }
   function fmt(n) { return String(red(n)).replace('.', ','); }
+  function fPct(n) { return fmt2(n) + ' %'; }
   function fmt2(n) { return (Math.round(n * 100) / 100).toFixed(2).replace('.', ','); }
   function pts(n) { return fmt(n) + (n === 1 ? ' punto' : ' puntos'); }
   function nota5(got, max) { return max > 0 ? got / max * NOTA_MAX : 0; }
@@ -287,7 +309,6 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
   }
 
   function aplicar(d) {
-    if (d.escala) NOTA_MAX = Number(d.escala) || 100;
     DB.casos = d.casos || {};
     var sig = JSON.stringify(d.rub || {});
     var cambio = sig !== rubSig;
@@ -314,14 +335,14 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
 
   function calc(cc, st) {
     var rec = recDe(st.id, cc);
-    var r = { n: st.items.length, ans: 0, got: 0, max: st.max, rec: rec || null, estado: 'sin', nota: 0 };
+    var r = { n: st.items.length, ans: 0, got: 0, max: st.max, rec: rec || null, estado: 'sin', nota: 0, pct: 0 };
     if (!st.items.length) { r.estado = 'norubrica'; return r; }
     if (rec && rec.r) st.items.forEach(function(it) {
       var v = rec.r[it.i];
       if (v === 1 || v === 0) { r.ans++; if (v === 1) r.got = red(r.got + it.p); }
     });
     r.estado = r.ans === 0 ? 'sin' : (r.ans < r.n ? 'curso' : 'completa');
-    r.nota = nota5(r.got, r.max);
+    r.nota = nota5(r.got, r.max); r.pct = r.nota * 100 / NOTA_MAX;
     return r;
   }
 
@@ -529,7 +550,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       pintarEncabezadoBase(st);
       var cx = document.getElementById('mx-caso'), nuevo = casoHtml(st.id);
       if ((cx ? cx.outerHTML : '') !== nuevo) { if (cx) cx.remove(); if (nuevo) document.getElementById('mx-rubrica').insertAdjacentHTML('beforebegin', nuevo); }
-    } else if (vista.tipo === 'admin') { var a = document.activeElement; if (!a || !a.closest || !a.closest('#mx-root textarea, #mx-root input')) vistaAdmin(); }
+    } else if (vista.tipo === 'admin') { var a = document.activeElement; if ((!a || !a.closest || !a.closest('#mx-root textarea, #mx-root input')) && !document.querySelector('[data-edit]:not([hidden]), [data-rub]:not([hidden])')) vistaAdmin(); }
   }
 
    
@@ -573,7 +594,6 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     sess = s;
     ssSet('mx_sess', JSON.stringify(s));
     ssSet('mx_nombre', s.nombre);
-    if (s.escala) NOTA_MAX = Number(s.escala) || 100;
     Store = crearStore(s.clave, s.nombre);
     APP.innerHTML = '<p class="mx-vacio">Cargando datos…</p>';
     Store.load().then(function(d) { if (d) aplicar(d); ultimaSync = Date.now(); iniciarSondeo(); pintar(); }).catch(function(e) {
@@ -610,7 +630,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     var pasos = [
       ['Abre tu base', 'Pulsa la tarjeta de la base que te corresponde. Se abre una página con su rúbrica completa.'],
       ['Busca al residente', 'En esa página escribe su nombre o cédula y elígelo. Cada opción te dice si ya lo evaluaron en esa base.'],
-      ['Marca cada actividad', 'Selecciona «Lo realiza» o «No lo realiza» en cada actividad. El puntaje y ' + (NOTA_MAX === 100 ? 'el porcentaje de cumplimiento' : 'la nota sobre ' + NOTA_MAX) + ' se calculan solos.'],
+      ['Marca cada actividad', 'Selecciona «Lo realiza» o «No lo realiza» en cada actividad. El puntaje, la nota de 0 a 5 y el porcentaje de cumplimiento se calculan solos. Al terminar, pulsa «Calificar».'],
       ['Sigue con el siguiente', 'Cada cambio se guarda solo y queda registrado con tu nombre. Usa «Siguiente pendiente» para pasar al próximo residente.']
     ];
     var h = barra() +
@@ -630,7 +650,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       '<section>' + band('Paso 2', 'Cómo calificar', IC.check).replace('class="mx-band"', 'class="mx-band" id="mx-guia"') + '<div class="mx-sec-body"><div class="mx-steps">' +
       pasos.map(function(p, i) { return '<div class="mx-step"><span class="b">' + (i + 1) + '</span><span style="min-width:0"><b>' + esc(p[0]) + '</b><span>' + esc(p[1]) + '</span></span></div>'; }).join('') +
       '</div></div></section>' +
-      '<section>' + band('Paso 3', 'Consolidado por candidato', IC.table) + '<div class="mx-sec-body"><div class="mx-card alt" style="cursor:default;flex-wrap:wrap"><span style="min-width:0;flex:1 1 300px"><span class="h">' + (NOTA_MAX === 100 ? 'Porcentaje de cumplimiento de cada candidato, de mayor a menor' : 'Notas sobre ' + NOTA_MAX + ' de cada candidato, de mayor a menor') + '</span><span class="mx-muted" style="display:block;margin-top:4px">Suma lo que registra cada docente en su base. Consúltalo o descárgalo en Excel cuando lo necesites.</span></span><button class="mx-btn" type="button" data-go="consolidado">Ver consolidado →</button></div></div></section>';
+      '<section>' + band('Paso 3', 'Consolidado por candidato', IC.table) + '<div class="mx-sec-body"><div class="mx-card alt" style="cursor:default;flex-wrap:wrap"><span style="min-width:0;flex:1 1 300px"><span class="h">' + 'Nota de 0 a 5 y porcentaje de cumplimiento de cada candidato, de mayor a menor' + '</span><span class="mx-muted" style="display:block;margin-top:4px">Suma lo que registra cada docente en su base. Consúltalo o descárgalo en Excel cuando lo necesites.</span></span><button class="mx-btn" type="button" data-go="consolidado">Ver consolidado →</button></div></div></section>';
     APP.innerHTML = h;
     filtrarBases();
   }
@@ -644,7 +664,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
   }
 
    
-  var selCC = '';
+  var selCC = '', ultimoOk = null;
   var obsAbiertas = {};
 
   function filaItem(it, v, nota) {
@@ -693,7 +713,12 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     if (!box) return;
     if (!st.items.length) { box.innerHTML = '<p class="mx-vacio">' + (sess.rol === 'admin' ? 'Esta base aún no tiene rúbrica. Cárgala en Administración.' : 'La rúbrica de esta base se está preparando. Aparecerá aquí en cuanto esté cargada.') + '</p>'; return; }
     var c = candPorCC(selCC);
-    if (!c) { box.innerHTML = '<p class="mx-vacio">Busca arriba al residente que vas a evaluar en esta base.</p>'; return; }
+    if (!c) {
+      var uo = ultimoOk && ultimoOk.b === st.id ? ultimoOk : null;
+      box.innerHTML = uo ? '<div class="mx-okbox" role="status"><span class="tick" aria-hidden="true">✓</span><div><h3>Información guardada</h3><p><strong>' + esc(uo.nombre) + '</strong> · Nota ' + fmt2(uo.nota) + ' / 5 (' + fPct(uo.pct) + ' de cumplimiento).</p><p>Ahora elige al siguiente candidato en el buscador de arriba.</p></div><div class="mx-row"><button class="mx-btn" type="button" data-act="siguiente">Siguiente pendiente</button><button class="mx-btn sec" type="button" data-act="buscar">Buscar otro candidato</button></div></div>'
+        : '<p class="mx-vacio">Busca arriba al residente que vas a evaluar en esta base.</p>';
+      return;
+    }
     var rec = recDe(st.id, c.cc) || { r: {} };
     var h = '<div class="mx-live" id="mx-live"></div>';
     st.secciones.forEach(function(sec) {
@@ -712,16 +737,17 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     var r = calc(c.cc, st), rec = r.rec || {}, full = r.ans === r.n;
     var live = document.getElementById('mx-live'), foot = document.getElementById('mx-foot');
     if (live) live.innerHTML = '<div class="w"><small>Evaluando a</small><b>' + esc(nomC(c)) + '</b> <span style="opacity:.75;font-size:12px">CC ' + esc(c.cc) + '</span></div>' +
-      '<div class="sc"><b>' + fmt2(r.nota) + '</b><span>' + (NOTA_MAX === 100 ? '% de cumplimiento' : 'nota sobre ' + NOTA_MAX) + ' · ' + fmt(r.got) + ' / ' + fmt(r.max) + ' puntos</span></div>';
+      '<div class="sc"><b>' + fmt2(r.nota) + ' <small style="font-size:.55em;font-weight:600;opacity:.8">/ 5</small></b><span>' + fPct(r.pct) + ' de cumplimiento · ' + fmt(r.got) + ' / ' + fmt(r.max) + ' puntos</span></div>';
     if (foot) {
       var obsAct = document.getElementById('mx-obs');
       var val = obsAct ? obsAct.value : (rec.obs || '');
-      foot.innerHTML = '<div class="mx-tot"><b>' + fmt2(r.nota) + (NOTA_MAX === 100 ? ' %' : ' / ' + NOTA_MAX) + '</b><span class="mx-muted">' + fmt(r.got) + ' de ' + fmt(r.max) + ' puntos</span>' +
+      foot.innerHTML = '<div class="mx-tot"><b>' + fmt2(r.nota) + ' / 5</b><span class="mx-muted">' + fPct(r.pct) + ' · ' + fmt(r.got) + ' de ' + fmt(r.max) + ' puntos</span>' +
         '<span class="mx-chip ' + (full ? 'ok' : (r.ans ? 'warn' : '')) + '">' + r.ans + ' de ' + r.n + ' actividades calificadas</span></div>' +
         '<div class="mx-prog" aria-hidden="true"><i class="' + (full ? 'full' : '') + '" style="width:' + (r.n ? Math.round(r.ans * 100 / r.n) : 0) + '%"></i></div>' +
         '<label class="mx-lbl" for="mx-obs">Observaciones</label><textarea class="mx-ta" id="mx-obs" placeholder="Escribe aquí observaciones de esta base">' + esc(val) + '</textarea>' +
         '<div class="mx-foot-row"><span class="mx-muted">' + (rec.ts ? 'Última modificación: ' + fechaLarga(rec.fecha) + (rec.evaluador ? ' · ' + esc(rec.evaluador) : '') : 'Aún sin calificaciones guardadas') + '</span>' +
-        '<div class="mx-row"><button class="mx-btn sec sm" type="button" data-act="siguiente">Siguiente pendiente</button><button class="mx-btn danger sm" type="button" data-act="reiniciar">Reiniciar esta base</button></div></div>';
+        '<div class="mx-row"><button class="mx-btn danger sm" type="button" data-act="reiniciar">Reiniciar esta base</button></div></div>' +
+        '<div class="mx-final"><p><strong>Cuando termines de marcar todas las actividades, pulsa «Calificar».</strong> Se confirma que la información quedó guardada y puedes elegir al siguiente candidato.</p><button class="mx-btn lime" type="button" data-act="terminar">Calificar</button></div><p class="mx-final-msg" id="mx-final-msg" role="alert"></p>';
     }
   }
 
@@ -743,11 +769,50 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
   function cerrarOpcionesDoc(ev) { if (!ev.target.closest || !ev.target.closest('.mx-cb')) cerrarOpciones(); }
 
   function elegir(cc) {
-    selCC = cc || ''; ssSet('mx_sel_' + vista.b, selCC);
+    selCC = cc || ''; ssSet('mx_sel_' + vista.b, selCC); if (selCC) ultimoOk = null;
     var c = candPorCC(selCC), inp = document.getElementById('mx-cin');
     if (inp) inp.value = c ? c.nombre + ' ' + c.apellidos + ' · ' + c.cc : '';
     cerrarOpciones(); pintarRubrica(BS[+vista.b - 1]);
     var live = document.getElementById('mx-live'); if (live && live.scrollIntoView) live.scrollIntoView({ block: 'nearest' });
+  }
+
+  function guardarYEsperar() {
+    return new Promise(function(ok, no) {
+      clearTimeout(saveT); vaciar();
+      var t0 = Date.now();
+      (function esperar() {
+        var limpio = !saving && !Object.keys(dirty).length && !Object.keys(dirtyDoc).length && !dirtyCands && !dirtyRub;
+        if (limpio) return ok();
+        if (Date.now() - t0 > 20000) return no();
+        setTimeout(esperar, 250);
+      })();
+    });
+  }
+
+  function terminarCalif(btn) {
+    var c = candPorCC(selCC), st = BS[+vista.b - 1], m = document.getElementById('mx-final-msg');
+    if (!c || !st) return;
+    var r = calc(c.cc, st);
+    if (r.ans < r.n) {
+      var falta = r.n - r.ans, filas = [].slice.call(document.querySelectorAll('#mx-rubrica .mx-it')), pri = null;
+      filas.forEach(function(f) { if (!pri && !/is-yes|is-no/.test(f.className)) pri = f; });
+      if (m) m.textContent = 'Faltan ' + falta + (falta === 1 ? ' actividad' : ' actividades') + ' por marcar. Te llevo a la primera.';
+      if (pri && pri.scrollIntoView) pri.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (m) m.textContent = '';
+    btn.disabled = true; btn.textContent = 'Guardando…';
+    guardarYEsperar().then(function() {
+      ultimoOk = { b: st.id, nombre: nomC(c), nota: r.nota, pct: r.pct };
+      selCC = ''; ssSet('mx_sel_' + st.id, '');
+      var inp = document.getElementById('mx-cin'); if (inp) inp.value = '';
+      pintarRubrica(st); pintarEncabezadoBase(st);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (inp) setTimeout(function() { inp.focus(); }, 350);
+    }, function() {
+      btn.disabled = false; btn.textContent = 'Calificar';
+      var mm = document.getElementById('mx-final-msg'); if (mm) mm.textContent = 'No se pudo guardar. Revisa tu conexión: la página lo sigue intentando y puedes volver a pulsar «Calificar».';
+    });
   }
 
   function siguiente() {
@@ -801,13 +866,17 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     return f;
   }
 
+  var modoCons = 'nota';
+  function vNota(n) { return modoCons === 'pct' ? fPct(n * 100 / NOTA_MAX) : fmt2(n); }
+
   function vistaConsolidado() {
     APP.innerHTML = barra() +
       '<div class="mx-back"><button class="mx-btn sec" type="button" data-go="">← Volver a las bases</button></div>' +
       '<section>' + band('Consolidado', 'Candidatos de mayor a menor nota', IC.table) + '<div class="mx-sec-body">' +
-      '<p class="mx-note">' + (NOTA_MAX === 100 ? 'Cada base se califica como <strong>porcentaje de cumplimiento</strong> (puntos obtenidos ÷ puntos posibles de esa base) y el <strong>resultado final es el promedio de las seis bases</strong>.' : 'Cada base se califica sobre ' + NOTA_MAX + ' y la <strong>nota final es el promedio de las seis bases</strong>.') + ' La lista se ordena de mayor a menor nota; los residentes con la calificación final completa aparecen primero. Se actualiza sola a medida que los docentes califican.</p>' +
+      '<p class="mx-note">' + 'Cada base se califica por <strong>porcentaje de cumplimiento</strong> (puntos obtenidos ÷ puntos posibles de esa base) y se convierte a una <strong>nota de 0 a 5</strong>. El <strong>resultado final es el promedio de las seis bases</strong>. ' + ' La lista se ordena de mayor a menor nota; los residentes con la calificación final completa aparecen primero. Se actualiza sola a medida que los docentes califican.</p>' +
       '<div class="mx-row" style="margin-bottom:12px"><div style="flex:1 1 280px"><label class="mx-sr" for="mx-fcons">Buscar candidato</label><input class="mx-in" id="mx-fcons" type="search" autocomplete="off" placeholder="Buscar candidato o cédula…"></div>' +
-      '<button class="mx-btn" type="button" data-act="csv">Consolidado (CSV)</button><button class="mx-btn sec" type="button" data-act="csvdet">Detalle por actividad (CSV)</button><button class="mx-btn sec" type="button" data-act="copiar">Copiar para Excel</button></div>' +
+      '<div class="mx-seg" role="group" aria-label="Ver el consolidado en"><button type="button" class="mx-pillink' + (modoCons === 'nota' ? ' on' : '') + '" data-act="modo" data-m="nota" aria-pressed="' + (modoCons === 'nota') + '">Nota 0–5</button><button type="button" class="mx-pillink' + (modoCons === 'pct' ? ' on' : '') + '" data-act="modo" data-m="pct" aria-pressed="' + (modoCons === 'pct') + '">Porcentaje</button></div></div>' +
+      '<div class="mx-row" style="margin-bottom:12px"><button class="mx-btn" type="button" data-act="csv">Consolidado 0–5 (CSV)</button><button class="mx-btn" type="button" data-act="csvpct">Consolidado en % (CSV)</button><button class="mx-btn sec" type="button" data-act="csvdet">Detalle por actividad (CSV)</button><button class="mx-btn sec" type="button" data-act="copiar">Copiar para Excel</button></div>' +
       '<p class="mx-msg" id="mx-msg-r" role="status" style="margin:0 0 10px"></p><div id="mx-cons"></div></div></section>';
     tablaConsolidado();
   }
@@ -820,13 +889,13 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     if (!l.length) { box.innerHTML = '<p class="mx-vacio">No hay candidatos con ese nombre o cédula.</p>'; return; }
     var h = '<div class="mx-tw"><table class="mx-tb"><thead><tr><th class="num">Puesto</th><th>Candidato</th><th>Cédula</th>';
     BS.forEach(function(s) { h += '<th class="num" style="white-space:normal">Base ' + s.num + '<small>' + esc(s.nombre) + '</small></th>'; });
-    h += '<th class="num">' + (NOTA_MAX === 100 ? 'Cumplimiento final' : 'Nota final') + '</th><th>Estado</th><th>Observaciones</th></tr></thead><tbody>';
+    h += '<th class="num">' + (modoCons === 'pct' ? 'Cumplimiento final' : 'Nota final (0–5)') + '</th><th>Estado</th><th>Observaciones</th></tr></thead><tbody>';
     l.forEach(function(x) {
       h += '<tr class="' + (x.final && x.pos <= 3 ? 'top3' : '') + '"><td class="num pos">' + (x.pos || '—') + '</td><td class="nm">' + esc(nomC(x.c)) + '</td><td class="cc">' + esc(x.c.cc) + '</td>';
       x.rs.forEach(function(r) {
-        h += '<td class="num">' + (r.estado === 'completa' ? fmt2(r.nota) : (r.estado === 'curso' ? '<span class="mx-chip warn">En curso ' + r.ans + '/' + r.n + '</span>' : (r.estado === 'norubrica' ? '<span class="mx-muted">—</span>' : '<span class="mx-chip">Pendiente</span>'))) + '</td>';
+        h += '<td class="num">' + (r.estado === 'completa' ? vNota(r.nota) : (r.estado === 'curso' ? '<span class="mx-chip warn">En curso ' + r.ans + '/' + r.n + '</span>' : (r.estado === 'norubrica' ? '<span class="mx-muted">—</span>' : '<span class="mx-chip">Pendiente</span>'))) + '</td>';
       });
-      h += '<td class="num tot">' + (x.media == null ? '—' : fmt2(x.media)) + '</td><td>' + (x.final ? '<span class="mx-chip ok">Calificación final</span>' : '<span class="mx-chip ' + (x.hechas ? 'warn' : '') + '">Parcial · ' + x.hechas + ' de ' + BS.length + ' bases</span>') + '</td>';
+      h += '<td class="num tot">' + (x.media == null ? '—' : vNota(x.media)) + '</td><td>' + (x.final ? '<span class="mx-chip ok">Calificación final</span>' : '<span class="mx-chip ' + (x.hechas ? 'warn' : '') + '">Parcial · ' + x.hechas + ' de ' + BS.length + ' bases</span>') + '</td>';
       var obs = BS.filter(function(s) { var r = recDe(s.id, x.c.cc); return r && ((r.obs && r.obs.trim()) || (r.n && Object.keys(r.n).length)); });
       var abierto = !!obsAbiertas[x.c.cc];
       h += '<td>' + (obs.length ? '<button class="mx-pillink" type="button" data-act="obs" data-cc="' + esc(x.c.cc) + '" aria-expanded="' + abierto + '">' + (abierto ? 'Ocultar' : 'Ver') + ' (' + obs.length + ')</button>' : '<span class="mx-muted">Sin observaciones</span>') + '</td></tr>';
@@ -849,16 +918,17 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
   function celda(v) { v = String(v == null ? '' : v); return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
   function aCSV(f) { return '﻿' + f.map(function(r) { return r.map(celda).join(';'); }).join('\r\n'); }
 
-  function filasCons() {
+  function filasCons(modo) {
+    var pct = modo === 'pct', cv = function(n) { return fmt2(pct ? n * 100 / NOTA_MAX : n); };
     var cab = ['Puesto', 'Apellidos', 'Nombre', 'Cédula'];
-    BS.forEach(function(s) { cab.push('Base ' + s.num + ' ' + s.nombre + (NOTA_MAX === 100 ? ' (% de cumplimiento)' : ' (nota sobre ' + NOTA_MAX + ')')); });
-    cab.push(NOTA_MAX === 100 ? 'Cumplimiento final (% promedio)' : 'Nota final (promedio)', 'Estado');
+    BS.forEach(function(s) { cab.push('Base ' + s.num + ' ' + s.nombre + (pct ? ' (% de cumplimiento)' : ' (nota 0-5)')); });
+    cab.push(pct ? 'Cumplimiento final (% promedio)' : 'Nota final (0-5, promedio)', 'Estado');
     BS.forEach(function(s) { cab.push('Observaciones base ' + s.num + ' ' + s.nombre); });
     var f = [cab];
     ordenCons().forEach(function(x) {
       var r = [x.pos, x.c.apellidos, x.c.nombre, x.c.cc];
-      x.rs.forEach(function(s) { r.push(s.estado === 'completa' ? fmt2(s.nota) : ''); });
-      r.push(x.media == null ? '' : fmt2(x.media), x.final ? 'Calificación final' : 'Parcial (' + x.hechas + ' de ' + BS.length + ' bases)');
+      x.rs.forEach(function(s) { r.push(s.estado === 'completa' ? cv(s.nota) : ''); });
+      r.push(x.media == null ? '' : cv(x.media), x.final ? 'Calificación final' : 'Parcial (' + x.hechas + ' de ' + BS.length + ' bases)');
       BS.forEach(function(s) { var rr = recDe(s.id, x.c.cc); r.push(rr ? [rr.obs || ''].concat(Object.keys(rr.n || {}).map(function(i) { return 'Act. ' + (+i + 1) + ': ' + rr.n[i]; })).filter(Boolean).join(' | ').replace(/\s+/g, ' ') : ''); });
       f.push(r);
     });
@@ -1014,7 +1084,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
   function vistaAdmin() {
     var rubs = BS.map(function(s) {
       return '<div class="mx-card2" data-b="' + s.id + '"><div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px"><div><span class="mx-lbl" style="margin:0">Base ' + s.num + '</span><strong>' + esc(s.nombre) + '</strong></div>' +
-        '<div class="mx-row"><span class="mx-chip ' + (s.items.length ? 'ok' : '') + '">' + (s.items.length ? s.items.length + ' actividades · ' + fmt(s.max) + ' puntos' : 'Sin rúbrica') + '</span>' + (DB.casos[s.id] ? '<span class="mx-chip ok">Con caso clínico</span>' : '') + '<button class="mx-btn sec sm" type="button" data-act="rubabrir">' + (s.items.length ? 'Editar' : 'Cargar') + ' rúbrica</button></div></div>' +
+        '<div class="mx-row"><span class="mx-chip ' + (s.items.length ? 'ok' : '') + '">' + (s.items.length ? s.items.length + ' actividades · ' + fmt(s.max) + ' puntos' : 'Sin rúbrica') + '</span>' + (DB.casos[s.id] ? '<span class="mx-chip ok">Con caso clínico</span>' : '') + '<button class="mx-btn sm" type="button" data-act="editabrir">Editar caso y rúbrica</button><button class="mx-btn sec sm" type="button" data-act="rubabrir">Cargar desde archivo</button></div></div>' +
+        '<div class="mx-edit" data-edit hidden></div>' +
         '<div class="mx-rub" data-rub hidden><p class="mx-note" style="font-size:13px"><strong>Cómo cargarla.</strong> Llena la plantilla de rúbrica (una fila por actividad: <strong>Sección · Actividad · Lo realiza (criterio) · Puntos · No lo realiza</strong>) y sube el archivo, o copia las filas y pégalas abajo. Si el archivo trae arriba la fila <strong>Caso</strong> (título y texto del caso clínico), el caso se carga junto con la rúbrica y se muestra a los evaluadores antes del checklist.</p><p class="mx-note" style="font-size:13px" data-cmsg></p>' +
         '<div class="mx-row" style="margin-bottom:10px"><label class="mx-btn sec sm" for="mx-rf-' + s.id + '" style="cursor:pointer">Elegir archivo de la rúbrica</label><input id="mx-rf-' + s.id + '" data-rfile type="file" accept=".xlsx,.csv,.txt,.tsv" class="mx-sr"></div>' +
         '<label class="mx-sr" for="mx-rta-' + s.id + '">Rúbrica</label><textarea class="mx-ta" id="mx-rta-' + s.id + '" data-rta style="min-height:130px" placeholder="Sección\tActividad\tLo realiza\tPuntos\tNo lo realiza"></textarea>' +
@@ -1035,6 +1106,74 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       '<section>' + band('Administración', 'Terminar la sesión de examen', IC.gear) + '<div class="mx-sec-body"><div class="mx-card2"><p class="mx-note" style="margin:0 0 12px">Guarda una copia del consolidado y del detalle en hojas nuevas del Excel de respaldo (llamadas «Archivo…») y deja vacíos los candidatos y las calificaciones para la próxima sesión. Las rúbricas y los docentes se conservan. Envía o descarga el consolidado antes de terminar.</p>' +
       '<div class="mx-row"><button class="mx-btn" type="button" data-act="correo">Enviar el consolidado al correo de Posgrados Clínicos</button><button class="mx-btn danger" type="button" data-act="nueva">Terminar sesión y vaciar candidatos</button></div><p class="mx-msg" id="mx-msg-n" role="status"></p></div></div></section>';
     listaCands();
+  }
+
+  function filaEdit(it, i, bloq) {
+    var v = function(x) { return esc(String(x == null ? '' : x)); };
+    return '<div class="mx-er" data-er><span class="num0">' + (i + 1) + '</span><div class="stack">' +
+      '<div><span class="lab">Sección</span><input class="mx-in" data-f="sec" maxlength="120" value="' + v(it.sec) + '"></div>' +
+      '<div><span class="lab">Actividad</span><input class="mx-in" data-f="t" maxlength="300" value="' + v(it.t) + '"></div>' +
+      '<div><span class="lab">Lo realiza (criterio)</span><textarea class="mx-ta" data-f="r" maxlength="600">' + v(it.r) + '</textarea></div>' +
+      '<div><span class="lab">No lo realiza (opcional)</span><input class="mx-in" data-f="n" maxlength="600" value="' + v(it.n) + '"></div></div>' +
+      '<div class="pts"><span class="lab">Puntos</span><input class="mx-in" data-f="p" inputmode="decimal" value="' + v(String(it.p == null ? '' : it.p).replace('.', ',')) + '"></div>' +
+      '<div>' + (bloq ? '' : '<button class="mx-btn danger sm" type="button" data-act="itemdel" aria-label="Quitar la actividad ' + (i + 1) + '" title="Quitar">×</button>') + '</div></div>';
+  }
+
+  function hayCalifs(b) { return Object.keys(baseDe(b).evals || {}).length > 0; }
+
+  function pintarEditor(card, aviso) {
+    var st = BS[+card.getAttribute('data-b') - 1], c = DB.casos[st.id] || { t: '', x: '' }, bloq = hayCalifs(st.id);
+    var box = card.querySelector('[data-edit]');
+    box.innerHTML = '<p class="mx-note" style="font-size:13px">Corrige aquí la ortografía y los textos sin montar un Excel nuevo. Los docentes ven los cambios al actualizar la página.</p>' +
+      '<h4 class="mx-eh">Caso clínico</h4><label class="mx-lbl" for="mx-ct-' + st.id + '">Título del caso</label><input class="mx-in" id="mx-ct-' + st.id + '" data-ctit maxlength="200" value="' + esc(c.t) + '">' +
+      '<label class="mx-lbl" for="mx-cx-' + st.id + '" style="margin-top:10px">Texto del caso (un párrafo por línea)</label><textarea class="mx-ta" id="mx-cx-' + st.id + '" data-ctxt maxlength="8000" style="min-height:200px">' + esc(c.x) + '</textarea>' +
+      '<h4 class="mx-eh">Actividades de la rúbrica <span class="mx-muted" data-etot></span></h4>' +
+      (bloq ? '<p class="mx-note" style="font-size:13px"><strong>Esta base ya tiene calificaciones.</strong> Puedes corregir textos y puntos, pero no agregar ni quitar actividades porque se descuadrarían las calificaciones guardadas. Para cambiar la estructura, primero reinicia la base o termina la sesión.</p>' : '') +
+      '<div data-items>' + st.items.map(function(it, i) { return filaEdit(it, i, bloq); }).join('') + '</div>' +
+      (bloq ? '' : '<div class="mx-row" style="margin:6px 0 10px"><button class="mx-btn sec sm" type="button" data-act="itemadd">+ Agregar actividad</button></div>') +
+      '<p class="mx-msg" data-emsg role="status">' + esc(aviso || '') + '</p>' +
+      '<div class="mx-row"><button class="mx-btn" type="button" data-act="editguardar">Guardar cambios</button><button class="mx-btn sec" type="button" data-act="editcerrar">Cerrar</button></div>';
+    totalEdit(card);
+  }
+
+  function leerEdit(card) {
+    return [].map.call(card.querySelectorAll('[data-er]'), function(r) {
+      var g = function(f) { return (r.querySelector('[data-f="' + f + '"]') || {}).value || ''; };
+      return { sec: g('sec').trim(), t: g('t').trim(), r: g('r').trim(), n: g('n').trim(), p: g('p').trim() };
+    });
+  }
+
+  function totalEdit(card) {
+    var e = card.querySelector('[data-etot]'); if (!e) return;
+    var tot = 0, n = 0;
+    leerEdit(card).forEach(function(x) { n++; var p = parseFloat(x.p.replace(',', '.')); if (isFinite(p) && p > 0) tot = red(tot + p); });
+    e.textContent = '· ' + n + (n === 1 ? ' actividad' : ' actividades') + ' · ' + fmt(tot) + ' puntos en total';
+  }
+
+  function guardarEdit(card) {
+    var st = BS[+card.getAttribute('data-b') - 1], rows = leerEdit(card), em = card.querySelector('[data-emsg]'), filas = [], err = '';
+    rows.forEach(function(x, i) {
+      if (err) return;
+      var p = parseFloat(x.p.replace(',', '.'));
+      if (!x.t) err = 'La actividad ' + (i + 1) + ' no tiene nombre.';
+      else if (!isFinite(p) || p < 0) err = 'La actividad ' + (i + 1) + ' necesita un puntaje numérico (0 o más).';
+      else filas.push([x.sec || 'Actividades', x.t, x.r, p, x.n]);
+    });
+    if (!err && !filas.length && st.items.length) err = 'La rúbrica debe tener al menos una actividad. Para vaciarla usa «Cargar desde archivo → Vaciar rúbrica».';
+    if (err) { em.textContent = err; return; }
+    var ant = JSON.stringify(st.items.map(function(it) { return [it.sec, it.t, it.r, it.p, it.n]; })), nuevo = JSON.stringify(filas), cambioRub = ant !== nuevo;
+    if (cambioRub && hayCalifs(st.id) && filas.length !== st.items.length) { em.textContent = 'No se guardó: esta base tiene calificaciones y no se pueden agregar ni quitar actividades.'; return; }
+    var t = card.querySelector('[data-ctit]').value.trim(), x = card.querySelector('[data-ctxt]').value.replace(/\r\n?/g, '\n').trim(), c0 = DB.casos[st.id] || { t: '', x: '' };
+    var cambioCaso = t !== c0.t || x !== c0.x;
+    if (!cambioRub && !cambioCaso) { em.textContent = 'No hay cambios por guardar.'; return; }
+    if (cambioRub) { construirBase(st, filas); rubSig = ''; marcarRub(st.id, filas); }
+    var pend = Promise.resolve();
+    if (cambioCaso) { if (x) DB.casos[st.id] = { t: t, x: x }; else delete DB.casos[st.id]; pend = Promise.resolve(Store.saveCaso(st.id, t, x)); }
+    em.textContent = 'Guardando…';
+    pend.then(function() { return cambioRub ? guardarYEsperar() : null; }).then(function() {
+      var b = st.id; vistaAdmin();
+      var nc = document.querySelector('[data-b="' + b + '"]'); if (nc) { nc.querySelector('[data-edit]').hidden = false; pintarEditor(nc, '✓ Cambios guardados. Los docentes los ven al actualizar la página.'); nc.scrollIntoView({ block: 'nearest' }); }
+    }, function() { em.textContent = 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'; });
   }
 
   function resumenRub(card) {
@@ -1067,6 +1206,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     if (a2 === 'notaabrir') { var nr = t.closest('.mx-note-row'), i0 = +t.closest('.mx-it').getAttribute('data-i'); nr.innerHTML = '<input class="mx-note-in" data-nota maxlength="120" aria-label="Observación de la actividad ' + (i0 + 1) + '" placeholder="Observación breve (opcional)">'; nr.firstChild.focus(); return; }
     if (a2 === 'elegir') { elegir(t.getAttribute('data-cc')); return; }
     if (a2 === 'siguiente') { siguiente(); return; }
+    if (a2 === 'terminar') { terminarCalif(t); return; }
+    if (a2 === 'buscar') { var bi = document.getElementById('mx-cin'); if (bi) { window.scrollTo({ top: 0, behavior: 'smooth' }); bi.focus(); } return; }
     if (a2 === 'salir') { salir(); return; }
     if (a2 === 'actualizar') { setEstado('guardando'); sincronizar(); return; }
     if (a2 === 'reiniciar') {
@@ -1074,10 +1215,12 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       var st = BS[+vista.b - 1]; delete baseDe(st.id).evals[selCC]; dirty[st.id + '|' + selCC] = true; programarGuardado(); pintarRubrica(st); return;
     }
     if (a2 === 'obs') { var k = t.getAttribute('data-cc'); obsAbiertas[k] = !obsAbiertas[k]; tablaConsolidado(); return; }
-    if (a2 === 'csv') { var n1 = 'consolidado-minicex-urgencias.csv'; avisoDesc(descargar(n1, aCSV(filasCons()), 'text/csv;charset=utf-8'), n1); return; }
+    if (a2 === 'csv') { var n1 = 'consolidado-minicex-urgencias-nota-0-5.csv'; avisoDesc(descargar(n1, aCSV(filasCons('nota')), 'text/csv;charset=utf-8'), n1); return; }
+    if (a2 === 'csvpct') { var n3 = 'consolidado-minicex-urgencias-porcentaje.csv'; avisoDesc(descargar(n3, aCSV(filasCons('pct')), 'text/csv;charset=utf-8'), n3); return; }
+    if (a2 === 'modo') { modoCons = t.getAttribute('data-m') === 'pct' ? 'pct' : 'nota'; vistaConsolidado(); return; }
     if (a2 === 'csvdet') { var n2 = 'detalle-minicex-urgencias.csv'; avisoDesc(descargar(n2, aCSV(filasDet()), 'text/csv;charset=utf-8'), n2); return; }
     if (a2 === 'copiar') {
-      var txt = filasCons().map(function(f) { return f.join('\t'); }).join('\n');
+      var txt = filasCons(modoCons).map(function(f) { return f.join('\t'); }).join('\n');
       var fin = function(ok) { msg('mx-msg-r', ok ? 'Consolidado copiado. Pégalo en Excel con Ctrl+V.' : 'No se pudo copiar automáticamente. Usa la descarga en CSV.'); };
       try { navigator.clipboard.writeText(txt).then(function() { fin(true); }, function() { fin(false); }); } catch (e) { fin(false); }
       return;
@@ -1106,11 +1249,17 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       return;
     }
     var card = t.closest('[data-b]');
+    if (a2 === 'editabrir' && card) { var eb = card.querySelector('[data-edit]'); if (eb.hidden) { pintarEditor(card); eb.hidden = false; } else eb.hidden = true; return; }
+    if (a2 === 'editcerrar' && card) { card.querySelector('[data-edit]').hidden = true; vistaAdmin(); return; }
+    if (a2 === 'editguardar' && card) { guardarEdit(card); return; }
+    if (a2 === 'itemadd' && card) { var lst = card.querySelector('[data-items]'); lst.insertAdjacentHTML('beforeend', filaEdit({ sec: (leerEdit(card).slice(-1)[0] || {}).sec || 'Actividades', t: '', r: '', n: '', p: '' }, lst.children.length, false)); lst.lastChild.querySelector('[data-f="t"]').focus(); totalEdit(card); return; }
+    if (a2 === 'itemdel' && card) { var fr = t.closest('[data-er]'); fr.parentNode.removeChild(fr); [].forEach.call(card.querySelectorAll('[data-er] .num0'), function(e, i) { e.textContent = i + 1; }); totalEdit(card); return; }
     if (a2 === 'rubabrir' && card) { var rb = card.querySelector('[data-rub]'); rb.hidden = !rb.hidden; return; }
     if (a2 === 'rubactual' && card) { var s0 = BS[+card.getAttribute('data-b') - 1]; card.querySelector('[data-rta]').value = s0.items.map(function(it) { return [it.sec, it.t, it.r, String(it.p).replace('.', ','), it.n].join('\t'); }).join('\n'); resumenRub(card); return; }
     if (a2 === 'rubguardar' && card) {
       var res = resumenRub(card); if (!res.filas.length || res.err.length) return;
-      var s1 = BS[+card.getAttribute('data-b') - 1]; construirBase(s1, res.filas); rubSig = ''; marcarRub(s1.id, res.filas);
+      var s1 = BS[+card.getAttribute('data-b') - 1];
+      if (hayCalifs(s1.id) && res.filas.length !== s1.items.length && !confirmar(t, 'Hay calificaciones: se descuadrarán. ¿Guardar igual?', 'Guardar rúbrica')) return; construirBase(s1, res.filas); rubSig = ''; marcarRub(s1.id, res.filas);
       if (card._caso && card._caso.x) { var cs = card._caso; DB.casos[s1.id] = cs; Promise.resolve(Store.saveCaso(s1.id, cs.t, cs.x)).catch(function() {}); }
       vistaAdmin();
       return;
@@ -1129,6 +1278,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     if (t.id === 'mx-cin') { opciones(t.value); return; }
     if (t.id === 'mx-fcons') { tablaConsolidado(); return; }
     if (t.hasAttribute('data-rta')) { resumenRub(t.closest('[data-b]')); return; }
+    if (t.getAttribute('data-f') === 'p') { totalEdit(t.closest('[data-b]')); return; }
     if (t.hasAttribute('data-nota') && selCC) { var st0 = BS[+vista.b - 1], rc = registro(st0.id, selCC), ix = +t.closest('.mx-it').getAttribute('data-i'); rc.n = rc.n || {}; if (t.value.trim()) rc.n[ix] = t.value; else delete rc.n[ix]; tocar(st0.id, selCC, rc); return; }
     if (t.id === 'mx-obs' && selCC) { var st = BS[+vista.b - 1], rec = registro(st.id, selCC); rec.obs = t.value; tocar(st.id, selCC, rec); }
   });
