@@ -526,6 +526,24 @@
   .db-caja-buscar { background: #f4f7fb; border-color: #d3e3f3; border-top: 3px solid var(--lima); }
   .db-tabs-busqueda button.activo { border-bottom-color: var(--lima); }
   .db-chip.activo { box-shadow: 0 0 0 2px rgba(202,221,48,.55); }
+
+  /* Reporte de prácticas (Excel para la Vicerrectoría): ventana propia, no toca el modal general */
+  #overlay-rp { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); align-items: flex-start; justify-content: center; padding: 24px 16px; overflow-y: auto; z-index: 100; }
+  #caja-rp { background: white; border-radius: 10px; padding: 22px; width: 500px; max-width: 92vw; max-height: calc(100vh - 48px); overflow-y: auto; margin: auto; }
+  #caja-rp h3 { margin-top: 0; font-size: 15px; color: var(--azul-ces); }
+  #caja-rp label { font-size: 12px; color: #555; display: block; margin: 10px 0 3px; }
+  #caja-rp input, #caja-rp select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit; font-size: 13px; background: white; }
+  #caja-rp .fila-botones { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  #caja-rp .cerrar { float: right; cursor: pointer; color: #999; font-size: 18px; padding: 2px 4px; }
+  .rp-ayuda { font-size: 12px; color: #6b7684; margin: 6px 0; line-height: 1.45; }
+  .rp-kpis { display: flex; gap: 10px; margin: 8px 0; }
+  .rp-kpis div { flex: 1; background: #f4f7fa; border-radius: 8px; padding: 8px 10px; text-align: center; }
+  .rp-kpis b { display: block; font-size: 20px; color: var(--azul-ces); }
+  .rp-kpis span { font-size: 11px; color: #6b7684; }
+  .rp-lista { font-size: 12.5px; color: #444; margin: 0 0 6px; padding-left: 18px; line-height: 1.5; }
+  .rp-rev { font-size: 12.5px; margin: 6px 0; border: 1px solid #e3e8ee; border-radius: 6px; padding: 6px 10px; }
+  .rp-rev summary { cursor: pointer; }
+  .rp-rev ul { margin: 4px 0 2px; padding-left: 18px; max-height: 180px; overflow-y: auto; }
 </style>
 </head>
 <body>
@@ -856,6 +874,7 @@
         <div><button class="btn-primario" onclick="aplicarFiltrosHistorico()">🔍 Buscar</button></div>
         <div><button class="btn-secundario" onclick="limpiarFiltrosHistorico()">🧹 Limpiar</button></div>
         <div><button class="btn-secundario" onclick="cargarHistorico(true)">🔄 Actualizar datos</button></div>
+        <div><button class="btn-primario" id="btn-reporte-practicas" onclick="abrirReportePracticas()" style="display:none;" title="Descarga el Excel de prácticas con todos los posgrados, sin movilidad académica">📑 Reporte de prácticas</button></div>
       </div>
       <p id="hist-resumen" style="font-size:12px; color:#888;"></p>
       <div style="overflow-x:auto;">
@@ -1016,6 +1035,8 @@
     <div id="contenido-modal"></div>
   </div>
 </div>
+
+<div id="overlay-rp" onclick="if (event.target.id === 'overlay-rp') cerrarReportePracticas();"><div id="caja-rp" role="dialog" aria-modal="true"></div></div>
 
 <div id="mensaje-flotante"></div>
 
@@ -1244,6 +1265,7 @@ function entrarAlApp() {
     document.getElementById('tab-btn-residentes').style.display = 'inline-block';
     document.getElementById('tab-btn-centros').style.display = 'inline-block';
     document.getElementById('boton-publicar-github').style.display = 'inline-block';
+    document.getElementById('btn-reporte-practicas').style.display = 'inline-block';
     document.getElementById('cat-btn-nuevo').style.display = 'inline-block';
     document.getElementById('enlace-unificar').style.display = 'block';
     cargarCentros();
@@ -8594,6 +8616,494 @@ function alternarKpisMas() {
   const abierto = caja.style.display !== 'none';
   caja.style.display = abierto ? 'none' : 'grid';
   document.getElementById('btn-kpis-mas').textContent = abierto ? '+ Ver más indicadores' : '− Ocultar indicadores';
+}
+
+
+// ============================================================
+// REPORTE DE PRÁCTICAS — solo coordinadoras.
+// Excel en el formato que piden (hoja "Rotación" + listas ocultas, columnas grises con fórmulas) con
+// TODOS los posgrados y sin movilidad académica (ni entrante ni saliente). Una fila por residente +
+// escenario + rotación: los meses seguidos en el mismo escenario se unen en una sola práctica
+// (inicio = día 1 del primer mes, final = último día del último mes). El sistema no guarda fechas
+// exactas ni horas, por eso las horas semanales se piden aquí y quedan en blanco si no se escriben.
+// Lo que el sistema no tiene (código, dirección, celular, docente) queda vacío, nunca inventado.
+// ============================================================
+const RP_LISTAS = {"sem":["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"],"per":["2025-2","2026-1","2026-2","2027-1","2027-2","2028-1","2028-2","2029-1","2029-2"],"lug":["Colegio Alem\u00e1n","Colegio Waldorf Isolda Echavarr\u00eda","Coorporaci\u00f3n de Amor al Ni\u00f1o Cari\u00f1o","Fiscal\u00eda","Fundaci\u00f3n Aulas en Paz","Haceb","INPEC","IPS Creciendo con Cari\u00f1o","Abc Academia De F\u00fatbol","Acp Homearmour","Agencia De Viajes Operadora Fincas Agrotur\u00edsticas","Agro-Palmeras El Charal C.A.","Agrosavia","Alcald\u00eda De Itag\u00fc\u00ed","Alcald\u00eda De Sabaneta - Direcci\u00f3n Cultural","Alfime Centro De Vida Independiente C\u00f3digo: No Aplica Codigo Reps Sede:01 Nit: 800070229-0 Municipio: Envigado Alfime Centro De Vida Independiente\u202f\u202f\u00a0","Algamar","Alineatech","Americol Enterprice Llc","Angio Team","Angiosur SAS C\u00f3digo Reps 0536016495-02 Sede 02 Cl\u00ednica Angiosur","Arca Mundial","Archipielagos Institute Of Marine Conservation","Art Medica S.A.S C\u00f3digo Reps: 0500110875 Sede:01 ","Arus","Asociaci\u00f3n De Recuperadores Global","Asociaci\u00f3n Profamilia C\u00f3digo Repss0500104917Sede 01","Astrolab","Atencom - Coca Cola","Atletico Nacional S.A. \u2013 Sede 02 -  Sede Deportiva De Guarne","Aurus","Autoservicio Diego \u00c9xito","Ayudas Diagn\u00f3sticas Sura S.A.S - Ayudas Diagnosticas Sura Industriales C\u00f3digo Reps: 0500110653 Sede:23 ","Ayudas Diagnosticas Sura S.A.S  Reps: 0500110653-23  Sede  31 Ayudas Diagnosticas Sura Manila","Ayudas Diagnosticas Sura S.A.S  Reps: 0500110653-23  Sede  40 Ay Dx Clinica Medellin De Occidente","Ayudas Diagnosticas Sura S.A.S  Reps: 0500110653-23 Sede 30 Ayudas Diagnosticas Salud Sura Sao Paulo","Ayudas Diagnosticas Sura S.A.S  Reps: 0500110653-23 Sede 42 Ayudas Diagnosticas Sura Belen","Ayudas Diagnosticas Sura S.A.S  Reps: 0500110653-23 Sede 44 Ay Dx Sura Ciudad Del Rio Piso 1","Ayudas Diagnosticas Sura S.A.S  Reps: 0500110653-23 Sede 68 Ayudas Diagnosticas Sura Tranvia Plaza","Ayudas Diagnosticas Sura S.A.S  Reps: 0500110653-23 Sede 90 Ayudas Diagnosticas Sura Pac La 33","Ayudas Diagn\u00f3sticas Sura S.A.S (Ayudas Diagnosticas Sura Sao Paulo)  C\u00f3digo Repss: 0500110653 Sede: 30 ","Banco Agrario","Beauty Plus","Bestrong Fisioterapia Y Ejercicio Funcional Caf S.A.S C\u00f3digo:0500114928-01 Sede:01 Municipio: Medell\u00edn Bestrong Fisioterapia Y Ejercicio Funcional\u202f\u202f\u00a0","Bienestar Universitario Udea","Bioforma S.A. Medicina Especializada C\u00f3digo Reps: 0500103951-01 Sede Bioforma S.A. Medicina Especializada.","Biorobotics Group","Bivett","Blue Boat Sas","Bonnett Analitics S.A.S","Boston Medical Care Ips Sas Sede 01 Convatec Ips - Medell\u00edn","Boydorr","C.I. Nutreo S.A.S","CAIPD Municipio De Sabaneta","CAITES Sabaneta","Caja De Compensaci\u00f3n Familiar De Antioquia Comfama C\u00f3digo: 0500105568 -06 Medell\u00edn Sede:10 Centro Integral De Salud Envigado\u00a0","Caja De Compensacion Familiar De Antioquia Comfama C\u00f3digo: 0500105568 -06, Sede: Centro Integral De Salud Itag\u00fc\u00ed. Municipio: Itag\u00fc\u00ed. C\u00f3digo Sede :0536005568-17\u202f\u00a0","Caja De Compensacion Familiar De Antioquia Comfama C\u00f3digo:0500105568-06 Sede:05 Municipio: Medell\u00edn Centro Integral De Salud Aranjuez\u00a0","Caja De Compensacion Familiar De Antioquia Comfama C\u00f3digo:0500105568-06 Sede:07 Municipio: Bello Centro Integral De Salud Bello\u00a0","Caja De Compensacion Familiar De Antioquia Comfama C\u00f3digo:0500105568-06 Sede:51 Municipio: Envigado Cis Comfama City Plaza Envigado\u00a0","Caja De Compensacion Familiar De Antioquia Comfama: Sede Medell\u00edn - Centro Integral De Salud San Ignacio","Caja De Compensacion Familiar De Antioquia Comfama: Sede Sabaneta","Caja De Compensacion Familiar De Antioquia\nComfama C\u00f3digo:0500105568-06 Sede:06 Municipio:Medell\u00edn Centro Integral De Salud San Ignacio","Caluce","Camale S.A.S","Casa Del Buen Dios","Cdi Mis Padres Y Yo","Cedimed S.A.S Reps: 0500104336-01  Sede 01 Cedimed Poblado","Cedimed S.A.S Reps: 0500104336-01 Sede 04 Cedimed Intermedica","Cedimed S.A.S Reps: 0500104336-01- Sede 08 Cedimed - Tesoro","Cedimed S.A.S Reps: 0500104336-01 Sede 09 Cedimed Medical","Cedimed S.A.S: Sede Cedimed Laureles","CELSIA","Centro Acu\u00e1tico Y Estimulaci\u00f3n Diana Espinosa C\u00f3digo:0500114756-01 Sede:01 Municipio: Medell\u00edn Centro Acu\u00e1tico Y Estimulaci\u00f3n Diana Espinosa\u202f\u202f\u00a0","Centro Cardiovascular Somer Incare S A\nC\u00f3digo Repss: 0561507720\nSede: 01","Centro De Innovacion Roldan Sas","Centro De Medicina Del Ejercicio Y Rehabilitacion Cardiaca S A S Cemde S A S C\u00f3digo: 0500102514-01\u202fSede:01 Municipio: Medell\u00edn Centro De Medicina Del Ejercicio Y Rehabilitacion Cardiaca S A Cemde S A\u202f\u202f\u00a0","Centro De Ortopedia Y Traumatologia El Estadio S.A C\u00f3digo:0500104210 Sede:02 Municipio: Medell\u00edn Centro De Ortopedia Y Traumatologia El Estadio S.A\u202f\u202f\u00a0","Centro Formativo De Antioquia (Cefa)","Centro Integral De Servicios Ambulatorios Para La Mujer Y La Familia (Cisafm)- E.S.E Metrosalud","Centro Oncologico De Antioquia Sa C\u00f3digo:0526610461-03 Sede:03 Municipio: Envigado Centro Oncol\u00f3gico De Antioquia S.A.\u00a0","Centro Veterinario Animal Vet","Centro Veterinario Y Zootecnia Universidad Ces","Ces Mide","Cielito Lindo Sas","Cij Jeans","Cimevet","Cir Centro De Investigaci\u00f3n Roldan","Clamfor","Clinica Cardio Vid \nC\u00f3digo Reps 0500102110 \nSede 01 \u2013 Clinica Cardio Vid","Clinica De Fracturas De Medell\u00edn S.A.S C\u00f3digo:0500103923-01 Sede:01 Municipio: Medell\u00edn Clinica De Fracturas De Medell\u00edn Ltda\u202f\u202f\u00a0","Clinica De Oftalmologia Sandiego S.A C\u00f3digo:0500101498-01 Sede:01 Municipio: Medell\u00edn Clinica De Oftalmologia Sandiego S.A\u00a0","Clinica De Oftalmologia Sandiego S.A C\u00f3digo:0500101498-01 Sede:03 Municipio: Medell\u00edn Clinica De Oftalmologia Sandiego S.A\u00a0Llanogrando","Cl\u00ednica Del Prado S.A.S C\u00f3digo:0500104648 -02 Sede:02 Cl\u00ednica Del Prado Ciudad Del Rio\u00a0","Cl\u00ednica Dover Bogot\u00e1","Cl\u00ednica Imbanaco S.A.S Reps 7600101111-16  Sede 16- Clinica Imbanaco S.A.S. Sede Principal","Cl\u00ednica Imbanaco S.A.S Reps 7600101111-16 Sede 01 Clinica Imbanaco S.A.S.","Cl\u00cdnica Imbanaco S.A.S Reps 7600101111-16, Sede 02- Clinica Imbanaco S.A.S.","Clinica Medellin S.A C\u00f3digo:0500102172-03 Sede:03 Municipio: Medell\u00edn Clinica Medellin Occidente\u00a0","Clinica Medellin S.A.S.0500102172-01","Clinica Oftalmologica De Antioquia S.A 0500102118-01 \u2013 Sede 01 Clinica Oftalmol\u00f3gica De Antioquia","Clinica San Juan De Dios La Ceja C\u00f3digo:0537602125-01 Sede:01 Municipio: La Ceja, Sede Clinica San Juan De Dios La Ceja\u202f\u202f\u00a0","Cl\u00ednica Veterinaria Tienda De Mascotas","Cl\u00ednica Veterinaria Vetas","Cn San Lucas S.A.S C\u00f3digo Reps: 0500117565-01 Sede:01 Municipio: Medell\u00edn Cn San Lucas S.A.S\u00a0","Cogentech","Coil","Colegio Avanzar","Colegio Britanico","Colegio Fontan","Colegio Gimnasio Internacional De Medell\u00edn","Colegio Montessori","Colegio Pinares","Colegio Vid","Colegio Vid","Colpodiagn\u00f3stico Sas C\u00f3digo Reps 0526613410-01 Sede 01","Comite De Estudios   Medicos S.A.S - Comit\u00e9 De Estudios M\u00e9dicos Ayacucho C\u00f3digo Repps 0500111103 Sede 18 ","Comodin Sas - Rifle","Comunidad De Hermanas Dominicas De La Presentacion De La Santisima Virgen De Tours Provincia De Medellin 0500102092-01 Sede 01 Clinica El Rosario Sede Centro","Comunidad De Hermanas Dominicas De La Presentacion De La Santisima Virgen De Tours Provincia De Medellin 0500102092-01 Sede 01 Clinica El Rosario Sede Centro ","Comunidad De Hermanas Dominicas De La Presentaci\u00f3n De La Sant\u00edsima Virgen De Tours Provincia De Medell\u00edn C\u00f3digo:0500102092-01 Sede:02 Cl\u00ednica El Rosario Sede El Tesoro\u00a0","Convenio Isa - Universidad Ces","Cooperativa Colanta","Coordinadora Mercantil","Cora Group C\u00f3digo Reps:0500114440 Sede:01","Corpaul - Medifarma S.A.S.","Corporaci\u00f3n Bancornea","Corporacion Hospital Francisco Lopera Restrepo, Santa Rosa De Osos C\u00f3digo:0568618069-01 Sede:01","Corporaci\u00f3n Hospital Infantil Concejo De Medell\u00edn\nC\u00f3digo:0500113131-01 Sede:01 Municipio: Medell\u00edn Corporaci\u00f3n Hospital Infantil Concejo De Medell\u00edn","Corporaci\u00f3n Mixta Instituto Colombiano De Medicina Tropical \u201cAntonio Roldan Betancur\u201d\u00a0 C\u00f3digo Reps: 0563105493\u00a0Sede 01\u00a0","Corporaci\u00f3n Mixta Instituto Colombiano De Medicina Tropical \u201cAntonio Roldan Betancur\u201d\u00a0 C\u00f3digo Reps: 0563105493\u00a0Sede 02","Corporaci\u00f3n Para Estudios En Salud Cl\u00ednica Ces C\u00f3digo Reps:0500102124-01  Sede:01 Corporaci\u00f3n Para Estudios En Salud Cl\u00ednica Ces","Corporaci\u00f3n Para Estudios En Salud Cl\u00ednica Ces: Sede:05 Centro Ambulatorio Torre M\u00e9dica Oviedo - Cl\u00ednica Ces","Corporaci\u00f3n Para Investigaciones Biol\u00f3gicas Cib - Corporaci\u00f3n Para Investigaciones Biol\u00f3gicas Cib - Sede 01","Corporaci\u00f3n Plenitud Centro De Atenci\u00f3n A La Persona Mayor No Aplica Codigo Reps Sede:01 Nit: 901298173-3 Municipio: Rionegro\u00a0","Corporacion Universitaria Lasallista \u2013 0512918173 \u2013 Sede 01 - Centro De Atenci\u00f3n Psicol\u00f3gico Lasallista (Cap)\u00a0","Cruz Roja Colombiana: Seccional Antioquia","Cuerpo De Bomberos Voluntarios De Envigado C\u00f3digo: 0526602193  Sede 01  ","Cuerpo De Bomberos Voluntarios De Sabaneta C\u00f3digo: 0563110576  Sede 01 ","Cultivos Olivares S.A.","Departamento De Radiologia S.A Reps: 0500102421-01 Sede 01 Departamento De Radiologia S.A  ","Dislicores","Distribuidora La 39","Dominium Inmuebles Y Vehiculos Sas","Dra. Skin S.A.S C\u00f3digo Reps 0500120182- 01 Sede 01","Dra. Skin S.A.S C\u00f3digo Reps 0500120182-02 Sede 02 Dra. Skin Local 4684","Dulces Sue\u00f1os","E.S.E Hospital La Maria C\u00f3digo:  0500106086 Sede 01 ","E.S.E Hospital San Fernando C\u00f3digo:0503004374 Sede:01 Municipio: Amaga E.S.E Hospital San Fernando\u00a0","E.S.E Hospital San Rafael De Itag\u00fc\u00ed C\u00f3digo: 0536004339 Sede 02 ","E.S.E Hospital Santa Lucia Del Municipio De Fredonia C\u00f3digo: 052820217101 Sede 01 ","E.S.E Hospital Santa Mar\u00eda Del Municipio De Santa B\u00e1rbara C\u00f3digo: 0567904582 Sede 01 ","E.S.E. Hospital Manuel Uribe Angel C\u00f3digo Reps 526604910 Sede: 01 E.S.E. Hospital Manuel Uribe Angel","E.S.E. Hospital Mar\u00eda Antonia Toro De Elejalde De Frontino C\u00f3digo: 0528402170 Sede 01 ","E.S.E. Hospital Mental De Antioquia \"Mar\u00eda Upegui - Homo\" 0508804734-01 Sede 01 E.S.E. Hospital Mental De Antioquia","E.S.E. Hospital San Rafael De Andes C\u00f3digo: 0503404432 Sede 01 ","E.S.E. Hospital San Rafael De Venecia C\u00f3digo: 058610145201 Sede 01 ","Eafit - Desarrollo Empleados","Eafit - Exa","El Comit\u00e9 De Rehabilitaci\u00f3n De Antioquia \u2013 0500102989 \u2013 Sede 02 - Unidad De Rehabilitaci\u00f3n Funcional\u00a0","El Comit\u00e9 De Rehabilitaci\u00f3n De Antioquia. C\u00f3digo 0500102989 \u2013 01 Sede:11 El Comit\u00e9 De Rehabilitaci\u00f3n De Antioquia Sede Aguacatala   ","El Comit\u00e9 De Rehabilitaci\u00f3n De Antioquia: Sede Unidad De Rehabilitaci\u00f3n Funcional","El Equipo Del Pueblo Deportivo Independiente Medell\u00edn C\u00f3digo: No Aplica Codigo Reps Sede:01 Nit: 900577148-2 Municipio: Medell\u00edn El Equipo Del Pueblo Deportivo Independiente Medell\u00edn\u202f\u202f\u00a0","El Rancherito","Electiva Nacional/Internacional","Empresa De Licores De Antioquia","Empresa De Medicina Integral Emi S.A. Servicio De Ambulancia Prepagada C\u00f3digo: 0500100302  Sede 01 Medell\u00edn  ","Empresa Social Del Estado Hospital San Juan De Dios C\u00f3digo:0578904579-01 Sede:01 Municipio: T\u00e1mesis E.S.E Hospital San Juan De Dios\u00a0","Empresa Social Del Estado Hospital San Juan De Dios: Municipio El Pe\u00f1ol","Empresa Social Del Estado Hospital San Juan De Dios: Sede Carmen De Viboral","Empresa Social Del Estado Hospital San Rafael De Yolombo C\u00f3digo:0589002431-01\u00a0 Sede:01 Empresa Social Del Estado Hospital San Rafael De Yolombo\u00a0","Empresa Social Del Estado Hospital Santamaria C\u00f3digo:0567904582-01 Sede:01 Municipio: Santa B\u00e1rbara Empresa Social Del Estado Hospital Santamaria\u202f\u202f\u00a0","Empresa Social Del Estado Ivan Restrepo Gomez C\u00f3digo: 0584704839-01\u202fSede:01 Municipio: Urrao Empresa Social Del Estado Ivan Restrepo Gomez\u202f\u202f\u00a0","Empresa Social Del Estado Metrosalud 0500102178-01 - Sede 07 Unidad Hospitalaria Doce De Octubre Luis Carlos Galan Sarmiento","Empresa Social Del Estado Metrosalud 0500102178-01 - Sede 08 Unidad Hospitalaria De Castilla Jaime Tobon Arbelaez","Empresa Social Del Estado Metrosalud 0500102178-01 - Sede 09 Unidad Hospitalaria San Javier Jes\u00fas Pel\u00e1ez Botero","Empresa Social Del Estado Metrosalud 0500102178-01 - Sede 10 Unidad Hospitalaria San Cristobal Leonardo Betancur Taborda","Empresa Social Del Estado Metrosalud 0500102178-01 - Sede 11 Unidad Hospitalaria San Antonio De Prado Diego Echavarria Misas ","Empresa Social Del Estado Metrosalud 0500102178-01 - Sede 57 Unidad Hospitalaria Santa Cruz V\u00edctor C\u00e1rdenas Jaramillo","Empresa Social Del Estado Metrosalud 0500102178-01 - Sede 61 Unidad Hospitalaria Nuevo Occidente  ","Empresa Social Del Estado Metrosalud C\u00f3digo:0500102178 Sede:12 Municipio: Medell\u00edn Centro De Salud Altavista\u00a0","Empresa Social Del Estado Metrosalud C\u00f3digo:0500102178-01 Sede:04 Unidad Hospitalaria De Manrique Hermenegildo De Fex\u00a0","Empresa Social Del Estado Metrosalud C\u00f3digo:0500102178-01 Sede:59 Centro De Salud Manantial De Vida\u00a0","Empresa Social Del Estado Metrosalud C\u00f3digo:0500102178-01\u00a0 Sede:02 Unidad Hospitalaria De Bel\u00e9n H\u00e9ctor Abad Gomez\u00a0","Empresa Social Del Estado Metrosalud Reps: 0500102178-01 Sede 52 Centro De Salud Poblado\u00a0","Empresa Social Del Estado Metrosalud\nC\u00f3digo:0500102178-01 Sede:54 Municipio:Medell\u00edn Centro De Salud Santo Domingo","Empresa Social Del Estado Metrosalud\nC\u00f3digo:0500102178-01Sede:32 Municipio:Medell\u00edn Centro De Salud Villa Del Socorro\nMedia\n9","Empresa Social Del Estado Metrosalud: Sede Centro De Salud Manantial De Vida","Empresa Social Whee Sas C\u00f3digo: No Aplica Codigo Reps Nit: 901237622\u202fSede:01 Municipio: Medell\u00edn Whee\u202f\u202f\u00a0","Emtelco","Enka De Colombia","Envigado Futbol Club","Epm","Equipos Y Laboratorios De Colombia Sas","Escanograf\u00eda Neurol\u00f3gica S.A 0500103468-01  Sede 01  Escanograf\u00eda Neurol\u00f3gica S.A","Ese Hospital Antonio Roldan Betancur - La Pintada - C\u00f3digo Reps 0539005090 - Sede 01","Ese Hospital Antonio Roldan Betancur: Municipio La Pintada","Ese Hospital Departamental Universitario Santa Sofia De Caldas\nC\u00f3digo Repss: 1700100873 Sede: 01","Ese Hospital Francisco Eladio Barrera C\u00f3digo:0523705948-01 Sede:01 Municipio: Don Mat\u00edas E.S.E. Hospital Francisco Eladio Barrera\u00a0","Ese Hospital Gabriel Pelaez Montoya\nC\u00f3digo:0536404768-01Sede:01 Municipio: Jard\u00edn E.S.E\nHospital Gabriel Pel\u00e1ez Montoya","Ese Hospital La Estrella C\u00f3digo:0538005016-01 Sede:01\nMunicipio:La Estrella E.S.E Hospital La Estrella","Ese Hospital La Maria C\u00f3digo:0500106086-01 Sede:01 Municipio: Medell\u00edn E.S.E. Hospital La Maria\u00a0","Ese Hospital La Merced C\u00f3digo:0510102139-01 Sede:01 Municipio: Ciudad Bol\u00edvar E.S.E Hospital La Merced De Ciudad Bolivar\u202f\u202f\u00a0","Ese Hospital Marco Fidel Su\u00e1rez: Sede Bello","Ese Hospital Pbro Alonso Maria Giraldo - San Rafael - C\u00f3digo Reps 0566701512 - Sede 01","Ese Hospital Presbitero Alonso Maria Giraldo: Municipio San Rafael","Ese Hospital San Jose C\u00f3digo:0564204576-01 Sede:01\nMunicipio: Salgar E.S.E. Hospital San Jose","Ese Hospital San Juan De Dios - Carmen De Viboral - C\u00f3digo Reps 0514804310 \u2013 Sede 01","Ese Hospital San Juan De Dios \u2013 El Pe\u00f1ol - C\u00f3digo Reps 0554101979 \u2013 Sede 01","Ese Hospital San Juan De Dios C\u00f3digo:0569702427-01\nSede:01 Municipio: El Santuario Hospital San Juan De Dios El Santuario","Ese Hospital San Luis Beltran C\u00f3digo:0565605092-01 Sede:01 Municipio: San Jer\u00f3nimo Ese Hospital San Luis Beltran\u00a0","Ese Hospital San Rafael-Itagui C\u00f3digo:0536004339 -01\nSede:01 Municipio:Itagui E.S.E. Hospital San Rafael De\nItagu\u00ed","Ese Hospital San Rafael-Itagui Reps 0536004339-01\nSede 01 E.S.E. Hospital San Rafael De Itagu\u00ed","Ese Hospital San Vicente De Paul \u2013 San Carlos - C\u00f3digo Reps 0564903983 - Sede 01","Ese Hospital San Vicente De Paul C\u00f3digo:0507904077-01 Sede:01 Municipio: Barbosa Ese Hospital San Vicente De Paul\u00a0","Ese Hospital San Vicente De Paul: Municipio San Carlos","Ese Hospital Santa Isabel C\u00f3digo:0566404481-01 Sede:01\nMunicipio: San Pedro Ese Hospital Santa Isabel","Ese Hospital Santamaria - Santa Barbara - C\u00f3digo Reps 0567904582 \u2013 Sede 01","Ese Instituto Nacional De Cancerologia C\u00f3digo Repss: 1100106065 Sede: 01 ","Ese Metrosalud - C\u00f3digo Reps 0500102178 - Sede 56 Centro De Salud Buenos Aires","Ese San Juan De Dios De Marinilla 0544005273-01 Sede01  Ese San Juan De Dios De Marinilla","Euskadi","Everyday Homeless","Finaktiva","Firma De Abogados Cardona Tinoco","Flamingo","Florecer","Floreciendo Contigo Sas\u00a0 No Aplica Codigo Reps Sede:01 Nit:901432117-5 Municipio: Medell\u00edn\u00a0","Francorp Sas","Fundaci\u00f3n Andecol \u2013 0500110902 \u2013 Sede 01 - Fundaci\u00f3n Andecol\u00a0","Fundaci\u00f3n Argos","Fundaci\u00f3n Aurelio Llano Posada C\u00f3digo: No Aplica Codigo Reps Sede:01 01\u202fNit: 890.984.924-1\u202fMunicipio: Medell\u00edn Fundacion Aurelio Llano Posada\u202f\u202f\u00a0","Fundaci\u00f3n Cl\u00ednica Del Norte C\u00f3digo:0508811823-01\u00a0 Sede:01 Fundaci\u00f3n Cl\u00ednica Del Norte\u00a0","Fundaci\u00f3n Cl\u00ednica Noel C\u00f3digo:0500105816-02 Sede:02 Municipio: Medell\u00edn Fundaci\u00f3n Cl\u00ednica Noel\u202f\u202f\u00a0","Fundacion Colombiana De Cancerologia Clinica Vida - C\u00f3digo Reps: 0500105586 Sede: 07 Fundaci\u00f3n Colombiana De Cancerolog\u00eda Cl\u00ednica Vida","Fundaci\u00f3n Colombiana De Cancerolog\u00eda Cl\u00ednica Vida C\u00f3digo Reps: 0500105586-05 Sede 05 Fundaci\u00f3n Colombiana De Cancerolog\u00eda Cl\u00ednica Vida","Fundacion Colombiana De Cancerologia Clinica Vida: Sede 01 Avenida 33","Fundacion Colombiana De Cancerologia Clinica Vida: Sede 02 Torre Interm\u00e9dica Piso 3","Fundacion Colombiana De Cancerologia Clinica Vida: Sede 05 Torre Interm\u00e9dica Piso 9","Fundaci\u00f3n De Atenci\u00f3n A La Ni\u00f1ez -Fan","Fundaci\u00f3n Educadora Infantil Carla Cristina","Fundaci\u00f3n Hospital Infantil Santa Ana C\u00f3digo:0500105482-01 Sede:01 Fundaci\u00f3n Hospital Infantil Santa Ana\u00a0","Fundaci\u00f3n Hospital Infantil Universitario De San Jose C\u00f3digo Reps 1100116133 \u2013 01 Sede: 01 Fundaci\u00f3n Hospital Infantil Universitario De San Jose","Fundaci\u00f3n Hospital San Vicente De Paul Rionegro C\u00f3digo:0561512044-01 Sede:01 Fundaci\u00f3n Hospital San Vicente De Paul Rionegro\u00a0","Fundaci\u00f3n Hospitalaria San Vicente De Paul C\u00f3digo:0500102175-01 Sede:01 Fundaci\u00f3n Hospitalaria San Vicente De Paul\u00a0","Fundaci\u00f3n Integrar-Fundaci\u00f3n Integrar C\u00f3digo Reps 0500109694 Sede 01 ","Fundaci\u00f3n Organizaci\u00f3n Vid - C\u00f3digo Reps 0500102111-2 - Sede 01","Fundaci\u00f3n Organizaci\u00f3n Vid \u2013 Sede 31 - Atardeceres Vid","Fundaci\u00f3n Saciar, Banco De Alimentos","Fundaci\u00f3n Santa Fe De Bogot\u00e1 C\u00f3digo Reps:1100105618 Sede 01 Fundaci\u00f3n Santa Fe De Bogota","Fundacion Valle Del Lili 7600102870-01  Sede 01 Fundacion Valle Del Lili","G.I G\u00e9netica, Regeneraci\u00f3n Y C\u00e1ncer. Udea.","Gilto Constructora Sas","Gobernacion De Antioquia - Secretar\u00eda De Productividad Y Competitividad.","Groupe Seb","Growth","Grupo Afin Farmaceutica Sas","Grupo Mp","Grupo Oncol\u00f3gico Internacional S.A. Y/O Cl\u00ednica De Oncolog\u00eda Astorga\u00a0C\u00f3digo Reps: 0500108165 Sede: 02 ","Grupo Turia: Empresa Aceros","Guarne Enterprises","Habitat Adulto Mayor S.A. C\u00f3digo:0538010121 Sede:03 Municipio: Medell\u00edn H\u00e1bitat Los Balsos\u202f\u202f\u00a0","H\u00e1bitat Adulto Mayor S.A. C\u00f3digo:0538010121-01 Sede:01 H\u00e1bitat Adulto Mayor S.A.\u00a0","H\u00e1bitat Adulto Mayor S.A. C\u00f3digo:0538010121-01 Sede:04 H\u00e1bitat Los Bernal\u00a0","Hacienda Monterrey","Hacienda San Jos\u00e9 - Vichada","Helpharma Sas 0500111436 \u2013 01 Sede 01 Helpharma Almacentro","Hermanas Dominicas Hijas De Nuestra Se\u00f1ora De Nazareth C\u00f3digo: No Aplica Codigo Reps Nit 900171049-8\u202fSede:01 Municipio: Medell\u00edn Hermanas Dominicas Hijas De Nuestra Se\u00f1ora De Nazareth\u202f\u202f\u00a0","Hipoculus Sas","Hogar Nazareth","Hola Doctor S.A.S. C\u00f3digo 0500117151-01 Sede:01\nMunicipio: Medell\u00edn Hola Doctor R S.A.S","Hospital Alma M\u00e1ter De Antioquia  Reps 0500105909 Sede 03 Sede Principal Hospital Alma M\u00e1ter De Antioquia","Hospital Alma M\u00e1ter De Antioquia  Reps 0500105909 Sede 03 Sede Principal Hospital Alma M\u00e1ter De Antioquia ","Hospital Alma M\u00e1ter De Antioquia C\u00f3digo Reps 0500105909 Sede 01","Hospital Alma Mater de Antioquia C\u00f3digo Reps 0500105909-03 Sede 01 Sede ambulatoria","Hospital Alma Mater de Antioquia C\u00f3digo Reps 0500105909-03 Sede 03 Sede principal Alma Mater","Hospital Alma Mater de Antioquia C\u00f3digo Reps 0500105909-03 Sede 11 Sede ambulatoria","Hospital Alma Mater de Antioquia C\u00f3digo Reps 0500105909-03 Sede 13 Sede ambulatoria","Hospital General De Medell\u00edn Luz Castro De Guti\u00e9rrez E.S.E C\u00f3digo Reps: 0500102144-01 ","Hospital Med For Pets","Hospital Neurologico De Colombia fundaci\u00f3n Iv\u00e1n Jim\u00e9nez \"El neurol\u00f3gico\" 0500101150-01 Sede 01 ","Hospital Pablo Tobon Uribe C\u00f3digo Reps  0500102104 - Sede 01 \u2013 Hospital Pablo Tobon Uribe","Hospital Universitario Caninos Y Felinos","Hospital Universitario Del Valle","Iduquity","Imanimal Sas","Indeportes Antioquia C\u00f3digo:0500105274-01 Sede:01 Municipio: Medell\u00edn Indeportes Antioquia\u202f\u00a0","Inder Envigado C\u00f3digo:0526613996-01 Sede:01 Municipio: Envigado Inder Envigado\u202f\u202f\u00a0","Infovital Sas","Instituci\u00f3n Edicativa Fe Y Alegria El Limonar San Antonio De Prado","Institucion Educativa Inem Jos\u00e9 Felix De Restrepo C\u00f3digo: No Aplica Codigo Reps, Nit: 811042439-1Sede:02 Municipio: Medell\u00edn Inem-Seccion Escuela Guillermo Echavarria\u202f\u202f\u202f\u00a0","Instituci\u00f3n Educativa Merceditas","Instituci\u00f3n Educativa Perpetuo Socorro","Instituci\u00f3n Educativa Villa Del Socorro C\u00f3digo: No Aplica Codigo Reps Sede:1\u00a0 Nit:81101785-4 Municipio: Medell\u00edn Instituci\u00f3n Educativa Villa Del Socorro\u00a0","Instituto Colombiano Del Dolor S.A.S Reps  0500111147 -04 - Sede 04 \u2013 Instituto Colombiano Del Dolor Sas Poblado","Instituto Colombiano Del Dolor S.A.S Reps  0500111147 -10 - Sede 10 \u2013 Incodol Sas Medical Tower Poblado","Instituto Colombiano Del Dolor S.A.S Reps 0500111147-01 Sede 03 Instituto Colombiano Del Dolor S.A.S","Instituto Colombiano Del Dolor S.A.S\nC\u00f3digo Reps: 0500111147\nSede 09 \nIps Pac Incodol","Instituto De Cancerologia S.A.S. C\u00f3digo:0500105616-01 Sede:01 Municipio: Medell\u00edn Instituto De Cancerologia\u00a0","Instituto De Capacitacion Los Alamos Sede:01 Reps 0536004585 \u2013 01.Municipio: Itag\u00fc\u00ed Instituto De Capacitacion Los Alamos\u202f\u202f\u00a0","Instituto De Cultura, Recreacion Y Deporte Municipio De Itagui C\u00f3digo: No Aplica Codigo Reps Nit: 901364194-0\u202fSede:01 Municipio: Itag\u00fc\u00ed Instituto De Cultura, Recreacion Y Deporte Municipio De Itagui\u202f\u202f\u00a0","Instituto De Deporte Y Recreacion Caldas-Indec C\u00f3digo: No Aplica Codigo Reps Sede:01 01 Nit: 800019147-1 Municipio: Caldas Instituto De Deporte Y Recreacion Caldas-Indec\u202f\u202f\u00a0","Instituto De Deporte Y Recreacion De La Estrella-Indere C\u00f3digo: No Aplica Codigo Nit: 803935-7 Reps Sede:01 Municipio: La Estrella Instituto De Deporte Y Recreacion De La Estrella-Indere\u202f\u202f\u00a0","Instituto Nacional De Medicina Legal  Y Ciencias Forenses  Regional Noroccidente Medell\u00edn","Instituto Roosevelt 1100108258-01 Sede 01 Instituto De Ortopedia Infantil Roosevelt","Invemar","Inversiones Medicas De Antioquia S.A. Cl\u00ednica Las Vegas C\u00f3digo:0500102120-01 Sede:01 Inversiones Medicas De Antioquia S.A. Cl\u00ednica Las Vegas\u00a0","Invima","IPF","Iq Interquirofanos S.A C\u00f3digo Reps 0500109525-01 Sede 01  ","Jurisdicci\u00f3n Especial De Paz","Keyrus","Laboratorio Baltymas - Icmt","Laboratorio De Gen\u00e9tica Animal  De La Udea (Grupo Gamma)","Laboratorio De Patologia Y Citolog\u00eda Dr. Rodrigo Restrepo S.A.S C\u00f3digo Reps 0500111437-03 Sede 03 Laboratorio De Patologia Y Citolog\u00eda Dr. Rodrigo Restrepo S.A.S","Laboratorio De Patologia Y Citologia Limitada Lapaci\u00a0 C\u00f3digo Repss: 0500101885 Sede: 02 ","Laboratorio Genes","Laboratorio Integrado De Medicina Especializada - Lime","Laboratorio One Health De La Universidad Nacional","Laboratorio Vitra","Laboratorios Funat S.A.S","Laboratorios M&N","Landers & C\u00eda. S.A.S","Leones Futbol Club S.A C\u00f3digo: No Aplica Codigo Reps Nit: 8000158192 Sede:01 Municipio: Itag\u00fc\u00ed Leones Futbol Club S.A\u202f\u202f\u00a0","Liceo Franc\u00e9s Medell\u00edn","Life (Bogot\u00e1)","Life Oncolog\u00eda Veterinaria","Liga De Natacion De Antioquia C\u00f3digo:0500109378-01 Sede:01 Municipio: Medell\u00edn Liga De Natacion De Antioquia\u202f\u202f\u00a0","L\u00ednea Directa Sas","L\u00edneas Medicas Especializadas De Colombia","LM2","Manufacturas Infantiles S.A.","Mas Capacidad","Master","Mec\u00e1nicos Asociados Sas","Medicina Fetal Sas Reps 0500110264 -01  Sede 01 Medicina Fetal Sa","Medipiel","Metro De Medell\u00edn","Ministerio De Salud De El Salvador","Mitacs Globalink Research Internship","M\u00f3dulo 123 Secretaria De Salud De Medell\u00edn \u2013 Operado Por La Universidad Ces ","Montacargas Am&M","Municipio De Itag\u00fc\u00ed","Municipio De Sabaneta C\u00f3digo: No Aplica Codigo Reps, Nit 890980331-6 Sede:01 Municipio: Sabaneta Municipio De Sabaneta\u202f\u202f\u00a0","Netux","Neuromedica Sas  Reps:  0500114294-19  \tSede:  Reps:  0500114294-09 Neuromedica Mayorca P7 ","Neuromedica Sas Reps  0500114294 -19 - Sede 05 \u2013 Neuromedica Rionegro","Neuromedica Sas: Sede Neuromedica Medical Tower","New Stetic","Noel -Grupo Nutresa-","Normandia","Novalfarm Sas","Nueva Ese Hospital San Rafael Jerico C\u00f3digo:0536804833-01 Sede:01 Municipio: Jeric\u00f3 Nueva E.S.E. Hospital San Rafael De Jeric\u00f3\u00a0","Nutricion Vital Nuval S.A.S","Panaca","Pediatr\u00eda Integral Sas. C\u00f3digo Reps 0500120128 \u2013 01 Sede:01 Sede Almacentro\u00a0","Peluditos Centro M\u00e9dico Veterinario","Pergamino","Pharmacielo","Pixel Graphics Sas","Plenilunio Cuidados Especiales Y Asistencia Paliativa S.A.S C\u00f3digo: No Aplica Codigo Reps Sede:01 Municipio: Medell\u00edn Plenilunio Cuidados Especiales Y Asistencia Paliativa S.A.S Nit:9004258804\u00a0","Posada De Mois\u00e9s","Preescolar Aspaen","Prever","Previsora Seguros","Prodiagn\u00f3stico Ips","Productos Familia S.A\u202f\u202f C\u00f3digo: No Aplica Codigo Reps Nit 890900161-9 Sede:01 Municipio: Medell\u00edn Productos Familia S.A\u202f\u202f\u202f\u202f\u00a0","Promotora Cl\u00ednica Zona Franca De Uraba Sas \u2013 0504513197- Sede 01 \u2013 Promotora Clinica Zona Franca De Uraba","Promotora Medica Las Americas S.A  C\u00f3digo Reps 0500102126 Sede 01 \u2013 Cl\u00ednica Las Americas","Psiky - Maria Osorio","Qlub Quirofanos S.A.S Sede 01 Qlub Quirofanos S.A.S","Qlub Quirofanos S.A.S- Sede 02 \u2013 0500120436-02- Qlub Quirofanos Sede Oviedo","Quir\u00f3fanos El Tesoro S.A.S C\u00f3digo Reps 0500113152-01 Sede 01 Quir\u00f3fanos El Tesoro","Radmedics Sas","Ranchero De Occidente Sas","Reproducci\u00f3n Inser","Research Institute For Medical And Health Sciences (Rimhs) De La Universidad De Sharjah","Reserva Agroecol\u00f3gica Los Monos","Saferbo","Sagga","Salamanca Alimentaci\u00f3n Industrial S.A. Nit: 890938952 - 02","Salecianos Pedro Justo Berrio","Salud Mental Integral","Samein","Savia Salud","Secretaria De Las Mujeres - Gobernaci\u00f3n Antioquia","Secretar\u00eda De Medio Ambiente Sabaneta","Secretar\u00eda De Salud De La Ceja","Securitas","Selvazai Sas","Serenity Girls","Servi Express S.A.S","Servicios De Salud Ips Suramericana S.A.S\u202fC\u00f3digo: 0500104259-19\u202fSede:19 Municipio: Medell\u00edn Ips Sura Industriales Medellin\u202f\u202f\u00a0","Servicios De Salud Ips Suramericana S.A.S. C\u00f3digo: 0500104259 \u2013 19 Sede:36 Ips Sura San Diego. ","Servicios De Salud Ips Suramericana S.A.S: Sede C\u00f3rdoba","Servid Salud Integral S.A.S \u2013 0500118338 \u2013 Sede 02 - Servid Salud Integral Oriente\u00a0","Serviexpress S.A.","Serviucis S.A.S. 0561507672-01 Sede 01 Serviucis S.A.S","Siemens","Smart Links Network","Sociedad Medica Antioque\u00f1a S.A. Soma \nC\u00f3digo Reps: 0500102101-01 \nSede 01\nSociedad Medica Antioque\u00f1a S.A. Soma ","Sociedad M\u00e9dica Rionegro S.A. Somer S.A. C\u00f3digo Reps 0561502129-01 Sede 01- Sociedad M\u00e9dica Rionegro S.A. Somer S.A","Sol Naciente","Solaz Centro De Entretenimiento Senior S.A.S. C\u00f3digo:0500113512-02 Sede:02 Municipio: Medell\u00edn Solaz Servicios De Salud Ii\u202f\u202f\u00a0","Special Olympics Colombia","Sporti Mental Health And Sport Sas \u2013 0500117468 \u2013 Sede 02 - Sporti Mental Health And Sport Sas\u00a0","St Jude Medical Colombia Ltda","Sumimedical","Suministros De Laboratorio Kasalab Sas","Sura Asset Management","Surdoz","Tahuma Sas","T\u00e9cnica Solarte","Telecentro: Villa Del Socorro Adulto Mayor","Terra Plants International","Tronex","Unidad De Biotecnolog\u00eda Vegetal","Unidad De Oncologia Hospital Manuel Uribe Angel De Envigado - Astorga S.A.\u00a0C\u00f3digo Reps: 0526611445 Sede: 01 ","Unidad Estomatologica Las Vegas S.A - C\u00f3digo Reps 0500104172 - Sede 01","Unilasallista","Universidad Ces","Universidad Ces - C\u00f3digo Reps 0563102109 Ips Ces Sabaneta C\u00f3digo Reps 0563102109 Sede 01","Universidad Ces - Convenio Mineros","Universidad Ces \u2013 Laboratorios Cesnutral","Universidad Ces \u2013 Restaurante N \u2013 Cocina Y Nutrici\u00f3n","Universidad Ces (Bienestar Universitario) Sede:01 C\u00f3digo: No Aplica Codigo Reps, Nit: 890984002-06\u202fMunicipio: Medell\u00edn Universidad Ces\u202f(Bienestar Universitario)\u202f\u202f\u00a0","Universidad Ces (Programa Lazos) C\u00f3digo Reps: No Aplica Codigo Reps, Nit: 890984002-06\u202fSede:01 Municipio: Medell\u00edn Universidad Ces (Programa Lazos)\u202f ","Universidad Ces C\u00f3digo: 0563102109-01 Sede:03 Municipio: Medell\u00edn Gimnasio - Ips Ces Poblado C\u00f3digo: 0500102109-03\u202f\u202f\u00a0","Universidad De Antioquia (Direcci\u00f3n Bienestar Universitario Departamento De Deportes) C\u00f3digo: No Aplica Codigo Reps Sede:01 Municipio: Medell\u00edn Universidad De Antioquia","Universidad De Lasalle - Bogot\u00e1","Universidad Del Tolima","Universidad Pontificia Bolivariana C\u00f3digo Reps:0500103448 Sede: 03 Clinica Universitaria Bolivariana","Uroclin S.A.S Reps  0500100252 -06\tSede 06 \u2013 Uroclin Manila","Uroclin S.A.S Reps  0500100252-04 - Sede 04 \u2013 Uroclin Prado","Urologos Y Ginecologos De Colombia Sa Urogine Sa - Sede 01 \u2013 Reps 0500109701-Urologos Y Ginecologos De Colombia Sa Urogine Sa","Urologos Y Ginecologos De Colombia Sa Urogine Sa C\u00f3digo Reps: 0500109701\u00a0\u00a0Sede 02","Urologos Y Ginecologos De Colombia Sa Urogine Sa -Sede 03 - Reps 0500109701-03-Urologos Y Ginecologos De Colombia S.A.","Urologos Y Ginecologos De Colombia Sa Urogine Sa -Sede 05 - Reps 0500109701-05 -Urogine Oviedo","Vets-Chile","Villegas Asociados","Wehost Colombia Sas","Nevus SAS C\u00f3digo Reps 0500122648-01 Sede 01 "],"asi":[["Cuidado de enfermer\u00eda a los colectivos sanos: preescolar\u00a0","Cuidado de enfermer\u00eda a los colectivos sanos\u00a0"],["Cuidado de enfermer\u00eda a los colectivos sanos: escolar\u00a0","Cuidado de enfermer\u00eda a los colectivos sanos\u00a0"],["Cuidado de enfermer\u00eda a los colectivos sanos: adolescente\u00a0","Cuidado de enfermer\u00eda a los colectivos sanos\u00a0"],["Cuidado de enfermer\u00eda a los colectivos sanos: adulto mayor\u00a0","Cuidado de enfermer\u00eda a los colectivos sanos\u00a0"],["Cuidado de enfermer\u00eda al adulto I: hospitalizaci\u00f3n\u00a0","Cuidado de enfermer\u00eda al adulto I\u00a0"],["Cuidado de enfermer\u00eda al adulto I: consulta externa\u00a0","Cuidado de enfermer\u00eda al adulto I\u00a0"],["Cuidado de enfermer\u00eda al adulto mayor\u00a0"],["Cuidado de enfermer\u00eda al adulto II: urgencias\u00a0","Cuidado de enfermer\u00eda al adulto II\u00a0"],["Cuidado de enfermer\u00eda al adulto II: perioperatorio\u00a0","Cuidado de enfermer\u00eda al adulto II\u00a0"],["Cuidado de enfermer\u00eda a la mujer y gestante: cirug\u00eda y hospitalizaci\u00f3n\u00a0","Cuidado de enfermer\u00eda a la mujer y gestante\u00a0"],["Cuidado de enfermer\u00eda a la mujer y gestante: consulta externa\u00a0","Cuidado de enfermer\u00eda a la mujer y gestante\u00a0"],["Cuidado de enfermer\u00eda al ni\u00f1o y al adolescente: hospitalizaci\u00f3n\u00a0","Cuidado de enfermer\u00eda al ni\u00f1o y al adolescente\u00a0"],["Cuidado de enfermer\u00eda al ni\u00f1o y al adolescente: consulta externa\u00a0","Cuidado de enfermer\u00eda al ni\u00f1o y al adolescente\u00a0"],["Pr\u00e1ctica Gesti\u00f3n en Enfermer\u00eda III\u00a0"],["Cuidado de heridas I"],["Estomas I"],["Cuidado de heridas II"],["Estomas II"],["Cardiolog\u00eda no invasiva: ecocardiograf\u00eda"],["Cardiolog\u00eda invasiva: hemodin\u00e1mica electrofisiolog\u00eda"],["Banco de sangre"],["T\u00e9cnicas quir\u00fargicas"],["Anestesia cardiovascular adultos"],["Unidad de cuidado intensivo adultos"],["Perfusi\u00f3n I"],["Perfusi\u00f3n II"],["Perfusi\u00f3n pedi\u00e1trica"],["Farmacia Cl\u00ednica"],["Pr\u00e1ctica profesional","Pr\u00e1ctica"],["Pr\u00e1ctica I\u00a0"],["Pr\u00e1ctica II\u00a0"],["Pr\u00e1ctica II","Pr\u00e1ctica II\u00a0"],["Pr\u00e1ctica I - Nutrici\u00f3n Humana","Pr\u00e1ctica I"],["Pr\u00e1ctica II - Alimentos","Pr\u00e1ctica II"],["Pr\u00e1ctica III \u2013 Salud p\u00fablica","Pr\u00e1ctica III"],["Pr\u00e1ctica IV"],["Dolor cr\u00f3nico oncol\u00f3gico y cuidados paliativos I\u00a0"],["Intervencionismo I\u00a0"],["Dolor no oncol\u00f3gico\u00a0\u00a0"],["Dolor agudo\u00a0"],["Medicina f\u00edsica y rehabilitaci\u00f3n\u00a0"],["Reumatolog\u00eda\u00a0"],["Pr\u00e1ctica Cl\u00ednica I\u00a0"],["Pr\u00e1ctica Cl\u00ednica II\u00a0"],["Pr\u00e1ctica Cl\u00ednica III\u00a0"],["Pr\u00e1ctica Cl\u00ednica IV\u00a0"],["Pr\u00e1ctica UCI "],["Veh\u00edculo de emergencias II "],["Manipulaci\u00f3n y procedimientos I "],["Comunicaciones II "],["Urgencias especiales II","Urgencias especiales II "],["Manipulaci\u00f3n y procedimientos II "],["Semiolog\u00eda II "],["Urgencias especiales III"],["Manipulaci\u00f3n y procedimientos III "],["Manipulaci\u00f3n y procedimientos IV  "],["Urgencias especiales IV"],["Comunicaciones IV "],["T\u00e9cnicas de rescate IV "],["Traslado y transporte de pacientes  "],["Pr\u00e1ctica I (Psicolog\u00eda Cl\u00ednica)"],["Pr\u00e1ctica II (Optativa)"],["Pr\u00e1ctica cl\u00ednica I"],["Pr\u00e1ctica cl\u00ednica II"],["Semiolog\u00eda "],["Medicina Interna I"],["Pediatr\u00eda I"],["Ayudas Diagn\u00f3sticas (Patolog\u00eda)"],["Ayudas Diagn\u00f3sticas (Imagenolog\u00eda)","Ayudas Diagn\u00f3sticas (Patolog\u00eda)"],["Medicina Interna II"],["Pediatr\u00eda II"],["Dermatolog\u00eda I"],["Medicina Interna III"],["Pediatr\u00eda III"],["Medicina interna III- Toxicolog\u00eda "],["Especialidad y consulta externa "],["Especialidades y Consulta Externa (Urgencias)"],["Grupos y Entornos III (Salud Familiar y Comunitaria)"],["Grupos y Entornos III (Promoci\u00f3n y Prevenci\u00f3n)"],["Ortopedia y Traumatolog\u00eda I"],["Psiquiatr\u00eda I "],["Ginecolog\u00eda y Obstetricia I"],["Intervenci\u00f3n en salud "],["Dermatolog\u00eda II"],["Pediatr\u00eda IV"],["Cirug\u00eda I","Pediatr\u00eda IV"],["Cirug\u00eda I"],["Ortopedia y traumatolog\u00eda II"],["Psiquiatr\u00eda II"],["Rotaci\u00f3n electiva "],["Ginecolog\u00eda y Obstetrciai II"],["Medicina interna IV"],["Pediatr\u00eda V"],["cirug\u00eda II"],["Ortopedia y Traumatolog\u00eda III"],["Ginecolog\u00eda y\nObstetricia III","Ginecolog\u00eda y Obstetricia III"],["Manejo del \nPaciente urgente\nII"],["Anestesia II"],["Cl\u00ednica de Odontopediatr\u00eda I"],["Cl\u00ednica de Odontopediatr\u00eda II"],["Pediatr\u00eda I","Odontolog\u00eda Hospitalaria II"],["Endocrinolog\u00eda pedi\u00e1trica I","Odontolog\u00eda Hospitalaria II"],["Cl\u00ednica de Odontopediatr\u00eda III"],["Pediatr\u00eda II","Odontolog\u00eda Hospitalaria III"],["Endocrinolog\u00eda pedi\u00e1trica II","Odontolog\u00eda Hospitalaria III"],["Cl\u00ednica de Odontopediatr\u00eda IV"],["Odontopediatr\u00eda hospitalaria","Cl\u00ednica de Odontopediatr\u00eda IV"],["Labio y Paladar Hendido I"],["Anestesia General I","Anestesia General II"],["Odontopediatr\u00eda social I","Prevenci\u00f3n y Cariolog\u00eda II"],["Cl\u00ednica de Odontopediatr\u00eda IV","Cl\u00ednica de Odontopediatr\u00eda V"],["Anestesia General II","Anestesia General III"],["Labio y Paladar Hendido II"],["Odontopediatr\u00eda social II","Rotaci\u00f3n Electiva"],["Odontopediatr\u00eda hospitalaria","Rotaci\u00f3n Electiva"],["Atenci\u00f3n del paciente sano"],["Cuidado Integral del adulto 1"],["Cuidado Integral del adulto 2"],["Cuidado Integral del adulto 3"],["Cuidado integral del paciente en desarrollo 1"],["Cuidado Integral del Adulto 4"],["Cuidado Integral del paciente en desarrollo 2"],["Cuidado Integral del paciente y la comunidad 1"],["Cuidado Integral del paciente y la comunidad 2"],["Cuidado Integral del paciente y la comunidad 3"],["Cuidado Integral del paciente y la comunidad 4"],["Optometr\u00eda General\u00a0","Cl\u00ednica II\u00a0"],["Optometr\u00eda General ( intramural)\u00a0","Cl\u00ednica III\u00a0"],["Optometr\u00eda comunitaria (Extramural)\u00a0\u00a0","Cl\u00ednica III\u00a0"],["Oftalmolog\u00eda-Patolog\u00eda ocular de segmento anterior y posterior\u00a0","Cl\u00ednica III\u00a0"],["Optometr\u00eda Pedi\u00e1trica (Intramural)\u00a0","Cl\u00ednica IV"],["Optometr\u00eda pedi\u00e1trica comunitaria (Extramural)\u00a0\u00a0","Cl\u00ednica IV"],["Baja Visi\u00f3n\u00a0","Cl\u00ednica IV"],["Ex\u00e1menes especializados\u00a0\u00a0","Cl\u00ednica IV"],["Lentes de Contacto\u00a0","Pr\u00e1ctica externa"],["Lentes de Contacto\u00a0","Cl\u00ednica IV"],["Practica Externa\nEntrenamiento visual y ortoptica ( intramural) ","Pr\u00e1ctica externa"],["Practica Externa \n\nEntrenamiento visual y ortoptica (extramural) ","Cl\u00ednica IV"],["Optometr\u00eda general  ","Pr\u00e1ctica externa"],["Cl\u00ednica de Ortodoncia I"],["Cl\u00ednica de Ortodoncia II"],["Cl\u00ednica de Ortodoncia III"],["Cl\u00ednica de Ortodoncia IV"],["Cl\u00ednica de Ortodoncia V"],["Cl\u00ednica de Ortodoncia VI"],["Cardiolog\u00eda no invasiva: ecocardiograf\u00eda","Cardiolog\u00eda invasiva: hemodin\u00e1mica electrofisiolog\u00eda"],["Cl\u00ednica de Rehabilitaci\u00f3n oral\n I"],["Cl\u00ednica de Rehabilitaci\u00f3n oral\n II"],["Cl\u00ednica de Rehabilitaci\u00f3n oral\n III"],["Cl\u00ednica de Rehabilitaci\u00f3n oral\n IV"],["Cl\u00ednica de Rehabilitaci\u00f3n oral\n V"],["Cuidado al reci\u00e9n nacido en sala de partos y post parto"],["Cuidado al reci\u00e9n nacido \nde bajo riesgo"],["Cuidado al reci\u00e9n nacido y su familia en el programa canguro","Cuidado al reci\u00e9n nacido \nde bajo riesgo"],["Cuidado al reci\u00e9n nacido en la unidad de cuidado intermedio neonatal","Cuidado al reci\u00e9n nacido \nde bajo riesgo"],["Cuidado al reci\u00e9n nacido cr\u00edticamente enfermo"],["Cl\u00ednica de endodoncia I"],["Cl\u00ednica de endodoncia II"],["Cl\u00ednica de endodoncia III"],["Cl\u00ednica de endodoncia IV"],["Rotaci\u00f3n Medicina Interna"],["Rotaci\u00f3n Pediatr\u00eda"],["Rotaci\u00f3n Anestesia"],["Rotaci\u00f3n Cirug\u00eda general"],["Rotaci\u00f3n Cirug\u00eda Maxilofacial I"],["Rotaci\u00f3n Cirug\u00eda Oral y Ortognatica I"],["Rotaci\u00f3n Cirug\u00eda Maxilofacial II"],["Rotaci\u00f3n Cirug\u00eda Oral y Ortognatica II"],["Rotaci\u00f3n Ortopedia\n"],["Rotaci\u00f3n Cabeza y Cuello"],["Rotaci\u00f3n Cirug\u00eda Maxilofacial III"],["Rotaci\u00f3n Cirug\u00eda Maxilofacial III","Rotaci\u00f3n Cirug\u00eda Maxilofacial IV "],["Rotaci\u00f3n Cirug\u00eda Pl\u00e1stica Facial"],["Rotaci\u00f3n Electiva I"],["Rotaci\u00f3n Electiva II"],["Pr\u00e1ctica en promoci\u00f3n de la salud\u00a0","Pr\u00e1ctica I"],["Pr\u00e1ctica en promoci\u00f3n de la salud y protecci\u00f3n espec\u00edfica\u202f\u202f\u00a0","Pr\u00e1ctica II"],["Pr\u00e1ctica de Terap\u00e9utica\u202f\u202f\u00a0","Pr\u00e1ctica III"],["Pr\u00e1ctica de Terap\u00e9utica\u202f\u202f\u00a0","Pr\u00e1ctica IV"],["Pr\u00e1ctica en profundizaci\u00f3n\u202f\u202f\u00a0","Pr\u00e1ctica V"],["Pr\u00e1ctica en profundizaci\u00f3n\u202f\u202f\u00a0","Pr\u00e1ctica VI"],["Cl\u00ednica perodoncia I "],["Cl\u00ednica perodoncia II"],["Cl\u00ednica perodoncia III"],["Cl\u00ednica perodoncia IV"],["Cl\u00ednica perodoncia V"],["Pr\u00e1ctica I"],["Pr\u00e1ctica II"],["Pr\u00e1ctica cl\u00ednica III"],["Imagenolog\u00eda\u00a0"],["\u00c1reas neuropsicol\u00f3gicas\u00a0"],["Neurocirug\u00eda\u00a0"],["Dolor cr\u00f3nico oncol\u00f3gico y cuidados paliativos II\u00a0"],["Intervencionismo II\u00a0"],["Electiva\u00a0","Electiva\u00a0\u00a0"],["Cirug\u00eda General I"],["Cirug\u00eda General II"],["Cirug\u00eda General III"],["Cirug\u00eda Pl\u00e1stica Reconstructiva y Est\u00e9tica I"],["Dermatolog\u00eda"],["Dermatopatolog\u00eda"],["Clinica de Heridas"],["Cirug\u00eda Vascular"],["Ortopedia"],["Cirug\u00eda Pl\u00e1stica Reconstructiva y Est\u00e9tica II"],["Cirug\u00eda Pl\u00e1stica Reconstructiva y Est\u00e9tica III"],["Cirug\u00eda de Mano I"],["Quemados I"],["Cirug\u00eda Cr\u00e1neo-maxilofacial"],["Mastolog\u00eda I"],["Microcirug\u00eda","Microcirug\u00eda "],["Cirug\u00eda Pl\u00e1stica Reconstructiva y Est\u00e9tica IV"],["Cirug\u00eda de Mano II"],["Quemados II"],["Cirug\u00eda Cr\u00e1neofacial y de labio y paladar hendido"],["Electiva I"],["Cirug\u00eda Pl\u00e1stica Reconstructiva y Est\u00e9tica V"],["Cirug\u00eda Est\u00e9tica I"],["Cirug\u00eda Est\u00e9tica II"],["Medicina Est\u00e9tica y Aparatolog\u00eda"],["Mastolog\u00eda II"],["Electiva II"],["Gastroenterolog\u00eda Cl\u00ednica I","Gastroenterolog\u00eda Cl\u00ednica I  "],["Endoscopia Digestiva I  "],["Ingenier\u00eda Biom\u00e9dica "],["Enfermer\u00eda"],["Im\u00e1genes Diagn\u00f3sticas "],["Patolog\u00eda e Inmunolog\u00eda  "],["Psiquiatr\u00eda"],["Gastroenterolog\u00eda Cl\u00ednica II"],["Endoscopia Digestiva II"],["Oncolog\u00eda Gastrointestinal"],["Fisiolog\u00eda Digestiva"],["Ultrasonido Endosc\u00f3pico y Endoscopia Avanzada"],["Hepatolog\u00eda"],["Cirug\u00eda de Mama I\u00a0"],["Anatom\u00eda Patol\u00f3gica\u00a0","Anatom\u00eda Patol\u00f3gica\u00a0\u00a0"],["Imagenolog\u00eda Mamaria\u00a0"],["Oncolog\u00eda\u00a0","Oncolog\u00eda\u00a0\u00a0"],["Cirug\u00eda de Mama II\u00a0","Cirug\u00eda de Mama II\u00a0\u00a0"],["Cirug\u00eda Pl\u00e1stica\u00a0"],["Medicina Paliativa\u00a0"],["Medicina F\u00edsica y Rehabilitaci\u00f3n\u00a0","Medicina F\u00edsica y Rehabilitaci\u00f3n\u00a0\u00a0"],["Radioterapia\u00a0","Radioterapia\u00a0\u00a0"],["Urgencias I"],["Urgencias II"],["Urgencias III"],["Medicina Interna "],["Cirug\u00eda General"],["Urgencias Pediatr\u00eda "],["Urgencias Ginecobstetricia "],["Urgencias IV"],["Radiolog\u00eda e Im\u00e1genes Diagn\u00f3sticas"],["UCI"],["Urgencias Neurolog\u00eda "],["Anestesia "],["Psiquiatr\u00eda "],["Urgencias V"],["Urgencias VI"],["Urgencias Cardiovasculares"],["Toxicolog\u00eda "],["UCI Cardiovascular "],["Neonatos"],["Lactantes"],["Preescolares"],["Urgencias Pedi\u00e1tricas I"],["Consulta Externa I"],["Neumolog\u00eda"],["Cardiolog\u00eda"],["Neurolog\u00eda"],["Pediatr\u00eda Comunitaria"],["Gastroenterolog\u00eda"],["Endocrinolog\u00eda"],["Infectolog\u00eda"],["Reumatolog\u00eda"],["Hematolog\u00eda"],["Oncolog\u00eda"],["UCI Neonatal"],["UCI Pedi\u00e1trica"],["Hospitalizaci\u00f3n Pediatr\u00eda"],["Urgencias Pedi\u00e1tricas II"],["Consulta Externa II"],["Adolescentes"],["Nefrolog\u00eda"],["Electiva"],["Radiolog\u00eda convencional y fluoroscopia"],["Tomograf\u00eda General"],["Torax I"],["Ecograf\u00eda I"],["Abdomen I"],["Osteomuscular I"],["Resonancia Magn\u00e9tica I"],["Neuroradiolog\u00eda I"],["Pr\u00e1ctica General I"],["Tomograf\u00eda de Abdomen"],["Tomograf\u00eda de T\u00f3rax"],["Radiolog\u00eda Pedi\u00e1trica I"],["Ecograf\u00eda II"],["Mamograf\u00eda I"],["Resonancia Magn\u00e9tica II"],["Doppler"],["Intervencionismo Cardiovascular y Neurol\u00f3gico"],["Imagen Cardiotor\u00e1cica"],["Torax II"],["Radiolog\u00eda pedi\u00e1trica II"],["Ecograf\u00eda Ginecol\u00f3gica y Obst\u00e9trica"],["Abdomen II"],["Osteomuscular II"],["Neuroradiolog\u00eda II"],["Intervencionismo Corporal"],["Pet-CT"],["Mamograf\u00eda II"],["Im\u00e1genes de Cabeza y Cuello"],["Resonancia Magn\u00e9tica III"],["Rotaci\u00f3n Internacional"],["Cirug\u00eda General IV"],["Cirug\u00eda Pl\u00e1stica"],["Radiolog\u00eda"],["Patolog\u00eda"],["Nutrici\u00f3n"],["Cirug\u00eda General V"],["Cirug\u00eda General VI"],["Cirug\u00eda General VII"],["Urolog\u00eda"],["Gastrohepatolog\u00eda"],["Coloproctolog\u00eda"],["Cirug\u00eda General VIII"],["Cirug\u00eda Vascular Perif\u00e9rica"],["Cirug\u00eda de T\u00f3rax"],["Laparoscopia"],["Cirug\u00eda Ginecol\u00f3gica"],["Cirug\u00eda Oncol\u00f3gica"],["Cirug\u00eda General IX"],["Trauma"],["Cirug\u00eda Infantil"],["Oftalmolog\u00eda general I"],["Cirug\u00eda oftalmol\u00f3gica general"],["Cornea I"],["Retina I"],["Optometr\u00eda"],["Glaucoma I"],["Oftalmolog\u00eda pedi\u00e1trica y estrabismo"],["Segmento anterior I"],["Uve\u00edtis"],["Ayudas diagn\u00f3sticas oftalmol\u00f3gicas"],["Ecograf\u00eda ocular"],["C\u00f3rnea I"],["Neuroftalmolog\u00eda"],["Oftalmolog\u00eda general II"],["Cirug\u00eda oftalmol\u00f3gica II"],["Cornea II"],["Retina II"],["Optometr\u00eda avanzada"],["Glaucoma II"],["Oftalmolog\u00eda pedi\u00e1trica avanzada"],["Segmento anterior II"],["Uve\u00edtis II"],["Ayudas diagn\u00f3sticas avanzadas"],["Ecograf\u00eda ocular avanzada"],["C\u00f3rnea II"],["Neuroftalmolog\u00eda avanzada"],["Oftalmolog\u00eda general III"],["Cirug\u00eda oftalmol\u00f3gica III"],["Cornea III"],["Retina III"],["Optometr\u00eda especializada"],["Glaucoma III"],["Oftalmolog\u00eda pedi\u00e1trica y estrabismo avanzado"],["Segmento anterior III"],["Uve\u00edtis III"],["Ayudas diagn\u00f3sticas especializadas"],["Facoemulsificaci\u00f3n"],["Oculopl\u00e1stica \u2013 Tumores"],["Neuroftalmolog\u00eda III"],["Electiva Internacional"],["Anestesia general I"],["Anestesia general II"],["Anestesia general III"],["Anestesia general IV"],["Anestesia obst\u00e9trica I"],["Anestesia obst\u00e9trica II"],["Anestesia obst\u00e9trica III"],["Anestesia regional"],["Anestesia pedi\u00e1trica I"],["Neuroanestesia"],["Dolor y cuidado paliativo"],["Anestesia general V"],["Anestesia pedi\u00e1trica II"],["Anestesia cardiovascular"],["Anestesia oftalmol\u00f3gica"],["Anestesia general VI"],["Neurolog\u00eda I"],["Medicina Interna"],["Cuidados Intensivos Neurol\u00f3gicos"],["Imagenolog\u00eda Neurol\u00f3gica I"],["Neurofisiolog\u00eda Cl\u00ednica y Epilepsia I"],["Urgencias Neurol\u00f3gicas I"],["Neurocirug\u00eda"],["Sue\u00f1o"],["Neurolog\u00eda II"],["Imagenolog\u00eda Neurol\u00f3gica II"],["Neurofisiolog\u00eda Cl\u00ednica y Epilepsia II"],["Neuroftalmolog\u00eda II"],["Rehabilitaci\u00f3n Neurol\u00f3gica"],["Urgencias Neurol\u00f3gicas II"],["Neuropediatr\u00eda"],["Neurocirug\u00eda II"],["Sue\u00f1o II"],["Electiva III"],["Neurolog\u00eda III"],["Imagenolog\u00eda Neurol\u00f3gica III"],["Neurofisiolog\u00eda Cl\u00ednica y Epilepsia III"],["Rehabilitaci\u00f3n Neurol\u00f3gica II"],["Electiva IV"],["Consulta Externa III"],["Urgencias Neurol\u00f3gicas III"],["Neuropediatr\u00eda II"],["Neurocirug\u00eda III"],["Sue\u00f1o III"],["Electiva V"],["Neurolog\u00eda IV"],["Neurofisiolog\u00eda Cl\u00ednica y Epilepsia IV"],["Rehabilitaci\u00f3n Neurol\u00f3gica III"],["Consulta Externa IV"],["Urgencias Neurol\u00f3gicas IV"],["Neuroftalmolog\u00eda IV"],["Neurocirug\u00eda IV"],["Sue\u00f1o IV"],["Electiva VI"],["Cardiolog\u00eda Cl\u00ednica de Adultos I"],["Ecocardiograf\u00eda"],["Cardiolog\u00eda No Invasiva"],["Cirug\u00eda Cardiovascular"],["Rehabilitaci\u00f3n Card\u00edaca"],["Medicina Nuclear"],["Imagenolog\u00eda Card\u00edaca"],["Cardiolog\u00eda Cl\u00ednica de Adultos II"],["Electrofisiolog\u00eda, Arritmias y Marcapasos"],["Cardiolog\u00eda Pedi\u00e1trica"],["Cardiolog\u00eda Intervencionista y Hemodinamia"],["Cuidados Coronarios"],["Falla Card\u00edaca"],["Rehabilitaci\u00f3n Card\u00edaca II"],["Alto Riesgo Obst\u00e9trico I"],["Medicina Fetal y Ecograf\u00eda I"],["Patolog\u00eda Tracto Genital Inferior"],["Alto Riesgo Obst\u00e9trico II"],["Ginecolog\u00eda y Obstetricia II"],["Ginecolog\u00eda Oncol\u00f3gica"],["Medicina Fetal y Ecograf\u00eda II"],["Alto Riesgo Obst\u00e9trico III"],["Ginecolog\u00eda y Obstetricia III"],["Ginecolog\u00eda y Obstetricia IV"],["Reproducci\u00f3n Humana"],["Electiva VII"],["Electiva VIII"],["Electiva IX"],["Electiva X"],["Electiva XI"],["Dermatolog\u00eda B\u00e1sica para Pat\u00f3logos"],["Patolog\u00eda B\u00e1sica para Dermat\u00f3logos"],["Dermatopatolog\u00eda I"],["Dermatopatolog\u00eda II"],["Dermatopatolog\u00eda III"],["Dermatopatolog\u00eda IV"],["Urgencias"],["Imagenolog\u00eda"],["Dermatolog\u00eda General"],["Psiquiatr\u00eda de Enlace"],["Toxicolog\u00eda"],["Consulta Externa"],["Ortopedia General I"],["Trauma I"],["Trauma II"],["Radiolog\u00eda "],["Enfermedades infecciosas"],["Fisiatria "],["Cirug\u00eda de Pie y Tobillo"],["Cirug\u00eda de cadera"],["Cirug\u00eda de rodilla ","Cirug\u00eda de Rodilla"],["Cirug\u00eda de hombro y codo"],["Cirug\u00eda de mano"],["Ortopedia General II"],["Cirug\u00eda de columna "],["Ortopedia pedi\u00e1trica"],["Dolor"],["Ortopedia General III"],["Ortopedia General IV"],["Trauma III"],["Cirug\u00eda reconstructiva"],["Urolog\u00eda General I"],["Urolog\u00eda Pedi\u00e1trica "],["Urolog\u00eda General II"],["Urolog\u00eda Ginecol\u00f3gica y funcional "],["Androlog\u00eda e infertilidad"],["Urolog\u00eda General III"],["Nefrolog\u00eda y transplantes"],["Endourolog\u00eda"],["Urolog\u00eda reconstructiva"],["Urolog\u00eda oncol\u00f3gica"],["Urolog\u00eda General IV"],["Urolog\u00eda General V"],["laparoscopia "],["Psiquiatr\u00eda General "],["Neuropsiquiatr\u00eda"],["Neurolog\u00eda "],["Psiquiatr\u00eda de Enlace I"],["Farmacodependencia "],["Psiquiatr\u00eda Comunitaria "],["Psicoterapia I "],["Psiquiatr\u00eda de Enlace II"],["Psiquiatr\u00eda Infantil "],["Psiquiatr\u00eda Forense "],["Endocrinolog\u00eda "],["Psicoterapia II "],["electiva "],["Fundamentos B\u00e1sicos de Biolog\u00eda Molecular"],["Inmunolog\u00eda I"],["Reumatolog\u00eda Cl\u00ednica Ambulatoria I"],["Reumatolog\u00eda Cl\u00ednica- Hospitalaria I"],["Rehabilitaci\u00f3n y Fisiatr\u00eda"],["Laboratorio de Inmunolog\u00eda"],["Inmunolog\u00eda II"],["Reumatolog\u00eda Cl\u00ednica Ambulatoria II"],["Reumatolog\u00eda Cl\u00ednica Hospitalaria II"],["Reumatolog\u00eda Pedi\u00e1trica"],["Dolor y Cuidados Paliativos"],["Electrofisiolog\u00eda I"],["Electrofisiolog\u00eda II"],["Electrofisiolog\u00eda III"],["Electrofisiolog\u00eda IV"],["Patolog\u00eda I"],["Inmunolog\u00eda"],["Dermatolog\u00eda\nGeneral I"],["Cirug\u00eda\nDermatol\u00f3gica I"],["Fototerapia"],["Patolog\u00eda II"],["Micolog\u00eda"],["Dermatolog\u00eda\nGeneral II"],["Cirug\u00eda dermatol\u00f3gica II"],["Estomatolog\u00eda"],["Enfermedades \nInfecciosas"],["Patolog\u00eda III"],["Dermatolog\u00eda\nGeneral III"],["Cirug\u00eda\nDermatol\u00f3gica III"],["Electrofisiolog\u00eda y arritmias"],["hemodinamia "],["Perfusi\u00f3n"],["Anestesia cardiovascular I"],["Anestesiua cardiovascular pedi\u00e1trica I"],["electrocardiograf\u00eda intraoperatoria ","electrocardiograf\u00eda intraoperatoria laboratorio"],["Anestesia cardiovascular II"],["Anestesiua cardiovascular pedi\u00e1trica II"],["electrocardiograf\u00eda intraoperatoria -quirofano"],["Diagn\u00f3stico cardiovascular invasivo"],["Intervencionismo cordiovascular I "],["Intervencionismo cordiovascular II"],["Intervencionismo cordiovascular III"],["Dolor cr\u00f3nico oncol\u00f3gico y cuidados paliativos I"],["Intervencionismo I"],["Dolor no oncol\u00f3gico "],["Dolor agudo"],["Medicina f\u00edsica y rehabilitaci\u00f3n"],["\u00c1reas neuropsicol\u00f3gicas"],["Dolor cr\u00f3nico oncol\u00f3gico y cuidados paliativos II"],["Intervencionismo II"],["Cirug\u00eda de Mama I"],["Anatom\u00eda Patol\u00f3gica "],["Imagenolog\u00eda Mamaria"],["Oncolog\u00eda "],["Cirug\u00eda de Mama II "],["Medicina Paliativa"],["Medicina F\u00edsica y Rehabilitaci\u00f3n "],["Radioterapia "],["UCI neonatal I"],["Cirug\u00eda pedi\u00e1trica"],["Laboratorio Cl\u00ednico y Gen\u00e9tica"],["Oftalmolog\u00eda"],["Im\u00e1genes Diagn\u00f3sticas \u2013 Ecograf\u00eda"],["UCI Neonatal II"],["Perinatolog\u00eda"],["Programa Canguro"],["Neumolog\u00eda I"],["Cuidado Intensivo"],["Laboratorio Pulmonar"],["Im\u00e1genes Diagn\u00f3sticas"],["Neumolog\u00eda II"],["Enfermedad Vascular Pulmonar"],["Rehabilitaci\u00f3n Pulmonar"],["Broncoscopia"],["Medicina del Sue\u00f1o"],["UCI I y cocneptos generales de trauma"],["UCI II y cocneptos generales "],["UCI III neumolog\u00eda"],["UCI IV cardiovascular "],["Ecocardiograf\u00eda en UCI "],["UCI V nefrolog\u00eda- hepatolog\u00eda y transplantes "],["UCI VI neurolog\u00eda"],["Cirug\u00eda Cardiovascular I"],["Anestesia Cardiovascular y Ecocardiograf\u00eda Intraoperatoria"],["UCI Cardiovascular"],["Imagenolog\u00eda Cardiovascular"],["Cirug\u00eda Cardiovascular II"],["Enfermedad Estructura Transcat\u00e9ter I"],["Cardiopat\u00edas Cong\u00e9nitas"],["Cardiolog\u00eda Cl\u00ednica y Electrofisiolog\u00eda"],["Cirug\u00eda Cardiovascular III"],["Enfermedad Estructural Transcat\u00e9ter II"],["UCI Pedi\u00e1trica I"],["Neumolog\u00eda Pedi\u00e1trica"],["Nefrolog\u00eda Pedi\u00e1trica"],["Infectolog\u00eda Pedi\u00e1trica"],["Anestesia Pedi\u00e1trica"],["UCI Pedi\u00e1trica II"],["UCI Cardiovascular Pedi\u00e1trica"],["Radiolog\u00eda Pedi\u00e1trica"],["Neurolog\u00eda Pedi\u00e1trica"],["Pr\u00e1ctica general II"],["Endocrinologia "],["Reumatologia"],["Infectolog\u00eda Pedi\u00e1trica I\u00a0"],["Microbiolog\u00eda Cl\u00ednica y Biolog\u00eda Molecular\u00a0"],["Micolog\u00eda\u00a0"],["Micobacterias\u00a0\u00a0"],["Enfermedades Tropicales \u2013 Parasitolog\u00eda\u00a0\u00a0"],["Programa de Optimizaci\u00f3n de Antimicrobianos PROA\u00a0"],["Infectolog\u00eda Pedi\u00e1trica II\u00a0"],["Infectolog\u00eda Pedi\u00e1trica III\u00a0"],["Comit\u00e9 de Infecciones\u00a0"],["Inmunolog\u00eda Cl\u00ednica\u00a0\u00a0"],["Infectolog\u00eda Pedi\u00e1trica en Neonatos\u00a0"],["Micobacterias "]],"prog":[["Pregrado de Medicina","Facultad de Ciencias de la Salud","Pregrado"],["Pregrado de Medicina Veterinaria y Zootecnia","Facultad de Ciencias Agropecuarias y Naturales","Pregrado"],["Pregrado de Biolog\u00eda","Facultad de Ciencias Agropecuarias y Naturales","Pregrado"],["Pregrado de Qu\u00edmica Farmac\u00e9utica","Facultad de Ciencias Alimentarias y Farmac\u00e9uticas","Pregrado"],["Pregrado de Odontolog\u00eda","Facultad de Ciencias Odontol\u00f3gicas, del Cuidado y la Rehabilitaci\u00f3n","Pregrado"],["Pregrado de Nutrici\u00f3n y Diet\u00e9tica","Facultad de Ciencias Alimentarias y Farmac\u00e9uticas","Pregrado"],["Pregrado de Enfermer\u00eda","Facultad de Ciencias Odontol\u00f3gicas, del Cuidado y la Rehabilitaci\u00f3n","Pregrado"],["Pregrado de Fisioterapia","Facultad de Ciencias Odontol\u00f3gicas, del Cuidado y la Rehabilitaci\u00f3n","Pregrado"],["Pregrado de Optometr\u00eda","Facultad de Ciencias de la Salud","Pregrado"],["Pregrado de Psicolog\u00eda","Facultad de Ciencias Sociales y Humanas","Pregrado"],["Pregrado de Administraci\u00f3n de Empresas","Facultad de Ciencias Sociales y Humanas","Pregrado"],["Pregrado de Derecho","Facultad de Ciencias Sociales y Humanas","Pregrado"],["Pregrado de Ingenier\u00eda Biom\u00e9dica","Facultad de Ciencias de la Salud","Pregrado"],["Pregrado de Ecolog\u00eda","Facultad de Ciencias Agropecuarias y Naturales","Pregrado"],["Tecnolog\u00eda en Atenci\u00f3n Prehospitalaria","Facultad de Ciencias Odontol\u00f3gicas, del Cuidado y la Rehabilitaci\u00f3n","Pregrado"],["Especializaci\u00f3n en Anestesiolog\u00eda","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Cardiolog\u00eda","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Cirug\u00eda Cardiovascular","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Cirug\u00eda General","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Dermatolog\u00eda","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Dermatopatolog\u00eda","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Dolor y Cuidado Paliativo","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Electrofisiolog\u00eda Card\u00edaca","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Gastroenterolog\u00eda","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Ginecolog\u00eda y Obstetricia","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Infectolog\u00eda Pedi\u00e1trica","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Mastolog\u00eda","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Medicina Cr\u00edtica y Cuidado Intensivo","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Medicina de Urgencias","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Medicina Interna","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Neonatolog\u00eda","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Oftalmolog\u00eda","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Pediatr\u00eda","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Psiquiatr\u00eda","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Urolog\u00eda","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Cirug\u00eda Pl\u00e1stica, Reconstructiva y Est\u00e9tica","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Anestesia Cardiovascular y Tor\u00e1cica","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Medicina Cr\u00edtica y Cuidado Intensivo Pedi\u00e1trico","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Ortopedia y Traumatolog\u00eda","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Neumolog\u00eda","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Neurolog\u00eda","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Reumatolog\u00eda","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Cardiolog\u00eda Intervencionista y Hemodinamia","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Radiolog\u00eda e Im\u00e1genes Diagn\u00f3sticas","Facultad de Ciencias de la Salud","Posgrado"],["Especializaci\u00f3n en Fisioterapia en Cuidado Cr\u00edtico del Adulto","Facultad de Ciencias Odontol\u00f3gicas, del Cuidado y la Rehabilitaci\u00f3n","Posgrado"],["Especializaci\u00f3n en Perfusi\u00f3n y Circulaci\u00f3n Extracorp\u00f3rea","Facultad de Ciencias Odontol\u00f3gicas, del Cuidado y la Rehabilitaci\u00f3n","Posgrado"],["Especializaci\u00f3n en Enfermer\u00eda en Cuidado de Personas con Heridas y Ostom\u00edas","Facultad de Ciencias Odontol\u00f3gicas, del Cuidado y la Rehabilitaci\u00f3n","Posgrado"],["Especializaci\u00f3n en Imagenolog\u00eda Veterinaria","Facultad de Ciencias Agropecuarias y Naturales","Posgrado"],["Especializaci\u00f3n en Biotecnolog\u00eda de la Reproducci\u00f3n Animal","Facultad de Ciencias Agropecuarias y Naturales","Posgrado"],["Especializaci\u00f3n en Anestesiolog\u00eda Veterinaria","Facultad de Ciencias Agropecuarias y Naturales","Posgrado"],["Especializaci\u00f3n en Cirug\u00eda Maxilofacial","Facultad de Ciencias Odontol\u00f3gicas, del Cuidado y la Rehabilitaci\u00f3n","Posgrado"],["Especializaci\u00f3n en Endodoncia","Facultad de Ciencias Odontol\u00f3gicas, del Cuidado y la Rehabilitaci\u00f3n","Posgrado"],["Especializaci\u00f3n en Odontopediatr\u00eda Cl\u00ednica y Ortodoncia Preventiva","Facultad de Ciencias Odontol\u00f3gicas, del Cuidado y la Rehabilitaci\u00f3n","Posgrado"],["Especializaci\u00f3n en Ortodoncia","Facultad de Ciencias Odontol\u00f3gicas, del Cuidado y la Rehabilitaci\u00f3n","Posgrado"],["Especializaci\u00f3n en Periodoncia","Facultad de Ciencias Odontol\u00f3gicas, del Cuidado y la Rehabilitaci\u00f3n","Posgrado"],["Especializaci\u00f3n en Rehabilitaci\u00f3n Oral","Facultad de Ciencias Odontol\u00f3gicas, del Cuidado y la Rehabilitaci\u00f3n","Posgrado"],["Especializaci\u00f3n en Neurodesarrollo y Aprendizaje","Facultad de Ciencias Sociales y Humanas","Posgrado"],["Maestr\u00eda en Cl\u00ednica Psicol\u00f3gica","Facultad de Ciencias Sociales y Humanas","Posgrado"],["Maestr\u00eda en Neuropsicolog\u00eda Cl\u00ednica","Facultad de Ciencias Sociales y Humanas","Posgrado"],["Maestr\u00eda en Psicolog\u00eda de la Salud","Facultad de Ciencias Sociales y Humanas","Posgrado"],["Maestr\u00eda en Cl\u00ednica Psicol\u00f3gica","Facultad de Ciencias Sociales y Humanas","Posgrado"],["Maestr\u00eda en Enfermer\u00eda Neonatal","Facultad de Ciencias Odontol\u00f3gicas, del Cuidado y la Rehabilitaci\u00f3n","Posgrado"]]};
+
+const RP_URLS_EXCELJS = [
+  'https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js'
+];
+const RP_PALABRAS_VACIAS = new Set(['de', 'del', 'la', 'las', 'el', 'los', 'y', 'e', 'en', 's', 'a', 'sas', 'sa', 'ltda', 'al']);
+const RP_PARTICULAS_NOMBRE = new Set(['de', 'del', 'la', 'las', 'los', 'y', 'e']);
+const RP_COLOR_GRIS = 'FFADB9CA'; // el gris azulado de las columnas con fórmulas del formato original
+const RP_ANCHOS = { A: 13.9, B: 9.4, C: 50, D: 37.1, E: 15.6, F: 8.4, G: 11.3, H: 13.1, I: 13.1, J: 17.3, K: 28.9, L: 13.1, M: 66.6, N: 23.4, O: 43.6, P: 45.1, Q: 12.9, R: 12.9, S: 16.1, T: 13, U: 16.1, V: 53.7 };
+const RP_ENCABEZADOS = ['Periodo Académico', 'Semestre', 'Programa académico', 'Facultad', 'Nivel de formación', 'Código del estudiante', 'Documento de identidad', 'Nombres completos', 'Apellidos completos', 'Dirección del estudiante', 'Correo electrónico del estudiante', 'Número celular del estudiante', 'Escenario de práctica', 'Asignatura', 'Práctica clínica o laboral', 'Nombre completo docente', 'Fecha de Inicio', 'Fecha final', 'Duración de la práctica en semanas', 'Número de horas que dura lapráctica semanal', 'Número de horas totales que dura la práctica', 'Observaciones'];
+// Estilo por columna, igual que el formato original: tamaño de letra, ajuste de texto, formato numérico y si es gris (fórmula)
+const RP_ESTILO_COL = {
+  A: [11, 0, 'General', 0], B: [11, 0, 'General', 0], C: [11, 0, 'General', 0], D: [11, 0, 'General', 1], E: [11, 0, 'General', 1],
+  F: [9, 1, '0', 0], G: [9, 1, '@', 0], H: [9, 1, '@', 0], I: [9, 1, '@', 0], J: [9, 1, 'General', 0], K: [9, 1, 'General', 0], L: [9, 1, 'General', 0],
+  M: [11, 0, 'General', 0], N: [9, 1, 'General', 0], O: [11, 0, 'General', 1], P: [11, 0, 'General', 0],
+  Q: [9, 1, 'mm-dd-yy', 0], R: [9, 1, 'mm-dd-yy', 0], S: [11, 0, '0.0', 1], T: [11, 0, 'General', 0], U: [11, 0, '0.0', 1], V: [11, 0, 'General', 0]
+};
+
+// ---------- textos ----------
+function rpNorm_(t) {
+  return String(t === null || t === undefined ? '' : t).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ').trim();
+}
+function rpTokens_(t) {
+  return [...new Set(rpNorm_(t).split(' ').filter(w => w && !RP_PALABRAS_VACIAS.has(w)))];
+}
+function rpRaiz_(w) { return w.slice(0, 6); } // anestesia / anestesiología comparten raíz
+function rpNucleoPrograma_(t) {
+  return rpNorm_(t).replace(/^(especializacion|maestria|doctorado)\s+((en|de)\s+)?/, '').trim();
+}
+function rpTitulo_(t) {
+  const s = String(t === null || t === undefined ? '' : t).replace(/\s+/g, ' ').trim();
+  if (!s) return '';
+  return s === s.toUpperCase() ? nombrePropioDb_(s) : s; // solo se arregla lo que viene todo en mayúsculas
+}
+
+// ---------- índices contra los listados oficiales del formato ----------
+const RP_PROGRAMAS = (() => {
+  const vistos = new Set(); const lista = [];
+  RP_LISTAS.prog.forEach(p => {
+    if (p[2] !== 'Posgrado') return;
+    const k = rpNorm_(p[0]); if (vistos.has(k)) return; vistos.add(k);
+    lista.push({ nombre: p[0], facultad: p[1], nivel: p[2], norm: k, nucleo: rpNucleoPrograma_(p[0]),
+      raices: new Set(rpTokens_(rpNucleoPrograma_(p[0])).map(rpRaiz_)) });
+  });
+  return lista;
+})();
+const RP_LUGARES = RP_LISTAS.lug.map(t => ({ texto: t, norm: rpNorm_(t), tokens: new Set(rpTokens_(t)) }));
+const RP_ASIGNATURAS = (() => {
+  const mapa = new Map();
+  RP_LISTAS.asi.forEach(a => { const k = rpNorm_(a[0]); if (k && !mapa.has(k)) mapa.set(k, { texto: a[0], rotacion: a.length > 1 ? a[1] : a[0] }); });
+  return mapa;
+})();
+
+// Programa del sistema -> programa del listado. Solo acepta coincidencias claras; si hay duda devuelve null
+// (el nombre del sistema se deja tal cual y el programa queda en la lista de revisión).
+function rpBuscarPrograma_(nombre) {
+  const norm = rpNorm_(nombre); if (!norm) return null;
+  const igual = RP_PROGRAMAS.find(p => p.norm === norm);
+  if (igual) return igual;
+  const nuc = rpNucleoPrograma_(nombre);
+  const igualNucleo = RP_PROGRAMAS.filter(p => p.nucleo === nuc);
+  if (igualNucleo.length === 1) return igualNucleo[0];
+  const raices = new Set(rpTokens_(nuc).map(rpRaiz_));
+  if (!raices.size) return null;
+  const puntajes = RP_PROGRAMAS.map(p => {
+    let comunes = 0; raices.forEach(r => { if (p.raices.has(r)) comunes++; });
+    const union = raices.size + p.raices.size - comunes;
+    return { p, comunes, j: union ? comunes / union : 0, contiene: comunes === raices.size };
+  }).filter(x => x.comunes > 0).sort((a, b) => b.j - a.j);
+  if (!puntajes.length) return null;
+  const mejor = puntajes[0], segundo = puntajes[1];
+  if (mejor.j >= 0.6 && (!segundo || mejor.j - segundo.j >= 0.15)) return mejor.p;
+  const quienContiene = puntajes.filter(x => x.contiene);
+  if (quienContiene.length === 1) return quienContiene[0].p;
+  return null;
+}
+
+// Escenario del sistema -> escenario del listado: igual, o único listado que contiene todas sus palabras.
+function rpBuscarLugar_(nombres) {
+  for (const nombre of nombres) {
+    const norm = rpNorm_(nombre); if (!norm) continue;
+    const igual = RP_LUGARES.find(l => l.norm === norm);
+    if (igual) return igual.texto;
+    const tk = rpTokens_(nombre); if (!tk.length) continue;
+    const candidatos = RP_LUGARES.filter(l => tk.every(w => l.tokens.has(w)));
+    if (candidatos.length === 1) return candidatos[0].texto;
+  }
+  return null;
+}
+
+// "Juan Camilo Pérez Gómez" -> nombres "Juan Camilo", apellidos "Pérez Gómez" (los dos últimos son apellidos).
+// Con una o tres palabras no hay forma segura de saber, por eso se marca "dudoso" para que se revise.
+function rpPartirNombre_(completo) {
+  const limpio = nombrePropioDb_(String(completo === null || completo === undefined ? '' : completo).replace(/\s+/g, ' ').trim());
+  if (!limpio) return { nombres: '', apellidos: '', dudoso: false, vacio: true };
+  const piezas = []; let previas = [];
+  limpio.split(' ').forEach(w => {
+    if (RP_PARTICULAS_NOMBRE.has(w.toLowerCase())) previas.push(w);
+    else { piezas.push(previas.concat(w).join(' ')); previas = []; }
+  });
+  if (previas.length) { if (piezas.length) piezas[piezas.length - 1] += ' ' + previas.join(' '); else piezas.push(previas.join(' ')); }
+  const n = piezas.length;
+  if (n === 1) return { nombres: piezas[0], apellidos: '', dudoso: true };
+  if (n === 2) return { nombres: piezas[0], apellidos: piezas[1], dudoso: false };
+  if (n === 3) return { nombres: piezas[0], apellidos: piezas[1] + ' ' + piezas[2], dudoso: true };
+  return { nombres: piezas.slice(0, n - 2).join(' '), apellidos: piezas.slice(n - 2).join(' '), dudoso: false };
+}
+
+// R1 -> I o II, R2 -> III o IV...: el año académico va de julio a junio (AAAA-2 = primer semestre del año académico)
+function rpSemestreRomano_(nivel, periodo) {
+  const m = /(\d+)/.exec(String(nivel || '')); if (!m) return '';
+  const k = Number(m[1]); if (!k) return '';
+  const n = 2 * (k - 1) + (/-2$/.test(periodo) ? 1 : 2);
+  return RP_LISTAS.sem[n - 1] || '';
+}
+
+function rpAnioDelRegistro_(r, mesN, periodo) {
+  const m = /^(\d{4})\s*-\s*(\d{4})$/.exec(String(r.AnioAcademico || '').trim());
+  if (m) return mesN >= 7 ? Number(m[1]) : Number(m[2]);
+  return Number(String(periodo).split('-')[0]);
+}
+
+function rpPeriodosDisponibles_() {
+  return [...new Set((cacheHistoricoCompleto || []).map(r => String(r.Semestre || '').trim()).filter(esPeriodoValido))].sort();
+}
+
+// ---------- armado de filas ----------
+function rpEsMovilidadEntrante_(r) {
+  return /^movilidad/i.test(String(r.Tipo || '').trim()) || esMovilidadG_(r.Nivel);
+}
+function rpEsSaliente_(c) { return c.ambito === 'Internacional' || c.vinculo === 'Convenio'; }
+
+function rpConstruirFilas_(periodo) {
+  const indice = indiceCentrosJS();
+  const cuenta = { registros: 0, movilidadEntrante: 0, negados: 0, vacacionesOSinCampo: 0, salientes: 0 };
+  const grupos = new Map();
+  const todosProgramas = new Set();
+
+  (cacheHistoricoCompleto || []).forEach(r => {
+    const prog = String(r.Programa || '').trim();
+    if (prog && !rpEsMovilidadEntrante_(r)) todosProgramas.add(prog);
+    if (String(r.Semestre || '').trim() !== periodo) return;
+    cuenta.registros++;
+    if (rpEsMovilidadEntrante_(r)) { cuenta.movilidadEntrante++; return; }
+    if (r.Estado === 'Negado') { cuenta.negados++; return; }
+    const mesN = mesNumG_(r.Mes);
+    const tokens = separarCampos(r.CampoRotacion);
+    if (!mesN || !tokens.length) { cuenta.vacacionesOSinCampo++; return; }
+
+    const lugares = []; let huboSaliente = false;
+    tokens.forEach(t => {
+      if (/^vacacion/.test(rpNorm_(t))) return;
+      const id = indice[claveCentroJS(t)];
+      if (id && id.indexOf('CEN-') === 0) {
+        const c = cacheCentros.find(x => x.id === id);
+        if (!c) return;
+        if (rpEsSaliente_(c)) { huboSaliente = true; return; }
+        if (!lugares.some(l => l.clave === id)) lugares.push({ clave: id, nombres: [c.nombre, c.sigla].concat(c.alias || []).filter(Boolean), mostrar: rpTitulo_(c.nombre || c.sigla), enCatalogo: true });
+      } else if (id) {
+        return; // no es un escenario de práctica (catálogo de "no centros")
+      } else {
+        const limpio = limpiarNombreCentroJS(t);
+        if (limpio && !lugares.some(l => l.clave === limpio)) lugares.push({ clave: limpio, nombres: [t], mostrar: rpTitulo_(t), enCatalogo: false });
+      }
+    });
+    if (huboSaliente) cuenta.salientes++;
+    if (!lugares.length) { if (!huboSaliente) cuenta.vacacionesOSinCampo++; return; }
+
+    const idRes = String(r.ResidenteID === null || r.ResidenteID === undefined ? '' : r.ResidenteID).trim();
+    const rotacion = String(r.Rotacion || r.DetalleOriginal || '').replace(/\s+/g, ' ').trim();
+    const abs = rpAnioDelRegistro_(r, mesN, periodo) * 12 + (mesN - 1);
+    lugares.forEach(l => {
+      const k = [idRes || rpNorm_(r.ResidenteNombre), prog, l.clave, rpNorm_(rotacion)].join('|');
+      let g = grupos.get(k);
+      if (!g) { g = { idRes, nombre: r.ResidenteNombre, correo: r.Correo || '', prog, nivel: r.Nivel, lugar: l, rotacion, meses: new Map() }; grupos.set(k, g); }
+      const previo = g.meses.get(abs) || { compartido: false, sinConfirmar: false };
+      previo.compartido = previo.compartido || tokens.length > 1;
+      previo.sinConfirmar = previo.sinConfirmar || (r.Estado === 'Pendiente' || r.Estado === 'Cambio');
+      g.meses.set(abs, previo);
+      if (!g.nivel && r.Nivel) g.nivel = r.Nivel;
+      if (!g.correo && r.Correo) g.correo = r.Correo;
+    });
+  });
+
+  const filas = [];
+  grupos.forEach(g => {
+    const orden = [...g.meses.keys()].sort((a, b) => a - b);
+    let corrida = [];
+    const cerrar = () => {
+      if (!corrida.length) return;
+      const ini = corrida[0], fin = corrida[corrida.length - 1];
+      filas.push({
+        g, inicio: new Date(Date.UTC(Math.floor(ini / 12), ini % 12, 1)),
+        fin: new Date(Date.UTC(Math.floor(fin / 12), (fin % 12) + 1, 0)),
+        compartido: corrida.some(a => g.meses.get(a).compartido),
+        sinConfirmar: corrida.some(a => g.meses.get(a).sinConfirmar)
+      });
+      corrida = [];
+    };
+    orden.forEach(a => { if (corrida.length && a !== corrida[corrida.length - 1] + 1) cerrar(); corrida.push(a); });
+    cerrar();
+  });
+
+  // Cruce con los listados oficiales (con memoria para no repetir búsquedas)
+  const memoProg = new Map(), memoLugar = new Map();
+  const sinEquivalente = { programas: new Map(), lugares: new Map(), asignaturas: new Map() };
+  const sumar = (mapa, nombre) => mapa.set(nombre, (mapa.get(nombre) || 0) + 1);
+  const detalle = filas.map(f => {
+    const g = f.g;
+    if (!memoProg.has(g.prog)) memoProg.set(g.prog, rpBuscarPrograma_(g.prog));
+    const p = memoProg.get(g.prog);
+    const programa = p ? p.nombre : rpTitulo_(g.prog);
+    if (!p) sumar(sinEquivalente.programas, programa || '(sin programa)');
+
+    if (!memoLugar.has(g.lugar.clave)) memoLugar.set(g.lugar.clave, rpBuscarLugar_(g.lugar.nombres));
+    const lugarOficial = memoLugar.get(g.lugar.clave);
+    const lugar = lugarOficial || g.lugar.mostrar;
+    if (!lugarOficial) sumar(sinEquivalente.lugares, lugar);
+
+    const asig = RP_ASIGNATURAS.get(rpNorm_(g.rotacion));
+    const asignatura = asig ? asig.texto : rpTitulo_(g.rotacion);
+    if (!asig) sumar(sinEquivalente.asignaturas, asignatura || '(sin rotación)');
+
+    const nom = rpPartirNombre_(g.nombre);
+    const sinDoc = !g.idRes || /^sin-?doc/i.test(g.idRes);
+    return {
+      periodo, semestre: rpSemestreRomano_(g.nivel, periodo), programa, programaOficial: p || null,
+      documento: sinDoc ? '' : g.idRes, sinDocumento: sinDoc, nombres: nom.nombres, apellidos: nom.apellidos, nombreDudoso: nom.dudoso || nom.vacio,
+      correo: g.correo, lugar, asignatura, asignaturaOficial: asig || null,
+      inicio: f.inicio, fin: f.fin, observaciones: f.compartido ? 'Mes compartido con otro escenario de práctica' : '',
+      sinConfirmar: f.sinConfirmar, nivelNum: Number((/(\d+)/.exec(String(g.nivel || '')) || [0, 99])[1])
+    };
+  });
+
+  detalle.sort((a, b) =>
+    a.programa.localeCompare(b.programa, 'es') || a.nivelNum - b.nivelNum ||
+    a.apellidos.localeCompare(b.apellidos, 'es') || a.nombres.localeCompare(b.nombres, 'es') ||
+    a.documento.localeCompare(b.documento, 'es') || a.inicio - b.inicio || a.lugar.localeCompare(b.lugar, 'es'));
+
+  const conFilas = new Set(detalle.map(f => rpNorm_(f.programa)));
+  const programasSinFilas = [...todosProgramas].filter(p => {
+    const o = rpBuscarPrograma_(p);
+    return !conFilas.has(rpNorm_(o ? o.nombre : rpTitulo_(p)));
+  }).map(p => rpTitulo_(p)).sort((a, b) => a.localeCompare(b, 'es'));
+
+  const lista = mapa => [...mapa.entries()].map(([nombre, n]) => ({ nombre, n })).sort((a, b) => b.n - a.n || a.nombre.localeCompare(b.nombre, 'es'));
+  return {
+    filas: detalle, cuenta,
+    residentes: new Set(detalle.map(f => f.documento || (f.nombres + '|' + f.apellidos))).size,
+    programas: conFilas.size, programasSinFilas,
+    sinEquivalente: { programas: lista(sinEquivalente.programas), lugares: lista(sinEquivalente.lugares), asignaturas: lista(sinEquivalente.asignaturas) },
+    nombresDudosos: detalle.filter(f => f.nombreDudoso).length,
+    sinDocumento: detalle.filter(f => f.sinDocumento).length,
+    sinCorreo: detalle.filter(f => !f.correo).length,
+    sinConfirmar: detalle.filter(f => f.sinConfirmar).length,
+    sinSemestre: detalle.filter(f => !f.semestre).length,
+    compartidas: detalle.filter(f => f.observaciones).length
+  };
+}
+
+// ---------- libro de Excel ----------
+function rpCargarExcelJS_() {
+  if (typeof ExcelJS !== 'undefined') return Promise.resolve();
+  const intentar = i => new Promise((resolver, rechazar) => {
+    if (i >= RP_URLS_EXCELJS.length) { rechazar(new Error('No se pudo cargar el generador de Excel (revisa la conexión a internet).')); return; }
+    const s = document.createElement('script');
+    s.src = RP_URLS_EXCELJS[i];
+    s.onload = () => resolver();
+    s.onerror = () => { s.remove(); intentar(i + 1).then(resolver, rechazar); };
+    document.head.appendChild(s);
+  });
+  return intentar(0);
+}
+
+function rpEstiloCelda_(col, esEncabezado) {
+  const borde = { style: 'thin' };
+  const base = { border: { top: borde, left: borde, bottom: borde, right: borde } };
+  if (esEncabezado) {
+    return Object.assign(base, { font: { name: 'Calibri', size: 9, bold: true }, alignment: { horizontal: 'center', vertical: 'top', wrapText: true },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: RP_COLOR_GRIS } } });
+  }
+  const e = RP_ESTILO_COL[col];
+  const estilo = Object.assign(base, { font: { name: 'Calibri', size: e[0] }, numFmt: e[2] });
+  if (e[1]) estilo.alignment = { wrapText: true };
+  if (e[3]) estilo.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: RP_COLOR_GRIS } };
+  return estilo;
+}
+
+function rpCrearLibro_(filas, horasSemanales) {
+  const L = RP_LISTAS;
+  const libro = new ExcelJS.Workbook();
+  libro.creator = 'Gestión Operativa · Posgrados Clínicos';
+  libro.created = new Date();
+  libro.calcProperties = { fullCalcOnLoad: true };
+
+  // Listas (oculta): mismas columnas que el formato original, porque las fórmulas y los desplegables apuntan a ellas
+  const hl = libro.addWorksheet('Listas', { state: 'hidden' });
+  const poner = (col, titulo, valores) => { hl.getCell(col + '1').value = titulo; valores.forEach((v, i) => { hl.getCell(col + (i + 2)).value = v; }); };
+  poner('A', 'Semestre', L.sem); poner('B', 'Periodo', L.per); poner('D', 'Lugar de práctica', L.lug);
+  poner('G', 'Asignatura', L.asi.map(a => a[0])); poner('H', 'Rotación', L.asi.map(a => (a.length > 1 ? a[1] : a[0])));
+  poner('J', 'Programa', L.prog.map(p => p[0])); poner('K', 'Facultad', L.prog.map(p => p[1])); poner('L', 'Nivel de estudio', L.prog.map(p => p[2]));
+  hl.getColumn('D').width = 66; hl.getColumn('G').width = 47; hl.getColumn('H').width = 32; hl.getColumn('J').width = 45; hl.getColumn('K').width = 30; hl.getColumn('L').width = 16;
+
+  const ws = libro.addWorksheet('Rotación', { views: [{ state: 'frozen', ySplit: 1 }] });
+  const cols = Object.keys(RP_ESTILO_COL);
+  cols.forEach(c => { ws.getColumn(c).width = RP_ANCHOS[c]; });
+  const fe = ws.getRow(1); fe.height = 48;
+  cols.forEach((c, i) => { const cell = fe.getCell(c); cell.value = RP_ENCABEZADOS[i]; cell.style = rpEstiloCelda_(c, true); });
+
+  const buscarProg = new Map(); L.prog.forEach(p => { const k = p[0].toLowerCase(); if (!buscarProg.has(k)) buscarProg.set(k, p); });
+  const buscarAsi = new Map(); L.asi.forEach(a => { const k = a[0].toLowerCase(); if (!buscarAsi.has(k)) buscarAsi.set(k, a.length > 1 ? a[1] : a[0]); });
+  const horas = horasSemanales === null || horasSemanales === undefined || horasSemanales === '' ? null : Number(horasSemanales);
+
+  filas.forEach((f, i) => {
+    const n = i + 2, fila = ws.getRow(n);
+    const poner = (c, v) => { const cell = fila.getCell(c); if (v !== null && v !== undefined && v !== '') cell.value = v; cell.style = rpEstiloCelda_(c, false); return cell; };
+    poner('A', f.periodo); poner('B', f.semestre); poner('C', f.programa);
+    const prog = buscarProg.get(f.programa.toLowerCase());
+    const fD = poner('D'); fD.value = { formula: `VLOOKUP(C${n},Listas!J:K,2,0)`, result: prog ? prog[1] : { error: '#N/A' } };
+    const fE = poner('E'); fE.value = { formula: `VLOOKUP(C${n},Listas!J:L,3,0)`, result: prog ? prog[2] : { error: '#N/A' } };
+    poner('F'); poner('G', f.documento); poner('H', f.nombres); poner('I', f.apellidos); poner('J'); poner('K', f.correo); poner('L');
+    poner('M', f.lugar); poner('N', f.asignatura);
+    const rot = buscarAsi.get(f.asignatura.toLowerCase());
+    const fO = poner('O'); fO.value = { formula: `IFERROR(VLOOKUP(N${n},Listas!G:H,2,0)," ")`, result: rot === undefined ? ' ' : rot };
+    poner('P'); poner('Q', f.inicio); poner('R', f.fin);
+    const semanas = (f.fin - f.inicio) / 86400000 / 7;
+    const fS = poner('S'); fS.value = { formula: `(R${n} - Q${n}) / 7`, result: semanas };
+    poner('T', horas);
+    const fU = poner('U'); fU.value = { formula: `S${n}*T${n}`, result: semanas * (horas || 0) };
+    poner('V', f.observaciones);
+  });
+
+  const ultima = Math.max(filas.length + 1, 2), tope = Math.max(1000, ultima);
+  ws.autoFilter = `A1:V${ultima}`;
+  const dv = ws.dataValidations;
+  const lista = (rango, formula) => dv.add(rango, { type: 'list', allowBlank: true, showErrorMessage: true, formulae: [formula] });
+  lista(`A2:A${tope}`, `Listas!$B$2:$B$${L.per.length + 1}`);
+  lista(`B2:B${tope}`, `Listas!$A$2:$A$${L.sem.length + 1}`);
+  lista(`C2:C${tope}`, `Listas!$J$2:$J$${L.prog.length + 1}`);
+  lista(`M2:M${tope}`, `Listas!$D$2:$D$${L.lug.length + 1}`);
+  lista(`N2:N${tope}`, `Listas!$G$2:$G$${L.asi.length + 1}`);
+  dv.add(`F2:F${tope}`, { type: 'whole', operator: 'greaterThanOrEqual', allowBlank: true, showErrorMessage: true, formulae: [0] });
+  dv.add(`T2:T${tope}`, { type: 'whole', operator: 'between', allowBlank: true, showErrorMessage: true, formulae: [0, 60] });
+  dv.add(`L2:L${tope}`, { type: 'textLength', operator: 'between', allowBlank: true, showErrorMessage: true, formulae: [10, 10] });
+  dv.add(`Q2:R${tope}`, { type: 'date', operator: 'between', allowBlank: true, showErrorMessage: true, formulae: [new Date(Date.UTC(2026, 0, 1)), new Date(Date.UTC(2029, 0, 31))] });
+
+  libro.views = [{ firstSheet: 1, activeTab: 1, visibility: 'visible' }];
+  return libro;
+}
+
+// ---------- ventana ----------
+let rpUltimo_ = null;
+let rpPref_ = { periodo: '', horas: '' };
+
+function cerrarReportePracticas() { document.getElementById('overlay-rp').style.display = 'none'; }
+
+function rpPintarFormulario_(mensajeError) {
+  const periodos = rpPeriodosDisponibles_();
+  if (!periodos.length) {
+    document.getElementById('caja-rp').innerHTML = `<span class="cerrar" onclick="cerrarReportePracticas()">✕</span><h3>📑 Reporte de prácticas</h3>
+      <p style="font-size:13px; color:#9C0006;">No hay rotaciones cargadas en el histórico todavía.</p>`;
+    return;
+  }
+  const elegido = periodos.includes(rpPref_.periodo) ? rpPref_.periodo : (periodos.includes('2026-2') ? '2026-2' : periodos[periodos.length - 1]);
+  const horasPrevias = rpPref_.horas || '';
+  document.getElementById('caja-rp').innerHTML = `
+    <span class="cerrar" onclick="cerrarReportePracticas()">✕</span>
+    <h3>📑 Reporte de prácticas</h3>
+    <p class="rp-ayuda">Excel en el formato solicitado, con <b>todos los posgrados</b> y <b>sin movilidad académica</b> (ni entrante ni saliente). Solo cuenta rotaciones que no estén negadas.</p>
+    <label>Periodo académico</label>
+    <select id="rp-periodo">${periodos.map(p => `<option value="${esc(p)}" ${p === elegido ? 'selected' : ''}>${esc(p)}</option>`).join('')}</select>
+    <label>Horas semanales de la práctica <span style="color:#999;">(opcional)</span></label>
+    <input id="rp-horas" type="number" min="0" max="60" step="1" placeholder="Ej. 48" value="${esc(horasPrevias)}">
+    <p class="rp-ayuda">El sistema no guarda las horas. Si escribes un número se aplica a todas las filas; si lo dejas vacío, la columna queda en blanco para completarla en el Excel.</p>
+    <p class="rp-ayuda">Las fechas salen por mes: cada práctica va del día 1 del primer mes al último día del último mes seguido en el mismo escenario.</p>
+    ${mensajeError ? `<p style="font-size:13px; color:#9C0006;">${esc(mensajeError)}</p>` : ''}
+    <div class="fila-botones">
+      <button class="btn-primario" id="rp-boton" onclick="descargarReportePracticas()">⬇ Descargar Excel</button>
+      <button class="btn-secundario" onclick="cerrarReportePracticas()">Cancelar</button>
+    </div>`;
+}
+
+async function abrirReportePracticas() {
+  if (!usuarioActual || usuarioActual.rol !== 'coordinadora') { mostrarMensaje('El reporte de prácticas es solo para coordinadoras.', 'error'); return; }
+  document.getElementById('overlay-rp').style.display = 'flex';
+  document.getElementById('caja-rp').innerHTML = `<span class="cerrar" onclick="cerrarReportePracticas()">✕</span><h3>📑 Reporte de prácticas</h3>
+    <p style="font-size:13px; color:#888;">⏳ Trayendo los datos más recientes...</p>`;
+  const [rh, rc] = await Promise.all([leerBackend('listarHistorico'), cargarCentros(true)]);
+  if (!rh.ok) {
+    document.getElementById('caja-rp').innerHTML = `<span class="cerrar" onclick="cerrarReportePracticas()">✕</span><h3>📑 Reporte de prácticas</h3>
+      <p style="font-size:13px; color:#9C0006;">No se pudo leer el histórico: ${esc(rh.error)}</p>
+      <div class="fila-botones"><button class="btn-primario" onclick="abrirReportePracticas()">Reintentar</button><button class="btn-secundario" onclick="cerrarReportePracticas()">Cerrar</button></div>`;
+    return;
+  }
+  cacheHistoricoCompleto = rh.datos;
+  if (!rc || !cacheCentros.length) {
+    document.getElementById('caja-rp').innerHTML = `<span class="cerrar" onclick="cerrarReportePracticas()">✕</span><h3>📑 Reporte de prácticas</h3>
+      <p style="font-size:13px; color:#9C0006;">No se pudo leer el catálogo de centros. Sin él no se puede separar la movilidad saliente, así que no genero el reporte para no entregar datos incompletos.</p>
+      <div class="fila-botones"><button class="btn-primario" onclick="abrirReportePracticas()">Reintentar</button><button class="btn-secundario" onclick="cerrarReportePracticas()">Cerrar</button></div>`;
+    return;
+  }
+  rpPintarFormulario_('');
+}
+
+function rpListaRevision_(titulo, ayuda, items, limite) {
+  if (!items.length) return '';
+  const total = items.reduce((s, x) => s + x.n, 0);
+  return `<details class="rp-rev"><summary>${esc(titulo)}: <b>${items.length}</b> <span style="color:#888;">(${total} fila${total === 1 ? '' : 's'})</span></summary>
+    <p class="rp-ayuda" style="margin:4px 0;">${esc(ayuda)}</p>
+    <ul>${items.slice(0, limite).map(x => `<li>${esc(x.nombre)} <span style="color:#888;">× ${x.n}</span></li>`).join('')}${items.length > limite ? `<li style="color:#888;">… y ${items.length - limite} más</li>` : ''}</ul></details>`;
+}
+
+function rpPintarResultado_(res, nombreArchivo, conHoras) {
+  const c = res.cuenta, s = res.sinEquivalente;
+  const aviso = (n, texto) => n ? `<li>${n} ${n === 1 ? 'fila' : 'filas'} ${texto}</li>` : '';
+  document.getElementById('caja-rp').innerHTML = `
+    <span class="cerrar" onclick="cerrarReportePracticas()">✕</span>
+    <h3>✅ Reporte descargado</h3>
+    <p style="font-size:13px; margin:0 0 8px;"><b>${esc(nombreArchivo)}</b></p>
+    <div class="rp-kpis">
+      <div><b>${res.filas.length}</b><span>filas</span></div>
+      <div><b>${res.residentes}</b><span>residentes</span></div>
+      <div><b>${res.programas}</b><span>programas</span></div>
+    </div>
+    ${res.programasSinFilas.length ? `<p class="rp-ayuda"><b>Sin rotaciones en este periodo (${res.programasSinFilas.length}):</b> ${res.programasSinFilas.map(esc).join(' · ')}</p>` : ''}
+    <p class="rp-ayuda"><b>Quedó por fuera (registros mensuales):</b> movilidad entrante ${c.movilidadEntrante} · movilidad saliente ${c.salientes} · negadas ${c.negados} · vacaciones o sin escenario ${c.vacacionesOSinCampo}.</p>
+    <p style="font-size:13px; font-weight:700; color:var(--azul-ces); margin:12px 0 4px;">Para revisar antes de enviar</p>
+    <ul class="rp-lista">
+      <li>Columnas que el sistema no tiene y quedaron en blanco: código, dirección, celular, docente${conHoras ? '' : ' y horas semanales'}.</li>
+      ${aviso(res.nombresDudosos, 'con nombre de una o tres palabras: confirma qué es nombre y qué es apellido.')}
+      ${aviso(res.sinDocumento, 'sin documento de identidad (el campo queda vacío).')}
+      ${aviso(res.sinCorreo, 'sin correo registrado.')}
+      ${aviso(res.sinSemestre, 'sin nivel (R1, R2…), por eso quedan sin semestre.')}
+      ${aviso(res.sinConfirmar, 'con meses todavía en Pendiente o Cambio.')}
+      ${aviso(res.compartidas, 'con mes compartido entre dos o más escenarios (lo dice la columna Observaciones).')}
+    </ul>
+    ${rpListaRevision_('Programas que no están en el listado del formato', 'Se dejó el nombre del sistema; la Facultad y el Nivel saldrán como #N/A hasta que lo cambies por uno del desplegable.', s.programas, 40)}
+    ${rpListaRevision_('Escenarios sin equivalente exacto en el listado', 'Se dejó el nombre del sistema. Elígelo del desplegable de la columna Escenario de práctica si quieres que coincida con el listado.', s.lugares, 40)}
+    ${rpListaRevision_('Rotaciones que no son una asignatura del listado', 'Se escribió la rotación tal cual está en el sistema. La columna «Práctica clínica o laboral» queda vacía en esas filas.', s.asignaturas, 40)}
+    <div class="fila-botones">
+      <button class="btn-primario" onclick="rpPintarFormulario_('')">Generar otro</button>
+      <button class="btn-secundario" onclick="cerrarReportePracticas()">Cerrar</button>
+    </div>`;
+}
+
+async function descargarReportePracticas() {
+  const periodo = document.getElementById('rp-periodo').value;
+  const textoHoras = document.getElementById('rp-horas').value.trim();
+  rpPref_ = { periodo, horas: textoHoras };
+  let horas = null;
+  if (textoHoras !== '') {
+    horas = Number(textoHoras);
+    if (!Number.isInteger(horas) || horas < 0 || horas > 60) { rpPintarFormulario_('Las horas semanales deben ser un número entero entre 0 y 60.'); return; }
+  }
+  const boton = document.getElementById('rp-boton');
+  boton.disabled = true; boton.textContent = '⏳ Generando...';
+  try {
+    await rpCargarExcelJS_();
+    const res = rpConstruirFilas_(periodo);
+    if (!res.filas.length) { rpPintarFormulario_('No hay rotaciones para ' + periodo + ' con estas reglas.'); return; }
+    const libro = rpCrearLibro_(res.filas, horas);
+    const buffer = await libro.xlsx.writeBuffer();
+    const nombreArchivo = 'Reporte_Practicas_' + periodo + '_Posgrados.xlsx';
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const enlace = document.createElement('a');
+    enlace.href = URL.createObjectURL(blob);
+    enlace.download = nombreArchivo;
+    document.body.appendChild(enlace); enlace.click(); enlace.remove();
+    setTimeout(() => URL.revokeObjectURL(enlace.href), 10000);
+    rpUltimo_ = res;
+    rpPintarResultado_(res, nombreArchivo, horas !== null);
+  } catch (err) {
+    rpPintarFormulario_('No se pudo generar el Excel: ' + (err && err.message ? err.message : err));
+  }
 }
 
 </script>
