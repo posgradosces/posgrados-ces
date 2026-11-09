@@ -8972,7 +8972,7 @@ function rpCrearLibro_(filas, horasSemanales) {
   lista(`M2:M${tope}`, `Listas!$D$2:$D$${L.lug.length + 1}`);
   lista(`N2:N${tope}`, `Listas!$G$2:$G$${L.asi.length + 1}`);
   dv.add(`F2:F${tope}`, { type: 'whole', operator: 'greaterThanOrEqual', allowBlank: true, showErrorMessage: true, formulae: [0] });
-  dv.add(`T2:T${tope}`, { type: 'whole', operator: 'between', allowBlank: true, showErrorMessage: true, formulae: [0, 60] });
+  dv.add(`T2:T${tope}`, { type: 'whole', operator: 'between', allowBlank: true, showErrorMessage: true, formulae: [0, 168] });
   dv.add(`L2:L${tope}`, { type: 'textLength', operator: 'between', allowBlank: true, showErrorMessage: true, formulae: [10, 10] });
   dv.add(`Q2:R${tope}`, { type: 'date', operator: 'between', allowBlank: true, showErrorMessage: true, formulae: [new Date(Date.UTC(2026, 0, 1)), new Date(Date.UTC(2029, 0, 31))] });
 
@@ -9002,7 +9002,7 @@ function rpPintarFormulario_(mensajeError) {
     <label>Periodo académico</label>
     <select id="rp-periodo">${periodos.map(p => `<option value="${esc(p)}" ${p === elegido ? 'selected' : ''}>${esc(p)}</option>`).join('')}</select>
     <label>Horas semanales de la práctica <span style="color:#999;">(opcional)</span></label>
-    <input id="rp-horas" type="number" min="0" max="60" step="1" placeholder="Ej. 48" value="${esc(horasPrevias)}">
+    <input id="rp-horas" type="number" min="0" max="168" step="1" placeholder="Ej. 48" value="${esc(horasPrevias)}">
     <p class="rp-ayuda">El sistema no guarda las horas. Si escribes un número se aplica a todas las filas; si lo dejas vacío, la columna queda en blanco para completarla en el Excel.</p>
     <p class="rp-ayuda">Las fechas salen por mes: cada práctica va del día 1 del primer mes al último día del último mes seguido en el mismo escenario.</p>
     ${mensajeError ? `<p style="font-size:13px; color:#9C0006;">${esc(mensajeError)}</p>` : ''}
@@ -9082,7 +9082,7 @@ async function descargarReportePracticas() {
   let horas = null;
   if (textoHoras !== '') {
     horas = Number(textoHoras);
-    if (!Number.isInteger(horas) || horas < 0 || horas > 60) { rpPintarFormulario_('Las horas semanales deben ser un número entero entre 0 y 60.'); return; }
+    if (!Number.isInteger(horas) || horas < 0 || horas > 168) { rpPintarFormulario_('Las horas semanales deben ser un número entero entre 0 y 168.'); return; }
   }
   const boton = document.getElementById('rp-boton');
   boton.disabled = true; boton.textContent = '⏳ Generando...';
