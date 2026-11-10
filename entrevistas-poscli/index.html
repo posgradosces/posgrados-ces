@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<title>Entrevistas Posgrados Clínicos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Diseño: tablero de evaluación con la identidad del aula de residentes CES (azul marino, azul cielo y lima). */
+:root {
+  --navy: #15284b; --navy2: #0f1d38; --blue: #004e8c; --sky: #429be2; --lime: #cadd30;
+  --paper: #f4f7fb; --tint: #e3edf7; --ink: #15284b; --txt: #3b4a62; --muted: #556070;
+  --line: rgba(21, 40, 75, .10); --white: #ffffff; --page: #eef2f8;
+  --ok: #1f7a4d; --okbg: #e6f4ec; --okbr: #9fd2b6; --oktx: #1b6a43;
+  --bad: #b3261e; --badbg: #fdecea; --badbr: #f1b5b0; --badtx: #8a1c15;
+  --warnbg: #fff8d6; --warnbr: #e3d27a; --warntx: #6b5a00;
+  --font: 'Montserrat', Arial, Helvetica, sans-serif;
+}
+html, body { margin: 0; }
+body { background: var(--page); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.6; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px; }
+#ces-entrevistas { box-sizing: border-box; max-width: 1180px; margin: 0 auto; background: var(--white); border-radius: 0 0 20px 20px; box-shadow: 0 10px 30px rgba(21, 40, 75, .08); overflow-wrap: anywhere; }
+#ces-entrevistas *, #ces-entrevistas *::before, #ces-entrevistas *::after { box-sizing: border-box; }
+#ces-entrevistas [hidden] { display: none !important; }
+.mx-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 24px; padding: 28px 44px; background: var(--navy); border-bottom: 5px solid var(--lime); }
+.mx-top p { margin: 0; }
+.mx-top .e { color: var(--lime); font-size: 14px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; margin-bottom: 6px; }
+.mx-top .t { color: #fff; font-size: clamp(22px, 2.4vw, 30px); font-weight: 800; line-height: 1.2; letter-spacing: -.3px; }
+.mx-top img { display: block; height: 86px; width: auto; max-width: 100%; }
+.mx-hero { position: relative; overflow: hidden; background: linear-gradient(135deg, #15284b 0%, #0f1d38 50%, #004e8c 100%); border-radius: 0 0 32px 32px; box-shadow: 0 10px 26px rgba(21, 40, 75, .10); }
+.mx-hero::before { content: ""; position: absolute; top: -120px; right: -80px; width: 380px; height: 380px; border-radius: 50%; background: rgba(202, 221, 48, .14); }
+.mx-hero::after { content: ""; position: absolute; bottom: -150px; left: -90px; width: 330px; height: 330px; border-radius: 50%; background: rgba(66, 155, 226, .20); }
+.mx-hero > div { position: relative; z-index: 2; max-width: 1000px; margin: 0 auto; padding: 40px 44px; text-align: center; }
+.mx-hero .e { margin: 0 0 14px; color: var(--lime); font-size: 15px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; }
+.mx-hero h1 { margin: 0 0 14px; color: #fff; font-size: clamp(34px, 5vw, 58px); line-height: 1.05; font-weight: 800; letter-spacing: -1.5px; text-wrap: balance; }
+.mx-hero .bar { width: 90px; height: 6px; border-radius: 3px; background: var(--lime); margin: 0 auto 20px; }
+.mx-hero .s { margin: 0 0 10px; color: #fff; font-size: clamp(17px, 2vw, 22px); font-weight: 600; line-height: 1.4; }
+.mx-hero .p { margin: 0 auto; max-width: 62ch; color: rgba(255, 255, 255, .85); font-size: clamp(14px, 1.5vw, 16px); line-height: 1.7; }
+.mx-main { padding: 26px 34px 12px; display: flex; flex-direction: column; gap: 20px; }
+.mx-stripe { display: flex; height: 6px; margin-top: 20px; }
+.mx-foot-page { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 18px; padding: 22px 34px; }
+.mx-foot-page p { margin: 0; font-size: 12px; color: var(--muted); }
+.mx-foot-page strong { color: var(--ink); }
+.mx-lbl { display: block; margin: 0 0 4px; color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; }
+.mx-in { width: 100%; min-height: 46px; padding: 10px 16px; border: 1px solid #cfd8e5; border-radius: 12px; background: #fff; color: var(--ink); font-family: inherit; font-size: 14px; outline: none; }
+.mx-in:focus, .mx-ta:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(66, 155, 226, .28); }
+.mx-in.lg { min-height: 52px; padding: 12px 20px; border: 2px solid var(--navy); border-radius: 14px; font-size: 16px; }
+.mx-ta { width: 100%; min-height: 84px; padding: 10px 14px; border: 1px solid #cfd8e5; border-radius: 12px; background: #fff; color: var(--ink); font-family: inherit; font-size: 14px; resize: vertical; outline: none; }
+.mx-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 9px 18px; border-radius: 999px; border: 1px solid var(--navy); background: var(--navy); color: #fff; font-family: inherit; font-size: 12.5px; font-weight: 700; line-height: 1.2; cursor: pointer; text-decoration: none; }
+.mx-btn:hover { background: var(--navy2); }
+.mx-btn:disabled { opacity: .45; cursor: not-allowed; }
+.mx-btn.sec { background: #fff; color: var(--navy); border-color: rgba(21, 40, 75, .25); }
+.mx-btn.sec:hover { background: var(--paper); }
+.mx-seg { display: inline-flex; gap: 6px; padding: 4px; border-radius: 999px; background: var(--tint); }
+.mx-seg .mx-pillink { border-color: transparent; background: transparent; }
+.mx-seg .mx-pillink.on { background: var(--navy); color: #fff; }
+.mx-final { margin-top: 18px; padding: 18px 20px; border-radius: 16px; background: var(--navy); color: #fff; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
+.mx-final p { margin: 0; font-size: 13.5px; opacity: .9; flex: 1 1 260px; }
+.mx-final .mx-btn { min-height: 52px; padding: 12px 36px; font-size: 16px; }
+.mx-final-msg { margin: 10px 0 0; font-size: 13.5px; font-weight: 600; color: #8a2a1f; }
+.mx-okbox { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; padding: 22px; border-radius: 16px; background: #effbf1; border: 1px solid #b7e4c0; border-left: 6px solid #2e9d4a; }
+.mx-okbox .tick { flex: 0 0 auto; width: 46px; height: 46px; border-radius: 50%; background: #2e9d4a; color: #fff; display: grid; place-items: center; font-size: 26px; font-weight: 800; }
+.mx-okbox h3 { margin: 0; color: #14532d; font-size: 17px; }
+.mx-okbox p { margin: 2px 0 0; color: #2f4f38; font-size: 14px; }
+.mx-okbox .mx-row { margin-left: auto; }
+.mx-edit { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); }
+.mx-eh { margin: 18px 0 8px; color: var(--navy); font-size: 14.5px; }
+.mx-er { display: grid; grid-template-columns: 34px 1fr 96px 40px; gap: 10px; align-items: start; padding: 12px; margin-bottom: 10px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.mx-er .stack { display: grid; gap: 8px; min-width: 0; }
+.mx-er .mx-in, .mx-er .mx-ta { min-height: 38px; padding: 7px 12px; font-size: 13.5px; }
+.mx-er .mx-ta { min-height: 60px; }
+.mx-er .lab { display: block; margin: 0 0 3px; font-size: 11px; font-weight: 700; letter-spacing: .5px; color: var(--muted); text-transform: uppercase; }
+.mx-er .num0 { width: 28px; height: 28px; border-radius: 50%; background: var(--navy); color: var(--lime); display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+@media (max-width: 640px) { .mx-er { grid-template-columns: 30px 1fr 40px; } .mx-er .pts { grid-column: 2 / 4; } }
+.mx-btn.lime { background: var(--lime); border-color: var(--lime); color: var(--navy); }
+.mx-btn.lime:hover { background: #bfd22a; }
+.mx-btn.danger { background: var(--badbg); border-color: var(--bad); color: var(--badtx); }
+.mx-btn.sm { min-height: 34px; padding: 6px 14px; font-size: 12px; }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; }
+.mx-band { display: flex; align-items: center; gap: 14px; padding: 18px 22px; border-radius: 16px; background: var(--navy); box-shadow: 0 8px 22px rgba(21, 40, 75, .12); }
+.mx-ico { display: inline-flex; flex: 0 0 42px; width: 42px; height: 42px; align-items: center; justify-content: center; border-radius: 12px; background: var(--lime); color: var(--navy); }
+.mx-band .e { display: block; color: var(--lime); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.mx-band .t { display: block; color: #fff; font-size: 17px; font-weight: 700; line-height: 1.3; }
+.mx-sec-body { padding-top: 16px; }
+.mx-note { margin: 0 0 14px; color: var(--txt); font-size: 14px; line-height: 1.65; }
+.mx-muted { color: var(--muted); font-size: 12.5px; line-height: 1.55; margin: 0; }
+.mx-start { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; border-radius: 16px; background: var(--paper); border: 1px solid rgba(21, 40, 75, .08); border-left: 5px solid var(--blue); }
+.mx-start .e { margin: 0 0 2px; color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; }
+.mx-start .d { margin: 0; color: #46556d; font-size: 14px; line-height: 1.4; }
+.mx-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.mx-pillink { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; background: #fff; border: 1px solid rgba(21, 40, 75, .12); color: var(--navy); text-decoration: none; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.mx-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; align-items: stretch; }
+.mx-card { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-width: 0; padding: 20px 22px; border-radius: 16px; background: var(--paper); border: 1px solid rgba(21, 40, 75, .09); border-left: 4px solid var(--blue); color: var(--navy); text-decoration: none; box-shadow: 0 6px 18px rgba(21, 40, 75, .05); cursor: pointer; font-family: inherit; text-align: left; width: 100%; }
+.mx-card.alt { border-left-color: var(--lime); }
+.mx-card:hover { box-shadow: 0 10px 24px rgba(21, 40, 75, .12); }
+.mx-card .l { display: flex; align-items: flex-start; gap: 14px; min-width: 0; }
+.mx-card .n { display: inline-flex; flex: 0 0 46px; width: 46px; height: 46px; align-items: center; justify-content: center; border-radius: 14px; background: var(--blue); color: #fff; font-size: 19px; font-weight: 800; }
+.mx-card.alt .n { background: var(--lime); color: var(--navy); }
+.mx-card .k { display: block; color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; }
+.mx-card .h { display: block; color: var(--navy); font-size: 16px; font-weight: 700; line-height: 1.35; }
+.mx-card .m { display: flex; align-items: center; gap: 6px; margin-top: 6px; color: var(--navy); font-size: 13px; font-weight: 700; line-height: 1.4; }
+.mx-card .m.off { color: #7a8699; font-weight: 500; }
+.mx-card .m svg { color: var(--blue); flex: 0 0 auto; }
+.mx-card .st { display: block; margin-top: 6px; }
+.mx-card .go { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 999px; background: var(--navy); color: #fff; font-size: 12px; font-weight: 700; }
+.mx-card .go i { color: var(--lime); font-style: normal; }
+.mx-vacio { margin: 0; padding: 20px; border-radius: 12px; background: var(--paper); border: 2px dashed rgba(21, 40, 75, .18); color: var(--muted); font-size: 14px; text-align: center; }
+.mx-steps { padding: 6px 22px; border-radius: 16px; background: #fff; border: 1px solid var(--line); border-top: 4px solid var(--lime); box-shadow: 0 6px 18px rgba(21, 40, 75, .06); }
+.mx-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; }
+.mx-step + .mx-step { border-top: 1px solid rgba(21, 40, 75, .09); }
+.mx-step .b { flex: 0 0 34px; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--navy); color: var(--lime); font-size: 14px; font-weight: 800; }
+.mx-step b { display: block; color: var(--navy); font-size: 15px; line-height: 1.35; }
+.mx-step span { display: block; margin-top: 2px; color: #46556d; font-size: 13.5px; line-height: 1.55; }
+.mx-warn { margin: 0; padding: 12px 16px; border-radius: 12px; background: var(--warnbg); border: 1px solid var(--warnbr); color: var(--warntx); font-size: 13px; line-height: 1.5; }
+.mx-chip { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; background: #eef2f8; color: var(--muted); }
+.mx-chip.ok { background: var(--okbg); color: var(--oktx); }
+.mx-chip.warn { background: var(--warnbg); color: var(--warntx); }
+.mx-chip.bad { background: var(--badbg); color: var(--badtx); }
+.mx-gate { max-width: 480px; margin: 6px auto 18px; padding: 30px 28px; border-radius: 18px; background: #fff; border: 1px solid var(--line); border-top: 4px solid var(--lime); box-shadow: 0 10px 30px rgba(21, 40, 75, .08); text-align: center; }
+.mx-gate .ic { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: var(--navy); color: var(--lime); margin-bottom: 14px; }
+.mx-gate h2 { margin: 0 0 6px; color: var(--navy); font-size: 21px; font-weight: 800; line-height: 1.25; }
+.mx-gate p { margin: 0 0 18px; color: #46556d; font-size: 14px; line-height: 1.6; }
+.mx-gate form { display: flex; flex-direction: column; gap: 12px; text-align: left; }
+.mx-pw { display: flex; gap: 8px; align-items: center; }
+.mx-pw .mx-btn { flex: 0 0 auto; min-width: 84px; white-space: nowrap; }
+.mx-err { margin: 0 !important; padding: 10px 14px; border-radius: 10px; background: var(--badbg); border: 1px solid var(--badbr); color: var(--badtx) !important; font-size: 13px !important; text-align: left; }
+.mx-hint { margin: 14px 0 0 !important; padding: 10px 14px; border-radius: 10px; background: var(--warnbg); border: 1px solid var(--warnbr); color: var(--warntx) !important; font-size: 12.5px !important; text-align: left; }
+.mx-back { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.mx-title { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.mx-title .n { display: flex; flex: 0 0 52px; width: 52px; height: 52px; align-items: center; justify-content: center; border-radius: 50%; background: var(--navy); border: 2px solid #fff; box-shadow: 0 0 0 2px var(--lime); color: var(--lime); font-size: 20px; font-weight: 800; }
+.mx-title .k { display: block; color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; }
+.mx-title h2 { margin: 0; color: var(--navy); font-size: clamp(20px, 3vw, 26px); line-height: 1.2; text-wrap: balance; }
+.mx-title .m { display: flex; align-items: center; gap: 6px; margin-top: 2px; color: #46556d; font-size: 13px; }
+.mx-pick { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 14px; align-items: end; }
+.mx-cb { position: relative; }
+.mx-cb-list { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 30; max-height: 300px; overflow: auto; padding: 6px; border-radius: 14px; background: #fff; border: 1px solid rgba(21, 40, 75, .18); box-shadow: 0 14px 34px rgba(21, 40, 75, .18); }
+.mx-opt { display: flex; align-items: center; justify-content: space-between; gap: 6px 14px; width: 100%; padding: 9px 12px; border: 0; border-radius: 10px; background: transparent; color: var(--ink); font-family: inherit; font-size: 13.5px; text-align: left; cursor: pointer; }
+.mx-opt:hover, .mx-opt.act { background: var(--tint); }
+.mx-opt small { display: block; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.mx-live { position: sticky; top: 0; z-index: 12; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 12px 18px; border-radius: 14px; background: var(--navy); color: #fff; box-shadow: 0 8px 20px rgba(21, 40, 75, .25); }
+.mx-live .w { min-width: 0; }
+.mx-live .w small { display: block; color: var(--lime); font-size: 10.5px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; }
+.mx-live .w b { font-size: 15px; }
+.mx-live .sc { display: flex; align-items: baseline; gap: 10px; font-variant-numeric: tabular-nums; }
+.mx-live .sc b { font-size: 24px; font-weight: 800; color: var(--lime); }
+.mx-live .sc span { font-size: 12px; color: rgba(255, 255, 255, .8); }
+.mx-sec { margin: 22px 0 10px; padding: 8px 14px; border-radius: 8px; background: var(--navy); color: var(--lime); font-size: 12px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; }
+.mx-it { scroll-margin-top: 96px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 18px; padding: 12px 14px; margin-bottom: 8px; border-radius: 12px; background: #f9fbfd; border: 1px solid rgba(21, 40, 75, .09); border-left: 4px solid #cfd8e5; }
+.mx-it.is-yes { border-left-color: var(--ok); background: #f3faf6; }
+.mx-it.is-no { border-left-color: var(--bad); background: #fef6f5; }
+.mx-it .tx { display: flex; gap: 12px; flex: 1 1 320px; min-width: 0; }
+.mx-it .nn { flex: 0 0 28px; width: 28px; height: 28px; border-radius: 8px; background: var(--tint); color: var(--blue); font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
+.mx-it p { margin: 0; }
+.mx-it .t { color: var(--navy); font-size: 14px; font-weight: 700; line-height: 1.35; }
+.mx-it .r { margin-top: 3px; color: #46556d; font-size: 12.5px; line-height: 1.5; }
+.mx-it .r b { color: var(--navy); }
+.mx-note-row { flex: 1 0 100%; padding-left: 40px; }
+.mx-note-in { width: 100%; max-width: 560px; min-height: 34px; padding: 5px 12px; border: 1px solid #cfd8e5; border-radius: 10px; background: #fff; color: var(--ink); font-family: inherit; font-size: 12.5px; outline: none; }
+.mx-note-in:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(66,155,226,.28); }
+.mx-note-add { border: 0; background: none; padding: 2px 0; color: var(--blue); font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline; }
+.mx-obs ul { margin: 6px 0 0; padding-left: 18px; font-size: 12.5px; line-height: 1.45; }
+.mx-seg { display: flex; gap: 8px; flex: 0 0 auto; }
+.mx-b { display: inline-flex; align-items: center; gap: 7px; min-height: 42px; padding: 8px 14px; border-radius: 12px; border: 1.5px solid #cfd8e5; background: #fff; color: var(--navy); font-family: inherit; font-size: 12.5px; font-weight: 700; line-height: 1.2; text-align: left; cursor: pointer; }
+.mx-b small { display: block; font-size: 11px; font-weight: 600; color: var(--muted); }
+.mx-b:hover { border-color: var(--blue); }
+.mx-b.yes[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+.mx-b.yes[aria-pressed="true"] svg { color: var(--lime); }
+.mx-b.yes[aria-pressed="true"] small { color: rgba(255, 255, 255, .8); }
+.mx-b.no[aria-pressed="true"] { background: var(--badbg); border-color: var(--bad); color: var(--badtx); }
+.mx-b.no[aria-pressed="true"] small { color: var(--badtx); }
+.mx-foot { margin-top: 18px; padding: 16px 18px; border-radius: 14px; background: var(--paper); border: 1px solid rgba(21, 40, 75, .08); }
+.mx-tot { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; margin-bottom: 10px; }
+.mx-tot b { color: var(--navy); font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.mx-prog { height: 8px; border-radius: 99px; background: #dde5ef; overflow: hidden; margin-bottom: 14px; }
+.mx-prog i { display: block; height: 100%; background: var(--sky); border-radius: 99px; }
+.mx-prog i.full { background: var(--ok); }
+.mx-foot-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-top: 12px; }
+.mx-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.mx-msg { margin: 10px 0 0; min-height: 20px; color: var(--blue); font-size: 13px; font-weight: 600; }
+.mx-tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.mx-tb { width: 100%; min-width: 1100px; border-collapse: collapse; font-size: 13px; overflow-wrap: normal; word-break: normal; }
+.mx-tb td.nm { min-width: 170px; font-weight: 600; }
+.mx-tb td.cc { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--txt); }
+.mx-tb th { white-space: nowrap; }
+.mx-tb .mx-pillink { white-space: nowrap; }
+.mx-tb th { padding: 10px 12px; background: var(--navy); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; text-align: left; vertical-align: bottom; }
+.mx-tb th small { display: block; width: 104px; max-width: 104px; margin-top: 2px; color: var(--lime); font-size: 10px; font-weight: 600; letter-spacing: 0; text-transform: none; line-height: 1.25; white-space: normal; }
+.mx-tb td { padding: 9px 12px; border-top: 1px solid rgba(21, 40, 75, .08); color: var(--ink); vertical-align: middle; }
+.mx-tb tr:nth-child(even) td { background: #f9fbfd; }
+.mx-tb .num { text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mx-tb .tot { font-weight: 800; }
+.mx-tb .pos { font-weight: 800; color: var(--blue); }
+.mx-tb tr.top3 td:first-child { box-shadow: inset 4px 0 0 var(--lime); }
+.mx-obs-grid { position: sticky; left: 12px; width: min(1000px, calc(100vw - 110px)); display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 10px; padding: 6px 0; white-space: normal; }
+.mx-obs { padding: 10px 14px; border-radius: 12px; background: #fff; border: 1px solid #ecd9a6; border-left: 4px solid var(--lime); }
+.mx-obs .k { display: block; color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; }
+.mx-obs p { margin: 4px 0; font-size: 13px; line-height: 1.5; }
+.mx-obs small { color: var(--muted); font-size: 11.5px; }
+.mx-caso { padding: 18px 22px; border-radius: 16px; background: #fff; border: 1px solid var(--line); border-left: 5px solid var(--lime); box-shadow: 0 6px 18px rgba(21,40,75,.06); }
+.mx-caso .k { display: block; color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; }
+.mx-caso h3 { margin: 2px 0 10px; color: var(--navy); font-size: 17px; line-height: 1.3; }
+.mx-caso p { margin: 0 0 8px; color: var(--txt); font-size: 14px; line-height: 1.65; }
+.mx-caso p:last-child { margin-bottom: 0; }
+.mx-clist { margin-top: 14px; border: 1px solid var(--line); border-radius: 14px; overflow: auto; max-height: 340px; background: #fff; }
+.mx-card2 { padding: 18px 20px; border-radius: 16px; background: #fff; border: 1px solid var(--line); box-shadow: 0 6px 18px rgba(21, 40, 75, .05); }
+.mx-card2 h3 { margin: 0 0 4px; color: var(--navy); font-size: 15px; font-weight: 700; }
+.mx-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; align-items: start; }
+.mx-rub { margin-top: 12px; padding: 16px 18px; border-radius: 14px; background: #fff8e8; border: 1px solid #ecd9a6; }
+.mx-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.mx-code { width: 100%; min-height: 150px; padding: 10px 14px; border: 1px solid #cfd8e5; border-radius: 12px; background: #f9fbfd; color: var(--ink); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; resize: vertical; }
+@media (max-width: 720px) {
+  .mx-top { padding: 22px 20px; } .mx-main { padding: 20px 16px 8px; } .mx-hero > div { padding: 32px 20px; }
+  .mx-seg { width: 100%; } .mx-seg .mx-b { flex: 1 1 0; justify-content: center; }
+  .mx-pick { grid-template-columns: minmax(0, 1fr); } .mx-card { flex-wrap: wrap; } .mx-card .go { width: 100%; justify-content: center; }
+  .mx-foot-page { padding: 18px 16px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+
+
+/* ===== Entrevistas posgrados: componentes propios ===== */
+.mx-lvs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.mx-lv { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 12px 14px 14px; text-align: left; border: 1.5px solid #cfd8e5; border-top-width: 5px; border-radius: 14px; background: #fff; color: var(--ink); font-family: inherit; cursor: pointer; }
+.mx-lv:hover { border-color: var(--blue); box-shadow: 0 6px 16px rgba(21, 40, 75, .10); }
+.mx-lv .h { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11.5px; font-weight: 800; letter-spacing: .9px; text-transform: uppercase; }
+.mx-lv .h i { font-style: normal; padding: 2px 9px; border-radius: 999px; background: var(--tint); color: var(--blue); font-size: 11px; letter-spacing: 0; }
+.mx-lv .d { font-size: 12.5px; line-height: 1.5; color: #46556d; }
+.mx-lv .d p { margin: 0 0 5px; }
+.mx-lv .d p.o { margin: 3px 0; color: var(--blue); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; }
+.mx-lv .d p.pl { padding-left: 10px; text-indent: -10px; }
+.mx-lv.n0 { border-top-color: #d9776f; } .mx-lv.n1 { border-top-color: #e6c64a; } .mx-lv.n2 { border-top-color: var(--sky); } .mx-lv.n3 { border-top-color: var(--lime); }
+.mx-lv[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: #fff; box-shadow: 0 8px 20px rgba(21, 40, 75, .22); }
+.mx-lv[aria-pressed="true"] .d, .mx-lv[aria-pressed="true"] .d p.o { color: rgba(255, 255, 255, .9); }
+.mx-lv[aria-pressed="true"] .h i { background: var(--lime); color: var(--navy); }
+.mx-lv[aria-pressed="true"].n0 { border-top-color: #d9776f; } .mx-lv[aria-pressed="true"].n3 { border-top-color: var(--lime); }
+.mx-na { margin-top: 10px; }
+.mx-crit { padding: 16px 18px 18px; margin-bottom: 14px; border-radius: 16px; background: #fff; border: 1px solid var(--line); border-left: 5px solid var(--blue); box-shadow: 0 6px 18px rgba(21, 40, 75, .05); }
+.mx-crit.done { border-left-color: var(--ok); }
+.mx-crit .k { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; }
+.mx-crit .q { margin: 4px 0 0; color: var(--navy); font-size: 15.5px; font-weight: 700; line-height: 1.45; }
+.mx-crit .hint { margin: 4px 0 0; color: var(--muted); font-size: 12.5px; font-style: italic; }
+.mx-secbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 26px 0 12px; padding: 9px 14px; border-radius: 8px; background: var(--navy); color: var(--lime); font-size: 12px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; }
+.mx-secbar span.sc { color: #fff; font-size: 12.5px; letter-spacing: 0; text-transform: none; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mx-extra { margin-top: 14px; padding: 14px 16px; border-radius: 14px; background: var(--paper); border: 1px solid rgba(21, 40, 75, .08); }
+.mx-extra h4 { margin: 0 0 8px; color: var(--navy); font-size: 13.5px; }
+.mx-yn { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 10px 0; }
+.mx-yn + .mx-yn { border-top: 1px solid rgba(21, 40, 75, .08); }
+.mx-yn p { margin: 0; flex: 1 1 320px; color: var(--navy); font-size: 13.5px; font-weight: 600; line-height: 1.45; }
+.mx-yn p small { display: block; color: var(--muted); font-weight: 500; font-size: 12px; }
+.mx-yn .mx-b { min-height: 38px; padding: 6px 16px; }
+.mx-yn .mx-b.risk[aria-pressed="true"] { background: var(--warnbg); border-color: #cda300; color: var(--warntx); }
+.mx-yn .mx-b.safe[aria-pressed="true"] { background: var(--okbg); border-color: var(--ok); color: var(--oktx); }
+.mx-subq { margin: 8px 0 0 14px; padding-left: 12px; border-left: 3px solid var(--tint); }
+.mx-ta.sm { min-height: 64px; }
+.mx-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.mx-tabs .mx-pillink.on { background: var(--navy); color: #fff; }
+.mx-grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 12px; }
+.mx-fld { display: block; min-width: 0; }
+.mx-tb.sm { min-width: 0; }
+.mx-tb input.mx-in, .mx-tb select.mx-in { min-height: 36px; padding: 5px 10px; font-size: 13px; border-radius: 9px; }
+.mx-tb td.act { white-space: nowrap; }
+.mx-tb th.g { text-align: center; border-left: 1px solid rgba(255, 255, 255, .25); }
+.mx-tb th.g2 { background: var(--blue); }
+.mx-tb td.rn { text-align: center; color: var(--muted); font-size: 12px; border-right: 1px solid rgba(21, 40, 75, .06); font-variant-numeric: tabular-nums; }
+.mx-tb td.rn.one { color: var(--blue); font-weight: 800; }
+.mx-tb tr.cut td { border-top: 2px dashed var(--lime); }
+.mx-tb tr.sel td { background: var(--tint) !important; }
+.mx-tb td.nm button { background: none; border: 0; padding: 0; color: var(--navy); font: inherit; font-weight: 700; text-align: left; cursor: pointer; text-decoration: underline; text-decoration-color: rgba(0, 78, 140, .35); text-underline-offset: 3px; }
+.mx-det { padding: 18px 20px; border-radius: 16px; background: #fff; border: 1px solid var(--line); border-left: 5px solid var(--lime); box-shadow: 0 6px 18px rgba(21, 40, 75, .06); }
+.mx-det h3 { margin: 0 0 4px; color: var(--navy); font-size: 17px; }
+.mx-ev { padding: 14px 16px; border-radius: 12px; background: var(--paper); border: 1px solid rgba(21, 40, 75, .08); }
+.mx-ev b.who { display: block; color: var(--navy); font-size: 14px; }
+.mx-ev small { color: var(--muted); font-size: 12px; }
+.mx-ev ul { margin: 8px 0 0; padding-left: 18px; font-size: 12.5px; line-height: 1.5; color: var(--txt); }
+.mx-ev .ob { margin-top: 8px; padding: 8px 12px; border-radius: 10px; background: #fff; border-left: 3px solid var(--lime); font-size: 12.5px; line-height: 1.5; color: var(--txt); white-space: pre-wrap; }
+.mx-ev .ob b { color: var(--navy); }
+.mx-toolbar { display: flex; flex-wrap: wrap; gap: 12px 14px; align-items: end; }
+.mx-toolbar .mx-fld { flex: 1 1 200px; }
+.mx-count { color: var(--muted); font-size: 12.5px; }
+.mx-who { display: inline-flex; align-items: center; gap: 6px; }
+@media (max-width: 980px) { .mx-lvs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .mx-lvs { grid-template-columns: minmax(0, 1fr); } .mx-secbar { flex-wrap: wrap; } }
+.mx-tb th.sub { background: var(--navy2); text-align: center; font-size: 10px; padding: 5px 8px; }
+.mx-tb th small { margin-top: 2px; }
+.mx-tb thead th[rowspan="3"] { vertical-align: middle; }
+.mx-tb td.nm .tg { display: inline-flex; align-items: baseline; gap: 6px; }
+.mx-tb td.nm .car { color: var(--blue); font-size: 11px; width: 10px; }
+.mx-tb td.nm .mx-chip { padding: 2px 8px; font-size: 10.5px; margin-left: 2px; }
+.mx-tb tr.exp td { background: #f4f8fd !important; padding: 8px 12px 14px; border-top: 0; white-space: normal; }
+.mx-tb tr.sel td.nm { box-shadow: inset 4px 0 0 var(--blue); }
+
+.mx-hello { padding: 18px 22px; border-radius: 16px; background: #fff; border: 1px solid var(--line); border-left: 5px solid var(--lime); box-shadow: 0 6px 18px rgba(21, 40, 75, .06); }
+.mx-hello .e { display: block; color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.mx-hello h2 { margin: 2px 0 4px; color: var(--navy); font-size: clamp(22px, 3.2vw, 30px); font-weight: 800; line-height: 1.2; letter-spacing: -.3px; }
+.mx-hello p { margin: 0; color: #46556d; font-size: 14px; line-height: 1.55; }
+
+</style>
+</head><body>
+<div id="ces-entrevistas" lang="es">
+  <header class="mx-top" role="banner">
+    <div style="min-width:0;flex:1 1 340px">
+      <p class="e">Posgrados Clínicos</p>
+      <p class="t">Entrevistas de admisión</p>
+      <p style="margin-top:4px;color:rgba(255,255,255,.8);font-size:14px;font-weight:600">Facultad de Ciencias de la Salud</p>
+    </div>
+    <div><img id="mx-logo" src="https://componentes-virtuales-ces.s3.us-east-1.amazonaws.com/plataforma/logo-blanco.png" alt="Universidad CES" onerror="this.outerHTML='&lt;span style=&quot;color:#fff;font-weight:800;font-size:22px&quot;&gt;Universidad CES&lt;/span&gt;'"></div>
+  </header>
+  <div id="mx-hero-box"></div>
+  <main class="mx-main" id="mx-root"><noscript><p class="mx-warn">Esta página necesita JavaScript activo para funcionar.</p></noscript></main>
+  <div class="mx-stripe" aria-hidden="true"><div style="width:65%;background:var(--navy)"></div><div style="width:23%;background:var(--sky)"></div><div style="width:12%;background:var(--lime)"></div></div>
+  <div class="mx-foot-page" role="contentinfo">
+    <div><p>Universidad CES · Facultad de Ciencias de la Salud</p><p><strong>Entrevistas de admisión a Posgrados Clínicos</strong></p><p>Espacio exclusivo para quienes participan en las entrevistas</p></div>
+    <button class="mx-pillink" type="button" id="mx-up">Volver arriba ↑</button>
+  </div>
+</div>
+<script>
+/* ===== CONFIGURACIÓN: es lo único que hay que editar ===== */
+/* Pega entre las comillas la dirección de la aplicación web de Apps Script (termina en /exec). */
+window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
+</script>
+<script>
+(function() {
+  'use strict';
+  var CFG = window.MX_CONFIG || {};
+  var DEMO = !!CFG.demo;
+  var SYNC_MS = CFG.syncMs || (CFG.demo ? 25000 : 45000), SAVE_MS = CFG.saveMs || 1500;
+  var APP = document.getElementById('mx-root'), HERO = document.getElementById('mx-hero-box');
+
+  /* ---------------- rúbrica (tomada del Excel «Formato Entrevista Postgrados Clínicos») ---------------- */
+  var NIV = [{ k: 'bajo', t: 'Bajo', v: 0 }, { k: 'medio', t: 'Medio', v: 1 }, { k: 'alto', t: 'Alto', v: 2 }, { k: 'muy', t: 'Muy alto', v: 3 }];
+  var SEC = [
+    { id: 'I', t: 'Motivaciones para estudiar un posgrado', w: 0.10, ids: ['I.1'] },
+    { id: 'II', t: 'Antecedentes académicos', w: 0.30, ids: ['II.1', 'II.2', 'II.3'] },
+    { id: 'III', t: 'Antecedentes laborales', w: 0.20, ids: ['III.1', 'III.2'] },
+    { id: 'IV', t: 'Habilidades personales', w: 0.30, ids: ['IV.1', 'IV.2'] },
+    { id: 'V', t: 'Aspiraciones laborales y de vida', w: 0.10, ids: ['V.1'] }
+  ];
+  var SEC_CORTO = { I: 'Motivaciones', II: 'A. académicos', III: 'A. laborales', IV: 'Hab. personales', V: 'Aspiraciones' };
+  var PREG = {
+    'I.1': { t: 'Motivación de la elección', q: '¿Por qué decidiste estudiar {P} y qué te llevó a decidir presentarte con nosotros?' },
+    'II.1': { t: 'Desempeño académico', q: '¿Cómo fue tu desempeño académico durante el pregrado / especialidad previa?' },
+    'II.2': { t: 'Investigación', q: '¿En qué actividades de investigación participaste? ¿Qué productos resultaron del mismo?' },
+    'II.3': { t: 'Inglés (competencia lectora)', q: '¿Cuál es tu nivel de competencia lectora en inglés?' },
+    'III.1': { t: 'Experiencia laboral', q: '¿Cuál ha sido tu experiencia laboral posterior al grado de pregrado / especialidad previa? ¿Trabajas actualmente?' },
+    'III.2': { t: 'Habilidades del trabajo', q: '¿Qué habilidades que hayas adquirido en tu trabajo te pueden ayudar en este contexto educativo?', nota: 'Solo si tiene experiencia laboral.', na: 'No aplica: no tiene experiencia laboral' },
+    'IV.1': { t: 'Hábitos de estudio y manejo del tiempo', q: '¿Qué estrategias utilizarías como residente para lograr cumplir tus actividades académicas y asistenciales?' },
+    'IV.2': { t: 'Liderazgo y afrontamiento emocional', q: 'Describa una situación difícil de su experiencia que haya tenido que afrontar en grupo. ¿Cuál fue su papel? ¿Y cómo la afrontó emocionalmente?' },
+    'V.1': { t: 'Aspiraciones', q: 'Una vez te gradúes del programa, además de actividades asistenciales, ¿qué otras cosas harías como especialista en {P}?' }
+  };
+  var RUBR = [{"id": "I.1", "sec": "I", "bajo": "No hay claridad en los argumentos de elección de la especialidad\nO\nNo considera las características del programa CES o de programas de otras instituciones (donde le salga cupo)\nO\nArgumenta principalmente desde linajes, herencias, creencias o deseos", "medio": "Refiere algunas generalidades del programa CES (información de la web)\nO\nNo argumenta comparativamente con otros programas o instituciones (no refleja una elección del CES).", "alto": "Su elección refleja búsqueda activa de información y referencias:\n-experiencias (electivas, semilleros, grupos de investigación, trabajo) con docentes del programa.\nO\n-contacto con el grupo de docentes y/o residentes del programa", "muy": "ALTO +\nEscoge por los diferenciadores del programa CES"}, {"id": "II.1", "sec": "II", "bajo": "Desempeño promedio o más bajo dentro de su cohorte", "medio": "Buen desempeño académico. Estuvo siempre entre los primeros puestos dentro de su cohorte de pregrado o especialidad previa.", "intro": "Obtuvo algún reconocimiento especial por su desempeño académico durante el pregrado o especialidad previa:", "alto": "Reconocimiento institucional", "muy": "Reconocimiento extra-institucional"}, {"id": "II.2", "sec": "II", "bajo": "Ninguna participación en actividades de investigación\nO\nParticipación en actividades de investigación, no tiene ningún producto", "medio": "Participó en actividades de investigación con grupos o semilleros\nY\nTiene productos de:\n* presentación de póster, O\n* ponencia en evento académicos o científicos, O\n* artículo sometido", "intro": "Participó en actividades de investigación con grupos o semilleros", "alto": "recibió premios o reconocimientos por póster o ponencia\nO\ntiene una publicación en revista", "muy": "tiene más de una publicación en revista\nO\ntiene al menos una publicación en revista de reconocimiento o de la especialidad"}, {"id": "II.3", "sec": "II", "bajo": "(Textos breves o sencillos, buscar información)\nNivel A1\nO\nNivel A2", "medio": "(Comprende textos redactados en lenguaje habitual o relacionado con su área)\nNivel B1", "intro": "", "alto": "(Comprende artículos con mensajes complejos, susceptibles de interpretación)\nNivel B2", "muy": "(Certificado por test)\nComprende con facilidad artículos y libros especializados o manuales\nNivel C"}, {"id": "III.1", "sec": "III", "bajo": "No ha tenido experiencia laboral clínica previa.", "medio": "Ha tenido experiencia laboral clínica previa, pero no en el área de la especialidad a la cual está aspirando.", "intro": "", "alto": "Tiene experiencia laboral relacionada con la especialidad a la cual está aspirando", "muy": "ALTO +\nEducación continuada en el área de la especialidad"}, {"id": "III.2", "sec": "III", "bajo": "No evidencia aprendizajes específicos a partir de su experiencia laboral", "medio": "Hace alusión a experiencias específicas, y habilidades pero no logra aplicarlas al contexto futuro de la residencia", "intro": "Hace alusión a habilidades adquiridas y plantea como le ayudan en su proceso formativo:", "alto": "Habilidades asistenciales O habilidades administrativas", "muy": "Habilidades asistenciales Y habilidades administrativas"}, {"id": "IV.1", "sec": "IV", "bajo": "No da importancia a los hábitos de estudio y al manejo de tiempo para el mismo\n(Cree que la parte académica está solo en sus cualidades personales)", "medio": "Menciona la importancia de hábitos de estudio y manejo del tiempo, pero no tiene estategias claras", "intro": "", "alto": "Evidencia métodos o técnicas específicas de estudio y manejo del tiempo/priorización", "muy": "ALTO +\nhace alusión al balance con la vida personal o familiar"}, {"id": "IV.2", "sec": "IV", "bajo": "No evidencia conductas de liderazgo o trabajo en equipo, o se describe como lider tipo \"heroe autosuficiente\"\n------\nNo reconoce la relevancia del afrontamiento emocional o evidencia desden", "medio": "Evidencia algunas conductas de liderazgo, pero no un estilo claro\n------\nReconoce la influencia de las emociones pero no da cuenta de haber usado recursos para su manejo", "intro": "", "alto": "Se evidencia un estilo de liderazgo claro y recursos para el manejo de sus emociones", "muy": "ALTO +\nAsocia su estilo de liderazgo al contexto y necesidades de la situación"}, {"id": "V.1", "sec": "V", "bajo": "No evidencia interes claros además de los asistenciales", "medio": "Evidencia intereses únicamente en docencia o investigación", "intro": "", "alto": "Ha analizado opciones claras y reales de crecimiento como empleado, independiente o empresario/emprendedor", "muy": "ALTO +\nHa analizado opciones novedosas para la especialidad O con un claro impacto social, económico o ambiental"}];
+  var RUB = {}; RUBR.forEach(function(r) { RUB[r.id] = r; });
+  var CRIT = []; SEC.forEach(function(s) { s.ids.forEach(function(i) { CRIT.push({ id: i, sec: s.id }); }); });
+  var PREG_EXTRA_II = '¿Qué otras competencias o habilidades académicas traes contigo con las cuales puedes contribuir a la Especialidad?';
+  /* Riesgo de deserción no académica: suma 1 por cada respuesta de riesgo (De 5). */
+  var RD = [
+    { id: 't', q: 'El programa es de tiempo completo y dedicación exclusiva; no se puede trabajar durante la residencia. ¿Puedes cursar el programa cumpliendo estas condiciones?', risk: 'no' },
+    { id: 'r', q: 'El programa tiene rotaciones obligatorias o electivas en otras ciudades o en el exterior. ¿Tienes las condiciones personales, familiares y económicas para tener estas experiencias?', risk: 'no' },
+    { id: 'e', q: 'Apoyo emocional y motivacional', grupo: true, risk: 'no' },
+    { id: 'p', q: 'Apoyo económico', grupo: true, risk: 'no' },
+    { id: 'f', q: '¿Podrías tener problemas en el futuro (en los próximos dos, tres o cuatro años) que puedan interferir para que completes la especialidad? ¿Qué barreras crees que puedas encontrar en ese proceso y cómo las afrontarías?', risk: 'si' }
+  ];
+  var RD_GRUPO = '¿Cuentas con una red de personas para tu proceso de ingreso y permanencia en la Universidad que te brinde: (preguntar quiénes)';
+  var ROL = { admin: 'Jefatura de Posgrados', decana: 'Decanatura', coord: 'Coordinación de programa' };
+  var ROL_CORTO = { admin: 'Jefatura', decana: 'Decanatura', coord: 'Coordinación' };
+
+  /* ---------------- utilidades ---------------- */
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function norm(s) { return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim(); }
+  function f2(n) { return n == null || isNaN(n) ? '—' : (Math.round(n * 100) / 100).toFixed(2).replace('.', ','); }
+  function f1(n) { return n == null || isNaN(n) ? '—' : (Math.round(n * 10) / 10).toFixed(1).replace('.', ','); }
+  function f0(n) { return n == null || isNaN(n) ? '—' : String(Math.round(n * 100) / 100).replace('.', ','); }
+  function cuposTxt(p) { return p && p.cupos > 0 ? p.cupos + (p.cupos === 1 ? ' cupo' : ' cupos') : 'cupos por definir'; }
+  function ssGet(k) { try { return sessionStorage.getItem(k) || ''; } catch (e) { return ''; } }
+  function ssSet(k, v) { try { if (v) sessionStorage.setItem(k, v); else sessionStorage.removeItem(k); } catch (e) {} }
+  function svg(p, w) { return '<svg width="' + (w || 20) + '" height="' + (w || 20) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; }
+  var IC = {
+    lock: svg('<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>', 26),
+    list: svg('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>'),
+    table: svg('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/>'),
+    users: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>'),
+    user: svg('<circle cx="12" cy="8" r="3.6"/><path d="M5 20a7 7 0 0 1 14 0"/>', 15),
+    yes: svg('<path d="M5 12.5l4.5 4.5L19 7"/>', 15),
+    no: svg('<path d="M6 6l12 12M18 6L6 18"/>', 15),
+    gear: svg('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>')
+  };
+
+  /* ---------------- datos en memoria ---------------- */
+  var DB = { progs: [], cands: [], evals: {}, evaluadores: {}, cfg: { examMax: 300, pesos: { coord: 1, decana: 1, admin: 1 }, abierta: true, conv: '' }, users: [] };
+  var sess = null; // { token, yo:{id,nombre,rol,programas} }
+  var Store = null, dirty = {}, saveT = null, saving = false, pollT = null, ultimaSync = 0;
+  var prog = '', vista = { tipo: 'inicio' }, consState = { ev: 'comb', orden: 'alfa', exp: {} }, admTab = 'cands', admImp = null, admDel = null;
+
+  function progDe(id) { for (var i = 0; i < DB.progs.length; i++) if (DB.progs[i].id === id) return DB.progs[i]; return null; }
+  function candDe(id) { for (var i = 0; i < DB.cands.length; i++) if (DB.cands[i].id === id) return DB.cands[i]; return null; }
+  function candsDe(pid) { return DB.cands.filter(function(c) { return c.prog === pid; }).sort(function(a, b) { return norm(a.apellidos + ' ' + a.nombre).localeCompare(norm(b.apellidos + ' ' + b.nombre)); }); }
+  function nomC(c) { return (c.nombre + ' ' + c.apellidos).replace(/\s+/g, ' ').trim(); }
+  function esAdmin() { return sess && sess.yo.rol === 'admin'; }
+  function veTodo() { return sess && (sess.yo.rol === 'admin' || sess.yo.rol === 'decana'); }
+  function misProgs() {
+    var ids = veTodo() ? DB.progs.map(function(p) { return p.id; }) : (sess.yo.programas || []);
+    return DB.progs.filter(function(p) { return ids.indexOf(p.id) >= 0; });
+  }
+  function recDe(cid, uid) { var e = DB.evals[cid]; return e && e[uid]; }
+  function miRec(cid) { return recDe(cid, sess.yo.id); }
+  function asegurarRec(cid) {
+    var e = DB.evals[cid] || (DB.evals[cid] = {});
+    return e[sess.yo.id] || (e[sess.yo.id] = { r: {}, bon: {}, rd: {}, obs: {}, uid: sess.yo.id, nom: sess.yo.nombre, rol: sess.yo.rol, t: 0 });
+  }
+
+  /* ---------------- cálculo (misma lógica del Excel) ---------------- */
+  function val(r, id) { var v = r[id]; return (v === 0 || v === 1 || v === 2 || v === 3) ? v : null; }
+  function prom(arr) { var s = 0, n = 0; arr.forEach(function(v) { if (v !== null && v !== undefined) { s += v; n++; } }); return n ? s / n : null; }
+  function totalDeSec(sec) {
+    var t = 0;
+    for (var i = 0; i < SEC.length; i++) { if (sec[SEC[i].id] == null) return null; t += sec[SEC[i].id] * SEC[i].w; }
+    return t;
+  }
+  function calcEval(rec) {
+    var r = (rec && rec.r) || {};
+    var sec = {};
+    SEC.forEach(function(s) { sec[s.id] = prom(s.ids.map(function(i) { return val(r, i); })); });
+    var ans = 0;
+    CRIT.forEach(function(c) { if (val(r, c.id) !== null || (c.id === 'III.2' && r[c.id] === 'na')) ans++; });
+    var bon = 0; SEC.forEach(function(s) { if (rec && rec.bon && rec.bon[s.id] === 1) bon++; });
+    var rd = 0, rdAns = 0;
+    RD.forEach(function(q) { var a = rec && rec.rd && rec.rd[q.id]; if (a === 'si' || a === 'no') { rdAns++; if (a === q.risk) rd++; } });
+    return { sec: sec, ent: totalDeSec(sec), ans: ans, n: CRIT.length, completa: ans === CRIT.length, bon: bon, rd: rd, rdAns: rdAns, hay: !!rec && (ans > 0 || rdAns > 0) };
+  }
+  function pesoRol(rol) { var p = DB.cfg.pesos && DB.cfg.pesos[rol]; return p == null || isNaN(p) ? 1 : Number(p); }
+  function evaluadoresDe(pid) { return DB.evaluadores[pid] || []; }
+  function combinar(c) {
+    var recs = [], e = DB.evals[c.id] || {};
+    Object.keys(e).forEach(function(uid) { var k = calcEval(e[uid]); if (k.completa) recs.push({ rec: e[uid], k: k, w: pesoRol(e[uid].rol) }); });
+    var sec = {};
+    SEC.forEach(function(s) {
+      var sw = 0, sv = 0;
+      recs.forEach(function(x) { if (x.k.sec[s.id] != null) { sw += x.w; sv += x.w * x.k.sec[s.id]; } });
+      sec[s.id] = sw ? sv / sw : null;
+    });
+    var bw = 0, bs = 0, rs = 0;
+    recs.forEach(function(x) { bw += x.w; bs += x.w * x.k.bon; rs += x.w * x.k.rd; });
+    return { sec: sec, ent: totalDeSec(sec), nComp: recs.length, N: evaluadoresDe(c.prog).length, bon: bw ? bs / bw : null, rd: bw ? rs / bw : null, hay: recs.length > 0 };
+  }
+  function examen(c) {
+    var b = c.bas, l = c.cli, u = c.cul;
+    var ok = function(x) { return x !== null && x !== undefined && x !== '' && !isNaN(x); };
+    return { bas: ok(b) ? +b : null, cli: ok(l) ? +l : null, cul: ok(u) ? +u : null, tot: (ok(b) && ok(l) && ok(u)) ? (+b + +l + +u) : null };
+  }
+  function globalDe(extot, ent) { if (extot == null || ent == null) return null; return (extot / (DB.cfg.examMax || 300)) * 0.6 + (ent / 3) * 0.4; }
+  function metricas(c, ev) {
+    var ex = examen(c), m = { c: c, ex: ex };
+    if (ev === 'comb') { var cm = combinar(c); m.sec = cm.sec; m.ent = cm.ent; m.bon = cm.bon; m.rd = cm.rd; m.est = cm.hay ? cm.nComp + ' de ' + cm.N : 'Sin calificar'; m.hay = cm.hay; m.bonDec = true; }
+    else { var rec = recDe(c.id, ev), k = calcEval(rec); m.sec = k.sec; m.ent = k.ent; m.bon = rec ? k.bon : null; m.rd = (rec && k.rdAns) ? k.rd : null; m.est = !rec || !k.hay ? 'Sin calificar' : (k.completa ? 'Completa' : 'En curso ' + k.ans + '/' + k.n); m.hay = k.hay; }
+    m.glob = globalDe(ex.tot, m.ent);
+    return m;
+  }
+  function rankear(arr, get) {
+    var vals = arr.map(function(x) { var v = get(x); return v == null ? null : Math.round(v * 1e9) / 1e9; });
+    return vals.map(function(v) { if (v === null) return ''; var r = 1; vals.forEach(function(o) { if (o !== null && o > v) r++; }); return r; });
+  }
+
+  /* ---------------- servidor ---------------- */
+  var API_OK = /^https:\/\/script\.google\.com\/(a\/macros\/[\w.-]+\/|macros\/)s\/[\w-]+\/exec$/;
+  function api(fn, a) {
+    return new Promise(function(ok, no) {
+      var falla = function(c) { var x = new Error(c || 'red'); x.code = c || 'red'; no(x); };
+      if (!API_OK.test(String(CFG.api || ''))) { falla('config'); return; }
+      var ctl = window.AbortController ? new AbortController() : null, t = setTimeout(function() { if (ctl) ctl.abort(); }, 45000);
+      fetch(CFG.api, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, args: a }), signal: ctl ? ctl.signal : undefined })
+        .then(function(r) { return r.json(); })
+        .then(function(r) { clearTimeout(t); if (r && r.ok === false) falla(r.error); else ok(r); })
+        .catch(function() { clearTimeout(t); falla('red'); });
+    });
+  }
+  function ScriptStore(token) {
+    var ver = null;
+    return {
+      load: function(soloSiCambio) {
+        return api('mx_load', [token, soloSiCambio ? ver : null]).then(function(d) { if (d && d.ver) ver = d.ver; return d; });
+      },
+      saveEval: function(cid, rec) { return api('mx_saveEval', [token, cid, rec]); },
+      admin: function(op, p) { ver = null; return api('mx_admin', [token, op, p]); },
+      logout: function() { return api('mx_logout', [token]).catch(function() {}); }
+    };
+  }
+  /* --- Servidor de demostración: reproduce en el navegador las mismas reglas de permisos del servidor real --- */
+  var LOCAL = null;
+  var SEED = /*SEED*/null;
+  function localInit() {
+    var progs = SEED.programas.map(function(n, i) { return { id: 'p' + (i + 1), nombre: n, cupos: 0 }; });
+    var pid = function(n) { for (var i = 0; i < progs.length; i++) if (progs[i].nombre === n) return progs[i].id; };
+    var users = [
+      { id: 'u1', nombre: 'Dra. Laura Libreros', saludo: 'Dra. Laura', usuario: 'laura.libreros', clave: 'Laura-2026', rol: 'admin', programas: [] },
+      { id: 'u2', nombre: 'Dra. Paula Vásquez', saludo: 'Dra. Paula', usuario: 'paula.vasquez', clave: 'Decana-2026', rol: 'decana', programas: [] }
+    ];
+    SEED.coordinadores.forEach(function(c, i) { users.push({ id: 'u' + (i + 3), nombre: c.nombre, saludo: c.saludo, usuario: c.usuario, clave: 'Demo-2026', rol: 'coord', programas: c.programas.map(pid) }); });
+    var muestra = { 'Oftalmología': [4, 4], 'Pediatría': [3, 6], 'Medicina Crítica y Cuidado Intensivo Pediátrico': [2, 2], 'Medicina de Urgencias': [4, 5], 'Anestesiología': [3, 3], 'Ortopedia y Traumatología': [3, 3], 'Cardiología': [3, 2] };
+    var nombres = [['Camila', 'Restrepo Gómez'], ['Andrés', 'Montoya Vélez'], ['Valentina', 'Ospina Duque'], ['Santiago', 'Arango Ríos'], ['Laura', 'Cardona Mejía'], ['Mateo', 'Salazar Henao'], ['Isabela', 'Zapata Londoño'], ['Daniel', 'Giraldo Ocampo']];
+    var cands = [], n = 0, primeros = {};
+    Object.keys(muestra).forEach(function(pn, pi) {
+      var id = pid(pn); progs.filter(function(x) { return x.id === id; })[0].cupos = muestra[pn][1]; primeros[pn] = 'c' + (n + 1);
+      for (var i = 0; i < muestra[pn][0]; i++) { n++; var nm = nombres[(i + pi) % nombres.length]; cands.push({ id: 'c' + n, prog: id, nombre: nm[0], apellidos: nm[1], doc: String(1000000000 + n * 7919), bas: 60 + ((n * 7) % 35), cli: 62 + ((n * 11) % 33), cul: 55 + ((n * 5) % 40) }); }
+    });
+    var L = { progs: progs, cands: cands, evals: {}, users: users, cfg: { examMax: 300, pesos: { coord: 1, decana: 1, admin: 1 }, abierta: true, conv: 'Convocatoria 2027-1' } };
+    function marcas(seed) { var r = {}; CRIT.forEach(function(c, i) { r[c.id] = (seed + i * 3 + (seed >> 1)) % 4; }); if (seed % 4 === 0) r['III.2'] = 'na'; return r; }
+    function rec(u, seed, completa) {
+      var r = marcas(seed); if (!completa) { delete r['V.1']; delete r['IV.2']; }
+      var bon = {}; SEC.forEach(function(s, i) { bon[s.id] = (seed + i) % 3 === 0 ? 1 : 0; });
+      var rd = {}; RD.forEach(function(q, i) { rd[q.id] = ((seed + i) % 5 === 0) ? q.risk : (q.risk === 'si' ? 'no' : 'si'); });
+      var obs = {}; if (completa) { obs.gen = seed % 2 ? 'Candidato claro y bien informado sobre el programa. Se sugiere confirmar disponibilidad para rotaciones.' : 'Buen perfil académico; refiere apoyo familiar sólido.'; obs.II = 'Presentó póster en congreso nacional.'; }
+      return { r: r, bon: bon, rd: rd, obs: obs, uid: u.id, nom: u.nombre, rol: u.rol, t: Date.now() };
+    }
+    var us = function(f) { return users.filter(f)[0]; };
+    var coordDe = function(pn) { return us(function(u) { return u.programas.indexOf(pid(pn)) >= 0; }); };
+    var cid = function(pn, k) { return 'c' + (+primeros[pn].slice(1) + k); };
+    var asig = [[cid('Oftalmología', 0), [users[0], users[1], coordDe('Oftalmología')], true], [cid('Oftalmología', 1), [users[0], coordDe('Oftalmología')], true], [cid('Oftalmología', 2), [users[1]], false],
+      [cid('Pediatría', 0), [users[0], users[1], coordDe('Pediatría')], true], [cid('Pediatría', 1), [coordDe('Pediatría')], false], [cid('Medicina de Urgencias', 0), [users[0], coordDe('Medicina de Urgencias')], true]];
+    asig.forEach(function(x, xi) { L.evals[x[0]] = {}; x[1].forEach(function(u, j) { L.evals[x[0]][u.id] = rec(u, 3 + xi * 5 + j * 2, x[2]); }); });
+    return L;
+  }
+  function localVisible(u) { return (u.rol === 'admin' || u.rol === 'decana') ? LOCAL.progs.map(function(p) { return p.id; }) : u.programas; }
+  function copia(o) { return JSON.parse(JSON.stringify(o)); }
+  function LocalStore(uid) {
+    var u = LOCAL.users.filter(function(x) { return x.id === uid; })[0];
+    var fail = function(c) { var e = new Error(c); e.code = c; return Promise.reject(e); };
+    return {
+      load: function() {
+        var vis = localVisible(u), progs = LOCAL.progs.filter(function(p) { return vis.indexOf(p.id) >= 0; });
+        var cands = LOCAL.cands.filter(function(c) { return vis.indexOf(c.prog) >= 0; });
+        var evals = {}; cands.forEach(function(c) { if (LOCAL.evals[c.id]) evals[c.id] = copia(LOCAL.evals[c.id]); });
+        var evr = {};
+        progs.forEach(function(p) { evr[p.id] = LOCAL.users.filter(function(x) { return x.rol === 'admin' || x.rol === 'decana' || x.programas.indexOf(p.id) >= 0; }).map(function(x) { return { id: x.id, nombre: x.nombre, rol: x.rol }; }); });
+        var r = { ok: true, yo: { id: u.id, nombre: u.nombre, saludo: u.saludo || '', rol: u.rol, programas: u.programas }, progs: copia(progs), cands: copia(cands), evals: evals, evaluadores: evr, cfg: copia(LOCAL.cfg) };
+        if (u.rol === 'admin') r.users = LOCAL.users.map(function(x) { return { id: x.id, nombre: x.nombre, saludo: x.saludo || '', usuario: x.usuario, rol: x.rol, programas: x.programas.slice() }; });
+        return Promise.resolve(r);
+      },
+      saveEval: function(cid, rec) {
+        var c = LOCAL.cands.filter(function(x) { return x.id === cid; })[0];
+        if (!c || localVisible(u).indexOf(c.prog) < 0) return fail('permiso');
+        (LOCAL.evals[cid] = LOCAL.evals[cid] || {})[u.id] = Object.assign(copia(rec), { uid: u.id, nom: u.nombre, rol: u.rol, t: Date.now() });
+        return Promise.resolve({ ok: true });
+      },
+      logout: function() { return Promise.resolve(); },
+      admin: function(op, p) {
+        if (u.rol !== 'admin') return fail('permiso');
+        if (op === 'archivar') return Promise.resolve({ ok: true });
+        var id = function(pre) { return pre + Math.random().toString(36).slice(2, 8); };
+        if (op === 'candidato') {
+          if (!p.id) { p.id = id('c'); LOCAL.cands.push(p); } else { var i = LOCAL.cands.findIndex(function(x) { return x.id === p.id; }); if (i >= 0) LOCAL.cands[i] = Object.assign(LOCAL.cands[i], p); }
+        } else if (op === 'importar') { p.filas.forEach(function(f) { f.id = id('c'); LOCAL.cands.push(f); }); return Promise.resolve({ ok: true, n: p.filas.length }); }
+        else if (op === 'importarProgramas') {
+          p.progs.forEach(function(x) { var e = LOCAL.progs.filter(function(q) { return norm(q.nombre) === norm(x.nombre); })[0]; if (e) { if (x.cupos) e.cupos = x.cupos; } else LOCAL.progs.push({ id: id('p'), nombre: x.nombre, cupos: x.cupos || 0 }); });
+        } else if (op === 'borrarTodos') { var nc = LOCAL.cands.length, ne = 0; LOCAL.cands.forEach(function(c) { ne += Object.keys(LOCAL.evals[c.id] || {}).length; }); LOCAL.cands = []; LOCAL.evals = {}; return Promise.resolve({ ok: true, candidatos: nc, evaluaciones: ne }); }
+        else if (op === 'borrarProg') { var gone = LOCAL.cands.filter(function(c) { return c.prog === p.pid; }), ne2 = 0; gone.forEach(function(c) { ne2 += Object.keys(LOCAL.evals[c.id] || {}).length; delete LOCAL.evals[c.id]; }); LOCAL.cands = LOCAL.cands.filter(function(c) { return c.prog !== p.pid; }); return Promise.resolve({ ok: true, candidatos: gone.length, evaluaciones: ne2 }); }
+        else if (op === 'borrarCandidato') { LOCAL.cands = LOCAL.cands.filter(function(x) { return x.id !== p.id; }); delete LOCAL.evals[p.id]; }
+        else if (op === 'programa') {
+          if (!p.id) { p.id = id('p'); LOCAL.progs.push({ id: p.id, nombre: p.nombre, cupos: p.cupos }); } else { var j = LOCAL.progs.findIndex(function(x) { return x.id === p.id; }); if (j >= 0) LOCAL.progs[j] = { id: p.id, nombre: p.nombre, cupos: p.cupos }; }
+        } else if (op === 'borrarPrograma') { if (LOCAL.cands.some(function(c) { return c.prog === p.id; })) return fail('conCandidatos'); LOCAL.progs = LOCAL.progs.filter(function(x) { return x.id !== p.id; }); }
+        else if (op === 'usuario') {
+          if (!p.id) { if (!p.clave) return fail('clave'); p.id = id('u'); LOCAL.users.push({ id: p.id, nombre: p.nombre, saludo: p.saludo || '', usuario: p.usuario, clave: p.clave, rol: p.rol, programas: p.programas || [] }); }
+          else { var k = LOCAL.users.findIndex(function(x) { return x.id === p.id; }); if (k >= 0) { var o = LOCAL.users[k]; o.nombre = p.nombre; o.saludo = p.saludo || ''; o.usuario = p.usuario; o.rol = p.rol; o.programas = p.programas || []; if (p.clave) o.clave = p.clave; } }
+        } else if (op === 'borrarUsuario') { if (p.id === u.id) return fail('propio'); LOCAL.users = LOCAL.users.filter(function(x) { return x.id !== p.id; }); }
+        else if (op === 'config') { LOCAL.cfg = Object.assign(LOCAL.cfg, p); }
+        return Promise.resolve({ ok: true });
+      }
+    };
+  }
+  function loginLocal(usuario, clave) {
+    var u = LOCAL.users.filter(function(x) { return norm(x.usuario) === norm(usuario) && x.clave === clave; })[0];
+    if (!u) { var e = new Error('clave'); e.code = 'clave'; return Promise.reject(e); }
+    if (!LOCAL.cfg.abierta && u.rol !== 'admin') { var e2 = new Error('cerrada'); e2.code = 'cerrada'; return Promise.reject(e2); }
+    return Promise.resolve({ ok: true, token: u.id });
+  }
+  function login(usuario, clave) { return DEMO ? loginLocal(usuario, clave) : api('mx_login', [usuario, clave]); }
+  function crearStore(token) { return DEMO ? LocalStore(token) : ScriptStore(token); }
+
+  function aplicar(d) {
+    DB.progs = d.progs || []; DB.cands = d.cands || []; DB.evaluadores = d.evaluadores || {}; DB.cfg = d.cfg || DB.cfg; DB.users = d.users || [];
+    var evals = d.evals || {};
+    Object.keys(dirty).forEach(function(cid) { var mine = recDe(cid, sess.yo.id); evals[cid] = evals[cid] || {}; if (mine) evals[cid][sess.yo.id] = mine; });
+    DB.evals = evals;
+  }
+
+  /* ---------------- guardado y sincronización ---------------- */
+  function setEstado(s) {
+    var e = document.getElementById('mx-sync'); if (!e) return;
+    var t, c = '';
+    if (s === 'guardando') { t = 'Guardando…'; c = 'warn'; }
+    else if (s === 'error') { t = 'Sin conexión. Se reintenta solo.'; c = 'bad'; }
+    else if (DEMO) { t = 'Vista previa: los datos viven solo en este navegador'; }
+    else { var d = new Date(ultimaSync || Date.now()); t = 'Guardado · ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); c = 'ok'; }
+    e.className = 'mx-chip ' + c; e.textContent = t;
+  }
+  function programarGuardado() { clearTimeout(saveT); setEstado('guardando'); saveT = setTimeout(vaciar, SAVE_MS); }
+  function vaciar() {
+    if (saving) { saveT = setTimeout(vaciar, 400); return; }
+    var ids = Object.keys(dirty);
+    if (!ids.length) { setEstado('ok'); return; }
+    saving = true;
+    var cadena = Promise.resolve();
+    ids.forEach(function(cid) {
+      cadena = cadena.then(function() {
+        var snap = JSON.stringify(miRec(cid) || null);
+        return Store.saveEval(cid, miRec(cid)).then(function() { if (JSON.stringify(miRec(cid) || null) === snap) delete dirty[cid]; });
+      });
+    });
+    cadena.then(function() { saving = false; ultimaSync = Date.now(); vaciar(); }).catch(function(e) {
+      saving = false;
+      if (e && (e.code === 'sesion' || e.code === 'clave')) { salir('Tu sesión terminó. Ingresa de nuevo.'); return; }
+      setEstado('error'); saveT = setTimeout(vaciar, 4000);
+    });
+  }
+  function sincronizar() {
+    if (!Store || !sess || saving || Object.keys(dirty).length) return Promise.resolve();
+    return Store.load(true).then(function(d) {
+      if (Object.keys(dirty).length) return;
+      if (d && d.unchanged) { ultimaSync = Date.now(); setEstado('ok'); return; }
+      aplicar(d); ultimaSync = Date.now(); repintarVivo(); setEstado('ok');
+    }).catch(function(e) {
+      if (e && (e.code === 'sesion' || e.code === 'clave')) { salir('Tu sesión terminó. Ingresa de nuevo.'); return; }
+      setEstado('error');
+    });
+  }
+  function iniciarSondeo() { clearInterval(pollT); if (DEMO) return; pollT = setInterval(function() { if (!document.hidden) sincronizar(); }, SYNC_MS); }
+
+  /* ---------------- navegación ---------------- */
+  function ruta() {
+    var p = (location.hash || '').replace(/^#\/?/, '').split('/');
+    if (p[0] === 'programa' && p[1]) return { tipo: 'programa', id: p[1] };
+    if (p[0] === 'cand' && p[1]) return { tipo: 'cand', id: p[1] };
+    if (p[0] === 'consolidado') return { tipo: 'consolidado' };
+    if (p[0] === 'admin') return { tipo: 'admin' };
+    return { tipo: 'inicio' };
+  }
+  function ir(h) { try { location.hash = h; } catch (e) {} pintar(); }
+  window.addEventListener('hashchange', function() { pintar(); });
+  function hero(visible) {
+    if (!visible) { HERO.innerHTML = ''; return; }
+    HERO.innerHTML = '<div class="mx-hero" role="region" aria-labelledby="mx-h1"><div>' +
+      '<p class="e">Posgrados Clínicos</p><h1 id="mx-h1">Entrevistas</h1><div class="bar"></div>' +
+      '<p class="s" style="font-size:clamp(14px,1.6vw,17px);font-weight:600;letter-spacing:.4px">Proceso de admisión · Facultad de Ciencias de la Salud</p>' +
+      '<p class="p">Espacio exclusivo para la Decanatura, la Jefatura de Posgrados y las coordinaciones de programa. Elige el programa, entrevista a cada candidato con la guía de calificación y consulta el consolidado con el examen.</p></div></div>';
+  }
+  function barra() {
+    var y = sess.yo;
+    var bar = '<div class="mx-start" style="padding:12px 18px"><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">' +
+      '<span class="mx-chip ' + (y.rol === 'admin' ? 'ok' : '') + '">' + esc(ROL[y.rol]) + '</span>' +
+      '<strong style="font-size:13.5px">' + esc(y.nombre) + '</strong>' +
+      '<span class="mx-chip" id="mx-sync" role="status"></span></div>' +
+      '<div class="mx-chips"><button class="mx-pillink" type="button" data-go="">Inicio</button>' +
+      '<button class="mx-pillink" type="button" data-go="consolidado">Consolidado</button>' +
+      (y.rol === 'admin' ? '<button class="mx-pillink" type="button" data-go="admin">Administración</button>' : '') +
+      '<button class="mx-pillink" type="button" data-act="actualizar">Actualizar</button>' +
+      '<button class="mx-pillink" type="button" data-act="salir">Cerrar sesión</button></div></div>';
+    setTimeout(function() { setEstado(saving || Object.keys(dirty).length ? 'guardando' : 'ok'); }, 0);
+    return bar;
+  }
+  function band(e, t, ic) { return '<div class="mx-band"><span class="mx-ico" aria-hidden="true">' + ic + '</span><span style="min-width:0"><span class="e">' + e + '</span><span class="t">' + t + '</span></span></div>'; }
+
+  function pintar() {
+    var r = ruta();
+    if (!sess) { hero(true); vistaPuerta(); return; }
+    vista = r;
+    hero(false);
+    var mp = misProgs();
+    if (!prog || (prog !== 'todos' && !progDe(prog))) prog = mp.length === 1 ? mp[0].id : '';
+    if (r.tipo === 'cand') vistaCand(r.id);
+    else if (r.tipo === 'programa') { var p = progDe(r.id); if (p) { prog = p.id; ssSet('mx_prog', prog); vistaPrograma(); } else vistaInicio(); }
+    else if (r.tipo === 'consolidado') vistaConsolidado();
+    else if (r.tipo === 'admin' && esAdmin()) vistaAdmin();
+    else if (mp.length === 1) { prog = mp[0].id; vistaPrograma(); }
+    else vistaInicio();
+    setEstado('ok');
+  }
+  function repintarVivo() {
+    var a = document.activeElement, enCampo = a && a.closest && a.closest('#mx-root input, #mx-root textarea, #mx-root select');
+    if (vista.tipo === 'inicio') vistaInicio();
+    else if (vista.tipo === 'programa') vistaPrograma();
+    else if (vista.tipo === 'consolidado') { if (!enCampo) vistaConsolidado(true); }
+    else if (vista.tipo === 'cand') refrescarForm(vista.id, true);
+    else if (vista.tipo === 'admin') { if (!enCampo && !document.querySelector('[data-confirm].on')) vistaAdmin(); }
+  }
+
+  /* ---------------- puerta de acceso ---------------- */
+  function vistaPuerta(aviso) {
+    var demoHint = DEMO ? '<p class="mx-hint"><strong>Vista previa de diseño.</strong> Prueba estos perfiles (usuario · clave). Hay 28 coordinaciones con los programas reales; todas usan la misma clave de prueba:<br>' +
+      LOCAL.users.filter(function(u) { return ['laura.libreros', 'paula.vasquez', 'juan.santamaria', 'mauricio.fernandez', 'julian.londono'].indexOf(u.usuario) >= 0; }).map(function(u) { return esc(ROL_CORTO[u.rol]) + (u.rol === 'coord' ? ' (' + esc(LOCAL.progs.filter(function(p) { return u.programas.indexOf(p.id) >= 0; }).map(function(p) { return p.nombre; }).join(' y ')) + ')' : '') + ' · <b>' + esc(u.usuario) + '</b> · <b>' + esc(u.clave) + '</b>'; }).join('<br>') + '</p>' : '';
+    APP.innerHTML = '<div class="mx-gate"><div class="ic">' + IC.lock + '</div>' +
+      '<h2>Acceso para entrevistadores</h2>' +
+      '<p>Ingresa con tu usuario y la clave personal que te entregó la Jefatura de Posgrados.</p>' +
+      '<form id="mx-form" autocomplete="off">' +
+      '<div><label class="mx-lbl" for="mx-usr">Usuario</label><input class="mx-in" id="mx-usr" type="text" autocomplete="off" autocapitalize="off" placeholder="Por ejemplo: nombre.apellido" value="' + esc(ssGet('mx_usr')) + '"></div>' +
+      '<div><label class="mx-lbl" for="mx-pass">Clave</label><div class="mx-pw"><input class="mx-in" id="mx-pass" type="password" autocomplete="off" placeholder="Escribe tu clave" aria-describedby="mx-err"><button class="mx-btn sec" type="button" id="mx-ver" aria-pressed="false">Ver</button></div></div>' +
+      '<p class="mx-err" id="mx-err" role="alert"' + (aviso ? '' : ' hidden') + '>' + esc(aviso || '') + '</p>' +
+      '<button class="mx-btn lime" type="submit" id="mx-go">Ingresar</button></form>' + demoHint + '</div>';
+    var f = document.getElementById('mx-form'), inp = document.getElementById('mx-pass'), usr = document.getElementById('mx-usr'),
+      err = document.getElementById('mx-err'), ver = document.getElementById('mx-ver'), go = document.getElementById('mx-go');
+    ver.addEventListener('click', function() { var s = inp.type === 'password'; inp.type = s ? 'text' : 'password'; ver.textContent = s ? 'Ocultar' : 'Ver'; ver.setAttribute('aria-pressed', s ? 'true' : 'false'); });
+    f.addEventListener('submit', function(ev) {
+      ev.preventDefault(); err.hidden = true;
+      var mostrar = function(t) { err.textContent = t; err.hidden = false; go.disabled = false; go.textContent = 'Ingresar'; };
+      if (!usr.value.trim()) { mostrar('Escribe tu usuario.'); usr.focus(); return; }
+      if (!inp.value) { mostrar('Escribe tu clave para continuar.'); inp.focus(); return; }
+      go.disabled = true; go.textContent = 'Verificando…';
+      login(usr.value.trim(), inp.value).then(function(r) { entrar(r.token, usr.value.trim()); }, function(e) {
+        var c = e && e.code;
+        if (c === 'clave') { mostrar('El usuario o la clave no son correctos. Revisa mayúsculas y minúsculas e inténtalo de nuevo.'); inp.select(); }
+        else if (c === 'bloqueo') mostrar('Demasiados intentos fallidos. Espera unos minutos e inténtalo de nuevo.');
+        else if (c === 'cerrada') mostrar('La página no está habilitada en este momento. Si tienes dudas, escribe a la Jefatura de Posgrados.');
+        else if (c === 'config') mostrar('Esta página aún no está conectada con el servidor. Falta pegar la dirección de la aplicación web en la configuración.');
+        else mostrar('No pudimos conectar. Revisa tu internet e inténtalo de nuevo.');
+      });
+    });
+  }
+  function entrar(token, usr) {
+    ssSet('mx_usr', usr || '');
+    Store = crearStore(token);
+    APP.innerHTML = '<p class="mx-vacio">Cargando datos…</p>';
+    Store.load().then(function(d) {
+      sess = { token: token, yo: d.yo }; aplicar(d);
+      ssSet('mx_tok', DEMO ? '' : token);
+      var mp = misProgs(); prog = mp.length === 1 ? mp[0].id : '';
+      ultimaSync = Date.now(); iniciarSondeo(); try { location.hash = ''; } catch (e) {} pintar();
+    }).catch(function(e) { salir(e && e.code === 'sesion' ? 'Tu sesión terminó. Ingresa de nuevo.' : 'No pudimos cargar los datos. Revisa tu conexión e inténtalo de nuevo.'); });
+  }
+  function salir(aviso) {
+    if (Store && Store.logout && sess && !aviso) Store.logout();
+    sess = null; Store = null; dirty = {}; prog = ''; clearInterval(pollT); ssSet('mx_tok', '');
+    DB.progs = []; DB.cands = []; DB.evals = {}; DB.users = [];
+    hero(true); vistaPuerta(aviso);
+  }
+
+  /* ---------------- inicio: elegir programa ---------------- */
+  function miProgreso(pid) {
+    var cs = candsDe(pid), c = 0, ec = 0;
+    cs.forEach(function(x) { var k = calcEval(miRec(x.id)); if (k.completa) c++; else if (k.hay) ec++; });
+    return { n: cs.length, c: c, ec: ec };
+  }
+  function chipProg(pid) {
+    var g = miProgreso(pid);
+    if (!g.n) return '<span class="mx-chip">Sin candidatos cargados</span>';
+    return '<span class="mx-chip ' + (g.c === g.n ? 'ok' : (g.c || g.ec ? 'warn' : '')) + '">' + g.c + ' de ' + g.n + ' entrevistados por ti</span>';
+  }
+  function saludoHtml() {
+    var h = new Date().getHours(), mom = h < 12 ? 'Buenos días' : (h < 19 ? 'Buenas tardes' : 'Buenas noches');
+    var y = sess.yo, nom = y.saludo || String(y.nombre || '').split(' ')[0], mp = misProgs(), t;
+    if (y.rol === 'coord') t = mp.length > 1 ? 'Tienes ' + mp.length + ' programas asignados. Elige el que vas a entrevistar.' : 'Estos son los candidatos de ' + (mp[0] ? mp[0].nombre : 'tu programa') + '. Cuando termines, revisa el consolidado.';
+    else if (y.rol === 'admin') t = 'Puedes entrevistar y consultar los ' + mp.length + ' programas, y cargar candidatos o cerrar la convocatoria desde Administración.';
+    else t = 'Puedes entrevistar y consultar los ' + mp.length + ' programas. Elige uno para empezar o abre el consolidado general.';
+    return '<div class="mx-hello"><span class="e">' + mom + '</span><h2>' + esc(nom) + '</h2><p>' + esc(t) + '</p></div>';
+  }
+  function vistaInicio() {
+    var mp = misProgs(), multi = mp.length > 1;
+    var cards = mp.map(function(p, i) {
+      return '<button class="mx-card' + (i % 2 ? ' alt' : '') + '" type="button" data-go="programa/' + esc(p.id) + '" data-s="' + esc(norm(p.nombre)) + '">' +
+        '<span class="l"><span class="n">' + (i + 1) + '</span><span style="min-width:0"><span class="k">Programa</span><span class="h">' + esc(p.nombre) + '</span>' +
+        '<span class="m off">' + IC.users + ' ' + candsDe(p.id).length + ' candidatos · ' + cuposTxt(p) + '</span><span class="st">' + chipProg(p.id) + '</span></span></span>' +
+        '<span class="go">Entrar <i aria-hidden="true">→</i></span></button>';
+    }).join('');
+    APP.innerHTML = barra() + saludoHtml() +
+      band(veTodo() ? 'Todos los programas' : 'Tus programas', multi ? 'Elige el programa que vas a entrevistar' : 'Programa asignado', IC.list) +
+      (mp.length > 8 ? '<div class="mx-fld"><label class="mx-lbl" for="mx-fp">Buscar programa</label><input class="mx-in" id="mx-fp" type="search" placeholder="Escribe el nombre del programa"></div>' : '') +
+      (mp.length ? '<div class="mx-grid" id="mx-pgrid">' + cards + '</div>' : '<p class="mx-vacio">Todavía no tienes programas asignados. Escribe a la Jefatura de Posgrados.</p>') +
+      (veTodo() ? '<div class="mx-grid"><button class="mx-card alt" type="button" data-go="consolidado"><span class="l"><span class="n">∑</span><span style="min-width:0"><span class="k">Vista general</span><span class="h">Consolidado de todos los programas</span><span class="m off">Examen, entrevista y resultado global por programa</span></span></span><span class="go">Abrir <i aria-hidden="true">→</i></span></button></div>' : '');
+    var fp = document.getElementById('mx-fp');
+    if (fp) fp.addEventListener('input', function() { var q = norm(fp.value); [].forEach.call(document.querySelectorAll('#mx-pgrid .mx-card'), function(b) { b.hidden = q && b.getAttribute('data-s').indexOf(q) < 0; }); });
+  }
+
+  /* ---------------- lista de candidatos del programa ---------------- */
+  function vistaPrograma() {
+    var p = progDe(prog); if (!p) { vistaInicio(); return; }
+    var cs = candsDe(p.id), multi = misProgs().length > 1;
+    var filas = cs.map(function(c, i) {
+      var k = calcEval(miRec(c.id)), ev = evaluadoresDe(p.id), otros = 0;
+      Object.keys(DB.evals[c.id] || {}).forEach(function(uid) { if (calcEval(DB.evals[c.id][uid]).completa) otros++; });
+      var chip = k.completa ? '<span class="mx-chip ok">Completa</span>' : (k.hay ? '<span class="mx-chip warn">En curso · ' + k.ans + ' de ' + k.n + '</span>' : '<span class="mx-chip">Sin iniciar</span>');
+      return '<tr><td class="num">' + (i + 1) + '</td><td class="nm">' + esc(nomC(c)) + '</td><td class="cc">' + esc(c.doc || '') + '</td><td>' + chip + '</td>' +
+        '<td class="num">' + otros + ' de ' + ev.length + '</td><td class="act"><button class="mx-btn sm" type="button" data-go="cand/' + esc(c.id) + '">' + (k.hay ? 'Continuar' : 'Entrevistar') + '</button></td></tr>';
+    }).join('');
+    APP.innerHTML = barra() + saludoHtml() +
+      '<div class="mx-back"><div class="mx-title"><span class="n">' + IC.list + '</span><span style="min-width:0"><span class="k">Programa</span><h2>' + esc(p.nombre) + '</h2>' +
+      '<span class="m">' + IC.users + ' ' + cs.length + ' candidatos · ' + cuposTxt(p) + '</span></span></div>' +
+      '<div class="mx-row">' + (multi || veTodo() ? '<button class="mx-btn sec sm" type="button" data-go="">← Cambiar de programa</button>' : '') + '<button class="mx-btn sec sm" type="button" data-go="consolidado">Ver consolidado</button></div></div>' +
+      (cs.length ? '<div class="mx-fld"><label class="mx-lbl" for="mx-fc">Buscar candidato</label><input class="mx-in" id="mx-fc" type="search" placeholder="Nombre, apellido o documento"></div>' +
+        '<div class="mx-tw"><table class="mx-tb sm"><thead><tr><th>#</th><th>Candidato</th><th>Documento</th><th>Tu entrevista</th><th>Entrevistas completas</th><th></th></tr></thead><tbody id="mx-cl">' + filas + '</tbody></table></div>' :
+        '<p class="mx-vacio">Este programa todavía no tiene candidatos cargados. La Jefatura de Posgrados los carga desde Administración.</p>');
+    var fc = document.getElementById('mx-fc');
+    if (fc) fc.addEventListener('input', function() { var q = norm(fc.value); [].forEach.call(document.querySelectorAll('#mx-cl tr'), function(tr) { tr.hidden = q && norm(tr.textContent).indexOf(q) < 0; }); });
+  }
+
+  /* ---------------- formulario de entrevista ---------------- */
+  function descHtml(txt) {
+    return String(txt || '').split('\n').map(function(l) {
+      var s = l.trim(); if (!s) return '';
+      if (s === 'O' || s === 'Y') return '<p class="o">' + (s === 'O' ? 'o' : 'y') + '</p>';
+      if (/^-+$/.test(s)) return '<p class="o">y además</p>';
+      if (/^ALTO \+/.test(s)) return '<p><b>Alto +</b> ' + esc(s.replace(/^ALTO \+\s*/, '')) + '</p>';
+      if (/^[-*]/.test(s)) return '<p class="pl">' + esc(s) + '</p>';
+      return '<p>' + esc(s) + '</p>';
+    }).join('');
+  }
+  function nivelHtml(cid, n, sel) {
+    var r = RUB[cid] || {}, txt = r[n.k] || '';
+    if ((n.k === 'alto' || n.k === 'muy') && r.intro) txt = r.intro + '\n' + txt;
+    return '<button type="button" class="mx-lv n' + n.v + '" aria-pressed="' + (sel === n.v ? 'true' : 'false') + '" data-c="' + cid + '" data-v="' + n.v + '">' +
+      '<span class="h">' + n.t + '<i>' + n.v + (n.v === 1 ? ' punto' : ' puntos') + '</i></span><span class="d">' + descHtml(txt) + '</span></button>';
+  }
+  function yn(attr, key, q, sel, riskVal, sub) {
+    var si = sel === 'si', no = sel === 'no';
+    return '<div class="mx-yn"><p>' + q + (sub ? '<small>' + sub + '</small>' : '') + '</p><div class="mx-seg">' +
+      '<button type="button" class="mx-b ' + (riskVal === 'si' ? 'risk' : 'safe') + '" aria-pressed="' + si + '" data-' + attr + '="' + key + '" data-v="si">' + IC.yes + ' Sí</button>' +
+      '<button type="button" class="mx-b ' + (riskVal === 'no' ? 'risk' : 'safe') + '" aria-pressed="' + no + '" data-' + attr + '="' + key + '" data-v="no">' + IC.no + ' No</button></div></div>';
+  }
+  function vistaCand(id) {
+    var c = candDe(id); if (!c) { vistaInicio(); return; }
+    var p = progDe(c.prog); prog = c.prog;
+    var rec = miRec(id) || { r: {}, bon: {}, rd: {}, obs: {} }, P = p.nombre;
+    var secs = SEC.map(function(s, si) {
+      var crits = s.ids.map(function(cid) {
+        var m = PREG[cid], v = rec.r[cid], na = (v === 'na');
+        return '<div class="mx-crit" id="cr-' + cid.replace('.', '_') + '"><div class="k"><span>Criterio ' + cid + ' · ' + esc(m.t) + '</span></div>' +
+          '<p class="q">' + esc(m.q.replace('{P}', P)) + '</p>' + (m.nota ? '<p class="hint">' + esc(m.nota) + '</p>' : '') +
+          '<div class="mx-lvs">' + NIV.map(function(n) { return nivelHtml(cid, n, val(rec.r, cid)); }).join('') + '</div>' +
+          (m.na ? '<div class="mx-na"><button type="button" class="mx-b" aria-pressed="' + na + '" data-c="' + cid + '" data-v="na">' + esc(m.na) + '</button></div>' : '') + '</div>';
+      }).join('');
+      var extra = s.id === 'II' ? '<div class="mx-crit" style="border-left-color:var(--sky)"><div class="k"><span>Pregunta complementaria · sin calificación</span></div><p class="q">' + esc(PREG_EXTRA_II) + '</p><p class="hint">Registra la respuesta en las observaciones de la sección.</p></div>' : '';
+      var bon = rec.bon[s.id] === 1, bno = rec.bon[s.id] === 0;
+      return '<div class="mx-secbar"><span>' + s.id + '. ' + esc(s.t) + ' (' + Math.round(s.w * 100) + ' %)</span><span class="sc" id="sc-' + s.id + '"></span></div>' + crits + extra +
+        '<div class="mx-extra"><h4>Bonificación de la sección</h4><div class="mx-yn" style="padding:0"><p>¿Asignas bonificación al candidato en esta sección?</p><div class="mx-seg">' +
+        '<button type="button" class="mx-b" aria-pressed="' + bon + '" data-bon="' + s.id + '" data-v="1">' + IC.yes + ' Sí</button>' +
+        '<button type="button" class="mx-b" aria-pressed="' + bno + '" data-bon="' + s.id + '" data-v="0">' + IC.no + ' No</button></div></div>' +
+        '<label class="mx-lbl" style="margin-top:12px" for="ob-' + s.id + '">Observaciones de la sección ' + s.id + '</label>' +
+        '<textarea class="mx-ta sm" id="ob-' + s.id + '" data-obs="' + s.id + '" placeholder="Anota evidencias, citas textuales o aspectos a tener en cuenta.">' + esc((rec.obs || {})[s.id] || '') + '</textarea></div>';
+    }).join('');
+    var riesgo = '<div class="mx-secbar"><span>Riesgo de deserción no académica</span><span class="sc" id="sc-rd"></span></div><div class="mx-extra" style="margin-top:0">' +
+      '<p class="mx-note" style="margin:0 0 6px">Registra la respuesta del candidato. Cada respuesta de riesgo suma 1 punto (máximo 5).</p>' +
+      yn('rd', 't', esc(RD[0].q), (rec.rd || {}).t, RD[0].risk) + yn('rd', 'r', esc(RD[1].q), (rec.rd || {}).r, RD[1].risk) +
+      '<div class="mx-yn" style="display:block"><p style="flex:none">' + esc(RD_GRUPO) + '</p><div class="mx-subq">' +
+      yn('rd', 'e', esc(RD[2].q), (rec.rd || {}).e, 'no') + yn('rd', 'p', esc(RD[3].q), (rec.rd || {}).p, 'no') + '</div></div>' +
+      yn('rd', 'f', esc(RD[4].q), (rec.rd || {}).f, 'si') + '</div>';
+    var gen = '<div class="mx-secbar"><span>Observaciones generales</span><span class="sc"></span></div><div class="mx-extra" style="margin-top:0"><label class="mx-lbl" for="ob-gen">Observaciones generales sobre el candidato</label>' +
+      '<textarea class="mx-ta" id="ob-gen" data-obs="gen" placeholder="Impresión general, fortalezas, aspectos por aclarar, recomendación.">' + esc((rec.obs || {}).gen || '') + '</textarea>' +
+      '<p class="mx-muted" style="margin-top:8px">Las observaciones las pueden leer quienes entrevistan este programa.</p></div>';
+    var sig = candsDe(c.prog), ix = sig.findIndex(function(x) { return x.id === id; }), nx = sig[ix + 1];
+    APP.innerHTML = barra() +
+      '<div class="mx-live" id="mx-live"><div class="w"><small id="lv-prog"></small><b id="lv-nom"></b></div><div class="sc"><b id="lv-tot">—</b><span id="lv-sub"></span></div></div>' +
+      '<div class="mx-back"><button class="mx-btn sec sm" type="button" data-go="programa/' + esc(c.prog) + '">← Lista de candidatos</button>' +
+      '<span class="mx-count">Candidato ' + (ix + 1) + ' de ' + sig.length + '</span></div>' + secs + riesgo + gen +
+      '<div class="mx-foot"><div class="mx-tot"><b id="ft-tot">—</b><span id="ft-sub" class="mx-muted"></span></div><div class="mx-prog" aria-hidden="true"><i id="ft-bar" style="width:0"></i></div>' +
+      '<div class="mx-foot-row"><span class="mx-muted" id="ft-det"></span><div class="mx-row"><button class="mx-btn sec" type="button" data-go="programa/' + esc(c.prog) + '">Volver a la lista</button>' +
+      (nx ? '<button class="mx-btn lime" type="button" data-go="cand/' + esc(nx.id) + '">Siguiente candidato →</button>' : '<button class="mx-btn lime" type="button" data-go="consolidado">Ver consolidado →</button>') + '</div></div></div>';
+    refrescarForm(id, false);
+    window.scrollTo(0, 0);
+  }
+  function refrescarForm(id, remoto) {
+    var c = candDe(id); if (!c) return;
+    var rec = miRec(id), k = calcEval(rec), p = progDe(c.prog);
+    var $ = function(i) { return document.getElementById(i); };
+    if (!$('lv-nom')) return;
+    $('lv-prog').textContent = p ? p.nombre : ''; $('lv-nom').textContent = nomC(c);
+    $('lv-tot').textContent = k.ent == null ? '—' : f2(k.ent); $('lv-sub').textContent = (k.ent == null ? 'Total entrevista (de 3) · ' : 'de 3 · ') + k.ans + ' de ' + k.n + ' criterios';
+    SEC.forEach(function(s) { var e = $('sc-' + s.id); if (e) e.textContent = k.sec[s.id] == null ? 'Sin calificar' : f2(k.sec[s.id]) + ' de 3'; });
+    var rdEl = $('sc-rd'); if (rdEl) rdEl.textContent = k.rdAns ? k.rd + ' de 5' + (k.rdAns < 5 ? ' · ' + k.rdAns + ' respondidas' : '') : 'Sin responder';
+    $('ft-tot').textContent = k.ent == null ? '—' : f2(k.ent) + ' / 3';
+    $('ft-sub').textContent = k.ent == null ? 'Total de la entrevista (se calcula al calificar las 5 secciones)' : 'Total de la entrevista (ponderado)';
+    $('ft-bar').style.width = Math.round(k.ans / k.n * 100) + '%'; $('ft-bar').className = k.completa ? 'full' : '';
+    $('ft-det').textContent = 'Bonos: ' + k.bon + ' de 5 · Riesgo de deserción: ' + (k.rdAns ? k.rd : '—') + ' de 5';
+    if (remoto) return;
+    [].forEach.call(document.querySelectorAll('[data-c]'), function(b) { var v = b.getAttribute('data-v'), cur = rec && rec.r[b.getAttribute('data-c')]; b.setAttribute('aria-pressed', String(String(cur) === v)); });
+    [].forEach.call(document.querySelectorAll('[data-bon]'), function(b) { b.setAttribute('aria-pressed', String(rec && rec.bon[b.getAttribute('data-bon')] === +b.getAttribute('data-v'))); });
+    [].forEach.call(document.querySelectorAll('[data-rd]'), function(b) { b.setAttribute('aria-pressed', String(rec && rec.rd[b.getAttribute('data-rd')] === b.getAttribute('data-v'))); });
+    CRIT.forEach(function(x) { var e = $('cr-' + x.id.replace('.', '_')); if (e) e.classList.toggle('done', val(rec ? rec.r : {}, x.id) !== null || (rec && rec.r[x.id] === 'na')); });
+  }
+  function mutar(cid, fn) { var rec = asegurarRec(cid); fn(rec); rec.t = Date.now(); dirty[cid] = 1; programarGuardado(); refrescarForm(cid, false); }
+
+  /* ---------------- consolidado ---------------- */
+  function evaluadoresVista(pids) {
+    var seen = {}, out = [];
+    pids.forEach(function(pid) { evaluadoresDe(pid).forEach(function(e) { if (!seen[e.id]) { seen[e.id] = 1; out.push(e); } }); });
+    return out;
+  }
+  function vistaConsolidado(suave) {
+    var mp = misProgs();
+    if (!prog && mp.length === 1) prog = mp[0].id;
+    if (!prog) prog = veTodo() ? 'todos' : (mp[0] ? mp[0].id : '');
+    if (prog === 'todos' && !veTodo()) prog = mp[0] ? mp[0].id : '';
+    var pids = prog === 'todos' ? mp.map(function(p) { return p.id; }) : [prog];
+    var evs = evaluadoresVista(pids);
+    if (consState.ev !== 'comb' && !evs.some(function(e) { return e.id === consState.ev; })) consState.ev = 'comb';
+    var selProg = (mp.length > 1 || veTodo()) ? '<div class="mx-fld"><label class="mx-lbl" for="mx-cp">Programa</label><select class="mx-in" id="mx-cp">' + (veTodo() ? '<option value="todos"' + (prog === 'todos' ? ' selected' : '') + '>Todos los programas</option>' : '') +
+      mp.map(function(p) { return '<option value="' + esc(p.id) + '"' + (prog === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select></div>' : '';
+    var tit = prog === 'todos' ? 'Todos los programas' : (progDe(prog) || {}).nombre;
+    APP.innerHTML = barra() + band('Consolidado', esc(tit || ''), IC.table) +
+      '<div class="mx-toolbar">' + selProg +
+      '<div class="mx-fld"><label class="mx-lbl" for="mx-ce">Calificación a mostrar</label><select class="mx-in" id="mx-ce"><option value="comb">Combinada (todos los entrevistadores)</option>' +
+      evs.map(function(e) { return '<option value="' + esc(e.id) + '"' + (consState.ev === e.id ? ' selected' : '') + '>' + esc(e.nombre) + ' · ' + esc(ROL_CORTO[e.rol]) + '</option>'; }).join('') + '</select></div>' +
+      '<div class="mx-fld"><label class="mx-lbl" for="mx-co">Orden</label><select class="mx-in" id="mx-co"><option value="alfa">Alfabético</option><option value="glob"' + (consState.orden === 'glob' ? ' selected' : '') + '>Por resultado global</option></select></div>' +
+      '<div class="mx-fld" style="flex:0 0 auto"><span class="mx-lbl">Detalle (bonos y observaciones)</span><span class="mx-row"><button class="mx-btn sec sm" type="button" data-act="expall">Desplegar todo</button><button class="mx-btn sec sm" type="button" data-act="colall">Contraer todo</button></span></div></div>' +
+      '<p class="mx-muted" id="mx-leyenda"></p><div id="mx-tabla"></div>' + descargasHtml();
+    var ce = document.getElementById('mx-ce'); if (consState.ev !== 'comb') ce.value = consState.ev;
+    if (!suave) window.scrollTo(0, 0);
+    tablaConsolidado();
+  }
+  function tablaProg(pid, ev) {
+    var p = progDe(pid), cs = candsDe(pid);
+    var ms = cs.map(function(c) { return metricas(c, ev); });
+    var R = {
+      bas: rankear(ms, function(m) { return m.ex.bas; }), cli: rankear(ms, function(m) { return m.ex.cli; }), cul: rankear(ms, function(m) { return m.ex.cul; }), tot: rankear(ms, function(m) { return m.ex.tot; }),
+      I: rankear(ms, function(m) { return m.sec.I; }), II: rankear(ms, function(m) { return m.sec.II; }), III: rankear(ms, function(m) { return m.sec.III; }), IV: rankear(ms, function(m) { return m.sec.IV; }), V: rankear(ms, function(m) { return m.sec.V; }),
+      ent: rankear(ms, function(m) { return m.ent; }), glob: rankear(ms, function(m) { return m.glob; })
+    };
+    var idx = ms.map(function(m, i) { return i; });
+    if (consState.orden === 'glob') idx.sort(function(a, b) { var ga = ms[a].glob, gb = ms[b].glob; if (ga == null && gb == null) return a - b; if (ga == null) return 1; if (gb == null) return -1; return gb - ga; });
+    var cupos = (p && p.cupos) || 0;
+    var rows = idx.map(function(i, pos) {
+      var m = ms[i], c = m.c, cut = consState.orden === 'glob' && cupos && pos === cupos && m.glob != null;
+      var rn = function(r) { return '<td class="rn' + (r === 1 ? ' one' : '') + '">' + (r === '' ? '' : r) + '</td>'; };
+      var pt = function(v, d) { return '<td class="num">' + (v == null ? '—' : (d === 1 ? f1(v) : f2(v))) + '</td>'; };
+      var top = consState.orden === 'glob' && cupos && pos < cupos && m.glob != null;
+      return '<tr class="' + (top ? 'top3 ' : '') + (cut ? 'cut ' : '') + (consState.exp[c.id] ? 'sel' : '') + '"><td class="nm"><button type="button" class="tg" data-det="' + esc(c.id) + '" aria-expanded="' + (consState.exp[c.id] ? 'true' : 'false') + '"><span class="car" aria-hidden="true">' + (consState.exp[c.id] ? '▾' : '▸') + '</span> ' + esc(nomC(c)) + '</button>' + chipsExtra(c) + '</td>' +
+        '<td class="num">' + f0(m.ex.bas) + '</td>' + rn(R.bas[i]) + '<td class="num">' + f0(m.ex.cli) + '</td>' + rn(R.cli[i]) + '<td class="num">' + f0(m.ex.cul) + '</td>' + rn(R.cul[i]) + '<td class="num tot">' + f0(m.ex.tot) + '</td>' + rn(R.tot[i]) +
+        pt(m.sec.I) + rn(R.I[i]) + pt(m.sec.II) + rn(R.II[i]) + pt(m.sec.III) + rn(R.III[i]) + pt(m.sec.IV) + rn(R.IV[i]) + pt(m.sec.V) + rn(R.V[i]) + '<td class="num tot">' + f2(m.ent) + '</td>' + rn(R.ent[i]) +
+        '<td class="num tot pos">' + f2(m.glob) + '</td>' + rn(R.glob[i]) + '<td class="num">' + (m.rd == null ? '—' : f1(m.rd)) + '</td><td class="num">' + (m.bon == null ? '—' : (ev === 'comb' ? f1(m.bon) : f0(m.bon))) + '</td><td class="num">' + esc(m.est) + '</td></tr>' + (consState.exp[c.id] ? '<tr class="exp"><td colspan="26"><div class="mx-obs-grid">' + evCards(c) + '</div></td></tr>' : '');
+    }).join('');
+    var ptRn = '<th class="num sub">Pt</th><th class="num sub">Rn</th>', sub = '';
+    for (var q = 0; q < 11; q++) sub += ptRn;
+    var head = '<tr><th rowspan="3" style="min-width:170px">Candidato</th><th class="g" colspan="8">Examen (de ' + (DB.cfg.examMax || 300) + ')</th><th class="g g2" colspan="12">Entrevista (de 3)</th><th class="g" colspan="2">Global</th>' +
+      '<th rowspan="3">Riesgo<small>de 5</small></th><th rowspan="3">Bonos</th><th rowspan="3">' + (ev === 'comb' ? 'Entrevistas completas' : 'Estado') + '</th></tr>' +
+      '<tr>' + ['Básicas', 'Clínicas', 'Cultura', 'Total'].map(function(x) { return '<th class="g" colspan="2">' + x + '</th>'; }).join('') +
+      ['I', 'II', 'III', 'IV', 'V'].map(function(s) { return '<th class="g g2" colspan="2">' + SEC_CORTO[s] + '</th>'; }).join('') + '<th class="g g2" colspan="2">Total</th><th class="g" colspan="2">60 % + 40 %</th></tr>' +
+      '<tr>' + sub + '</tr>';
+    return '<div class="mx-card2" style="margin-bottom:16px;padding:14px 16px"><h3>' + esc(p ? p.nombre : '') + ' <span class="mx-chip">' + cs.length + ' candidatos · ' + cuposTxt(p) + '</span></h3>' +
+      (cs.length ? '<div class="mx-tw" style="margin-top:10px"><table class="mx-tb"><thead>' + head + '</thead><tbody>' + rows + '</tbody></table></div>' : '<p class="mx-vacio" style="margin-top:10px">Sin candidatos cargados.</p>') + '</div>';
+  }
+  function tablaConsolidado() {
+    var mp = misProgs(), pids = prog === 'todos' ? mp.map(function(p) { return p.id; }) : [prog];
+    var ev = consState.ev;
+    var html = pids.map(function(pid) { return tablaProg(pid, ev); }).join('');
+    document.getElementById('mx-tabla').innerHTML = html || '<p class="mx-vacio">No hay programas para mostrar.</p>';
+    var ley = ev === 'comb' ? 'Calificación combinada: promedio ponderado de las entrevistas completas (pesos: ' + ['coord', 'decana', 'admin'].map(function(r) { return ROL_CORTO[r] + ' ' + f0(pesoRol(r)); }).join(' · ') + '). Pt = puntaje, Rn = ranking dentro del programa. La barra lima marca los cupos cuando se ordena por resultado global.'
+      : 'Mostrando solo la calificación de la persona elegida. Pt = puntaje, Rn = ranking dentro del programa.';
+    document.getElementById('mx-leyenda').textContent = ley + ' El global se calcula cuando hay notas del examen y entrevista completa.';
+  }
+  var RD_CORTO = { t: 'No puede cursar a tiempo completo', r: 'Sin condiciones para rotaciones', e: 'Sin apoyo emocional', p: 'Sin apoyo económico', f: 'Prevé problemas que interfieran' };
+  function resumenExtra(c) {
+    var e = DB.evals[c.id] || {}, nObs = 0, nBon = 0;
+    Object.keys(e).forEach(function(u) {
+      var r = e[u], tiene = false;
+      if (r.obs) Object.keys(r.obs).forEach(function(k) { if (String(r.obs[k] || '').trim()) tiene = true; });
+      if (tiene) nObs++;
+      if (r.bon) SEC.forEach(function(s) { if (r.bon[s.id] === 1) nBon++; });
+    });
+    return { obs: nObs, bon: nBon };
+  }
+  function chipsExtra(c) {
+    var x = resumenExtra(c), h = '';
+    if (x.obs) h += ' <span class="mx-chip warn" title="Entrevistadores que dejaron observaciones">' + x.obs + (x.obs === 1 ? ' obs.' : ' obs.') + '</span>';
+    if (x.bon) h += ' <span class="mx-chip ok" title="Bonificaciones otorgadas por los entrevistadores">' + x.bon + (x.bon === 1 ? ' bono' : ' bonos') + '</span>';
+    return h;
+  }
+  function evCards(c) {
+    var evs = evaluadoresDe(c.prog), e = DB.evals[c.id] || {};
+    return evs.map(function(u) {
+      var rec = e[u.id], k = calcEval(rec);
+      var cab = '<b class="who">' + esc(u.nombre) + '</b><small>' + esc(ROL[u.rol]);
+      if (!rec || !k.hay) return '<div class="mx-ev">' + cab + '</small><ul><li>Todavía no ha calificado.</li></ul></div>';
+      var bons = SEC.filter(function(s) { return rec.bon && rec.bon[s.id] === 1; }).map(function(s) { return s.id + '. ' + SEC_CORTO[s.id]; });
+      var rds = RD.filter(function(q) { return rec.rd && rec.rd[q.id] === q.risk; }).map(function(q) { return RD_CORTO[q.id]; });
+      var obs = SEC.map(function(s) { return rec.obs && String(rec.obs[s.id] || '').trim() ? '<div class="ob"><b>Sección ' + s.id + ' · ' + esc(SEC_CORTO[s.id]) + ':</b> ' + esc(rec.obs[s.id]) + '</div>' : ''; }).join('') +
+        (rec.obs && String(rec.obs.gen || '').trim() ? '<div class="ob"><b>Observaciones generales:</b> ' + esc(rec.obs.gen) + '</div>' : '');
+      return '<div class="mx-ev">' + cab + ' · ' + (k.completa ? 'entrevista completa' : 'en curso (' + k.ans + ' de ' + k.n + ')') + '</small>' +
+        '<ul>' + SEC.map(function(s) { return '<li>' + esc(SEC_CORTO[s.id]) + ': <b>' + f2(k.sec[s.id]) + '</b></li>'; }).join('') + '<li>Total entrevista: <b>' + f2(k.ent) + '</b> de 3</li>' +
+        '<li>Bonificación (' + k.bon + ' de 5): ' + (bons.length ? '<b>' + esc(bons.join('; ')) + '</b>' : 'ninguna') + '</li>' +
+        '<li>Riesgo de deserción (' + (k.rdAns ? k.rd : '—') + ' de 5): ' + (rds.length ? esc(rds.join('; ')) : (k.rdAns ? 'sin factores de riesgo' : 'sin responder')) + '</li></ul>' + (obs || '<div class="ob">Sin observaciones.</div>') + '</div>';
+    }).join('');
+  }
+  /* ---------- descargas ---------- */
+  var XLSX_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', xlsxP = null;
+  function cargarXLSX() {
+    if (window.XLSX) return Promise.resolve(window.XLSX);
+    if (xlsxP) return xlsxP;
+    xlsxP = new Promise(function(ok, no) {
+      var s = document.createElement('script'); s.src = XLSX_URL; s.onload = function() { window.XLSX ? ok(window.XLSX) : no(new Error('xlsx')); }; s.onerror = function() { xlsxP = null; no(new Error('xlsx')); };
+      document.head.appendChild(s);
+    });
+    return xlsxP;
+  }
+  function r2(v, d) { if (v == null || isNaN(v)) return ''; var k = d === 1 ? 10 : 100; return Math.round(v * k) / k; }
+  var HCONS = ['Candidato', 'Documento', 'Básicas (Pt)', 'Básicas (Rn)', 'Clínicas (Pt)', 'Clínicas (Rn)', 'Cultura (Pt)', 'Cultura (Rn)', 'Total examen (Pt)', 'Total examen (Rn)', 'Motivaciones (Pt)', 'Motivaciones (Rn)', 'A. académicos (Pt)', 'A. académicos (Rn)', 'A. laborales (Pt)', 'A. laborales (Rn)', 'Hab. personales (Pt)', 'Hab. personales (Rn)', 'Aspiraciones (Pt)', 'Aspiraciones (Rn)', 'Total entrevista (Pt)', 'Total entrevista (Rn)', 'Global (Pt)', 'Global (Rn)', 'Riesgo deserción (de 5)', 'Bonos', 'Entrevistas completas'];
+  function filasConsolidado(pids, ev, conProg) {
+    var L = [conProg ? ['Programa'].concat(HCONS) : HCONS.slice()];
+    pids.forEach(function(pid) {
+      var cs = candsDe(pid), ms = cs.map(function(c) { return metricas(c, ev); });
+      var g = function(f) { return rankear(ms, f); };
+      var R = [g(function(m) { return m.ex.bas; }), g(function(m) { return m.ex.cli; }), g(function(m) { return m.ex.cul; }), g(function(m) { return m.ex.tot; }), g(function(m) { return m.sec.I; }), g(function(m) { return m.sec.II; }), g(function(m) { return m.sec.III; }), g(function(m) { return m.sec.IV; }), g(function(m) { return m.sec.V; }), g(function(m) { return m.ent; }), g(function(m) { return m.glob; })];
+      ms.forEach(function(m, i) {
+        var row = [nomC(m.c), m.c.doc || '', r2(m.ex.bas), R[0][i], r2(m.ex.cli), R[1][i], r2(m.ex.cul), R[2][i], r2(m.ex.tot), R[3][i], r2(m.sec.I), R[4][i], r2(m.sec.II), R[5][i], r2(m.sec.III), R[6][i], r2(m.sec.IV), R[7][i], r2(m.sec.V), R[8][i], r2(m.ent), R[9][i], r2(m.glob), R[10][i], r2(m.rd, 1), r2(m.bon, 1), m.est];
+        L.push(conProg ? [(progDe(pid) || {}).nombre].concat(row) : row);
+      });
+    });
+    return L;
+  }
+  function filasDetalle(pids) {
+    var L = [['Programa', 'Candidato', 'Documento', 'Entrevistador', 'Rol', 'Estado', 'Motivaciones', 'A. académicos', 'A. laborales', 'Hab. personales', 'Aspiraciones', 'Total entrevista', 'Bonificación en', 'Bonos (n)', 'Riesgo deserción (de 5)', 'Factores de riesgo', 'Obs. I Motivaciones', 'Obs. II A. académicos', 'Obs. III A. laborales', 'Obs. IV Hab. personales', 'Obs. V Aspiraciones', 'Observaciones generales']];
+    pids.forEach(function(pid) {
+      candsDe(pid).forEach(function(c) {
+        evaluadoresDe(pid).forEach(function(u) {
+          var rec = recDe(c.id, u.id), k = calcEval(rec); if (!rec || !k.hay) return;
+          var o = rec.obs || {};
+          L.push([(progDe(pid) || {}).nombre, nomC(c), c.doc || '', u.nombre, ROL[u.rol], k.completa ? 'Completa' : 'En curso ' + k.ans + '/' + k.n,
+            r2(k.sec.I), r2(k.sec.II), r2(k.sec.III), r2(k.sec.IV), r2(k.sec.V), r2(k.ent),
+            SEC.filter(function(s) { return rec.bon && rec.bon[s.id] === 1; }).map(function(s) { return s.id + '. ' + SEC_CORTO[s.id]; }).join('; '), k.bon, k.rdAns ? k.rd : '',
+            RD.filter(function(q) { return rec.rd && rec.rd[q.id] === q.risk; }).map(function(q) { return RD_CORTO[q.id]; }).join('; '),
+            o.I || '', o.II || '', o.III || '', o.IV || '', o.V || '', o.gen || '']);
+        });
+      });
+    });
+    return L;
+  }
+  function dlMsg(t, bad) { var m = document.getElementById('mx-dlmsg'); if (m) { m.textContent = t; m.style.color = bad ? 'var(--badtx)' : 'var(--blue)'; } }
+  function descargasHtml(conSelect) {
+    var mp = misProgs(), multi = mp.length > 1;
+    var sel = conSelect ? '<div class="mx-fld" style="max-width:360px;margin-bottom:10px"><label class="mx-lbl" for="dl-prog">Programa</label><select class="mx-in" id="dl-prog">' + mp.map(function(p) { return '<option value="' + esc(p.id) + '"' + (prog === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select></div>' : '';
+    var todos = veTodo() ? 'Todos los programas' : 'Mis programas';
+    return '<div class="mx-card2"><h3>Descargar el consolidado en Excel</h3><p class="mx-muted" style="margin:4px 0 10px">El archivo trae la calificación combinada con puntajes y rankings, y una hoja «Detalle» con la calificación, las bonificaciones y las observaciones de cada entrevistador.</p>' + sel + '<div class="mx-row">' +
+      ((conSelect || (prog && prog !== 'todos')) ? '<button class="mx-btn sm" type="button" data-dl="prog">Un programa (.xlsx)</button>' : '') +
+      (multi ? '<button class="mx-btn sm" type="button" data-dl="hojas">' + todos + ' · una hoja por programa (.xlsx)</button><button class="mx-btn sm" type="button" data-dl="una">' + todos + ' · una sola hoja (.xlsx)</button>' : '') +
+      '<button class="mx-btn sm sec" type="button" data-dl="csv">CSV de la vista actual</button></div><p class="mx-msg" id="mx-dlmsg" role="status"></p></div>';
+  }
+  function nombreHoja(txt, usados) {
+    var n = String(txt || 'Programa').replace(/[\[\]:*?\/\\]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 31) || 'Programa', b = n, i = 2;
+    while (usados[norm(n)]) { n = b.slice(0, 28) + ' ' + i++; }
+    usados[norm(n)] = 1; return n;
+  }
+  function fechaArchivo() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function descargar(modo) {
+    if (modo === 'csv') { descargarCSV(); return; }
+    var all = misProgs().map(function(p) { return p.id; }), selEl = document.getElementById('dl-prog');
+    var pid = selEl ? selEl.value : prog;
+    if (modo === 'prog' && (!pid || pid === 'todos' || all.indexOf(pid) < 0)) { dlMsg('Elige un programa.', true); return; }
+    var pids = modo === 'prog' ? [pid] : all;
+    if (!pids.length) { dlMsg('No hay programas para descargar.', true); return; }
+    dlMsg('Preparando el archivo…');
+    cargarXLSX().then(function(X) {
+      var wb = X.utils.book_new(), usados = { detalle: 1 };
+      if (modo === 'una') X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(filasConsolidado(pids, 'comb', true)), 'Consolidado');
+      else pids.forEach(function(p) { X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(filasConsolidado([p], 'comb', false)), nombreHoja((progDe(p) || {}).nombre, usados)); });
+      X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(filasDetalle(pids)), 'Detalle');
+      var nom = 'Consolidado_entrevistas_' + (modo === 'prog' ? norm((progDe(pid) || {}).nombre).replace(/[^a-z0-9]+/g, '_') : (modo === 'una' ? 'todos_una_hoja' : 'todos_por_hojas')) + '_' + fechaArchivo() + '.xlsx';
+      X.writeFile(wb, nom); dlMsg('Se descargó ' + nom + '.');
+    }).catch(function() { dlMsg('No se pudo preparar el archivo de Excel. Revisa tu conexión o usa el CSV.', true); });
+  }
+  function descargarCSV() {
+    var mp = misProgs(), pids = prog === 'todos' ? mp.map(function(p) { return p.id; }) : [prog || (mp[0] && mp[0].id)];
+    var L = filasConsolidado(pids, consState.ev, true);
+    var csv = '﻿' + L.map(function(r) { return r.map(function(x) { x = x == null ? '' : (typeof x === 'number' ? String(x).replace('.', ',') : String(x)); return /[;"\n]/.test(x) ? '"' + x.replace(/"/g, '""') + '"' : x; }).join(';'); }).join('\r\n');
+    try {
+      var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      a.download = 'Consolidado_entrevistas_' + (pids.length > 1 ? 'todos' : norm((progDe(pids[0]) || {}).nombre).replace(/[^a-z0-9]+/g, '_')) + '_' + fechaArchivo() + '.csv'; document.body.appendChild(a); a.click(); a.remove(); dlMsg('Se descargó el CSV.');
+    } catch (e) { dlMsg('No se pudo descargar.', true); }
+  }
+
+  /* ---------------- administración (solo Jefatura de Posgrados) ---------------- */
+  function msg(t, bad) { var m = document.getElementById('mx-amsg'); if (m) { m.textContent = t; m.style.color = bad ? 'var(--badtx)' : 'var(--blue)'; } }
+  function opAdmin(op, p, okMsg) {
+    return Store.admin(op, p).then(function() { return Store.load(); }).then(function(d) { aplicar(d); vistaAdmin(); msg(okMsg || 'Cambios guardados.'); }).catch(function(e) {
+      var m = { permiso: 'No tienes permiso para esta acción.', conCandidatos: 'No se puede eliminar un programa que tiene candidatos. Elimina o traslada primero a los candidatos.', clave: 'Escribe una clave para el nuevo usuario.', propio: 'No puedes eliminar tu propio usuario.', usuario: 'Ese usuario ya existe.', claveCorta: 'La clave debe tener al menos 7 caracteres.', claveRepetida: 'Esa clave ya la usa otra persona. Elige una distinta.', ultimoAdmin: 'Debe quedar al menos una persona con rol de Jefatura de Posgrados.', duplicado: 'Ya existe un programa con ese nombre.', datos: 'Revisa los datos: falta información o hay un valor no válido.', ocupado: 'El sistema está ocupado. Inténtalo de nuevo en unos segundos.' };
+      if (e && e.code === 'sesion') { salir('Tu sesión terminó. Ingresa de nuevo.'); return; }
+      msg(m[e && e.code] || 'No se pudo guardar. Inténtalo de nuevo.', true);
+    });
+  }
+  function selProgs(id, cur, todos) { return '<select class="mx-in" id="' + id + '">' + (todos ? '<option value="">Todos los programas</option>' : '') + DB.progs.map(function(p) { return '<option value="' + esc(p.id) + '"' + (cur === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select>'; }
+  function vistaAdmin() {
+    var tabs = [['cands', 'Candidatos'], ['progs', 'Programas'], ['users', 'Usuarios y claves'], ['cierre', 'Cierre y descargas'], ['ajustes', 'Ajustes']];
+    var cuerpo = admTab === 'cands' ? admCands() : admTab === 'progs' ? admProgs() : admTab === 'users' ? admUsers() : admTab === 'cierre' ? admCierre() : admAjustes();
+    APP.innerHTML = barra() + band('Administración', 'Solo la Jefatura de Posgrados puede modificar esta información', IC.gear) +
+      '<div class="mx-tabs">' + tabs.map(function(t) { return '<button class="mx-pillink' + (admTab === t[0] ? ' on' : '') + '" type="button" data-tab="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div><p class="mx-msg" id="mx-amsg" role="status"></p>' + cuerpo;
+  }
+  var admFiltro = '';
+  function admCands() {
+    var cs = DB.cands.filter(function(c) { return !admFiltro || c.prog === admFiltro; }).sort(function(a, b) { return norm((progDe(a.prog) || {}).nombre + a.apellidos).localeCompare(norm((progDe(b.prog) || {}).nombre + b.apellidos)); });
+    var filas = cs.map(function(c) {
+      return '<tr data-row="' + esc(c.id) + '"><td>' + selProgs('', c.prog).replace('<select class="mx-in" id=""', '<select class="mx-in" data-f="prog"') + '</td>' +
+        '<td><input class="mx-in" data-f="nombre" value="' + esc(c.nombre) + '"></td><td><input class="mx-in" data-f="apellidos" value="' + esc(c.apellidos) + '"></td><td><input class="mx-in" data-f="doc" value="' + esc(c.doc || '') + '" style="min-width:110px"></td>' +
+        '<td><input class="mx-in" data-f="bas" inputmode="decimal" value="' + esc(c.bas == null ? '' : c.bas) + '" style="width:74px"></td><td><input class="mx-in" data-f="cli" inputmode="decimal" value="' + esc(c.cli == null ? '' : c.cli) + '" style="width:74px"></td><td><input class="mx-in" data-f="cul" inputmode="decimal" value="' + esc(c.cul == null ? '' : c.cul) + '" style="width:74px"></td>' +
+        '<td class="num">' + f0(examen(c).tot) + '</td><td class="act"><button class="mx-btn sm" type="button" data-save-c="' + esc(c.id) + '">Guardar</button> <button class="mx-btn sm danger" type="button" data-confirm="bc:' + esc(c.id) + '">Eliminar</button></td></tr>';
+    }).join('');
+    return '<div class="mx-card2"><h3>Agregar candidato</h3><div class="mx-grid3" style="margin-top:10px">' +
+      '<div class="mx-fld"><label class="mx-lbl" for="nc-prog">Programa</label>' + selProgs('nc-prog', admFiltro) + '</div>' +
+      '<div class="mx-fld"><label class="mx-lbl" for="nc-nom">Nombres</label><input class="mx-in" id="nc-nom"></div><div class="mx-fld"><label class="mx-lbl" for="nc-ape">Apellidos</label><input class="mx-in" id="nc-ape"></div>' +
+      '<div class="mx-fld"><label class="mx-lbl" for="nc-doc">Documento</label><input class="mx-in" id="nc-doc"></div>' +
+      '<div class="mx-fld"><label class="mx-lbl" for="nc-bas">Básicas</label><input class="mx-in" id="nc-bas" inputmode="decimal"></div><div class="mx-fld"><label class="mx-lbl" for="nc-cli">Clínicas</label><input class="mx-in" id="nc-cli" inputmode="decimal"></div><div class="mx-fld"><label class="mx-lbl" for="nc-cul">Cultura</label><input class="mx-in" id="nc-cul" inputmode="decimal"></div></div>' +
+      '<p class="mx-row" style="margin-top:12px"><button class="mx-btn lime" type="button" data-act="addcand">Agregar candidato</button></p></div>' +
+      '<div class="mx-card2"><h3>Cargar candidatos desde un archivo de Excel</h3><p class="mx-note" style="margin-top:6px">Usa la plantilla que te entregó la Coordinación (hojas <b>Programas</b> y <b>Candidatos</b>). Al elegir el archivo verás un resumen y confirmas antes de que se cargue. Los candidatos que ya existen (mismo documento en el mismo programa) no se duplican.</p>' +
+      '<p class="mx-row"><label class="mx-btn lime" style="cursor:pointer" for="imp-file">Elegir archivo de Excel…</label><input class="mx-sr" type="file" id="imp-file" accept=".xlsx,.xls,.csv"></p>' +
+      '<details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700;color:var(--blue);font-size:13px">O pega las filas copiadas desde Excel</summary><p class="mx-note" style="margin:8px 0">Columnas: <b>Programa · Nombres · Apellidos · Documento · Básicas · Clínicas · Cultura</b> (sin encabezado).</p>' +
+      '<textarea class="mx-code" id="imp-txt" placeholder="Oftalmología&#9;Camila&#9;Restrepo Gómez&#9;1020304050&#9;78&#9;81&#9;70"></textarea><p class="mx-row" style="margin-top:10px"><button class="mx-btn" type="button" data-act="imp">Revisar datos pegados</button></p></details>' +
+      '<div id="imp-prev">' + impPrevHtml() + '</div></div>' +
+      '<div class="mx-card2"><div class="mx-toolbar"><div class="mx-fld"><h3 style="margin-bottom:6px">Candidatos cargados (' + cs.length + ')</h3><label class="mx-lbl" for="adm-fp">Filtrar por programa</label>' + selProgs('adm-fp', admFiltro, true) + '</div></div>' +
+      '<p class="mx-muted" style="margin:8px 0">El total del examen se calcula como Básicas + Clínicas + Cultura. Si falta alguna nota, el total y el resultado global quedan pendientes.</p>' +
+      '<div class="mx-tw"><table class="mx-tb" style="min-width:980px"><thead><tr><th>Programa</th><th>Nombres</th><th>Apellidos</th><th>Documento</th><th>Básicas</th><th>Clínicas</th><th>Cultura</th><th>Total</th><th></th></tr></thead><tbody>' + (filas || '<tr><td colspan="9"><p class="mx-vacio">No hay candidatos cargados.</p></td></tr>') + '</tbody></table></div></div>';
+  }
+  function admProgs() {
+    var filas = DB.progs.map(function(p) {
+      var cn = DB.users.filter(function(u) { return u.rol === 'coord' && u.programas.indexOf(p.id) >= 0; }).map(function(u) { return u.nombre; });
+      return '<tr data-row="' + esc(p.id) + '"><td><input class="mx-in" data-f="nombre" value="' + esc(p.nombre) + '"></td><td><input class="mx-in" data-f="cupos" inputmode="numeric" value="' + esc(p.cupos || 0) + '" style="width:80px"></td><td class="num">' + candsDe(p.id).length + '</td><td>' + (cn.length ? esc(cn.join(', ')) : '<span class="mx-muted">Sin coordinador asignado</span>') + '</td>' +
+        '<td class="act"><button class="mx-btn sm" type="button" data-save-p="' + esc(p.id) + '">Guardar</button> <button class="mx-btn sm danger" type="button" data-confirm="bp:' + esc(p.id) + '">Eliminar</button></td></tr>';
+    }).join('');
+    return '<div class="mx-card2"><h3>Agregar programa</h3><div class="mx-grid3" style="margin-top:10px"><div class="mx-fld"><label class="mx-lbl" for="np-nom">Nombre del programa</label><input class="mx-in" id="np-nom"></div><div class="mx-fld"><label class="mx-lbl" for="np-cup">Cupos</label><input class="mx-in" id="np-cup" inputmode="numeric"></div></div><p class="mx-row" style="margin-top:12px"><button class="mx-btn lime" type="button" data-act="addprog">Agregar programa</button></p></div>' +
+      '<div class="mx-card2"><h3>Programas (' + DB.progs.length + ')</h3><div class="mx-tw" style="margin-top:10px"><table class="mx-tb" style="min-width:760px"><thead><tr><th>Programa</th><th>Cupos</th><th>Candidatos</th><th>Coordinación asignada</th><th></th></tr></thead><tbody>' + filas + '</tbody></table></div></div>';
+  }
+  function admUsers() {
+    var filas = DB.users.map(function(u) {
+      var ps = u.rol === 'coord' ? '<div class="mx-row" style="gap:6px 14px;max-width:520px">' + DB.progs.map(function(p) { return '<label style="font-size:12.5px;white-space:nowrap"><input type="checkbox" data-f="prg" value="' + esc(p.id) + '"' + (u.programas.indexOf(p.id) >= 0 ? ' checked' : '') + '> ' + esc(p.nombre) + '</label>'; }).join('') + '</div>' : '<span class="mx-muted">Acceso a todos los programas</span>';
+      return '<tr data-row="' + esc(u.id) + '"><td><input class="mx-in" data-f="nombre" value="' + esc(u.nombre) + '" style="min-width:190px"></td><td><input class="mx-in" data-f="saludo" value="' + esc(u.saludo || '') + '" style="min-width:120px" placeholder="Ej.: Luz Andrea"></td><td><input class="mx-in" data-f="usuario" value="' + esc(u.usuario) + '" style="min-width:150px"></td>' +
+        '<td><select class="mx-in" data-f="rol"><option value="coord"' + (u.rol === 'coord' ? ' selected' : '') + '>Coordinación</option><option value="decana"' + (u.rol === 'decana' ? ' selected' : '') + '>Decanatura</option><option value="admin"' + (u.rol === 'admin' ? ' selected' : '') + '>Jefatura de Posgrados</option></select></td>' +
+        '<td>' + ps + '</td><td><input class="mx-in" data-f="clave" type="password" autocomplete="new-password" placeholder="Nueva clave (opcional)" style="min-width:160px"></td>' +
+        '<td class="act"><button class="mx-btn sm" type="button" data-save-u="' + esc(u.id) + '">Guardar</button> <button class="mx-btn sm danger" type="button" data-confirm="bu:' + esc(u.id) + '">Eliminar</button></td></tr>';
+    }).join('');
+    return '<div class="mx-card2"><h3>Agregar persona</h3><div class="mx-grid3" style="margin-top:10px"><div class="mx-fld"><label class="mx-lbl" for="nu-nom">Nombre</label><input class="mx-in" id="nu-nom"></div><div class="mx-fld"><label class="mx-lbl" for="nu-sal">Cómo saludarle (nombre de pila)</label><input class="mx-in" id="nu-sal" placeholder="Ej.: Luz Andrea"></div><div class="mx-fld"><label class="mx-lbl" for="nu-usr">Usuario (por ejemplo, el correo)</label><input class="mx-in" id="nu-usr" autocapitalize="off"></div>' +
+      '<div class="mx-fld"><label class="mx-lbl" for="nu-rol">Rol</label><select class="mx-in" id="nu-rol"><option value="coord">Coordinación de programa</option><option value="decana">Decanatura</option><option value="admin">Jefatura de Posgrados</option></select></div>' +
+      '<div class="mx-fld"><label class="mx-lbl" for="nu-cla">Clave inicial (mín. 7 caracteres)</label><input class="mx-in" id="nu-cla" type="password" autocomplete="new-password"></div></div>' +
+      '<div class="mx-fld" style="margin-top:10px" id="nu-pw"><span class="mx-lbl">Programas (solo coordinación)</span><div class="mx-row" style="gap:6px 14px">' + DB.progs.map(function(p) { return '<label style="font-size:12.5px"><input type="checkbox" name="nu-prg" value="' + esc(p.id) + '"> ' + esc(p.nombre) + '</label>'; }).join('') + '</div></div>' +
+      '<p class="mx-row" style="margin-top:12px"><button class="mx-btn lime" type="button" data-act="adduser">Agregar persona</button></p></div>' +
+      '<div class="mx-card2"><h3>Personas con acceso (' + DB.users.length + ')</h3><p class="mx-muted" style="margin:6px 0 10px">Las claves se guardan cifradas (hash con sal) y no se pueden consultar: solo se pueden reemplazar escribiendo una nueva. Cada coordinación solo ve los programas marcados aquí.</p><div class="mx-tw"><table class="mx-tb" style="min-width:1300px"><thead><tr><th>Nombre completo</th><th>Cómo saludarle</th><th>Usuario</th><th>Rol</th><th>Programas</th><th>Cambiar clave</th><th></th></tr></thead><tbody>' + filas + '</tbody></table></div></div>';
+  }
+  function admAjustes() {
+    var c = DB.cfg;
+    return '<div class="mx-card2"><h3>Ajustes de la convocatoria</h3><div class="mx-grid3" style="margin-top:10px"><div class="mx-fld"><label class="mx-lbl" for="aj-conv">Nombre de la convocatoria</label><input class="mx-in" id="aj-conv" value="' + esc(c.conv || '') + '"></div>' +
+      '<div class="mx-fld"><label class="mx-lbl" for="aj-max">Puntaje máximo del examen</label><input class="mx-in" id="aj-max" inputmode="numeric" value="' + esc(c.examMax) + '"></div></div>' +
+      '<h3 style="margin-top:18px">Peso de cada entrevistador en la calificación combinada</h3><p class="mx-muted" style="margin:6px 0 10px">Por defecto las tres calificaciones pesan igual (promedio simple). Si la Facultad define otra ponderación, cámbiala aquí: el consolidado la aplica solo.</p>' +
+      '<div class="mx-grid3"><div class="mx-fld"><label class="mx-lbl" for="aj-wc">Coordinación</label><input class="mx-in" id="aj-wc" inputmode="decimal" value="' + esc(c.pesos.coord) + '"></div><div class="mx-fld"><label class="mx-lbl" for="aj-wd">Decanatura</label><input class="mx-in" id="aj-wd" inputmode="decimal" value="' + esc(c.pesos.decana) + '"></div><div class="mx-fld"><label class="mx-lbl" for="aj-wa">Jefatura de Posgrados</label><input class="mx-in" id="aj-wa" inputmode="decimal" value="' + esc(c.pesos.admin) + '"></div></div>' +
+      '<h3 style="margin-top:18px">Acceso a la página</h3><label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:14px"><input type="checkbox" id="aj-ab"' + (c.abierta ? ' checked' : '') + '> Página abierta para decanatura y coordinaciones</label>' +
+      '<p class="mx-row" style="margin-top:14px"><button class="mx-btn lime" type="button" data-act="saveaj">Guardar ajustes</button></p></div>';
+  }
+  function impPrevHtml() {
+    if (!admImp) return '';
+    var x = admImp;
+    if (x.error) return '<p class="mx-warn" style="margin-top:12px">' + esc(x.error) + '</p>';
+    var porProg = {}; x.filas.forEach(function(f) { porProg[f.progNombre] = (porProg[f.progNombre] || 0) + 1; });
+    var lista = Object.keys(porProg).sort().map(function(k) { return '<li>' + esc(k) + ': <b>' + porProg[k] + '</b></li>'; }).join('');
+    return '<div class="mx-extra"><h4>Resumen de la carga</h4><ul style="margin:0 0 8px;padding-left:18px;font-size:13px;line-height:1.55">' +
+      '<li><b>' + x.filas.length + '</b> candidatos nuevos en <b>' + Object.keys(porProg).length + '</b> programas</li>' +
+      (x.progsNuevos ? '<li><b>' + x.progsNuevos + '</b> programas nuevos o con cupos actualizados (hoja Programas)</li>' : '') +
+      (x.dup ? '<li>' + x.dup + ' candidatos ya estaban cargados y se omiten</li>' : '') + '</ul>' +
+      (lista ? '<details><summary style="cursor:pointer;font-size:12.5px;color:var(--blue);font-weight:700">Ver candidatos por programa</summary><ul style="margin:6px 0 0;padding-left:18px;font-size:12.5px">' + lista + '</ul></details>' : '') +
+      '<p class="mx-row" style="margin-top:12px"><button class="mx-btn lime" type="button" data-act="impok"' + (x.filas.length || x.progsNuevos ? '' : ' disabled') + '>Confirmar carga</button><button class="mx-btn sec" type="button" data-act="impno">Cancelar</button></p></div>';
+  }
+  function prepararImport(candRows, progRows) {
+    var known = {}; DB.progs.forEach(function(p) { known[norm(p.nombre)] = p; });
+    var pr = [], nuevos = 0;
+    (progRows || []).forEach(function(r) { var n = String(r[0] == null ? '' : r[0]).trim(); if (!n || norm(n) === 'programa') return; var cu = num(r[1]); pr.push({ nombre: n, cupos: cu == null ? 0 : Math.round(cu) }); var k = known[norm(n)]; if (!k || (cu != null && Math.round(cu) !== (k.cupos || 0))) nuevos++; known[norm(n)] = known[norm(n)] || { nombre: n, cupos: 0 }; });
+    var vistos = {}, dup = 0, filas = [], mal = [], sinProg = {};
+    var clave = function(prog, doc, nom, ape) { return prog + '|' + (doc ? 'd:' + norm(doc) : 'n:' + norm(nom + ' ' + ape)); };
+    DB.cands.forEach(function(c) { vistos[clave(c.prog, c.doc, c.nombre, c.apellidos)] = 1; });
+    var idDe = {}; DB.progs.forEach(function(p) { idDe[norm(p.nombre)] = p.id; });
+    (candRows || []).forEach(function(r, i) {
+      var cel = function(j) { return r[j] == null ? '' : String(r[j]).trim(); };
+      if (!cel(0) && !cel(1) && !cel(2)) return;
+      if (norm(cel(0)) === 'programa' && i === 0) return;
+      if (!known[norm(cel(0))]) { sinProg[cel(0) || '(vacío)'] = 1; mal.push(i + 1); return; }
+      if (!cel(1) && !cel(2)) { mal.push(i + 1); return; }
+      var kk = clave(idDe[norm(cel(0))] || norm(cel(0)), cel(3), cel(1), cel(2));
+      if (vistos[kk]) { dup++; return; }
+      vistos[kk] = 1;
+      filas.push({ progNombre: known[norm(cel(0))].nombre, nombre: cel(1), apellidos: cel(2), doc: cel(3), bas: num(cel(4)), cli: num(cel(5)), cul: num(cel(6)) });
+    });
+    if (mal.length) { admImp = { error: 'No se cargó nada. Revisa las filas ' + mal.slice(0, 10).join(', ') + (mal.length > 10 ? '…' : '') + ': ' + (Object.keys(sinProg).length ? 'el programa no existe (' + Object.keys(sinProg).slice(0, 4).join(', ') + '). Escríbelo igual que en la hoja Programas.' : 'faltan nombres.') }; }
+    else if (!filas.length && !nuevos) admImp = { error: dup ? 'Todos los candidatos del archivo ya estaban cargados.' : 'No se encontraron filas para cargar.' };
+    else admImp = { filas: filas, progs: pr, progsNuevos: nuevos, dup: dup };
+    var pv = document.getElementById('imp-prev'); if (pv) pv.innerHTML = impPrevHtml();
+  }
+  function leerArchivoExcel(file) {
+    var pv = document.getElementById('imp-prev'); if (pv) pv.innerHTML = '<p class="mx-msg">Leyendo el archivo…</p>';
+    var rd = new FileReader();
+    rd.onerror = function() { admImp = { error: 'No se pudo leer el archivo.' }; if (pv) pv.innerHTML = impPrevHtml(); };
+    rd.onload = function() {
+      cargarXLSX().then(function(X) {
+        var wb = X.read(rd.result, { type: 'array' }), pick = function(re) { for (var i = 0; i < wb.SheetNames.length; i++) if (re.test(norm(wb.SheetNames[i]))) return wb.Sheets[wb.SheetNames[i]]; return null; };
+        var wc = pick(/^candidatos?$/) || (pick(/^programas?$/) ? null : wb.Sheets[wb.SheetNames[0]]), wp = pick(/^programas?$/);
+        var rows = function(w) { return w ? X.utils.sheet_to_json(w, { header: 1, blankrows: false, defval: '' }) : []; };
+        var cr = rows(wc); if (cr.length && norm(cr[0][0]) === 'programa') cr = cr.slice(1);
+        var pr = rows(wp); if (pr.length && norm(pr[0][0]) === 'programa') pr = pr.slice(1);
+        prepararImport(cr, pr);
+      }).catch(function() { admImp = { error: 'No se pudo abrir el archivo. Revisa que sea un Excel (.xlsx) o usa la opción de pegar las filas.' }; if (pv) pv.innerHTML = impPrevHtml(); });
+    };
+    rd.readAsArrayBuffer(file);
+  }
+  function ejecutarImport() {
+    var x = admImp; if (!x || x.error) return; admImp = null;
+    msg('Cargando…');
+    var paso1 = x.progs && x.progs.length ? Store.admin('importarProgramas', { progs: x.progs }) : Promise.resolve();
+    paso1.then(function() { return Store.load(); }).then(function(d) {
+      aplicar(d);
+      var idDe = {}; DB.progs.forEach(function(p) { idDe[norm(p.nombre)] = p.id; });
+      var filas = x.filas.map(function(f) { return { prog: idDe[norm(f.progNombre)], nombre: f.nombre, apellidos: f.apellidos, doc: f.doc, bas: f.bas, cli: f.cli, cul: f.cul }; });
+      return filas.length ? Store.admin('importar', { filas: filas }) : { ok: true, n: 0 };
+    }).then(function(r) { return Store.load().then(function(d) { aplicar(d); vistaAdmin(); msg('Listo. Se cargaron ' + x.filas.length + ' candidatos' + (x.progsNuevos ? ' y se actualizaron los programas.' : '.')); }); })
+      .catch(function() { vistaAdmin(); msg('No se pudo completar la carga. Revisa los datos e inténtalo de nuevo.', true); });
+  }
+  function admCierre() {
+    var nC = DB.cands.length, nP = DB.progs.length;
+    var ps = DB.progs.filter(function(p) { return candsDe(p.id).length; });
+    var opts = DB.progs.map(function(p) { return '<option value="' + esc(p.id) + '"' + (admDel && admDel.pid === p.id ? ' selected' : '') + '>' + esc(p.nombre) + ' (' + candsDe(p.id).length + ')</option>'; }).join('');
+    var conf = '';
+    if (admDel) {
+      var que = admDel.tipo === 'todos' ? 'TODOS los candidatos (' + nC + ' en ' + ps.length + ' programas)' : 'los ' + candsDe(admDel.pid).length + ' candidatos del programa ' + ((progDe(admDel.pid) || {}).nombre || '');
+      conf = '<div class="mx-rub" style="border-color:var(--badbr);background:var(--badbg)"><p style="margin:0 0 8px;font-size:14px;color:var(--badtx)"><b>Vas a borrar ' + esc(que) + '</b> con todas sus calificaciones y observaciones. Esta acción no se puede deshacer.</p>' +
+        '<p class="mx-note" style="margin:0 0 10px">' + (DEMO ? 'En la vista previa no se guarda copia. ' : 'Antes de borrar, el servidor archiva una copia del consolidado en el Excel de respaldo (hojas «Archivo»). ') + 'Te recomendamos descargar el consolidado primero.</p>' +
+        '<label class="mx-lbl" for="del-conf">Escribe <b>BORRAR</b> para confirmar</label><div class="mx-row"><input class="mx-in" id="del-conf" autocomplete="off" style="max-width:240px"><button class="mx-btn danger" type="button" id="del-go" data-act="dodel" disabled>Borrar definitivamente</button><button class="mx-btn sec" type="button" data-act="delno">Cancelar</button></div></div>';
+    }
+    return '<div class="mx-card2"><h3>1. Descarga el consolidado antes de cerrar</h3><p class="mx-muted" style="margin:4px 0 10px">Hazlo cuando terminen las entrevistas: así conservas puntajes, rankings, bonificaciones y observaciones.</p>' + descargasHtml(true).replace(/^<div class="mx-card2">/, '<div>').replace('<h3>Descargar el consolidado en Excel</h3>', '') + '</div>' +
+      '<div class="mx-card2"><h3>2. Borrar candidatos al cerrar la convocatoria</h3><p class="mx-muted" style="margin:4px 0 12px">Se borran los candidatos y sus calificaciones. Los programas, las personas con acceso y los ajustes se conservan. Actualmente hay <b>' + nC + '</b> candidatos en <b>' + ps.length + '</b> de ' + nP + ' programas.</p>' +
+      '<div class="mx-toolbar"><div class="mx-fld"><label class="mx-lbl" for="bp-prog">Borrar solo un programa</label><select class="mx-in" id="bp-prog">' + (opts || '<option value="">Sin programas</option>') + '</select></div>' +
+      '<div class="mx-fld" style="flex:0 0 auto"><button class="mx-btn danger" type="button" data-act="askprog"' + (nC ? '' : ' disabled') + '>Borrar candidatos de este programa</button></div>' +
+      '<div class="mx-fld" style="flex:0 0 auto"><button class="mx-btn danger" type="button" data-act="askall"' + (nC ? '' : ' disabled') + '>Borrar todos los candidatos</button></div></div>' + conf + '</div>';
+  }
+  function num(v) { v = String(v == null ? '' : v).trim().replace(',', '.'); return v === '' || isNaN(v) ? null : +v; }
+  function rowVals(tr) { var o = {}; [].forEach.call(tr.querySelectorAll('[data-f]'), function(i) { if (i.getAttribute('data-f') === 'prg') { if (i.checked) (o.prg = o.prg || []).push(i.value); } else o[i.getAttribute('data-f')] = i.value; }); return o; }
+
+  /* ---------------- eventos ---------------- */
+  APP.addEventListener('click', function(ev) {
+    var t = ev.target.closest('button,[data-go]'); if (!t) return;
+    var g = t.getAttribute('data-go');
+    if (g !== null && !t.hasAttribute('data-act')) { ir(g); return; }
+    var act = t.getAttribute('data-act');
+    if (act === 'salir') { try { location.hash = ''; } catch (e) {} salir(); return; }
+    if (act === 'actualizar') { setEstado('guardando'); sincronizar().then(function() { pintar(); }); return; }
+    if (act === 'csv') { descargarCSV(); return; }
+    if (t.hasAttribute('data-det')) { var did = t.getAttribute('data-det'); if (consState.exp[did]) delete consState.exp[did]; else consState.exp[did] = true; tablaConsolidado(); return; }
+    if (act === 'expall' || act === 'colall') {
+      var mpx = misProgs(), pidsx = prog === 'todos' ? mpx.map(function(p) { return p.id; }) : [prog];
+      pidsx.forEach(function(pid) { candsDe(pid).forEach(function(c) { if (act === 'expall') consState.exp[c.id] = true; else delete consState.exp[c.id]; }); });
+      tablaConsolidado(); return;
+    }
+    if (t.hasAttribute('data-dl')) { descargar(t.getAttribute('data-dl')); return; }
+    var cc = t.getAttribute('data-c');
+    if (cc && vista.tipo === 'cand') { var v = t.getAttribute('data-v'); mutar(vista.id, function(r) { var nv = v === 'na' ? 'na' : +v; if (r.r[cc] === nv) delete r.r[cc]; else r.r[cc] = nv; }); return; }
+    var bn = t.getAttribute('data-bon'); if (bn && vista.tipo === 'cand') { var bv = +t.getAttribute('data-v'); mutar(vista.id, function(r) { if (r.bon[bn] === bv) delete r.bon[bn]; else r.bon[bn] = bv; }); return; }
+    var rd = t.getAttribute('data-rd'); if (rd && vista.tipo === 'cand') { var rv = t.getAttribute('data-v'); mutar(vista.id, function(r) { if (r.rd[rd] === rv) delete r.rd[rd]; else r.rd[rd] = rv; }); return; }
+    if (t.hasAttribute('data-tab')) { admTab = t.getAttribute('data-tab'); vistaAdmin(); return; }
+    if (!esAdmin()) return;
+    if (act === 'impok') { ejecutarImport(); return; }
+    if (act === 'impno') { admImp = null; var pvx = document.getElementById('imp-prev'); if (pvx) pvx.innerHTML = ''; return; }
+    if (act === 'askprog') { var bp = document.getElementById('bp-prog'); if (bp && bp.value) { admDel = { tipo: 'prog', pid: bp.value }; vistaAdmin(); var dc = document.getElementById('del-conf'); if (dc) dc.focus(); } return; }
+    if (act === 'askall') { admDel = { tipo: 'todos' }; vistaAdmin(); var dc2 = document.getElementById('del-conf'); if (dc2) dc2.focus(); return; }
+    if (act === 'delno') { admDel = null; vistaAdmin(); return; }
+    if (act === 'dodel') {
+      var dcv = document.getElementById('del-conf'); if (!dcv || dcv.value.trim().toUpperCase() !== 'BORRAR' || !admDel) return;
+      var d0 = admDel; admDel = null;
+      var pidsA = d0.tipo === 'todos' ? DB.progs.map(function(x) { return x.id; }) : [d0.pid];
+      var arch = DEMO ? Promise.resolve() : Store.admin('archivar', { etiqueta: d0.tipo === 'todos' ? 'Todos' : ((progDe(d0.pid) || {}).nombre || '').slice(0, 25), cons: filasConsolidado(pidsA, 'comb', true), det: filasDetalle(pidsA) });
+      arch.then(function() { return Store.admin(d0.tipo === 'todos' ? 'borrarTodos' : 'borrarProg', { pid: d0.pid }); }).then(function(r) { return Store.load().then(function(d) { aplicar(d); consState.exp = {}; vistaAdmin(); msg('Listo. Se borraron ' + (r && r.candidatos != null ? r.candidatos : '') + ' candidatos y ' + (r && r.evaluaciones != null ? r.evaluaciones : '') + ' calificaciones.' + (DEMO ? '' : ' Antes de borrar se guardó una copia en hojas «Archivo…» del Google Sheets.')); }); })
+        .catch(function() { vistaAdmin(); msg('No se pudo borrar. Inténtalo de nuevo.', true); });
+      return;
+    }
+    if (t.hasAttribute('data-confirm')) {
+      if (!t.classList.contains('on')) { t.classList.add('on'); t.textContent = '¿Seguro? Confirmar'; setTimeout(function() { if (t.isConnected) { t.classList.remove('on'); t.textContent = 'Eliminar'; } }, 5000); return; }
+      var cf = t.getAttribute('data-confirm').split(':'), k = cf[0], id = cf[1];
+      if (k === 'bc') opAdmin('borrarCandidato', { id: id }, 'Candidato eliminado.'); else if (k === 'bp') opAdmin('borrarPrograma', { id: id }, 'Programa eliminado.'); else if (k === 'bu') opAdmin('borrarUsuario', { id: id }, 'Persona eliminada.');
+      return;
+    }
+    var sc = t.getAttribute('data-save-c'), sp = t.getAttribute('data-save-p'), su = t.getAttribute('data-save-u');
+    if (sc) { var o = rowVals(t.closest('tr')); opAdmin('candidato', { id: sc, prog: o.prog, nombre: o.nombre.trim(), apellidos: o.apellidos.trim(), doc: o.doc.trim(), bas: num(o.bas), cli: num(o.cli), cul: num(o.cul) }, 'Candidato actualizado.'); return; }
+    if (sp) { var op = rowVals(t.closest('tr')); if (!op.nombre.trim()) { msg('Escribe el nombre del programa.', true); return; } opAdmin('programa', { id: sp, nombre: op.nombre.trim(), cupos: num(op.cupos) || 0 }, 'Programa actualizado.'); return; }
+    if (su) { var ou = rowVals(t.closest('tr')); if (!ou.nombre.trim() || !ou.usuario.trim()) { msg('Escribe el nombre y el usuario.', true); return; } if (ou.clave && ou.clave.length < 7) { msg('La clave debe tener al menos 7 caracteres.', true); return; } opAdmin('usuario', { id: su, nombre: ou.nombre.trim(), saludo: (ou.saludo || '').trim(), usuario: ou.usuario.trim(), rol: ou.rol, programas: ou.rol === 'coord' ? (ou.prg || []) : [], clave: ou.clave || '' }, 'Datos de la persona actualizados.'); return; }
+    if (act === 'addcand') {
+      var gv = function(i) { return document.getElementById(i).value; };
+      if (!gv('nc-nom').trim() || !gv('nc-ape').trim()) { msg('Escribe los nombres y apellidos del candidato.', true); return; }
+      if (!gv('nc-prog')) { msg('Primero crea un programa en la pestaña Programas.', true); return; }
+      opAdmin('candidato', { prog: gv('nc-prog'), nombre: gv('nc-nom').trim(), apellidos: gv('nc-ape').trim(), doc: gv('nc-doc').trim(), bas: num(gv('nc-bas')), cli: num(gv('nc-cli')), cul: num(gv('nc-cul')) }, 'Candidato agregado.'); return;
+    }
+    if (act === 'imp') {
+      var lineas = document.getElementById('imp-txt').value.split(/\r?\n/).filter(function(l) { return l.trim(); });
+      if (!lineas.length) { msg('Pega primero las filas copiadas desde Excel.', true); return; }
+      prepararImport(lineas.map(function(l) { var c = l.split('\t'); return c.length < 3 ? l.split(';') : c; }), []); return;
+    }
+    if (act === 'addprog') { var nn = document.getElementById('np-nom').value.trim(); if (!nn) { msg('Escribe el nombre del programa.', true); return; } opAdmin('programa', { nombre: nn, cupos: num(document.getElementById('np-cup').value) || 0 }, 'Programa agregado.'); return; }
+    if (act === 'adduser') {
+      var un = document.getElementById('nu-nom').value.trim(), uu = document.getElementById('nu-usr').value.trim(), ur = document.getElementById('nu-rol').value, uc = document.getElementById('nu-cla').value;
+      if (!un || !uu) { msg('Escribe el nombre y el usuario.', true); return; } if (uc.length < 7) { msg('La clave debe tener al menos 7 caracteres.', true); return; }
+      var pr = [].map.call(document.querySelectorAll('input[name="nu-prg"]:checked'), function(i) { return i.value; });
+      if (ur === 'coord' && !pr.length) { msg('Marca al menos un programa para la coordinación.', true); return; }
+      opAdmin('usuario', { nombre: un, saludo: document.getElementById('nu-sal').value.trim(), usuario: uu, rol: ur, programas: ur === 'coord' ? pr : [], clave: uc }, 'Persona agregada.'); return;
+    }
+    if (act === 'saveaj') {
+      var mx = num(document.getElementById('aj-max').value); if (!mx || mx <= 0) { msg('El puntaje máximo del examen debe ser mayor que 0.', true); return; }
+      var w = [num(document.getElementById('aj-wc').value), num(document.getElementById('aj-wd').value), num(document.getElementById('aj-wa').value)];
+      if (w.some(function(x) { return x == null || x < 0; }) || !(w[0] + w[1] + w[2] > 0)) { msg('Los pesos deben ser números positivos.', true); return; }
+      opAdmin('config', { conv: document.getElementById('aj-conv').value.trim(), examMax: mx, pesos: { coord: w[0], decana: w[1], admin: w[2] }, abierta: document.getElementById('aj-ab').checked }, 'Ajustes guardados.'); return;
+    }
+  });
+  APP.addEventListener('input', function(ev) {
+    var t = ev.target, ob = t.getAttribute && t.getAttribute('data-obs');
+    if (t.id === 'del-conf') { var go = document.getElementById('del-go'); if (go) go.disabled = t.value.trim().toUpperCase() !== 'BORRAR'; return; }
+    if (ob && vista.tipo === 'cand') { var v = t.value; mutar(vista.id, function(r) { r.obs = r.obs || {}; if (v) r.obs[ob] = v; else delete r.obs[ob]; }); }
+  });
+  APP.addEventListener('change', function(ev) {
+    var t = ev.target;
+    if (t.id === 'mx-cp') { prog = t.value; consState.det = ''; vistaConsolidado(true); }
+    else if (t.id === 'mx-ce') { consState.ev = t.value; tablaConsolidado(); }
+    else if (t.id === 'mx-co') { consState.orden = t.value; tablaConsolidado(); }
+    else if (t.id === 'adm-fp') { admFiltro = t.value; vistaAdmin(); }
+    else if (t.id === 'imp-file') { if (t.files && t.files[0]) leerArchivoExcel(t.files[0]); t.value = ''; }
+    else if (t.id === 'nu-rol') { var b = document.getElementById('nu-pw'); if (b) b.hidden = t.value !== 'coord'; }
+  });
+  document.getElementById('mx-up').addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  if (CFG.expose) window.MX_TEST = { calcEval: calcEval, globalDe: globalDe, DB: DB, rankear: rankear, metricas: metricas, examen: examen, combinar: combinar };
+  /* ---------------- arranque ---------------- */
+  if (DEMO) LOCAL = localInit();
+  var tok = ssGet('mx_tok');
+  if (!DEMO && tok) entrar(tok, ssGet('mx_usr')); else pintar();
+})();
+
+</script>
+</body></html>
