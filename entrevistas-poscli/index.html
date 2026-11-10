@@ -293,17 +293,6 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .mx-hello h2 { margin: 2px 0 4px; color: var(--navy); font-size: clamp(22px, 3.2vw, 30px); font-weight: 800; line-height: 1.2; letter-spacing: -.3px; }
 .mx-hello p { margin: 0; color: #46556d; font-size: 14px; line-height: 1.55; }
 
-.mx-guia { margin-top: 16px; }
-.mx-gb { margin-bottom: 16px; padding: 18px 20px; border-radius: 16px; background: #fff; border: 1px solid var(--line); box-shadow: 0 6px 18px rgba(21, 40, 75, .05); }
-.mx-gb h3 { margin: 0 0 12px; color: var(--navy); font-size: 16px; font-weight: 800; }
-.mx-gl { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.mx-gl li { display: flex; gap: 12px; align-items: flex-start; }
-.mx-gl .gn { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--navy); color: var(--lime); font-size: 12px; font-weight: 800; }
-.mx-gl li > div > b { display: block; color: var(--navy); font-size: 14px; }
-.mx-gl p { margin: 2px 0 0; color: #46556d; font-size: 13.5px; line-height: 1.55; }
-.mx-gb.tip { border-left: 5px solid var(--lime); }
-.mx-gb.tip ul { margin: 0; padding-left: 18px; color: #46556d; font-size: 13.5px; line-height: 1.6; }
-
 .mx-dd { min-width: 230px; max-width: 340px; border: 1px solid #cfd8e5; border-radius: 10px; background: #fff; font-size: 13px; }
 .mx-dd > summary { cursor: pointer; list-style: none; padding: 8px 12px; color: var(--navy); font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .mx-dd > summary::-webkit-details-marker { display: none; }
@@ -315,6 +304,24 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .mx-ddl label { display: flex; align-items: flex-start; gap: 6px; font-size: 12.5px; line-height: 1.35; white-space: normal; }
 .mx-ddl label[hidden] { display: none; }
 .mx-tb select.mx-in { min-width: 150px; }
+
+.mx-pillink.tour { background: var(--lime); border-color: var(--lime); color: var(--navy); font-weight: 800; white-space: nowrap; }
+#tour_spot { position: fixed; z-index: 90; pointer-events: none; border-radius: 14px; box-shadow: 0 0 0 9999px rgba(21, 40, 75, .62); outline: 3px solid var(--lime); transition: left .25s, top .25s, width .25s, height .25s; }
+#tour_panel { position: fixed; z-index: 100; right: 20px; bottom: 20px; width: min(430px, calc(100vw - 24px)); background: #fff; border-radius: 16px; padding: 18px; box-shadow: 0 12px 40px rgba(0, 0, 0, .35); display: flex; flex-direction: column; gap: 12px; font-family: 'Montserrat', system-ui, sans-serif; color: #1c2b4a; }
+#tour_panel.top { bottom: auto; top: 20px; }
+#tour_panel h3 { margin: 0; font-size: 18px; color: var(--navy); }
+#tour_panel p { margin: 0; font-size: 14px; line-height: 1.55; color: #46556d; }
+.tbar { display: flex; gap: 3px; } .tbar i { flex: 1; height: 6px; border-radius: 3px; display: block; }
+.tph { display: flex; justify-content: space-between; align-items: center; gap: 10px; } .tph b { font-size: 12px; color: var(--blue); }
+.tph button { border: 0; background: none; color: #46556d; font: inherit; font-size: 13px; cursor: pointer; min-height: 36px; padding: 0 6px; }
+.tpf { display: flex; justify-content: space-between; gap: 10px; }
+.tno { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 14px; min-height: 44px; cursor: pointer; } .tno input { width: 20px; height: 20px; }
+.mx-tmodal { position: fixed; inset: 0; z-index: 110; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(21, 40, 75, .62); font-family: 'Montserrat', system-ui, sans-serif; }
+.mx-tbox { width: min(460px, 100%); background: #fff; border-radius: 18px; padding: 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 16px 50px rgba(0, 0, 0, .4); color: #1c2b4a; }
+.mx-tbox h2 { margin: 0; font-size: 24px; color: var(--navy); } .mx-tbox p { margin: 0; font-size: 14.5px; line-height: 1.55; color: #46556d; }
+.mx-tbox .tem { width: 48px; height: 48px; border-radius: 14px; background: var(--tint); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.mx-tbox .tbtns { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 700px) { #tour_panel { right: 12px; left: 12px; bottom: 12px; width: auto; } #tour_panel.top { top: 12px; bottom: auto; } }
 
 </style>
 </head><body>
@@ -652,7 +659,6 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     if (p[0] === 'cand' && p[1]) return { tipo: 'cand', id: p[1] };
     if (p[0] === 'consolidado') return { tipo: 'consolidado' };
     if (p[0] === 'admin') return { tipo: 'admin' };
-    if (p[0] === 'guia') return { tipo: 'guia' };
     return { tipo: 'inicio' };
   }
   function ir(h) { try { location.hash = h; } catch (e) {} pintar(); }
@@ -673,7 +679,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       '<div class="mx-chips"><button class="mx-pillink" type="button" data-go="">Inicio</button>' +
       '<button class="mx-pillink" type="button" data-go="consolidado">Consolidado</button>' +
       (y.rol === 'admin' ? '<button class="mx-pillink" type="button" data-go="admin">Administración</button>' : '') +
-      '<button class="mx-pillink" type="button" data-go="guia">Guía</button>' +
+      '<button class="mx-pillink tour" type="button" data-tour="boton">▶ Dame mi recorrido virtual</button>' +
       '<button class="mx-pillink" type="button" data-act="actualizar">Actualizar</button>' +
       '<button class="mx-pillink" type="button" data-act="salir">Cerrar sesión</button></div></div>';
     setTimeout(function() { setEstado(saving || Object.keys(dirty).length ? 'guardando' : 'ok'); }, 0);
@@ -692,13 +698,11 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     else if (r.tipo === 'programa') { var p = progDe(r.id); if (p) { prog = p.id; ssSet('mx_prog', prog); vistaPrograma(); } else vistaInicio(); }
     else if (r.tipo === 'consolidado') vistaConsolidado();
     else if (r.tipo === 'admin' && esAdmin()) vistaAdmin();
-    else if (r.tipo === 'guia') vistaGuia();
     else if (mp.length === 1) { prog = mp[0].id; vistaPrograma(); }
     else vistaInicio();
     setEstado('ok');
   }
   function repintarVivo() {
-    if (vista.tipo === 'guia') return;
     var a = document.activeElement, enCampo = a && a.closest && a.closest('#mx-root input, #mx-root textarea, #mx-root select');
     if (vista.tipo === 'inicio') vistaInicio();
     else if (vista.tipo === 'programa') vistaPrograma();
@@ -746,11 +750,12 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       sess = { token: token, yo: d.yo }; aplicar(d);
       ssSet('mx_tok', DEMO ? '' : token);
       var mp = misProgs(); prog = mp.length === 1 ? mp[0].id : '';
-      ultimaSync = Date.now(); iniciarSondeo(); try { location.hash = guiaVisto() ? '' : '#/guia'; } catch (e) {} pintar();
+      ultimaSync = Date.now(); iniciarSondeo(); try { location.hash = ''; } catch (e) {} pintar(); setTimeout(tourAuto, 500);
     }).catch(function(e) { salir(e && e.code === 'sesion' ? 'Tu sesión terminó. Ingresa de nuevo.' : 'No pudimos cargar los datos. Revisa tu conexión e inténtalo de nuevo.'); });
   }
   function salir(aviso) {
     if (Store && Store.logout && sess && !aviso) Store.logout();
+    tourSalir(); ssSet('mx_tour_vis', '');
     sess = null; Store = null; dirty = {}; prog = ''; clearInterval(pollT); ssSet('mx_tok', '');
     DB.progs = []; DB.cands = []; DB.evals = {}; DB.users = [];
     hero(true); vistaPuerta(aviso);
@@ -776,93 +781,127 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     return '<div class="mx-hello"><span class="e">' + mom + '</span><h2>' + esc(nom) + '</h2><p>' + esc(t) + '</p></div>';
   }
 
-  /* ---------------- guía de uso (distinta para cada rol) ---------------- */
-  var GUIA_ENTREVISTAR = [
-    ['Abre al candidato', 'En la lista pulsa «Entrevistar». Arriba ves al candidato y, abajo, las cinco secciones de la guía: motivaciones, antecedentes académicos, antecedentes laborales, habilidades personales y aspiraciones.'],
-    ['Pregunta y califica', 'Cada criterio trae la pregunta sugerida. Mientras escuchas, elige el nivel que mejor describe la respuesta: <b>Bajo, Medio, Alto o Muy alto</b>. Cada nivel muestra su descripción para que califiques con el mismo criterio que los demás entrevistadores. Si vuelves a pulsar el nivel elegido, se desmarca.'],
-    ['Experiencia laboral', 'En «Habilidades del trabajo» (III.2) existe la opción <b>No aplica</b>, solo para quien no tiene experiencia laboral. Es el único criterio donde se puede usar.'],
-    ['Bonificaciones', 'Al final de cada sección puedes marcar si el candidato merece una bonificación (Sí / No). Si la das, explica el motivo en las observaciones de esa sección.'],
-    ['Riesgo de deserción', 'Responde Sí o No a las cinco preguntas del final. Cada respuesta de riesgo suma 1 (máximo 5) y queda visible en el consolidado.'],
-    ['Observaciones', 'Hay un espacio por sección y uno general. Lo que escribas lo ven las demás personas que entrevistan ese programa, así que redáctalo con respeto y de forma objetiva.'],
-    ['Se guarda solo', 'No hay botón de guardar. Arriba verás «Guardando…» y luego «Guardado · hora». Espera ese aviso antes de cerrar la página. Si dice «Sin conexión», se reintenta solo cuando vuelva la red.']
-  ];
-  var GUIA_CALCULO = [
-    ['Calificación de la entrevista', 'Cada sección tiene un peso: Motivaciones 10 %, Antecedentes académicos 30 %, Antecedentes laborales 20 %, Habilidades personales 30 % y Aspiraciones 10 %. El resultado va de 0 a 3.'],
-    ['Combinación de entrevistadores', 'La plataforma une las calificaciones de la Decanatura, la Jefatura y la Coordinación del programa. Solo cuentan las entrevistas que cada persona dejó <b>completas</b>. Por defecto pesan igual; la Jefatura puede cambiarlo en Ajustes.'],
-    ['Resultado global', 'Es el 60 % del examen (Básicas + Clínicas + Cultura) más el 40 % de la entrevista. El examen lo carga la Jefatura. Mientras falte alguna nota del examen, el global aparece como «pendiente».'],
-    ['Posición (Rn)', 'El consolidado ordena a los candidatos de cada programa de mayor a menor. Si dos empatan, comparten posición.']
-  ];
-  var GUIA = {
-    coord: {
-      titulo: 'Guía para coordinaciones de programa',
-      intro: 'Esta plataforma reemplaza los archivos de Excel separados. Tú calificas a los candidatos de tu programa; la Decanatura y la Jefatura también los califican por aparte, y la plataforma combina las tres calificaciones.',
-      bloques: [
-        ['Antes de empezar', [
-          ['Tu acceso', 'La Jefatura de Posgrados te entregó tu usuario y tu clave. La clave solo la puede cambiar la Jefatura; si la olvidas, escríbele.'],
-          ['Qué ves', 'Solo los candidatos de tu programa. Si tienes dos programas, la pantalla de inicio te deja elegir cuál entrevistar. Los candidatos y el examen los carga la Jefatura: tú no puedes modificarlos.']
-        ]],
-        ['Cómo entrevistar', GUIA_ENTREVISTAR.concat([['Pasa al siguiente', 'Al final del formulario puedes volver a la lista o seguir con el siguiente candidato. En la lista, la columna «Tu entrevista» indica si está Sin iniciar, En curso o Completa, y «Entrevistas completas» cuántos de los 3 entrevistadores ya terminaron.']])],
-        ['Consultar el consolidado', [
-          ['Abrir el consolidado', 'Pulsa «Consolidado» en la barra. Muestra el examen, la entrevista y el resultado global de cada candidato de tu programa, con su posición.'],
-          ['Ver el detalle', 'Pulsa el nombre de un candidato para desplegarlo: verás las observaciones y bonificaciones de cada entrevistador. También puedes cambiar entre la calificación combinada o la de cada persona.'],
-          ['Descargar', 'En el consolidado encuentras las opciones para bajar el Excel de tu programa.']
-        ]],
-        ['Cómo se calcula el resultado', GUIA_CALCULO]
-      ],
-      consejos: ['Entrevista con la guía abierta y califica en el momento: es más fiable que hacerlo después de memoria.', 'Termina todos los criterios de un candidato para que su entrevista cuente como completa.', 'Si ves algo raro en un candidato (nombre, documento, notas del examen), avisa a la Jefatura: solo ella puede corregirlo.']
-    },
-    decana: {
-      titulo: 'Guía para la Decanatura',
-      intro: 'Puedes entrevistar y consultar los 29 programas. Tu calificación es independiente de la de la Jefatura y la de cada coordinación, y la plataforma las combina automáticamente.',
-      bloques: [
-        ['Antes de empezar', [
-          ['Tu acceso', 'La Jefatura de Posgrados te entregó tu usuario y tu clave. La clave solo la puede cambiar la Jefatura.'],
-          ['Elegir el programa', 'Al entrar, el inicio muestra los 29 programas con su avance. Elige el que vas a entrevistar; puedes cambiar de programa cuando quieras con «Cambiar de programa». Hay un buscador para encontrarlo rápido.']
-        ]],
-        ['Cómo entrevistar', GUIA_ENTREVISTAR],
-        ['Consultar el consolidado', [
-          ['General o por programa', 'En «Consolidado» eliges un programa o la vista de todos. Ves examen, entrevista, resultado global y posición de cada candidato.'],
-          ['Ver el detalle', 'Pulsa el nombre de un candidato para desplegarlo y leer las observaciones y bonificaciones de cada entrevistador. Con «Calificación a mostrar» alternas entre la combinada y la de cada persona.'],
-          ['Descargar', 'Puedes bajar el consolidado de un programa o el global de todos, en Excel.']
-        ]],
-        ['Cómo se calcula el resultado', GUIA_CALCULO]
-      ],
-      consejos: ['Para ver quién falta por entrevistar, usa la columna «Entrevistas completas» de cada programa.', 'Los candidatos, los cupos y las notas del examen los administra la Jefatura de Posgrados.']
-    },
-    admin: {
-      titulo: 'Guía para la Jefatura de Posgrados',
-      intro: 'Eres la administradora de la plataforma: cargas candidatos, notas del examen, programas, usuarios y claves; también puedes entrevistar y consultar todos los programas, y cerrar la convocatoria. Estos son los pasos en orden.',
-      bloques: [
-        ['1. Preparar la convocatoria (Administración)', [
-          ['Programas y cupos', 'En «Programas» registra los cupos de cada uno. Mientras estén en 0, la página muestra «cupos por definir».'],
-          ['Cargar candidatos', 'En «Candidatos» sube el Excel con la plantilla (el programa se elige de una lista desplegable). Antes de confirmar, la página muestra una vista previa con los duplicados y errores. También puedes agregar o corregir candidatos uno por uno.'],
-          ['Notas del examen', 'En la misma pestaña registras Básicas, Clínicas y Cultura de cada candidato. El total se suma solo (máximo 300) y el resultado global se calcula en cuanto estén las tres notas.'],
-          ['Usuarios y claves', 'En «Usuarios y claves» ves a la decanatura y a las coordinaciones. Cambia la clave de cualquier persona escribiendo una nueva (mínimo 7 caracteres). Solo tú puedes hacerlo. También se puede en el Google Sheets, hoja «Usuarios», columna «NUEVA CLAVE»; se cifra al instante.'],
-          ['Ajustes', 'Define el nombre de la convocatoria, el puntaje máximo del examen y el peso de cada entrevistador (por defecto, iguales). Aquí también puedes cerrar el acceso a coordinaciones y decanatura con «Página abierta»; tú siempre puedes entrar.']
-        ]],
-        ['2. Durante las entrevistas', GUIA_ENTREVISTAR.slice(0, 2).concat([['Seguimiento', 'En «Consolidado» y en la lista de cada programa ves cuántos entrevistadores completaron cada candidato (de 3). Puedes desplegar a un candidato para leer observaciones y bonificaciones.'], ['Se guarda solo', 'Todo se guarda automáticamente; espera el aviso «Guardado · hora».']])],
-        ['3. Al terminar: descargar y cerrar', [
-          ['Descargar primero', 'En «Cierre y descargas» baja el consolidado de un programa, el global o el detalle con observaciones. Hazlo antes de borrar.'],
-          ['Borrar candidatos', 'Puedes borrar los candidatos de un programa o todos. La página pide escribir BORRAR para confirmar. Antes de borrar, el sistema guarda una copia en hojas «Archivo…» del Google Sheets de respaldo.'],
-          ['Cuidado', 'Borrar elimina también las calificaciones y observaciones de esos candidatos en la plataforma. Los programas y usuarios permanecen para la próxima convocatoria.']
-        ]],
-        ['Cómo se calcula el resultado', GUIA_CALCULO]
-      ],
-      consejos: ['Comparte el Google Sheets de respaldo solo con quien administra la plataforma: ahí están todas las calificaciones y los datos de los candidatos.', 'Antes de abrir a las coordinaciones, haz una entrevista de prueba, revisa el consolidado y bórrala.', 'Si alguien dice que no puede entrar: verifica en Usuarios que su usuario y programa estén bien y asígnale una clave nueva.']
+
+  /* ---------------- recorrido virtual (distinto para cada rol) ---------------- */
+  var tour = null, tourT = null;
+  function tourKey() { return 'mx_tour_off_' + (sess ? sess.yo.id : ''); }
+  function tourSilenciado() { try { return localStorage.getItem(tourKey()) === '1'; } catch (e) { return false; } }
+  function tourSilenciar(v) { try { if (v) localStorage.setItem(tourKey(), '1'); else localStorage.removeItem(tourKey()); } catch (e) {} }
+  function $q(sel) { return document.querySelector(sel); }
+  function hashDe(h) { return String(h || '').replace(/^#\/?/, ''); }
+  var T_CALCULO = 'La entrevista pesa así: Motivaciones 10 %, Antecedentes académicos 30 %, Laborales 20 %, Habilidades personales 30 % y Aspiraciones 10 % (resultado de 0 a 3). La plataforma une las calificaciones de la Decanatura, la Jefatura y la Coordinación, y solo cuenta las entrevistas completas. El resultado global es 60 % examen y 40 % entrevista; si falta alguna nota del examen queda «pendiente».';
+  function tourPasos() {
+    var rol = sess.yo.rol, mp = misProgs(), pr = mp.filter(function(x) { return candsDe(x.id).length; })[0] || mp[0], c0 = pr ? candsDe(pr.id)[0] : null;
+    var rp = pr ? '#/programa/' + pr.id : '#/', rc = c0 ? '#/cand/' + c0.id : null, P = [];
+    var multi = mp.length > 1;
+    P.push({ ruta: '#/', sel: '.mx-hello', t: 'Tu bienvenida', x: rol === 'admin' ? 'Aquí te saludamos y te recordamos lo que puedes hacer: entrevistar y consultar los ' + mp.length + ' programas, y administrar la convocatoria.' : rol === 'decana' ? 'Aquí te saludamos. Puedes entrevistar y consultar los ' + mp.length + ' programas, y ver el consolidado general.' : 'Aquí te saludamos y ves cuál es tu programa. Solo verás los candidatos de ' + (multi ? 'tus programas' : 'tu programa') + '; los demás programas no aparecen en ninguna pantalla.' });
+    P.push({ ruta: '#/', sel: '.mx-start', t: 'Tu barra de herramientas', x: 'Arriba tienes tu rol y tu nombre, el estado de guardado («Guardado · hora») y los botones: Inicio, Consolidado' + (rol === 'admin' ? ', Administración' : '') + ', Actualizar y Cerrar sesión. Este mismo recorrido lo repites cuando quieras con «Dame mi recorrido virtual».' });
+    if (rol !== 'coord' || multi) P.push({ ruta: '#/', sel: '#mx-pgrid', t: rol === 'coord' ? 'Elige el programa' : 'Elige el programa a entrevistar', x: rol === 'coord' ? 'Tienes dos programas asignados. Elige el que vas a entrevistar; cada tarjeta muestra cuántos candidatos tiene y tu avance.' : 'Aquí aparecen los 29 programas con su número de candidatos y tu avance. Elige uno para entrevistar; con «Cambiar de programa» vuelves aquí.' });
+    if (pr) P.push({ ruta: rp, sel: '.mx-tb', t: 'Lista de candidatos', x: 'Cada fila es un candidato. «Tu entrevista» muestra si está Sin iniciar, En curso o Completa, y «Entrevistas completas» cuántos de los entrevistadores ya terminaron. Pulsa «Entrevistar» para abrirlo. Arriba hay un buscador por nombre o documento.' });
+    if (rc) {
+      P.push({ ruta: rc, sel: '#mx-live', t: 'Candidato y puntaje en vivo', x: 'Esta barra te acompaña mientras entrevistas: muestra el candidato y tu puntaje, que se actualiza con cada criterio que calificas.' });
+      P.push({ ruta: rc, sel: '.mx-crit', t: 'Pregunta guía y criterio', x: 'Cada criterio trae la pregunta sugerida para hacer al candidato. Las secciones son: motivaciones, antecedentes académicos, antecedentes laborales, habilidades personales y aspiraciones.' });
+      P.push({ ruta: rc, sel: '.mx-lvs', t: 'Elige el nivel', x: 'Mientras escuchas, marca el nivel que mejor describe la respuesta: Bajo, Medio, Alto o Muy alto. Cada tarjeta explica qué significa, para calificar con el mismo criterio que los demás entrevistadores. Si vuelves a pulsar el nivel elegido, se desmarca.' });
+      P.push({ ruta: rc, pick: function() { return $q('.mx-na'); }, sel: '.mx-na', t: 'No aplica', x: 'En «Habilidades del trabajo» existe la opción «No aplica», solo para candidatos sin experiencia laboral. Es el único criterio donde se puede usar.' });
+      P.push({ ruta: rc, pick: function() { var b = $q('[data-bon]'); return b ? b.closest('.mx-extra') : null; }, t: 'Bonificación', x: 'Al final de cada sección puedes asignar una bonificación (Sí o No). Si la das, explica el motivo en las observaciones; el consolidado la muestra.' });
+      P.push({ ruta: rc, pick: function() { var b = document.getElementById('sc-rd'); return b ? b.parentNode : null; }, t: 'Riesgo de deserción', x: 'Responde Sí o No a cinco preguntas. Cada respuesta de riesgo suma 1 (máximo 5) y se ve en el consolidado.' });
+      P.push({ ruta: rc, pick: function() { var b = document.getElementById('ob-gen'); return b ? b.closest('.mx-extra') : null; }, t: 'Observaciones', x: 'Hay un espacio de observaciones por sección y uno general. Lo que escribas lo ven las demás personas que entrevistan ese programa; redáctalo con respeto y de forma objetiva.' });
+      P.push({ ruta: rc, sel: '.mx-foot', t: 'Se guarda solo', x: 'No hay botón de guardar: cada respuesta se guarda sola. Arriba verás «Guardando…» y luego «Guardado · hora»; espera ese aviso antes de cerrar. Abajo tienes la barra de avance y el botón «Siguiente candidato».' });
     }
-  };
-  function guiaVisto() { try { return !!localStorage.getItem('mx_guia_' + (sess ? sess.yo.id : '')); } catch (e) { return false; } }
-  function guiaMarcar() { try { localStorage.setItem('mx_guia_' + sess.yo.id, '1'); } catch (e) {} }
-  function vistaGuia() {
-    var g = GUIA[sess.yo.rol] || GUIA.coord, n = 0;
-    var bloques = g.bloques.map(function(b) {
-      n = 0; return '<section class="mx-gb"><h3>' + b[0] + '</h3><ol class="mx-gl">' + b[1].map(function(x) { n++; return '<li><span class="gn">' + n + '</span><div><b>' + x[0] + '</b><p>' + x[1] + '</p></div></li>'; }).join('') + '</ol></section>';
-    }).join('');
-    APP.innerHTML = barra() + '<div class="mx-hello"><span class="e">Guía de uso</span><h2>' + esc(g.titulo) + '</h2><p>' + esc(g.intro) + '</p></div><div class="mx-guia">' + bloques +
-      '<section class="mx-gb tip"><h3>Buenas prácticas</h3><ul>' + g.consejos.map(function(c) { return '<li>' + esc(c) + '</li>'; }).join('') + '</ul></section>' +
-      '<p class="mx-row" style="margin-top:18px"><button class="mx-btn lime" type="button" data-act="guiaok">Entendido, ir al inicio</button></p><p class="mx-muted" style="margin:8px 0 0">Puedes volver a esta guía cuando quieras con el botón «Guía» de la barra.</p></div>';
-    window.scrollTo(0, 0);
+    P.push({ ruta: '#/consolidado', sel: '#mx-tabla', t: 'El consolidado', x: 'Muestra, por candidato, el examen, la entrevista y el resultado global, con su posición (Rn) dentro del programa. ' + (rol === 'coord' ? 'Ves únicamente tu programa.' : 'Eliges un programa o la vista de todos.') });
+    if (rol !== 'coord') P.push({ ruta: '#/consolidado', sel: '#mx-cp', t: 'Elige el programa', x: 'Cambia entre un programa y la vista general de todos.' });
+    P.push({ ruta: '#/consolidado', sel: '#mx-ce', t: 'Calificación a mostrar', x: 'Alterna entre la calificación combinada de todos los entrevistadores y la de cada persona por separado.' });
+    P.push({ ruta: '#/consolidado', pick: function() { return $q('.mx-tb td.nm button') || $q('.mx-tb td.nm'); }, t: 'Despliega a cada candidato', x: 'Pulsa el nombre de un candidato para desplegarlo: verás las observaciones y bonificaciones de cada entrevistador.' });
+    P.push({ ruta: '#/consolidado', pick: function() { var b = document.getElementById('mx-dlmsg'); return b ? b.closest('.mx-card2') : null; }, t: 'Descargas', x: 'Baja el consolidado en Excel: ' + (multi || rol !== 'coord' ? 'de un programa o de todos' : 'de tu programa') + ', con una hoja «Detalle» que incluye observaciones y bonificaciones.' });
+    P.push({ ruta: '#/consolidado', t: 'Cómo se calcula el resultado', x: T_CALCULO });
+    if (rol === 'admin') {
+      var tb = function(tab) { return function() { admTab = tab; }; };
+      P.push({ ruta: '#/admin', pre: tb('progs'), sel: '.mx-tabs', t: 'Administración', x: 'Solo tú ves esta sección. Tiene cinco pestañas que se recorren en orden: Programas, Candidatos, Usuarios y claves, Ajustes y Cierre y descargas.' });
+      P.push({ ruta: '#/admin', pre: tb('progs'), sel: '.mx-tb', t: '1. Programas y cupos', x: 'Aquí defines los cupos de cada programa y ves su coordinación. Mientras los cupos estén en 0, la página muestra «cupos por definir».' });
+      P.push({ ruta: '#/admin', pre: tb('cands'), pick: function() { var b = document.getElementById('imp-file'); return b ? b.closest('.mx-card2') : null; }, t: '2. Cargar candidatos desde Excel', x: 'Sube la plantilla (el programa se elige de una lista desplegable). Antes de confirmar, la página muestra un resumen con duplicados y errores.' });
+      P.push({ ruta: '#/admin', pre: tb('cands'), pick: function() { var b = document.getElementById('nc-bas'); return b ? b.closest('.mx-card2') : null; }, t: 'Candidato por candidato y notas del examen', x: 'También puedes agregar un candidato a mano. Aquí registras las notas de Básicas, Clínicas y Cultura; el total se suma solo (máximo 300) y el global se calcula cuando están las tres.' });
+      P.push({ ruta: '#/admin', pre: tb('users'), pick: function() { var b = document.getElementById('adm-fu'); return b ? b.closest('.mx-fld') : null; }, t: '3. Usuarios y claves', x: 'Busca a una persona por nombre, usuario o programa. Cambia su clave escribiendo una nueva (mínimo 7 caracteres): solo tú puedes hacerlo. En el Google Sheets, hoja «Usuarios», columna «NUEVA CLAVE», también se cifra al instante.' });
+      P.push({ ruta: '#/admin', pre: tb('users'), pick: function() { return $q('tr[data-row] .mx-dd') || $q('#nu-pw'); }, t: 'Programas de cada coordinación', x: 'Con este desplegable eliges los programas que ve cada coordinación; tiene su propio buscador.' });
+      P.push({ ruta: '#/admin', pre: tb('ajustes'), pick: function() { var b = document.getElementById('aj-wc'); return b ? b.closest('.mx-grid3') : null; }, t: '4. Ajustes', x: 'Define el peso de cada entrevistador (por defecto, iguales), el puntaje máximo del examen y el nombre de la convocatoria.' });
+      P.push({ ruta: '#/admin', pre: tb('ajustes'), pick: function() { var b = document.getElementById('aj-ab'); return b ? b.closest('label') : null; }, t: 'Abrir o cerrar la página', x: 'Con «Página abierta» controlas si decanatura y coordinaciones pueden entrar. Tú siempre puedes entrar.' });
+      P.push({ ruta: '#/admin', pre: tb('cierre'), pick: function() { var b = document.getElementById('bp-prog'); return b ? b.closest('.mx-card2') : null; }, t: '5. Al terminar: descargar y borrar', x: 'Primero descarga el consolidado. Luego puedes borrar los candidatos de un programa o todos; la página pide escribir BORRAR para confirmar, y antes de borrar el sistema guarda una copia en hojas «Archivo…» del Google Sheets.' });
+    }
+    P.push({ fin: true, ruta: '#/', t: 'Listo', x: 'Ya conoces lo esencial. Puedes repetir el recorrido cuando quieras desde «Dame mi recorrido virtual», en la barra superior.' });
+    return P;
   }
+  function tourEsperar(f, ms) { return new Promise(function(ok) { var t0 = Date.now(); (function g() { var e = null; try { e = f(); } catch (x) {} if (e) ok(e); else if (Date.now() - t0 > ms) ok(null); else setTimeout(g, 120); })(); }); }
+  function tourElem(p) { return p.pick ? p.pick() : (p.sel ? $q(p.sel) : null); }
+  function tourBienvenida() {
+    if (document.getElementById('tour_modal')) return;
+    var y = sess.yo, nom = y.saludo || String(y.nombre || '').split(' ')[0];
+    var d = document.createElement('div'); d.id = 'tour_modal'; d.className = 'mx-tmodal';
+    d.innerHTML = '<div class="mx-tbox" role="dialog" aria-modal="true" aria-labelledby="tm_t"><div class="tem" aria-hidden="true">👋</div><h2 id="tm_t">Hola, ' + esc(nom) + '</h2>' +
+      '<p>Te acompaño por la plataforma de entrevistas de admisión en un par de minutos: qué ves, cómo calificar a un candidato y cómo leer el consolidado' + (y.rol === 'admin' ? ', y cómo administrar la convocatoria' : '') + '.</p>' +
+      '<div class="tbtns"><button class="mx-btn lime" type="button" data-tour="ini" id="tm_ini">Empezar el recorrido</button><button class="mx-btn sec" type="button" data-tour="ahora">Ahora no</button></div>' +
+      '<label class="tno"><input type="checkbox" id="tm_no"> No volver a mostrar este mensaje</label>' +
+      '<p class="mx-muted" style="font-size:12px;margin:0">Puedes retomarlo cuando quieras desde «Dame mi recorrido virtual».</p></div>';
+    document.body.appendChild(d);
+    var b = document.getElementById('tm_ini'); if (b) b.focus();
+  }
+  function tourCerrarModal() { var m = document.getElementById('tour_modal'); if (m) m.remove(); }
+  function tourAuto() {
+    if (!sess || tour || document.getElementById('tour_modal') || tourSilenciado() || ssGet('mx_tour_vis') === '1') return;
+    ssSet('mx_tour_vis', '1'); tourBienvenida();
+  }
+  function tourEmpezar() {
+    tourCerrarModal(); if (tour) return;
+    if (!document.getElementById('tour_spot')) { var s = document.createElement('div'); s.id = 'tour_spot'; document.body.appendChild(s); }
+    if (!document.getElementById('tour_panel')) { var p = document.createElement('div'); p.id = 'tour_panel'; p.setAttribute('role', 'dialog'); p.setAttribute('aria-label', 'Recorrido virtual'); document.body.appendChild(p); }
+    tour = { i: 0, pasos: tourPasos(), n: 0 };
+    tourT = setInterval(tourPosicion, 200); tourIr(0);
+  }
+  function tourSalir() {
+    clearInterval(tourT); tourT = null; tour = null;
+    ['tour_spot', 'tour_panel', 'tour_modal'].forEach(function(id) { var e = document.getElementById(id); if (e) e.remove(); });
+  }
+  function tourPosicion() {
+    var s = document.getElementById('tour_spot'); if (!tour || !s) return;
+    var p = tour.pasos[tour.i], el = tour.cargando ? null : tourElem(p), pn = document.getElementById('tour_panel');
+    if (!el) { s.style.left = '50%'; s.style.top = '50%'; s.style.width = '0px'; s.style.height = '0px'; if (pn) pn.classList.remove('top'); return; }
+    var r = el.getBoundingClientRect(), m = 6;
+    s.style.left = (r.left - m) + 'px'; s.style.top = (r.top - m) + 'px'; s.style.width = (r.width + 2 * m) + 'px'; s.style.height = (r.height + 2 * m) + 'px';
+    if (pn) pn.classList.toggle('top', r.top + Math.min(r.height, 200) / 2 > window.innerHeight * 0.55);
+  }
+  function tourPanel() {
+    var pn = document.getElementById('tour_panel'); if (!tour || !pn) return;
+    var p = tour.pasos[tour.i], n = tour.pasos.length, ult = tour.i === n - 1;
+    pn.innerHTML = '<div class="tph"><b>Paso ' + (tour.i + 1) + ' de ' + n + '</b><button type="button" data-tour="salir">Salir del recorrido</button></div>' +
+      '<div class="tbar" aria-hidden="true">' + tour.pasos.map(function(_, k) { return '<i style="background:' + (k <= tour.i ? 'var(--blue)' : '#d3dcea') + '"></i>'; }).join('') + '</div>' +
+      '<h3>' + esc(p.t) + '</h3><p>' + esc(p.x) + '</p>' +
+      (ult ? '<label class="tno"><input type="checkbox" id="tp_no"' + (tourSilenciado() ? ' checked' : '') + '> No volver a mostrar el recorrido al entrar</label>' : '') +
+      '<div class="tpf">' + (tour.i > 0 ? '<button class="mx-btn sec" type="button" data-tour="atras">← Atrás</button>' : '<span></span>') + '<button class="mx-btn lime" type="button" data-tour="' + (ult ? 'fin' : 'sig') + '" id="tp_sig">' + (ult ? 'Terminar' : 'Siguiente →') + '</button></div>';
+    var b = document.getElementById('tp_sig'); if (b && document.activeElement && document.activeElement.tagName !== 'INPUT') b.focus({ preventScroll: true });
+  }
+  function tourIr(i) {
+    var T = tour; if (!T) return;
+    T.i = i; T.n += 1; var mi = T.n, p = T.pasos[i]; T.cargando = true; tourPanel();
+    var vigente = function() { return tour === T && T.n === mi; };
+    if (p.pre) p.pre();
+    if (p.ruta && hashDe(location.hash) !== hashDe(p.ruta)) { try { location.hash = p.ruta; } catch (e) {} } else if (p.pre) pintar();
+    tourEsperar(function() { return tourElem(p) || (!p.sel && !p.pick ? document.body : null); }, 9000).then(function(el) {
+      if (!vigente()) return;
+      T.cargando = false;
+      if (el && el !== document.body) { var r = el.getBoundingClientRect(); if (r.top < 70 || r.top > window.innerHeight - 260) window.scrollTo({ top: Math.max(0, window.scrollY + r.top - 90), behavior: 'smooth' }); }
+      tourPosicion();
+    });
+  }
+  document.addEventListener('click', function(ev) {
+    var b = ev.target.closest && ev.target.closest('[data-tour]'); if (!b) return;
+    var a = b.getAttribute('data-tour'), c;
+    if (a === 'boton') { if (!tour) tourEmpezar(); }
+    else if (a === 'ini') { c = document.getElementById('tm_no'); if (c && c.checked) tourSilenciar(true); tourEmpezar(); }
+    else if (a === 'ahora') { c = document.getElementById('tm_no'); if (c && c.checked) tourSilenciar(true); tourCerrarModal(); }
+    else if (a === 'sig' && tour) tourIr(Math.min(tour.i + 1, tour.pasos.length - 1));
+    else if (a === 'atras' && tour) tourIr(Math.max(0, tour.i - 1));
+    else if (a === 'salir') tourSalir();
+    else if (a === 'fin') { c = document.getElementById('tp_no'); if (c) tourSilenciar(c.checked); tourSalir(); }
+  });
+  document.addEventListener('keydown', function(ev) { if (ev.key === 'Escape' && (tour || document.getElementById('tour_modal'))) tourSalir(); });
   function vistaInicio() {
     var mp = misProgs(), multi = mp.length > 1;
     var cards = mp.map(function(p, i) {
@@ -1348,7 +1387,6 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     if (g !== null && !t.hasAttribute('data-act')) { ir(g); return; }
     var act = t.getAttribute('data-act');
     if (act === 'salir') { try { location.hash = ''; } catch (e) {} salir(); return; }
-    if (act === 'guiaok') { guiaMarcar(); ir(''); return; }
     if (act === 'actualizar') { setEstado('guardando'); sincronizar().then(function() { pintar(); }); return; }
     if (act === 'csv') { descargarCSV(); return; }
     if (t.hasAttribute('data-det')) { var did = t.getAttribute('data-det'); if (consState.exp[did]) delete consState.exp[did]; else consState.exp[did] = true; tablaConsolidado(); return; }
