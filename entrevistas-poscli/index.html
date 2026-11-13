@@ -944,8 +944,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     }).join('');
     APP.innerHTML = barra() + saludoHtml() +
       band(veTodo() ? 'Todos los programas' : 'Tus programas', multi ? 'Elige el programa que vas a entrevistar' : 'Programa asignado', IC.list) +
-      (veTodo() ? '<div class="mx-grid mx-gen"><button class="mx-card alt" type="button" data-go="consolidado"><span class="l"><span class="n">∑</span><span style="min-width:0"><span class="k">Vista general</span><span class="h">Consolidado de todos los programas</span><span class="m off">Examen, entrevista y resultado global por programa</span></span></span><span class="go">Abrir <i aria-hidden="true">→</i></span></button></div>' : '') +
-      (mp.length > 8 ? '<div class="mx-fld"><label class="mx-lbl" for="mx-fp">Buscar programa</label><input class="mx-in" id="mx-fp" type="search" placeholder="Escribe el nombre del programa"></div>' : '') +
+      ((mp.length > 8 || veTodo()) ? '<div class="mx-toolbar" style="margin:14px 0 16px">' + (mp.length > 8 ? '<div class="mx-fld"><label class="mx-lbl" for="mx-fp">Buscar programa</label><input class="mx-in" id="mx-fp" type="search" placeholder="Escribe el nombre del programa"></div>' : '') + (veTodo() ? '<button class="mx-btn lime" type="button" data-go="consolidado">∑ Ver consolidado general</button>' : '') + '</div>' : '') +
       (mp.length ? '<div class="mx-grid' + (mp.length > 6 ? ' pg' : '') + '" id="mx-pgrid">' + cards + '</div>' : '<p class="mx-vacio">Todavía no tienes programas asignados. Escribe a la Jefatura de Posgrados.</p>');
     var fp = document.getElementById('mx-fp');
     if (fp) fp.addEventListener('input', function() { var q = norm(fp.value); [].forEach.call(document.querySelectorAll('#mx-pgrid .mx-card'), function(b) { b.hidden = q && b.getAttribute('data-s').indexOf(q) < 0; }); });
