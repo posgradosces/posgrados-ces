@@ -345,6 +345,15 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .mx-grid.pg .mx-card .m svg { display: inline-block; vertical-align: -3px; margin-right: 4px; width: 15px; height: 15px; }
 .mx-grid.pg .mx-card .st:empty { display: none; }
 
+.mx-b[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+.mx-b[aria-pressed="true"] svg { color: var(--lime); }
+.mx-b.bn[aria-pressed="true"] { background: #46556d; border-color: #46556d; color: #fff; }
+.mx-b.bn[aria-pressed="true"] svg { color: #fff; }
+.mx-yn .mx-b.risk[aria-pressed="true"] { background: var(--warnbg); border-color: #cda300; color: var(--warntx); }
+.mx-yn .mx-b.safe[aria-pressed="true"] { background: var(--okbg); border-color: var(--ok); color: var(--oktx); }
+.mx-savemsg { margin: 10px 0 0; min-height: 1.3em; font-size: 13.5px; font-weight: 600; color: var(--blue); }
+.mx-savemsg.ok { color: var(--oktx); } .mx-savemsg.bad { color: var(--badtx); }
+
 </style>
 </head><body>
 <div id="ces-entrevistas" lang="es">
@@ -670,6 +679,11 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       if (e && (e.code === 'sesion' || e.code === 'clave')) { salir('Tu sesión terminó. Ingresa de nuevo.'); return; }
       setEstado('error'); saveT = setTimeout(vaciar, 4000);
     });
+  }
+  function guardarYa(cb) {
+    clearTimeout(saveT); setEstado('guardando'); vaciar();
+    var t0 = Date.now();
+    (function w() { if (!sess) return; if (!Object.keys(dirty).length && !saving) cb(true); else if (Date.now() - t0 > 15000) cb(false); else setTimeout(w, 200); })();
   }
   function sincronizar() {
     if (!Store || !sess || saving || Object.keys(dirty).length) return Promise.resolve();
@@ -1011,8 +1025,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       var bon = rec.bon[s.id] === 1, bno = rec.bon[s.id] === 0;
       return '<div class="mx-secbar"><span>' + s.id + '. ' + esc(s.t) + ' (' + Math.round(s.w * 100) + ' %)</span><span class="sc" id="sc-' + s.id + '"></span></div>' + crits + extra +
         '<div class="mx-extra"><h4>Bonificación de la sección</h4><div class="mx-yn" style="padding:0"><p>¿Asignas bonificación al candidato en esta sección?</p><div class="mx-seg">' +
-        '<button type="button" class="mx-b" aria-pressed="' + bon + '" data-bon="' + s.id + '" data-v="1">' + IC.yes + ' Sí</button>' +
-        '<button type="button" class="mx-b" aria-pressed="' + bno + '" data-bon="' + s.id + '" data-v="0">' + IC.no + ' No</button></div></div>' +
+        '<button type="button" class="mx-b yes" aria-pressed="' + bon + '" data-bon="' + s.id + '" data-v="1">' + IC.yes + ' Sí</button>' +
+        '<button type="button" class="mx-b bn" aria-pressed="' + bno + '" data-bon="' + s.id + '" data-v="0">' + IC.no + ' No</button></div></div>' +
         '<label class="mx-lbl" style="margin-top:12px" for="ob-' + s.id + '">Observaciones de la sección ' + s.id + '</label>' +
         '<textarea class="mx-ta sm" id="ob-' + s.id + '" data-obs="' + s.id + '" placeholder="Anota evidencias, citas textuales o aspectos a tener en cuenta.">' + esc((rec.obs || {})[s.id] || '') + '</textarea></div>';
     }).join('');
@@ -1031,8 +1045,9 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       '<div class="mx-back"><button class="mx-btn sec sm" type="button" data-go="programa/' + esc(c.prog) + '">← Lista de candidatos</button>' +
       '<span class="mx-count">Candidato ' + (ix + 1) + ' de ' + sig.length + '</span></div>' + secs + riesgo + gen +
       '<div class="mx-foot"><div class="mx-tot"><b id="ft-tot">—</b><span id="ft-sub" class="mx-muted"></span></div><div class="mx-prog" aria-hidden="true"><i id="ft-bar" style="width:0"></i></div>' +
-      '<div class="mx-foot-row"><span class="mx-muted" id="ft-det"></span><div class="mx-row"><button class="mx-btn sec" type="button" data-go="programa/' + esc(c.prog) + '">Volver a la lista</button>' +
-      (nx ? '<button class="mx-btn lime" type="button" data-go="cand/' + esc(nx.id) + '">Siguiente candidato →</button>' : '<button class="mx-btn lime" type="button" data-go="consolidado">Ver consolidado →</button>') + '</div></div></div>';
+      '<div class="mx-foot-row"><span class="mx-muted" id="ft-det"></span><div class="mx-row"><button class="mx-btn lime" type="button" data-act="guardarent" id="ft-save">Guardar entrevista</button><button class="mx-btn sec" type="button" data-go="programa/' + esc(c.prog) + '">Volver a la lista</button>' +
+      (nx ? '<button class="mx-btn sec" type="button" data-go="cand/' + esc(nx.id) + '">Siguiente candidato →</button>' : '<button class="mx-btn sec" type="button" data-go="consolidado">Ver consolidado →</button>') + '</div></div>' +
+      '<p class="mx-savemsg" id="ft-msg" role="status" aria-live="polite"></p></div>';
     refrescarForm(id, false);
     window.scrollTo(0, 0);
   }
@@ -1419,6 +1434,20 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     if (g !== null && !t.hasAttribute('data-act')) { ir(g); return; }
     var act = t.getAttribute('data-act');
     if (act === 'salir') { try { location.hash = ''; } catch (e) {} salir(); return; }
+    if (act === 'guardarent' && vista.tipo === 'cand') {
+      var msg = document.getElementById('ft-msg'), bt = document.getElementById('ft-save'), cid0 = vista.id;
+      if (msg) { msg.className = 'mx-savemsg'; msg.textContent = 'Guardando…'; } if (bt) bt.disabled = true;
+      guardarYa(function(ok) {
+        var m2 = document.getElementById('ft-msg'), b2 = document.getElementById('ft-save'); if (b2) b2.disabled = false;
+        if (!m2 || vista.tipo !== 'cand' || vista.id !== cid0) return;
+        if (!ok) { m2.className = 'mx-savemsg bad'; m2.textContent = 'No se pudo guardar todavía (sin conexión). Se reintenta solo; no cierres la página.'; return; }
+        var k = calcEval(miRec(cid0)), d = new Date(), h = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+        m2.className = 'mx-savemsg ok';
+        m2.textContent = '✔ Entrevista guardada · ' + h + (k.completa ? ' · Completa: ya cuenta en el consolidado.' : ' · Faltan ' + (k.n - k.ans) + ' criterios por calificar para que cuente como completa.');
+        setEstado('ok');
+      });
+      return;
+    }
     if (act === 'actualizar') { setEstado('guardando'); sincronizar().then(function() { pintar(); }); return; }
     if (act === 'csv') { descargarCSV(); return; }
     if (t.hasAttribute('data-det')) { var did = t.getAttribute('data-det'); if (consState.exp[did]) delete consState.exp[did]; else consState.exp[did] = true; tablaConsolidado(); return; }
