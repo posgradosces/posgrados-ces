@@ -646,7 +646,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
   function salir(aviso) {
     if (typeof tourSalir === 'function' && tour) { tour.prev = undefined; tourSalir(); }
     sess = null; Store = null; dirty = {}; dirtyDoc = {}; dirtyNom = {}; dirtyCands = false; dirtyRub = false;
-    ssSet('mx_sess', ''); clearInterval(pollT);
+    ssSet('mx_sess', ''); ssSet('mx_tour_vis', ''); clearInterval(pollT);
     hero(true);
     vistaPuerta(aviso);
   }
@@ -752,8 +752,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
   }
   function tourCerrarModal() { var m = document.getElementById('tour_modal'); if (m) m.remove(); }
   function tourAuto() {
-    if (!sess || tour || document.getElementById('tour_modal') || tourSilenciado()) return;
-    tourBienvenida();
+    if (!sess || tour || document.getElementById('tour_modal') || tourSilenciado() || ssGet('mx_tour_vis') === '1') return;
+    ssSet('mx_tour_vis', '1'); tourBienvenida();
   }
   function tourEmpezar() {
     tourCerrarModal(); if (tour) return;
@@ -1718,7 +1718,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
   (function arrancar() {
     var s = null;
     try { s = JSON.parse(ssGet('mx_sess') || 'null'); } catch (e) {}
-    var ini = function() { if (s && s.clave && s.rol) { entrar(s); return; } pintar(); };
+    var ini = function() { if (s && s.clave && s.rol) { entrar(s, true); return; } pintar(); };
     if (CFG.api && !DEMO) api('mx_estado', []).then(function(e) { ESTADO = e; }, function() {}).then(ini); else ini();
   })();
 })();
