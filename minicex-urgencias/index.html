@@ -201,6 +201,19 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .mx-caso h3 { margin: 2px 0 10px; color: var(--navy); font-size: 17px; line-height: 1.3; }
 .mx-caso p { margin: 0 0 8px; color: var(--txt); font-size: 14px; line-height: 1.65; }
 .mx-caso p:last-child { margin-bottom: 0; }
+.mx-anot { margin-top: 10px; border-radius: 14px; background: #fff; border: 1px solid var(--line); overflow: hidden; }
+.mx-anot-t { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; border: 0; background: transparent; color: var(--navy); font: inherit; font-weight: 700; font-size: 14px; text-align: left; cursor: pointer; }
+.mx-anot-t:hover { background: #f4f7fb; }
+.mx-anot-t:focus-visible { outline: 3px solid rgba(66,155,226,.45); outline-offset: -3px; }
+.mx-anot-t span:nth-child(2) { flex: 1; min-width: 0; }
+.mx-anot-t small { display: block; margin-top: 1px; color: var(--muted, #5b6b82); font-size: 12px; font-weight: 500; }
+.mx-anot-c { font-size: 20px; line-height: 1; color: var(--blue); }
+.mx-anot-box { padding: 4px 16px 16px; }
+.mx-an { margin: 0 0 8px; padding: 10px 14px; border-radius: 12px; background: #fff8e6; border: 1px solid #f0dca0; }
+.mx-an.ok { background: #f4f7fb; border-color: var(--line); opacity: .8; }
+.mx-an-h { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; font-size: 13px; }
+.mx-an p { margin: 4px 0 8px; font-size: 13.5px; line-height: 1.55; color: var(--txt); }
+
 .mx-clist { margin-top: 14px; border: 1px solid var(--line); border-radius: 14px; overflow: auto; max-height: 340px; background: #fff; }
 .mx-card2 { padding: 18px 20px; border-radius: 16px; background: #fff; border: 1px solid var(--line); box-shadow: 0 6px 18px rgba(21, 40, 75, .05); }
 .mx-card2 h3 { margin: 0 0 4px; color: var(--navy); font-size: 15px; font-weight: 700; }
@@ -282,12 +295,13 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     user: svg('<circle cx="12" cy="8" r="3.6"/><path d="M5 20a7 7 0 0 1 14 0"/>', 15),
     yes: svg('<path d="M5 12.5l4.5 4.5L19 7"/>', 15),
     no: svg('<path d="M6 6l12 12M18 6L6 18"/>', 15),
+    note: svg('<path d="M4 4h16v12H9l-5 4z"/><path d="M8 9h8M8 12h5"/>', 20),
     gear: svg('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>')
   };
 
    
   var BS = BASES.map(function(n, i) { return { id: String(i + 1), num: i + 1, nombre: n, items: [], secciones: [], max: 0 }; });
-  var DB = { cands: [], rub: {}, bases: {}, casos: {} }; 
+  var DB = { cands: [], rub: {}, bases: {}, casos: {}, anot: [] }; 
   var sess = null; 
   var Store = null;
   var dirty = {}, dirtyDoc = {}, dirtyNom = {}, dirtyCands = false, dirtyRub = false;
@@ -310,6 +324,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
 
   function aplicar(d) {
     DB.casos = d.casos || {};
+    DB.anot = (sess && sess.rol === 'admin') ? (d.anot || []) : [];
     var sig = JSON.stringify(d.rub || {});
     var cambio = sig !== rubSig;
     rubSig = sig;
@@ -384,13 +399,15 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
         return gs('mx_load', clave, ver).then(function(r) {
           if (r.unchanged) return null;
           ver = r.ver;
-          return { escala: r.escala, cands: r.cands || [], rub: r.rub || {}, bases: r.bases || {}, casos: r.casos || {} };
+          return { escala: r.escala, cands: r.cands || [], rub: r.rub || {}, bases: r.bases || {}, casos: r.casos || {}, anot: r.anot || [] };
         });
       },
       saveBase: function(b, cambios) { return gs('mx_saveBase', clave, nombre, b, cambios); },
       saveCands: function(c) { return gs('mx_saveCands', clave, c); },
       saveRub: function(b, f) { return gs('mx_saveRub', clave, b, f); },
       saveCaso: function(b, t, x) { return gs('mx_saveCaso', clave, b, t, x); },
+      anotar: function(b, x) { return gs('mx_anotar', clave, nombre, b, x); },
+      atender: function(id, v) { return gs('mx_atender', clave, id, v); },
       nueva: function() { return gs('mx_nueva', clave); },
       correo: function() { return gs('mx_correo', clave); }
     };
@@ -549,7 +566,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       if (!(document.activeElement && document.activeElement.closest && document.activeElement.closest('#mx-rubrica')) || cambioRub) { if (!c || document.activeElement !== c) pintarRubrica(st); }
       pintarEncabezadoBase(st);
       var cx = document.getElementById('mx-caso'), nuevo = casoHtml(st.id);
-      if ((cx ? cx.outerHTML : '') !== nuevo) { if (cx) cx.remove(); if (nuevo) document.getElementById('mx-rubrica').insertAdjacentHTML('beforebegin', nuevo); }
+      if ((cx ? cx.outerHTML : '') !== nuevo) { if (cx) cx.remove(); if (nuevo) (document.getElementById('mx-anot') || document.getElementById('mx-rubrica')).insertAdjacentHTML('beforebegin', nuevo); }
     } else if (vista.tipo === 'admin') { var a = document.activeElement; if ((!a || !a.closest || !a.closest('#mx-root textarea, #mx-root input')) && !document.querySelector('[data-edit]:not([hidden]), [data-rub]:not([hidden])')) vistaAdmin(); }
   }
 
@@ -688,7 +705,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       (st.items.length ?
         '<div class="mx-pick"><div><label class="mx-lbl" for="mx-cin">Residente a evaluar en esta base</label><div class="mx-cb"><input class="mx-in lg" id="mx-cin" type="search" autocomplete="off" placeholder="Busca por nombre o cédula…" role="combobox" aria-expanded="false" aria-controls="mx-clb"><div class="mx-cb-list" id="mx-clb" role="listbox" hidden></div></div></div>' +
         '<button class="mx-btn sec" type="button" data-act="siguiente">Siguiente pendiente</button></div>' : '') +
-      casoHtml(st.id) +
+      casoHtml(st.id) + anotHtml(st.id) +
       '<div id="mx-rubrica"></div>';
     pintarEncabezadoBase(st);
     var c = candPorCC(selCC), inp = document.getElementById('mx-cin');
@@ -701,6 +718,27 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     var c = DB.casos && DB.casos[b]; if (!c || !c.x) return '';
     return '<section class="mx-caso" id="mx-caso" aria-label="Caso de la estación"><span class="k">Caso de la estación</span>' + (c.t ? '<h3>' + esc(c.t) + '</h3>' : '') +
       c.x.split('\n').filter(function(l) { return l.trim(); }).map(function(l) { return '<p>' + esc(l) + '</p>'; }).join('') + '</section>';
+  }
+
+   
+  function anotHtml(b) {
+    if (!DB.casos || !DB.casos[b] || !DB.casos[b].x) return '';
+    return '<section class="mx-anot" id="mx-anot" data-b="' + b + '"><button class="mx-anot-t" type="button" data-act="anotabrir" aria-expanded="false" aria-controls="mx-anot-box">' + IC.note + '<span>Anotaciones de evaluador<small>¿Algo por corregir u observar en este caso? Escríbelo aquí.</small></span><span class="mx-anot-c" aria-hidden="true">+</span></button>' +
+      '<div class="mx-anot-box" id="mx-anot-box" hidden><label class="mx-lbl" for="mx-anot-ta">Tu observación o corrección sobre el caso de la base ' + b + '</label>' +
+      '<textarea class="mx-ta" id="mx-anot-ta" maxlength="1000" placeholder="Por ejemplo: en el segundo párrafo la frecuencia cardíaca debería decir 140 por minuto."></textarea>' +
+      '<div class="mx-row" style="margin-top:8px"><button class="mx-btn sm" type="button" data-act="anotenviar">Enviar anotación</button><span class="mx-muted" id="mx-anot-n">0 / 1000</span></div>' +
+      '<p class="mx-msg" id="mx-anot-msg" role="status"></p></div></section>';
+  }
+
+  function anotLista(b, quienes) {
+    var l = (DB.anot || []).filter(function(a) { return a.b === b; });
+    if (!l.length) return '<h4 class="mx-eh">Anotaciones de evaluadores</h4><p class="mx-muted" style="margin:0 0 6px">Aún no hay anotaciones sobre el caso de esta base.</p>';
+    var pend = l.filter(function(a) { return a.e !== 'atendida'; }).length;
+    return '<h4 class="mx-eh">Anotaciones de evaluadores <span class="mx-muted">· ' + pend + (pend === 1 ? ' pendiente' : ' pendientes') + ' de ' + l.length + '</span></h4>' +
+      l.slice().reverse().map(function(a) {
+        return '<div class="mx-an' + (a.e === 'atendida' ? ' ok' : '') + '" data-aid="' + esc(a.id) + '"><div class="mx-an-h"><strong>' + esc(a.ev || 'Evaluador') + '</strong><span class="mx-muted">' + esc(a.f) + '</span></div><p>' + esc(a.x).replace(/\n/g, '<br>') + '</p>' +
+          '<button class="mx-btn sec sm" type="button" data-act="anotatender" data-v="' + (a.e === 'atendida' ? '0' : '1') + '">' + (a.e === 'atendida' ? 'Volver a abrir' : 'Marcar como atendida') + '</button></div>';
+      }).join('');
   }
 
   function pintarEncabezadoBase(st) {
@@ -953,6 +991,154 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     if (DEMO) return false;
     try { var b = new Blob([texto], { type: mime }), u = URL.createObjectURL(b), a = document.createElement('a'); a.href = u; a.download = nombre; document.body.appendChild(a); a.click(); setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(u); }, 600); return true; } catch (e) { return false; }
   }
+
+   
+  var MIME_DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  var CRCT = null;
+  function crc32(u8) {
+    if (!CRCT) { CRCT = []; for (var n = 0; n < 256; n++) { var c0 = n; for (var k = 0; k < 8; k++) c0 = c0 & 1 ? 0xEDB88320 ^ (c0 >>> 1) : c0 >>> 1; CRCT[n] = c0 >>> 0; } }
+    var c = 0xFFFFFFFF;
+    for (var i = 0; i < u8.length; i++) c = CRCT[(c ^ u8[i]) & 255] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+  function zipStore(files) {
+    var enc = new TextEncoder(), parts = [], cd = [], off = 0, cdl = 0;
+    files.forEach(function(f) {
+      var nm = enc.encode(f.n), d = enc.encode(f.t), crc = crc32(d), h = new DataView(new ArrayBuffer(30)), c = new DataView(new ArrayBuffer(46));
+      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(12, 0x21, true);
+      h.setUint32(14, crc, true); h.setUint32(18, d.length, true); h.setUint32(22, d.length, true); h.setUint16(26, nm.length, true);
+      parts.push(new Uint8Array(h.buffer), nm, d);
+      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(14, 0x21, true);
+      c.setUint32(16, crc, true); c.setUint32(20, d.length, true); c.setUint32(24, d.length, true); c.setUint16(28, nm.length, true); c.setUint32(42, off, true);
+      cd.push(new Uint8Array(c.buffer), nm); cdl += 46 + nm.length; off += 30 + nm.length + d.length;
+    });
+    var e = new DataView(new ArrayBuffer(22));
+    e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, cdl, true); e.setUint32(16, off, true);
+    return new Blob(parts.concat(cd, [new Uint8Array(e.buffer)]), { type: MIME_DOCX });
+  }
+
+  var NS_W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+  function xe(t) { return String(t == null ? '' : t).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '').replace(/[&<>"]/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function wr(t, o) {
+    o = o || {};
+    var pr = (o.b ? '<w:b/>' : '') + (o.i ? '<w:i/>' : '') + (o.color ? '<w:color w:val="' + o.color + '"/>' : '') + (o.sz ? '<w:sz w:val="' + o.sz + '"/><w:szCs w:val="' + o.sz + '"/>' : '');
+    return '<w:r>' + (pr ? '<w:rPr>' + pr + '</w:rPr>' : '') + '<w:t xml:space="preserve">' + xe(t) + '</w:t></w:r>';
+  }
+  function wp(runs, o) {
+    o = o || {};
+    var pr = (o.style ? '<w:pStyle w:val="' + o.style + '"/>' : '') + (o.keep ? '<w:keepNext/>' : '') + (o.pb ? '<w:pageBreakBefore/>' : '') +
+      (o.shd ? '<w:shd w:val="clear" w:color="auto" w:fill="' + o.shd + '"/>' : '') +
+      (o.before != null || o.after != null ? '<w:spacing' + (o.before != null ? ' w:before="' + o.before + '"' : '') + (o.after != null ? ' w:after="' + o.after + '"' : '') + '/>' : '') +
+      (o.ind ? '<w:ind w:left="' + o.ind + '" w:hanging="' + (o.hang || 0) + '"/>' : '') + (o.jc ? '<w:jc w:val="' + o.jc + '"/>' : '');
+    return '<w:p>' + (pr ? '<w:pPr>' + pr + '</w:pPr>' : '') + runs + '</w:p>';
+  }
+  function wt(t, o) { return wp(wr(t, o), o); }
+  function wc(w, content, o) {
+    o = o || {};
+    return '<w:tc><w:tcPr><w:tcW w:w="' + w + '" w:type="dxa"/>' + (o.span ? '<w:gridSpan w:val="' + o.span + '"/>' : '') +
+      (o.left ? '<w:tcBorders><w:left w:val="single" w:sz="36" w:space="0" w:color="' + o.left + '"/></w:tcBorders>' : '') +
+      (o.shd ? '<w:shd w:val="clear" w:color="auto" w:fill="' + o.shd + '"/>' : '') + (o.mid ? '<w:vAlign w:val="center"/>' : '') + '</w:tcPr>' + content + '</w:tc>';
+  }
+  function wtbl(widths, rows, borde) {
+    var tot = widths.reduce(function(a, x) { return a + x; }, 0), bd = borde === false ? 'none' : 'single';
+    return '<w:tbl><w:tblPr><w:tblW w:w="' + tot + '" w:type="dxa"/><w:tblLayout w:type="fixed"/><w:tblBorders>' +
+      ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(function(s) { return '<w:' + s + ' w:val="' + bd + '" w:sz="4" w:space="0" w:color="C5D0E0"/>'; }).join('') +
+      '</w:tblBorders><w:tblCellMar><w:top w:w="70" w:type="dxa"/><w:left w:w="110" w:type="dxa"/><w:bottom w:w="70" w:type="dxa"/><w:right w:w="110" w:type="dxa"/></w:tblCellMar></w:tblPr>' +
+      '<w:tblGrid>' + widths.map(function(w) { return '<w:gridCol w:w="' + w + '"/>'; }).join('') + '</w:tblGrid>' +
+      rows.map(function(r) { return '<w:tr><w:trPr>' + (r.split ? '' : '<w:cantSplit/>') + (r.hdr ? '<w:tblHeader/>' : '') + '</w:trPr>' + r.c + '</w:tr>'; }).join('') + '</w:tbl>' + wp('', { after: 60 });
+  }
+
+  var W_PAG = 9972, C_NAVY = '15284B', C_BLUE = '004E8C', C_LIME = 'CADD30', C_TINT = 'E3EDF7';
+  function anioConv() { return (ESTADO && ESTADO.anio) ? String(ESTADO.anio) : String(new Date().getFullYear()); }
+
+  function wBanda(l1, l2, l3) {
+    return wtbl([W_PAG], [{ c: wc(W_PAG, wt(l1, { b: 1, color: C_LIME, sz: 18, after: 40 }) + wt(l2, { b: 1, color: 'FFFFFF', sz: 36, after: 40 }) + wt(l3, { color: 'DCE6F4', sz: 21, after: 0 }), { shd: C_NAVY }) }], false);
+  }
+
+  function wInstrucciones() {
+    var pasos = [
+      'Cada base dura 10 minutos: 1 de lectura del caso, 7 dentro de la estación y 2 de retroalimentación.',
+      'En las siguientes páginas encontrará, por base, el caso clínico y las actividades por evaluar, con lo que se espera del candidato y los puntos de cada una. Si ve algo por corregir en el caso, puede escribirlo en «Anotaciones de evaluador», debajo del caso en la plataforma.',
+      'Ingrese a la plataforma con la clave que le entregó la Coordinación y escriba su nombre y apellido.',
+      'Al terminar con cada candidato pulse «Calificar». La plataforma confirma con el mensaje «Información guardada».'
+    ];
+    var x = wt('Antes de comenzar', { style: 'Heading1' });
+    pasos.forEach(function(p, i) { x += wp(wr((i + 1) + '.  ', { b: 1, color: C_BLUE }) + wr(p), { ind: 360, hang: 360, after: 90 }); });
+    return x;
+  }
+
+  function wBase(st, o) {
+    o = o || {};
+    var doc = baseDe(st.id).docente, c = DB.casos[st.id], x = '';
+    if (o.pb) x += wp('', { pb: true, after: 0 });
+    x += wBanda('MEDICINA DE URGENCIAS · MiniCEX ' + anioConv(), 'Base ' + st.num + ' · ' + st.nombre, 'Información para el docente evaluador · Universidad CES');
+    var fila = function(k, v) { return { c: wc(3000, wt(k, { b: 1, color: C_NAVY, after: 0 }), { shd: C_TINT, mid: 1 }) + wc(W_PAG - 3000, wt(v, { after: 0 }), { mid: 1 }) }; };
+    x += wtbl([3000, W_PAG - 3000], [
+      fila('Docente evaluador a cargo', doc || 'Por asignar'),
+      fila('Base y estación', 'Base ' + st.num + ' · ' + st.nombre),
+      fila('Actividades por calificar', String(st.items.length)),
+      fila('Puntaje total de la base', fmt(st.max) + ' puntos')
+    ]);
+    if (o.inst) x += wInstrucciones();
+    if (c && c.x) {
+      x += wt('Caso clínico' + (c.t ? ': ' + c.t : ''), { style: 'Heading1' });
+      x += wtbl([W_PAG], [{ c: wc(W_PAG, c.x.split('\n').filter(function(l) { return l.trim(); }).map(function(l) { return wt(l, { after: 90 }); }).join(''), { shd: 'F4F7FB', left: C_LIME }), split: 1 }], false);
+    }
+    x += wt('Actividades a evaluar', { style: 'Heading1' });
+    if (!st.items.length) return x + wt('Esta base aún no tiene rúbrica cargada.', { i: 1 });
+    var W = [620, 2650, 5300, 1402], rows = [{ hdr: 1, c: ['N.º', 'Actividad', 'Qué se espera del candidato', 'Puntos'].map(function(t, i) { return wc(W[i], wt(t, { b: 1, color: 'FFFFFF', sz: 19, after: 0, jc: i === 0 || i === 3 ? 'center' : null }), { shd: C_NAVY, mid: 1 }); }).join('') }];
+    st.secciones.forEach(function(sec) {
+      var sub = sec.idx.reduce(function(a, it) { return red(a + it.p); }, 0);
+      if (st.secciones.length > 1 || sec.t !== 'Actividades') rows.push({ c: wc(W_PAG, wp(wr(sec.t, { b: 1, color: C_NAVY }) + wr('  ·  ' + fmt(sub) + ' puntos', { color: C_BLUE, sz: 19 }), { after: 0, keep: 1 }), { span: 4, shd: C_TINT }) });
+      sec.idx.forEach(function(it) {
+        var crit = wt(it.r || '—', { sz: 19, after: 0 });
+        rows.push({ c: wc(W[0], wt(String(it.i + 1), { b: 1, color: C_BLUE, after: 0, jc: 'center' }), { mid: 1 }) + wc(W[1], wt(it.t, { b: 1, sz: 19, after: 0 })) + wc(W[2], crit) + wc(W[3], wt(fmt(it.p), { b: 1, after: 0, jc: 'center' }), { mid: 1 }) });
+      });
+    });
+    rows.push({ c: wc(W[0] + W[1] + W[2], wt('Total de la base', { b: 1, color: C_NAVY, after: 0, jc: 'right' }), { span: 3, shd: C_TINT }) + wc(W[3], wt(fmt(st.max), { b: 1, color: C_NAVY, after: 0, jc: 'center' }), { shd: C_TINT }) });
+    return x + wtbl(W, rows);
+  }
+
+  function wPortada(bases) {
+    var x = wBanda('UNIVERSIDAD CES · FACULTAD DE CIENCIAS DE LA SALUD', 'MiniCEX · Medicina de Urgencias ' + anioConv(), 'Información para los docentes evaluadores');
+    x += wt('Bases de la prueba', { style: 'Heading1' });
+    var W = [800, 3400, 3072, 1200, 1500];
+    var rows = [{ hdr: 1, c: ['Base', 'Estación', 'Docente a cargo', 'Actividades', 'Puntos'].map(function(t, i) { return wc(W[i], wt(t, { b: 1, color: 'FFFFFF', sz: 19, after: 0, jc: i === 0 || i > 2 ? 'center' : null }), { shd: C_NAVY }); }).join('') }];
+    bases.forEach(function(st) {
+      rows.push({ c: wc(W[0], wt(String(st.num), { b: 1, color: C_BLUE, after: 0, jc: 'center' })) + wc(W[1], wt(st.nombre, { b: 1, after: 0 })) + wc(W[2], wt(baseDe(st.id).docente || 'Por asignar', { after: 0 })) +
+        wc(W[3], wt(st.items.length ? String(st.items.length) : '—', { after: 0, jc: 'center' })) + wc(W[4], wt(st.items.length ? fmt(st.max) : '—', { after: 0, jc: 'center' })) });
+    });
+    return x + wtbl(W, rows) + wInstrucciones();
+  }
+
+  function docxBlob(cuerpo, titulo) {
+    var sect = '<w:sectPr><w:footerReference w:type="default" r:id="rId2"/><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="567" w:footer="567" w:gutter="0"/></w:sectPr>';
+    var hd = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+    var estilos = hd + '<w:styles ' + NS_W + '><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri" w:eastAsia="Calibri"/><w:sz w:val="21"/><w:szCs w:val="21"/><w:lang w:val="es-CO"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="100" w:line="264" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>' +
+      '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>' +
+      '<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="300" w:after="110"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:b/><w:color w:val="' + C_NAVY + '"/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr></w:style>' +
+      '<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="80"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:color w:val="' + C_BLUE + '"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr></w:style>' +
+      '<w:style w:type="table" w:default="1" w:styleId="TableNormal"><w:name w:val="Normal Table"/><w:uiPriority w:val="99"/><w:semiHidden/><w:tblPr><w:tblInd w:w="0" w:type="dxa"/><w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="108" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="108" w:type="dxa"/></w:tblCellMar></w:tblPr></w:style></w:styles>';
+    var pie = hd + '<w:ftr ' + NS_W + '>' + wp(wr('MiniCEX Urgencias · Universidad CES · Página ', { sz: 17, color: '556070' }) + '<w:r><w:rPr><w:sz w:val="17"/><w:color w:val="556070"/></w:rPr><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:rPr><w:sz w:val="17"/><w:color w:val="556070"/></w:rPr><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r><w:r><w:rPr><w:sz w:val="17"/><w:color w:val="556070"/></w:rPr><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:rPr><w:sz w:val="17"/><w:color w:val="556070"/></w:rPr><w:t>1</w:t></w:r><w:r><w:rPr><w:sz w:val="17"/><w:color w:val="556070"/></w:rPr><w:fldChar w:fldCharType="end"/></w:r>', { jc: 'center', after: 0 }) + '</w:ftr>';
+    var core = hd + '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>' + xe(titulo) + '</dc:title><dc:creator>Posgrados Clínicos · Universidad CES</dc:creator></cp:coreProperties>';
+    return zipStore([
+      { n: '[Content_Types].xml', t: hd + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>' },
+      { n: '_rels/.rels', t: hd + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>' },
+      { n: 'word/_rels/document.xml.rels', t: hd + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/></Relationships>' },
+      { n: 'word/document.xml', t: hd + '<w:document ' + NS_W + '><w:body>' + cuerpo + sect + '</w:body></w:document>' },
+      { n: 'word/styles.xml', t: estilos }, { n: 'word/footer1.xml', t: pie }, { n: 'docProps/core.xml', t: core }
+    ]);
+  }
+
+  function slug(t) { return norm(t).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+  function docxUnaBase(st) { return docxBlob(wBase(st, { inst: true }), 'MiniCEX Urgencias · Base ' + st.num + ' · ' + st.nombre); }
+  function docxTodas() {
+    var cuerpo = wPortada(BS);
+    BS.forEach(function(st) { cuerpo += wBase(st, { pb: true }); });
+    return docxBlob(cuerpo, 'MiniCEX Urgencias · Documento para evaluadores');
+  }
+  function avisoWord(ok, n) { msg('mx-msg-w', DEMO ? 'En la vista previa las descargas están desactivadas. En la página real se descarga ' + n + '.' : (ok ? 'Se descargó ' + n + '.' : 'No se pudo generar el archivo en este navegador.')); }
+
   function msg(id, t) { var e = document.getElementById(id); if (e) e.textContent = t; }
   function avisoDesc(ok, n) { msg('mx-msg-r', DEMO ? 'En la vista previa las descargas están desactivadas. En la página real se descarga ' + n + '.' : (ok ? 'Se descargó ' + n + '.' : 'No se pudo generar el archivo en este navegador.')); }
 
@@ -1081,10 +1267,12 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     box.innerHTML = h + '</tbody></table></div>';
   }
 
+  function npend(b) { return (DB.anot || []).filter(function(a) { return a.b === b && a.e !== 'atendida'; }).length; }
+
   function vistaAdmin() {
     var rubs = BS.map(function(s) {
       return '<div class="mx-card2" data-b="' + s.id + '"><div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px"><div><span class="mx-lbl" style="margin:0">Base ' + s.num + '</span><strong>' + esc(s.nombre) + '</strong></div>' +
-        '<div class="mx-row"><span class="mx-chip ' + (s.items.length ? 'ok' : '') + '">' + (s.items.length ? s.items.length + ' actividades · ' + fmt(s.max) + ' puntos' : 'Sin rúbrica') + '</span>' + (DB.casos[s.id] ? '<span class="mx-chip ok">Con caso clínico</span>' : '') + '<button class="mx-btn sm" type="button" data-act="editabrir">Editar caso y rúbrica</button><button class="mx-btn sec sm" type="button" data-act="rubabrir">Cargar desde archivo</button></div></div>' +
+        '<div class="mx-row"><span class="mx-chip ' + (s.items.length ? 'ok' : '') + '">' + (s.items.length ? s.items.length + ' actividades · ' + fmt(s.max) + ' puntos' : 'Sin rúbrica') + '</span>' + (DB.casos[s.id] ? '<span class="mx-chip ok">Con caso clínico</span>' : '') + '<button class="mx-btn sm" type="button" data-act="editabrir">Editar caso y rúbrica</button>' + (npend(s.id) ? '<button class="mx-btn sec sm" type="button" data-act="editabrir">Anotaciones (' + npend(s.id) + ')</button>' : '') + '<button class="mx-btn sec sm" type="button" data-act="word">Descargar Word</button><button class="mx-btn sec sm" type="button" data-act="rubabrir">Cargar desde archivo</button></div></div>' +
         '<div class="mx-edit" data-edit hidden></div>' +
         '<div class="mx-rub" data-rub hidden><p class="mx-note" style="font-size:13px"><strong>Cómo cargarla.</strong> Llena la plantilla de rúbrica (una fila por actividad: <strong>Sección · Actividad · Lo realiza (criterio) · Puntos · No lo realiza</strong>) y sube el archivo, o copia las filas y pégalas abajo. Si el archivo trae arriba la fila <strong>Caso</strong> (título y texto del caso clínico), el caso se carga junto con la rúbrica y se muestra a los evaluadores antes del checklist.</p><p class="mx-note" style="font-size:13px" data-cmsg></p>' +
         '<div class="mx-row" style="margin-bottom:10px"><label class="mx-btn sec sm" for="mx-rf-' + s.id + '" style="cursor:pointer">Elegir archivo de la rúbrica</label><input id="mx-rf-' + s.id + '" data-rfile type="file" accept=".xlsx,.csv,.txt,.tsv" class="mx-sr"></div>' +
@@ -1102,7 +1290,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       '<section>' + band('Administración', 'Casos de las bases', IC.list) + '<div class="mx-sec-body"><p class="mx-note">Cada base muestra a los evaluadores el texto del caso encima de su rúbrica. Sube el archivo de casos (columnas <strong>Base · Título · Texto</strong>); cada fila reemplaza el caso de la base que indica la columna Base.</p>' +
       '<div class="mx-row"><label class="mx-btn sec" for="mx-file-casos" style="cursor:pointer">Elegir archivo de casos</label><input id="mx-file-casos" type="file" accept=".xlsx,.csv,.txt,.tsv" class="mx-sr"></div><p class="mx-msg" id="mx-msg-casos" role="status"></p>' +
       '<div class="mx-chips">' + BS.map(function(s) { var c = DB.casos[s.id]; return '<span class="mx-chip ' + (c ? 'ok' : '') + '">Base ' + s.num + ': ' + (c ? 'caso cargado' : 'sin caso') + '</span>'; }).join('') + '</div></div></section>' +
-      '<section>' + band('Administración', 'Rúbricas de las seis bases', IC.list) + '<div class="mx-sec-body"><p class="mx-note">Cada rúbrica se carga una vez y queda para todos los docentes. Los puntos de cada actividad definen su peso; el resultado de cada base es el porcentaje de puntos obtenidos sobre los puntos de esa base.</p><div style="display:flex;flex-direction:column;gap:12px">' + rubs + '</div></div></section>' +
+      '<section>' + band('Administración', 'Rúbricas de las seis bases', IC.list) + '<div class="mx-sec-body"><div class="mx-card2" style="margin-bottom:12px"><h3>Documento Word para los evaluadores</h3><p class="mx-muted" style="margin:0 0 10px">Descarga todas las bases en un solo Word, con portada, docente a cargo, instrucciones, caso clínico y lista de chequeo con puntos. También puedes descargar una sola base con el botón «Descargar Word» de cada tarjeta.</p><div class="mx-row"><button class="mx-btn" type="button" data-act="wordtodo">Descargar todas las bases (Word)</button></div><p class="mx-msg" id="mx-msg-w" role="status"></p></div><p class="mx-note">Cada rúbrica se carga una vez y queda para todos los docentes. Los puntos de cada actividad definen su peso; el resultado de cada base es el porcentaje de puntos obtenidos sobre los puntos de esa base.</p><div style="display:flex;flex-direction:column;gap:12px">' + rubs + '</div></div></section>' +
       '<section>' + band('Administración', 'Terminar la sesión de examen', IC.gear) + '<div class="mx-sec-body"><div class="mx-card2"><p class="mx-note" style="margin:0 0 12px">Guarda una copia del consolidado y del detalle en hojas nuevas del Excel de respaldo (llamadas «Archivo…») y deja vacíos los candidatos y las calificaciones para la próxima sesión. Las rúbricas y los docentes se conservan. Envía o descarga el consolidado antes de terminar.</p>' +
       '<div class="mx-row"><button class="mx-btn" type="button" data-act="correo">Enviar el consolidado al correo de Posgrados Clínicos</button><button class="mx-btn danger" type="button" data-act="nueva">Terminar sesión y vaciar candidatos</button></div><p class="mx-msg" id="mx-msg-n" role="status"></p></div></div></section>';
     listaCands();
@@ -1124,7 +1312,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
   function pintarEditor(card, aviso) {
     var st = BS[+card.getAttribute('data-b') - 1], c = DB.casos[st.id] || { t: '', x: '' }, bloq = hayCalifs(st.id);
     var box = card.querySelector('[data-edit]');
-    box.innerHTML = '<p class="mx-note" style="font-size:13px">Corrige aquí la ortografía y los textos sin montar un Excel nuevo. Los docentes ven los cambios al actualizar la página.</p>' +
+    box.innerHTML = anotLista(st.id) + '<p class="mx-note" style="font-size:13px">Corrige aquí la ortografía y los textos sin montar un Excel nuevo. Los docentes ven los cambios al actualizar la página.</p>' +
       '<h4 class="mx-eh">Caso clínico</h4><label class="mx-lbl" for="mx-ct-' + st.id + '">Título del caso</label><input class="mx-in" id="mx-ct-' + st.id + '" data-ctit maxlength="200" value="' + esc(c.t) + '">' +
       '<label class="mx-lbl" for="mx-cx-' + st.id + '" style="margin-top:10px">Texto del caso (un párrafo por línea)</label><textarea class="mx-ta" id="mx-cx-' + st.id + '" data-ctxt maxlength="8000" style="min-height:200px">' + esc(c.x) + '</textarea>' +
       '<h4 class="mx-eh">Actividades de la rúbrica <span class="mx-muted" data-etot></span></h4>' +
@@ -1203,6 +1391,20 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     if (t.hasAttribute('data-go')) { ir('#/' + t.getAttribute('data-go')); window.scrollTo(0, 0); return; }
     var a2 = t.getAttribute('data-act');
     if (a2 === 'set') { calificar(t); return; }
+    if (a2 === 'anotabrir') { var ab = document.getElementById('mx-anot-box'), op = ab.hidden; ab.hidden = !op; t.setAttribute('aria-expanded', op ? 'true' : 'false'); t.querySelector('.mx-anot-c').textContent = op ? '–' : '+'; if (op) document.getElementById('mx-anot-ta').focus(); return; }
+    if (a2 === 'anotenviar') {
+      var ta = document.getElementById('mx-anot-ta'), tx = ta.value.replace(/\r\n?/g, '\n').trim(), bb = document.getElementById('mx-anot').getAttribute('data-b');
+      if (!tx) { msg('mx-anot-msg', 'Escribe primero tu anotación.'); ta.focus(); return; }
+      t.disabled = true; msg('mx-anot-msg', 'Enviando…');
+      Promise.resolve(Store.anotar(bb, tx)).then(function() { ta.value = ''; msg('mx-anot-n', '0 / 1000'); msg('mx-anot-msg', '✓ Anotación enviada a la Coordinación. ¡Gracias!'); t.disabled = false; if (sess.rol === 'admin') { DB.anot.push({ id: 'l' + Date.now(), f: hoy(), b: bb, ev: sess.nombre || 'Coordinación', x: tx, e: '' }); } }, function() { t.disabled = false; msg('mx-anot-msg', 'No se pudo enviar. Revisa tu conexión e inténtalo de nuevo; tu texto sigue aquí.'); });
+      return;
+    }
+    if (a2 === 'anotatender') {
+      var an = t.closest('[data-aid]'), aid = an.getAttribute('data-aid'), v = t.getAttribute('data-v') === '1', cd = t.closest('[data-b]');
+      t.disabled = true;
+      Promise.resolve(Store.atender(aid, v)).then(function() { (DB.anot || []).forEach(function(x) { if (x.id === aid) x.e = v ? 'atendida' : ''; }); var bid = cd.getAttribute('data-b'); vistaAdmin(); var nc = document.querySelector('.mx-card2[data-b="' + bid + '"]'); if (nc) { nc.querySelector('[data-edit]').hidden = false; pintarEditor(nc); } }, function() { t.disabled = false; });
+      return;
+    }
     if (a2 === 'notaabrir') { var nr = t.closest('.mx-note-row'), i0 = +t.closest('.mx-it').getAttribute('data-i'); nr.innerHTML = '<input class="mx-note-in" data-nota maxlength="120" aria-label="Observación de la actividad ' + (i0 + 1) + '" placeholder="Observación breve (opcional)">'; nr.firstChild.focus(); return; }
     if (a2 === 'elegir') { elegir(t.getAttribute('data-cc')); return; }
     if (a2 === 'siguiente') { siguiente(); return; }
@@ -1249,6 +1451,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       return;
     }
     var card = t.closest('[data-b]');
+    if (a2 === 'word' && card) { var sw = BS[+card.getAttribute('data-b') - 1]; if (!sw.items.length) { msg('mx-msg-w', 'La base ' + sw.num + ' aún no tiene rúbrica cargada.'); return; } var nw = 'MiniCEX-Urgencias-Base-' + sw.num + '-' + slug(sw.nombre) + '.docx'; avisoWord(descargar(nw, docxUnaBase(sw), MIME_DOCX), nw); return; }
+    if (a2 === 'wordtodo') { var nt = 'MiniCEX-Urgencias-Bases-para-evaluadores.docx'; avisoWord(descargar(nt, docxTodas(), MIME_DOCX), nt); return; }
     if (a2 === 'editabrir' && card) { var eb = card.querySelector('[data-edit]'); if (eb.hidden) { pintarEditor(card); eb.hidden = false; } else eb.hidden = true; return; }
     if (a2 === 'editcerrar' && card) { card.querySelector('[data-edit]').hidden = true; vistaAdmin(); return; }
     if (a2 === 'editguardar' && card) { guardarEdit(card); return; }
@@ -1275,6 +1479,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     if (t.id === 'mx-sin') { filtrarBases(); return; }
     if (t.hasAttribute('data-bnom')) { var bn = BS[+t.getAttribute('data-bnom') - 1]; bn.nombre = t.value.trim() || BASES[+bn.id - 1]; dirtyNom[bn.id] = true; dirtyDoc[bn.id] = true; programarGuardado(); return; }
     if (t.hasAttribute('data-doc')) { baseDe(t.getAttribute('data-doc')).docente = t.value.trim(); dirtyDoc[t.getAttribute('data-doc')] = true; programarGuardado(); return; }
+    if (t.id === 'mx-anot-ta') { msg('mx-anot-n', t.value.length + ' / 1000'); msg('mx-anot-msg', ''); return; }
     if (t.id === 'mx-cin') { opciones(t.value); return; }
     if (t.id === 'mx-fcons') { tablaConsolidado(); return; }
     if (t.hasAttribute('data-rta')) { resumenRub(t.closest('[data-b]')); return; }
