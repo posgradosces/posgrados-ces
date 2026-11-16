@@ -213,6 +213,29 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .mx-an.ok { background: #f4f7fb; border-color: var(--line); opacity: .8; }
 .mx-an-h { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; font-size: 13px; }
 .mx-an p { margin: 4px 0 8px; font-size: 13.5px; line-height: 1.55; color: var(--txt); }
+.mx-hello { padding: 18px 22px; border-radius: 16px; background: #fff; border: 1px solid var(--line); border-left: 5px solid var(--lime); box-shadow: 0 6px 18px rgba(21,40,75,.06); }
+.mx-hello .e { display: block; color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.mx-hello h2 { margin: 2px 0 4px; color: var(--navy); font-size: clamp(22px, 3.2vw, 30px); font-weight: 800; line-height: 1.2; letter-spacing: -.3px; }
+.mx-hello p { margin: 0; color: #46556d; font-size: 14px; line-height: 1.55; }
+.mx-pillink.tour { background: var(--lime); border-color: var(--lime); color: var(--navy); font-weight: 800; white-space: nowrap; }
+#tour_block { position: fixed; inset: 0; z-index: 85; background: transparent; }
+#tour_spot { position: fixed; z-index: 90; pointer-events: none; border-radius: 14px; box-shadow: 0 0 0 9999px rgba(21, 40, 75, .62); outline: 3px solid var(--lime); transition: left .25s, top .25s, width .25s, height .25s; }
+#tour_panel { position: fixed; z-index: 100; right: 20px; bottom: 20px; width: min(430px, calc(100vw - 24px)); background: #fff; border-radius: 16px; padding: 18px; box-shadow: 0 12px 40px rgba(0, 0, 0, .35); display: flex; flex-direction: column; gap: 12px; font-family: inherit; color: #1c2b4a; }
+#tour_panel.top { bottom: auto; top: 20px; }
+#tour_panel h3 { margin: 0; font-size: 18px; color: var(--navy); }
+#tour_panel p { margin: 0; font-size: 14px; line-height: 1.55; color: #46556d; }
+.tbar { display: flex; gap: 3px; } .tbar i { flex: 1; height: 6px; border-radius: 3px; display: block; }
+.tph { display: flex; justify-content: space-between; align-items: center; gap: 10px; } .tph b { font-size: 12px; color: var(--blue); }
+.tph button { border: 0; background: none; color: #46556d; font: inherit; font-size: 13px; cursor: pointer; min-height: 36px; padding: 0 6px; }
+.tpf { display: flex; justify-content: space-between; gap: 10px; }
+.tno { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 14px; min-height: 44px; cursor: pointer; } .tno input { width: 20px; height: 20px; }
+.mx-tmodal { position: fixed; inset: 0; z-index: 110; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(21, 40, 75, .62); font-family: inherit; }
+.mx-tbox { width: min(460px, 100%); background: #fff; border-radius: 18px; padding: 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 16px 50px rgba(0, 0, 0, .4); color: #1c2b4a; }
+.mx-tbox h2 { margin: 0; font-size: 24px; color: var(--navy); } .mx-tbox p { margin: 0; font-size: 14.5px; line-height: 1.55; color: #46556d; }
+.mx-tbox .tem { width: 48px; height: 48px; border-radius: 14px; background: var(--tint); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.mx-tbox .tbtns { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 700px) { #tour_panel { right: 12px; left: 12px; bottom: 12px; width: auto; } #tour_panel.top { top: 12px; bottom: auto; } }
+
 
 .mx-clist { margin-top: 14px; border: 1px solid var(--line); border-radius: 14px; overflow: auto; max-height: 340px; background: #fff; }
 .mx-card2 { padding: 18px 20px; border-radius: 16px; background: #fff; border: 1px solid var(--line); box-shadow: 0 6px 18px rgba(21, 40, 75, .05); }
@@ -517,13 +540,14 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
 
   function barra() {
     var admin = sess.rol === 'admin';
-    return '<div class="mx-start" style="padding:12px 18px"><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">' +
+    return '<div class="mx-start" id="mx-barra" style="padding:12px 18px"><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">' +
       '<span class="mx-chip ' + (admin ? 'ok' : '') + '">' + (admin ? 'Administración' : 'Evaluador') + '</span>' + (admin && cerrada() ? '<span class="mx-chip" style="background:#fff3cd;color:#664d03">Página cerrada para docentes</span>' : '') +
       '<strong style="font-size:13.5px">' + esc(sess.nombre || 'Coordinación') + '</strong>' +
       '<span class="mx-chip" id="mx-sync" role="status"></span></div>' +
       '<div class="mx-chips"><button class="mx-pillink" type="button" data-go="">Inicio</button>' +
       '<button class="mx-pillink" type="button" data-go="consolidado">Consolidado</button>' +
       (admin ? '<button class="mx-pillink" type="button" data-go="admin">Administración</button>' : '') +
+      '<button class="mx-pillink tour" type="button" data-tour="boton">▶ Dame mi recorrido virtual</button>' +
       '<button class="mx-pillink" type="button" data-act="actualizar">Actualizar</button>' +
       '<button class="mx-pillink" type="button" data-act="salir">Cerrar sesión</button></div></div>';
   }
@@ -594,7 +618,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       var nombre = nom.value.trim(), tmp = crearStore(inp.value, nombre);
       tmp.login(nombre, inp.value).then(function(r) {
         go.textContent = 'Ingresar';
-        entrar({ rol: r.rol, nombre: nombre, clave: inp.value, base: r.base || '', escala: r.escala });
+        entrar({ rol: r.rol, nombre: nombre, clave: inp.value, base: r.base || '', escala: r.escala }, true);
       }, function(e) {
         go.textContent = 'Ingresar';
         var c = e && e.code;
@@ -607,19 +631,20 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     });
   }
 
-  function entrar(s) {
+  function entrar(s, nuevo) {
     sess = s;
     ssSet('mx_sess', JSON.stringify(s));
     ssSet('mx_nombre', s.nombre);
     Store = crearStore(s.clave, s.nombre);
     APP.innerHTML = '<p class="mx-vacio">Cargando datos…</p>';
-    Store.load().then(function(d) { if (d) aplicar(d); ultimaSync = Date.now(); iniciarSondeo(); pintar(); }).catch(function(e) {
+    Store.load().then(function(d) { if (d) aplicar(d); ultimaSync = Date.now(); iniciarSondeo(); pintar(); if (nuevo) setTimeout(tourAuto, 500); }).catch(function(e) {
       if (e && e.code === 'cerrada') { sess = null; ssSet('mx_sess', ''); ESTADO = { cerrada: 'no' }; pintar(); return; }
       salir(e && e.code === 'clave' ? 'La clave ya no es válida. Ingresa de nuevo con la clave vigente.' : 'No pudimos cargar los datos. Revisa tu conexión e inténtalo de nuevo.');
     });
   }
 
   function salir(aviso) {
+    if (typeof tourSalir === 'function' && tour) { tour.prev = undefined; tourSalir(); }
     sess = null; Store = null; dirty = {}; dirtyDoc = {}; dirtyNom = {}; dirtyCands = false; dirtyRub = false;
     ssSet('mx_sess', ''); clearInterval(pollT);
     hero(true);
@@ -641,6 +666,158 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
 
   function band(e, t, ic) { return '<div class="mx-band"><span class="mx-ico" aria-hidden="true">' + ic + '</span><span style="min-width:0"><span class="e">' + e + '</span><span class="t">' + t + '</span></span></div>'; }
 
+   
+  function saludoNombre() {
+    var t = String(sess && sess.nombre || '').trim().split(/\s+/).filter(Boolean);
+    if (!t.length) return 'Coordinación';
+    var cap = function(w) { return w.charAt(0).toUpperCase() + w.slice(1); };
+    if (/^(dr|dra|doctor|doctora|prof|profe|profesor|profesora|mg|esp|enf|dres)\.?$/i.test(t[0]) && t[1]) return cap(t[0]) + ' ' + cap(t[1]);
+    return cap(t[0]);
+  }
+
+  function saludoHtml() {
+    var h = new Date().getHours(), mom = h < 12 ? 'Buenos días' : (h < 19 ? 'Buenas tardes' : 'Buenas noches'), admin = sess.rol === 'admin', st = sess.base ? BS[+sess.base - 1] : null, t;
+    if (admin) t = 'Puedes abrir las seis bases, cargar candidatos y rúbricas, corregir los casos y descargar el Word para los evaluadores desde Administración.';
+    else if (st) t = 'Tienes asignada la base ' + st.num + ' · ' + st.nombre + '. Ábrela, califica a cada residente con su rúbrica y consulta el consolidado cuando lo necesites.';
+    else t = 'Abre la base que te corresponde, califica a cada residente con su rúbrica y consulta el consolidado cuando lo necesites.';
+    return '<div class="mx-hello"><span class="e">' + mom + '</span><h2>' + esc(saludoNombre()) + '</h2><p>' + esc(t) + '</p>' +
+      '<p style="margin-top:10px"><button class="mx-pillink tour" type="button" data-tour="boton">▶ Dame mi recorrido virtual</button></p></div>';
+  }
+
+  var tour = null, tourT = null;
+  function tourKey() { return 'mx_tour_off_' + norm(sess ? (sess.nombre || sess.rol) : ''); }
+  function tourSilenciado() { try { return localStorage.getItem(tourKey()) === '1'; } catch (e) { return false; } }
+  function tourSilenciar(v) { try { if (v) localStorage.setItem(tourKey(), '1'); else localStorage.removeItem(tourKey()); } catch (e) {} }
+  function $q(sel) { return document.querySelector(sel); }
+  function hashDe(h) { return String(h || '').replace(/^#\/?/, ''); }
+  function secDe(txt) {
+    var ts = document.querySelectorAll('.mx-band .t');
+    for (var i = 0; i < ts.length; i++) if (norm(ts[i].textContent).indexOf(norm(txt)) > -1) return ts[i].closest('section');
+    return null;
+  }
+
+  function tourPasos() {
+    var admin = sess.rol === 'admin', P = [], conItems = BS.filter(function(s) { return s.items.length; });
+    var st = (sess.base && !admin) ? BS[+sess.base - 1] : (conItems.filter(function(s) { return DB.casos[s.id]; })[0] || conItems[0] || BS[0]);
+    var rb = '#/base/' + st.id, hayItems = st.items.length > 0, hayCaso = !!(DB.casos[st.id] && DB.casos[st.id].x), c0 = null;
+    if (hayItems) c0 = DB.cands.filter(function(c) { return calc(c.cc, st).estado !== 'completa'; })[0] || DB.cands[0] || null;
+    var selC = function() { if (c0) { if (tour && tour.prev === undefined) tour.prev = ssGet('mx_sel_' + st.id); ssSet('mx_sel_' + st.id, c0.cc); } };
+    P.push({ ruta: '#/', sel: '.mx-hello', t: 'Tu bienvenida', x: 'Aquí te saludamos por tu nombre y te recordamos qué puedes hacer. Este recorrido es solo una demostración: no se guarda ni se califica nada mientras lo haces.' });
+    P.push({ ruta: '#/', sel: '#mx-barra', t: 'Tu barra de herramientas', x: 'Arriba ves tu rol y tu nombre, el estado de guardado («Guardado · hora») y los botones: Inicio, Consolidado' + (admin ? ', Administración' : '') + ', Actualizar y Cerrar sesión. Con «Dame mi recorrido virtual» repites este recorrido cuando quieras.' });
+    P.push({ ruta: '#/', sel: '#mx-cards', t: admin ? 'Las bases' : 'Elige tu base', x: (admin ? 'Aquí están las seis bases. ' : 'Pulsa la tarjeta de la base que te corresponde. ') + 'Cada tarjeta muestra el docente a cargo y cuántos residentes ya fueron evaluados en esa base.' });
+    P.push({ ruta: rb, sel: '.mx-title', t: 'Tu base', x: 'Cada base tiene su estación y su docente evaluador a cargo. Con «Volver a las bases» regresas al inicio.' });
+    if (hayCaso) P.push({ ruta: rb, sel: '#mx-caso', t: 'El caso de la estación', x: 'Antes de calificar, lee el caso clínico que verá el candidato. Siempre está encima de la rúbrica para que lo tengas a la mano.' });
+    if (hayCaso) P.push({ ruta: rb, sel: '#mx-anot', t: 'Anotaciones de evaluador', x: 'Si ves algo por corregir u observar en el caso, ábrelo aquí, escríbelo y pulsa «Enviar anotación». Le llega a la Coordinación y no modifica nada de lo que ven los demás.' });
+    if (hayItems) P.push({ ruta: rb, sel: '.mx-pick', t: 'Busca al residente', x: 'Escribe su nombre o cédula y elígelo de la lista; cada opción te dice si ya fue evaluado en esta base. «Siguiente pendiente» te lleva al próximo que falte.', pre: selC });
+    if (hayItems && c0) {
+      P.push({ ruta: rb, sel: '#mx-live', t: 'Residente y puntaje en vivo', x: 'Esta barra te acompaña mientras calificas: muestra al residente y el puntaje, que se actualiza con cada actividad que marcas.', pre: selC });
+      P.push({ ruta: rb, sel: '.mx-it', t: 'Actividad y lo que se espera', x: 'Cada actividad trae descrito lo que se espera del candidato y sus puntos. Léela con calma y compárala con lo que viste en la estación.', pre: selC });
+      P.push({ ruta: rb, pick: function() { var b = $q('.mx-it .mx-seg'); return b; }, t: 'Lo realiza / No lo realiza', x: 'Marca «Lo realiza» si el candidato cumplió la actividad (suma sus puntos) o «No lo realiza» si no. Si te equivocas, vuelve a pulsar la opción elegida y se desmarca.', pre: selC });
+      P.push({ ruta: rb, pick: function() { return $q('.mx-it .mx-note-row'); }, t: 'Observación breve', x: 'Si lo necesitas, añade una observación corta a una actividad (hasta 120 caracteres). Es opcional.', pre: selC });
+      P.push({ ruta: rb, sel: '#mx-foot', t: 'Resultado, observaciones y guardado', x: 'Abajo ves la nota de 0 a 5, el porcentaje de cumplimiento y cuántas actividades llevas. Hay un espacio de observaciones generales de la base. Cada cambio se guarda solo y queda registrado con tu nombre.', pre: selC });
+      P.push({ ruta: rb, sel: '.mx-final', t: 'Calificar', x: 'Cuando marques todas las actividades, pulsa «Calificar». La plataforma confirma con «Información guardada» y te deja elegir al siguiente residente.', pre: selC });
+    } else if (hayItems) {
+      P.push({ ruta: rb, sel: '#mx-rubrica', t: 'Aún no hay residentes', x: 'Cuando la Coordinación cargue a los residentes, podrás buscarlos aquí y calificarlos con la rúbrica de la base.' });
+    } else {
+      P.push({ ruta: rb, sel: '#mx-rubrica', t: 'Rúbrica por cargar', x: 'Esta base aún no tiene rúbrica. Cuando la Coordinación la cargue, aparecerá aquí con sus actividades y puntos.' });
+    }
+    P.push({ ruta: '#/consolidado', sel: '#mx-cons', t: 'El consolidado', x: 'Muestra a cada residente con su nota de 0 a 5 por base y su resultado final, de mayor a menor. Se ordena solo a medida que los docentes califican.' });
+    P.push({ ruta: '#/consolidado', sel: '.mx-seg', t: 'Nota o porcentaje', x: 'Cada base se califica por porcentaje de cumplimiento (puntos obtenidos ÷ puntos de la base) y se convierte a una nota de 0 a 5. El resultado final es el promedio de las seis bases. Aquí cambias entre ver la nota o el porcentaje.' });
+    P.push({ ruta: '#/consolidado', pick: function() { var b = $q('[data-act="csv"]'); return b ? b.parentNode : null; }, t: 'Descargas', x: 'Baja el consolidado en CSV (nota o porcentaje) y el detalle por actividad cuando lo necesites.' });
+    if (admin) {
+      P.push({ ruta: '#/admin', pick: function() { return secDe('Descargar Word'); }, t: 'Word para los evaluadores', x: 'Descarga un Word con el docente de cada base, su caso clínico y las actividades por evaluar con lo que se espera y los puntos. Sirve para que los docentes se preparen antes de empezar.' });
+      P.push({ ruta: '#/admin', pick: function() { return secDe('Docente a cargo'); }, t: 'Docente de cada base', x: 'Escribe el nombre del docente evaluador de cada base y, si hace falta, el nombre de la estación. Queda guardado para las próximas sesiones.' });
+      P.push({ ruta: '#/admin', pick: function() { return secDe('Candidatos'); }, t: 'Candidatos', x: 'Agrega a los residentes pegando desde Excel o cargando un archivo con Nombre, Apellidos y Cédula. Los docentes los ven de inmediato.' });
+      P.push({ ruta: '#/admin', pick: function() { return secDe('Casos de las bases'); }, t: 'Casos clínicos', x: 'Sube el archivo de casos o edítalos uno por uno en cada base. Cada caso aparece encima de la rúbrica.' });
+      P.push({ ruta: '#/admin', pick: function() { return secDe('Rúbricas de las seis bases'); }, t: 'Rúbricas y anotaciones', x: 'Edita el caso y las actividades de cada base, o cárgalas desde un archivo. Si los evaluadores dejan anotaciones, verás el botón «Anotaciones (n)» en la tarjeta de la base para leerlas y marcarlas como atendidas.' });
+      P.push({ ruta: '#/admin', pick: function() { return secDe('Terminar la sesión'); }, t: 'Al terminar el examen', x: 'Descarga el consolidado primero. Luego puedes guardar una copia en hojas «Archivo…» del Excel y dejar la página lista para la próxima convocatoria.' });
+    }
+    P.push({ fin: true, ruta: '#/', t: 'Listo', x: 'Ya conoces lo esencial. Puedes repetir el recorrido cuando quieras desde «Dame mi recorrido virtual».' });
+    return P;
+  }
+
+  function tourEsperar(f, ms) { return new Promise(function(ok) { var t0 = Date.now(); (function g() { var e = null; try { e = f(); } catch (x) {} if (e) ok(e); else if (Date.now() - t0 > ms) ok(null); else setTimeout(g, 120); })(); }); }
+  function tourElem(p) { return p.pick ? p.pick() : (p.sel ? $q(p.sel) : null); }
+
+  function tourBienvenida() {
+    if (document.getElementById('tour_modal')) return;
+    var d = document.createElement('div'); d.id = 'tour_modal'; d.className = 'mx-tmodal';
+    d.innerHTML = '<div class="mx-tbox" role="dialog" aria-modal="true" aria-labelledby="tm_t"><div class="tem" aria-hidden="true">👋</div><h2 id="tm_t">Hola, ' + esc(saludoNombre()) + '</h2>' +
+      '<p>Te acompaño por la plataforma en un par de minutos: cómo abrir tu base, calificar a un residente, dejar anotaciones sobre el caso y consultar el consolidado' + (sess.rol === 'admin' ? ', y cómo administrar la prueba' : '') + '. No se guarda nada mientras lo haces.</p>' +
+      '<div class="tbtns"><button class="mx-btn lime" type="button" data-tour="ini" id="tm_ini">Empezar el recorrido</button><button class="mx-btn sec" type="button" data-tour="ahora">Ahora no</button></div>' +
+      '<label class="tno"><input type="checkbox" id="tm_no"> No volver a mostrar este mensaje</label>' +
+      '<p class="mx-muted" style="font-size:12px;margin:0">Puedes retomarlo cuando quieras desde «Dame mi recorrido virtual».</p></div>';
+    document.body.appendChild(d);
+    var b = document.getElementById('tm_ini'); if (b) b.focus();
+  }
+  function tourCerrarModal() { var m = document.getElementById('tour_modal'); if (m) m.remove(); }
+  function tourAuto() {
+    if (!sess || tour || document.getElementById('tour_modal') || tourSilenciado()) return;
+    tourBienvenida();
+  }
+  function tourEmpezar() {
+    tourCerrarModal(); if (tour) return;
+    ['tour_block', 'tour_spot', 'tour_panel'].forEach(function(id) {
+      if (document.getElementById(id)) return;
+      var e = document.createElement('div'); e.id = id;
+      if (id === 'tour_panel') { e.setAttribute('role', 'dialog'); e.setAttribute('aria-label', 'Recorrido virtual'); }
+      document.body.appendChild(e);
+    });
+    tour = { i: 0, pasos: tourPasos(), n: 0, prev: undefined, bid: '' };
+    var admin = sess.rol === 'admin';
+    tour.bid = (sess.base && !admin) ? sess.base : ((BS.filter(function(s) { return s.items.length && DB.casos[s.id]; })[0] || BS.filter(function(s) { return s.items.length; })[0] || BS[0]).id);
+    tourT = setInterval(tourPosicion, 200); tourIr(0);
+  }
+  function tourSalir() {
+    if (tour && tour.prev !== undefined) ssSet('mx_sel_' + tour.bid, tour.prev);
+    clearInterval(tourT); tourT = null; tour = null;
+    ['tour_block', 'tour_spot', 'tour_panel', 'tour_modal'].forEach(function(id) { var e = document.getElementById(id); if (e) e.remove(); });
+    if (sess) pintar();
+  }
+  function tourPosicion() {
+    var s = document.getElementById('tour_spot'); if (!tour || !s) return;
+    var p = tour.pasos[tour.i], el = tour.cargando ? null : tourElem(p), pn = document.getElementById('tour_panel');
+    if (!el) { s.style.left = '50%'; s.style.top = '50%'; s.style.width = '0px'; s.style.height = '0px'; if (pn) pn.classList.remove('top'); return; }
+    var r = el.getBoundingClientRect(), m = 6;
+    s.style.left = (r.left - m) + 'px'; s.style.top = (r.top - m) + 'px'; s.style.width = (r.width + 2 * m) + 'px'; s.style.height = (r.height + 2 * m) + 'px';
+    if (pn) pn.classList.toggle('top', r.top + Math.min(r.height, 200) / 2 > window.innerHeight * 0.55);
+  }
+  function tourPanel() {
+    var pn = document.getElementById('tour_panel'); if (!tour || !pn) return;
+    var p = tour.pasos[tour.i], n = tour.pasos.length, ult = tour.i === n - 1;
+    pn.innerHTML = '<div class="tph"><b>Paso ' + (tour.i + 1) + ' de ' + n + '</b><button type="button" data-tour="salir">Salir del recorrido</button></div>' +
+      '<div class="tbar" aria-hidden="true">' + tour.pasos.map(function(_, k) { return '<i style="background:' + (k <= tour.i ? 'var(--blue)' : '#d3dcea') + '"></i>'; }).join('') + '</div>' +
+      '<h3>' + esc(p.t) + '</h3><p>' + esc(p.x) + '</p>' +
+      (ult ? '<label class="tno"><input type="checkbox" id="tp_no"' + (tourSilenciado() ? ' checked' : '') + '> No volver a mostrar el recorrido al entrar</label>' : '') +
+      '<div class="tpf">' + (tour.i > 0 ? '<button class="mx-btn sec" type="button" data-tour="atras">← Atrás</button>' : '<span></span>') + '<button class="mx-btn lime" type="button" data-tour="' + (ult ? 'fin' : 'sig') + '" id="tp_sig">' + (ult ? 'Terminar' : 'Siguiente →') + '</button></div>';
+    var b = document.getElementById('tp_sig'); if (b && document.activeElement && document.activeElement.tagName !== 'INPUT') b.focus({ preventScroll: true });
+  }
+  function tourIr(i) {
+    var T = tour; if (!T) return;
+    T.i = i; T.n += 1; var mi = T.n, p = T.pasos[i]; T.cargando = true; tourPanel();
+    var vigente = function() { return tour === T && T.n === mi; };
+    if (p.pre) p.pre();
+    if (p.ruta && hashDe(location.hash) !== hashDe(p.ruta)) { try { location.hash = p.ruta; } catch (e) {} } else if (p.pre) pintar();
+    tourEsperar(function() { return tourElem(p) || (!p.sel && !p.pick ? document.body : null); }, 9000).then(function(el) {
+      if (!vigente()) return;
+      T.cargando = false;
+      if (el && el !== document.body) { var r = el.getBoundingClientRect(); if (r.top < 70 || r.top > window.innerHeight - 260) window.scrollTo({ top: Math.max(0, window.scrollY + r.top - 90), behavior: 'smooth' }); }
+      tourPosicion();
+    });
+  }
+  document.addEventListener('click', function(ev) {
+    var b = ev.target.closest && ev.target.closest('[data-tour]'); if (!b) return;
+    var a = b.getAttribute('data-tour'), c;
+    if (a === 'boton') { if (!tour) tourEmpezar(); }
+    else if (a === 'ini') { c = document.getElementById('tm_no'); if (c && c.checked) tourSilenciar(true); tourEmpezar(); }
+    else if (a === 'ahora') { c = document.getElementById('tm_no'); if (c && c.checked) tourSilenciar(true); tourCerrarModal(); }
+    else if (a === 'sig' && tour) tourIr(Math.min(tour.i + 1, tour.pasos.length - 1));
+    else if (a === 'atras' && tour) tourIr(Math.max(0, tour.i - 1));
+    else if (a === 'salir') tourSalir();
+    else if (a === 'fin') { c = document.getElementById('tp_no'); if (c) tourSilenciar(c.checked); tourSalir(); }
+  });
+  document.addEventListener('keydown', function(ev) { if (ev.key === 'Escape' && (tour || document.getElementById('tour_modal'))) tourSalir(); });
+
   function vistaInicio() {
     var admin = sess.rol === 'admin';
     var q = (document.getElementById('mx-sin') || {}).value || '';
@@ -650,8 +827,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       ['Marca cada actividad', 'Selecciona «Lo realiza» o «No lo realiza» en cada actividad. El puntaje, la nota de 0 a 5 y el porcentaje de cumplimiento se calculan solos. Al terminar, pulsa «Calificar».'],
       ['Sigue con el siguiente', 'Cada cambio se guarda solo y queda registrado con tu nombre. Usa «Siguiente pendiente» para pasar al próximo residente.']
     ];
-    var h = barra() +
-      '<div class="mx-start"><div style="min-width:0;flex:1 1 280px"><p class="e">Empieza por aquí</p><p class="d">Cada docente evaluador tiene a cargo una base. Elige lo que necesitas:</p></div>' +
+    var h = barra() + saludoHtml() +
+      '<div class="mx-start" style="margin-top:12px"><div style="min-width:0;flex:1 1 280px"><p class="e">Empieza por aquí</p><p class="d">Cada docente evaluador tiene a cargo una base. Elige lo que necesitas:</p></div>' +
       '<div class="mx-chips"><a class="mx-pillink" href="#mx-bases" data-anchor="mx-bases">Mi base</a><a class="mx-pillink" href="#mx-guia" data-anchor="mx-guia">Cómo calificar</a><button class="mx-pillink" type="button" data-go="consolidado">Consolidado</button></div></div>';
     if (admin) {
       h += '<section>' + band('Administración', 'Prepara el examen', IC.gear) + '<div class="mx-sec-body"><div class="mx-grid">' +
