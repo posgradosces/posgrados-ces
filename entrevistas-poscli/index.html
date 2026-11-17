@@ -416,6 +416,23 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .pw-blk .mx-tw { overflow-x: auto; }
 @media (max-width: 700px) { .pw-dg { grid-template-columns: 1fr; } .pw-tb { min-width: 640px; } }
 
+/* ===== Ponderado: barras de colores (más visual) ===== */
+.pw-panel .pw-h { padding: 16px 22px 14px; }
+.pw-panel .pw-h h2 { font-size: clamp(18px, 2.4vw, 23px); }
+.pw-c { padding: 16px 20px 18px; }
+.pw-r { margin-bottom: 12px; }
+.pw-l b { font-size: 24px; }
+.pw-b { height: 12px; }
+.pw-b.c1 i { background: #1f5fa8; } .pw-b.c2 i { background: #2f9ad8; } .pw-b.c3 i { background: #7aa93a; }
+.pw-b.c4 i { background: linear-gradient(90deg, #1f5fa8, #2f9ad8); }
+.pw-b.ex i { background: #1f5fa8; } .pw-b.en i { background: #7aa93a; }
+.pw-in { margin-top: 4px; }
+.pw-in input.mx-in { width: 80px; min-height: 34px; padding: 4px 8px; }
+.pw-split { display: flex; height: 44px; border-radius: 12px; overflow: hidden; margin-bottom: 16px; font-size: 13px; font-weight: 800; color: #fff; }
+.pw-split span { display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+.pw-split .ex { background: #1f5fa8; } .pw-split .en { background: #7aa93a; }
+.pw-panel .pw-n { padding: 12px 22px 14px; }
+
 </style>
 </head><body>
 <div id="ces-entrevistas" lang="es">
@@ -1174,18 +1191,20 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   }
   function panelPond() {
     var pv = pesosVista(), admin = esAdmin(), mx = DB.cfg.examMax || 300;
-    var roles = [['decana', 'Decanatura', 'wd'], ['admin', 'Jefatura de Posgrados', 'wa'], ['coord', 'Coordinación del programa', 'wc']];
-    var chips = roles.map(function(r) {
-      return '<div class="pw-chip"><span class="pw-cn">' + r[1] + '</span><b>' + pctTxt(pv.w[r[0]], pv.tot) + '</b>' +
-        (admin ? '<label class="pw-in">Peso <input class="mx-in" id="pw-' + r[2] + '" inputmode="decimal" value="' + esc(pv.w[r[0]]) + '" aria-label="Peso de ' + esc(r[1]) + '"></label>' : '<span class="pw-s">Peso: ' + esc(pv.w[r[0]]) + '</span>') + '</div>';
+    var barra_ = function(txt, v, tot, extra, cl) { return '<div class="pw-r"><div class="pw-l"><span>' + txt + '</span><b>' + pctTxt(v, tot) + '</b></div><div class="pw-b ' + (cl || '') + '" aria-hidden="true"><i style="width:' + (tot ? v / tot * 100 : 0) + '%"></i></div>' + (extra || '') + '</div>'; };
+    var roles = [['decana', 'Decanatura', 'wd', 'c1'], ['admin', 'Jefatura de Posgrados', 'wa', 'c2'], ['coord', 'Coordinación del programa', 'wc', 'c3']];
+    var c1 = roles.map(function(r) {
+      return barra_(r[1], pv.w[r[0]], pv.tot, admin ? '<label class="pw-in">Peso <input class="mx-in" id="pw-' + r[2] + '" inputmode="decimal" value="' + esc(pv.w[r[0]]) + '" aria-label="Peso de ' + esc(r[1]) + '"></label>' : '<span class="pw-s">Peso asignado: ' + esc(pv.w[r[0]]) + '</span>', r[3]);
     }).join('');
-    var secs = SEC.map(function(x) { return '<li><span>' + esc(x.t) + '</span><b>' + Math.round(x.w * 100) + ' %</b></li>'; }).join('');
-    return '<section class="pw-panel" aria-labelledby="pw-t"><div class="pw-h"><span class="pw-tag">Ponderación aplicada</span><h2 id="pw-t">Pesos que usa el sistema ahora mismo</h2></div>' +
-      '<div class="pw-top"><div class="pw-chips">' + chips + '</div>' +
-      (admin ? '<div class="pw-act"><button class="mx-btn lime sm" type="button" data-act="savepw">Aplicar pesos</button><span class="pw-hint">Ejemplos: 1-1-1 (iguales) o 40-20-40. Se recalcula al instante.</span></div><p class="mx-savemsg" id="pw-msg" role="status" aria-live="polite"></p>' : '<p class="pw-hint">La Jefatura de Posgrados puede modificar el peso de cada entrevistador.</p>') + '</div>' +
-      '<details class="pw-det"><summary>Ver pesos de las secciones de la entrevista y del resultado global</summary><div class="pw-dg">' +
-      '<div><h3>Secciones de la entrevista</h3><ul class="pw-ul">' + secs + '</ul></div>' +
-      '<div><h3>Resultado global</h3><ul class="pw-ul"><li><span>Examen (sobre ' + mx + ')</span><b>60 %</b></li><li><span>Entrevista (0 a 3)</span><b>40 %</b></li></ul><p class="pw-f"><b>Global</b> = (Examen ÷ ' + mx + ' × 0,60) + (Entrevista ÷ 3 × 0,40)</p></div></div></details>' +
+    var c2 = SEC.map(function(x) { return barra_(esc(x.t), x.w, 1, '', 'c4'); }).join('');
+    var c3 = '<div class="pw-split" aria-hidden="true"><span class="ex" style="width:60%">Examen 60 %</span><span class="en" style="width:40%">Entrevista 40 %</span></div>' +
+      barra_('Examen (Básicas + Clínicas + Cultura)', 0.6, 1, '<span class="pw-s">Sobre ' + mx + ' puntos</span>', 'ex') + barra_('Entrevista (calificación 0 a 3)', 0.4, 1, '<span class="pw-s">Combinada de los entrevistadores</span>', 'en');
+    return '<section class="pw-panel" aria-labelledby="pw-t"><div class="pw-h"><span class="pw-tag">Ponderación aplicada</span><h2 id="pw-t">Así se calcula el resultado de cada candidato</h2>' +
+      '<p>' + (admin ? 'Como Jefatura de Posgrados puedes modificar el peso de cada entrevistador aquí mismo.' : 'La Jefatura de Posgrados puede modificar el peso de cada entrevistador.') + '</p></div>' +
+      '<div class="pw-g"><div class="pw-c"><h3><i>1</i>Entre entrevistadores</h3>' + c1 +
+      (admin ? '<div class="pw-act"><button class="mx-btn lime" type="button" data-act="savepw">Aplicar pesos</button><span class="pw-hint">Ejemplos: 1-1-1 (iguales) o 40-20-40. Se recalcula al instante.</span></div><p class="mx-savemsg" id="pw-msg" role="status" aria-live="polite"></p>' : '') + '</div>' +
+      '<div class="pw-c"><h3><i>2</i>Secciones de la entrevista</h3>' + c2 + '</div>' +
+      '<div class="pw-c"><h3><i>3</i>Resultado global</h3>' + c3 + '<p class="pw-f"><b>Global</b> = (Examen ÷ ' + mx + ' × 0,60) + (Entrevista ÷ 3 × 0,40)</p></div></div>' +
       '<p class="pw-n">Solo cuentan las entrevistas que cada persona dejó <b>completas</b>; si un entrevistador aún no termina a un candidato, su peso se reparte entre quienes sí terminaron. Si hay varias personas con el mismo rol, primero se promedian entre sí.</p></section>';
   }
   function tabsCons(act) {
