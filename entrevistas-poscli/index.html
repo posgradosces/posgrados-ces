@@ -533,6 +533,12 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 @media (max-width: 900px) { .pw-fich, .pw-g2, .pw-sub { grid-template-columns: 1fr; } }
 .pw-fich { grid-template-columns: minmax(0, 1fr); }
 .pw-sub li span, .pw-sub li em { white-space: nowrap; }
+.pw-mini2 { margin-top: 10px; }
+.pw-mini2 .pw-h { padding: 10px 18px 9px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom-width: 4px; }
+.pw-mini2 .pw-h h2 { margin: 0; font-size: 16px; }
+.pw-mini2 .pw-strip { padding: 8px 18px; }
+.pw-mini2 .pw-nl { padding: 8px 18px 10px; border-top: 1px solid var(--line); font-size: 12px; }
+.pw-mini2 .pw-edb { margin-top: 8px; }
 
 </style>
 </head><body>
@@ -1298,20 +1304,15 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   var ROL_COL = { decana: '#1f5fa8', admin: '#2f9ad8', coord: '#7aa93a' };
   var cmpState = { cid: '' };
   function panelPond() {
-    var pv = pesosVista(), admin = esAdmin(), mx = DB.cfg.examMax || 300, ar = mx / 3;
-    var barra_ = function(txt, big, w, cl, sub) { return '<div class="pw-r"><div class="pw-l"><span>' + txt + '</span><b>' + big + '</b></div><div class="pw-b ' + cl + '" aria-hidden="true"><i style="width:' + Math.max(0, Math.min(100, w)) + '%"></i></div>' + (sub ? '<span class="pw-s">' + sub + '</span>' : '') + '</div>'; };
+    var pv = pesosVista(), admin = esAdmin(), mx = DB.cfg.examMax || 300;
     var items = ['decana', 'admin', 'coord'].map(function(r) { return '<span class="pw-p"><i style="background:' + ROL_COL[r] + '"></i>' + ROL_NOM[r] + ' <b>' + pctTxt(pv.w[r], pv.tot) + '</b></span>'; }).join('');
     var ed = admin ? '<details class="pw-ed"><summary>✎ Editar pesos</summary><div class="pw-edb">' +
       [['wd', 'Decanatura', 'decana'], ['wa', 'Jefatura', 'admin'], ['wc', 'Coordinación', 'coord']].map(function(x) { return '<label class="pw-in">' + x[1] + ' <input class="mx-in" id="pw-' + x[0] + '" inputmode="decimal" value="' + esc(pv.w[x[2]]) + '" aria-label="Peso de ' + x[1] + '"></label>'; }).join('') +
       '<button class="mx-btn lime sm" type="button" data-act="savepw">Aplicar pesos</button><span class="pw-hint">Ejemplos: 1-1-1 (iguales) o 40-20-40.</span></div></details>' : '';
-    var c2 = SEC.map(function(z) { return barra_(esc(z.t), pnum(z.w * 40) + ' %', z.w * 100, 'en', Math.round(z.w * 100) + ' % de la entrevista'); }).join('');
-    var c3 = '<div class="pw-split" aria-hidden="true"><span class="ex" style="width:60%">Examen 60 %</span><span class="en" style="width:40%">Entrevista 40 %</span></div>' +
-      barra_('Examen (Básicas + Clínicas + Cultura)', '60 %', 60, 'ex', 'Sobre ' + mx + ' puntos') + barra_('Entrevista (calificación 0 a 3)', '40 %', 40, 'en', 'Combinada de los entrevistadores');
-    return '<section class="pw-panel" aria-labelledby="pw-t"><div class="pw-h"><span class="pw-tag">Ponderación aplicada</span><h2 id="pw-t">Así se calcula el resultado de cada candidato</h2>' +
-      '<p>' + (admin ? 'Como Jefatura de Posgrados puedes modificar el peso de cada entrevistador aquí mismo.' : 'La Jefatura de Posgrados puede modificar el peso de cada entrevistador.') + '</p></div>' +
+    var secs = SEC.map(function(z) { return esc(SEC_CORTO[z.id] || z.t) + ' ' + Math.round(z.w * 100) + ' %'; }).join(' · ');
+    return '<section class="pw-panel pw-mini2" aria-labelledby="pw-t"><div class="pw-h"><span class="pw-tag">Ponderación aplicada</span><h2 id="pw-t">Global = Examen 60 % + Entrevista 40 %</h2></div>' +
       '<div class="pw-strip"><b class="pw-t">Peso de cada entrevistador</b>' + items + '<span class="pw-sp"></span>' + ed + '</div><p class="mx-savemsg" id="pw-msg" role="status" aria-live="polite" style="margin:0 22px"></p>' +
-      '<div class="pw-g pw-g2"><div class="pw-c"><h3><i>1</i>Entrevista · 40 %: peso de cada sección</h3>' + c2 + '</div><div class="pw-c"><h3><i>2</i>Resultado global</h3>' + c3 + '<p class="pw-f"><b>Global</b> = (Examen ÷ ' + mx + ' × 0,60) + (Entrevista ÷ 3 × 0,40)</p></div></div>' +
-      '<p class="pw-n">Solo cuentan las entrevistas que cada persona dejó <b>completas</b>; si un entrevistador aún no termina a un candidato, su peso se reparte entre quienes sí terminaron. Si hay varias personas con el mismo rol, primero se promedian entre sí.</p></section>';
+      '<p class="pw-n pw-nl"><b>Secciones de la entrevista:</b> ' + secs + '. Solo cuentan las entrevistas completas; si alguien no ha terminado, su peso se reparte entre quienes sí.</p></section>';
   }
   function tabsCons(act) {
     var b = function(k, h, t) { return '<button class="mx-pillink' + (act === k ? ' on' : '') + '" type="button" data-go="' + h + '">' + t + '</button>'; };
