@@ -553,6 +553,11 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .mx-tw .mx-tb tbody tr.top3 td:first-child { background: #f1f7d0; box-shadow: inset 4px 0 0 var(--lime), 2px 0 0 var(--line); }
 .mx-tw .mx-tb tbody tr.sel td:first-child { background: var(--tint); }
 .mx-tw .mx-tb td.nm { min-width: 150px; white-space: normal; }
+.mx-perfil.edit label { display: block; }
+.mx-perfil.edit label b { margin-bottom: 6px; }
+.mx-perfil.edit textarea { width: 100%; min-height: 76px; box-sizing: border-box; }
+.mx-rdh { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 10px; padding: 9px 14px; border-radius: 8px; background: #eaf1fb; border-left: 6px solid var(--lime); color: var(--navy); font-size: 12px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; }
+.mx-rdh span.sc { color: var(--navy); font-size: 12.5px; letter-spacing: 0; text-transform: none; white-space: nowrap; }
 
 </style>
 </head><body>
@@ -1217,15 +1222,24 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       '<button type="button" class="mx-b ' + (riskVal === 'si' ? 'risk' : 'safe') + '" aria-pressed="' + si + '" data-' + attr + '="' + key + '" data-v="si">' + IC.yes + ' Sí</button>' +
       '<button type="button" class="mx-b ' + (riskVal === 'no' ? 'risk' : 'safe') + '" aria-pressed="' + no + '" data-' + attr + '="' + key + '" data-v="no">' + IC.no + ' No</button></div></div>';
   }
-  function perfilCard(c) {
+  function perfilInner(c) {
     var t = String(c.perfil || '').trim();
-    if (!t) return esAdmin() ? '<div class="mx-perfil vacio"><b>Perfil del candidato</b><p>Sin perfil cargado. Puedes escribirlo en Administración › Candidatos.</p></div>' : '';
+    if (esAdmin()) return '<div class="mx-perfil edit"><label for="pf-txt"><b>Perfil del candidato</b></label><textarea class="mx-ta sm" id="pf-txt" rows="3" placeholder="Ej.: 27 años. Nació en Bogotá. Pregrado Javeriana 2023. Trabaja en… Segunda vez al CES.">' + esc(c.perfil || '') + '</textarea>' +
+      '<div class="mx-row" style="margin-top:8px;align-items:center"><button class="mx-btn lime sm" type="button" data-act="guardarperfil" data-id="' + esc(c.id) + '">Guardar perfil</button><span class="mx-muted" style="font-size:12px">Lo verán todas las personas que entrevisten a este candidato.</span></div><p class="mx-savemsg" id="pf-msg" role="status" aria-live="polite"></p></div>';
+    if (!t) return '';
     return '<div class="mx-perfil"><b>Perfil del candidato</b><p>' + esc(t).replace(/\n/g, '<br>') + '</p></div>';
   }
+  function perfilCard(c) { return '<div id="pf-wrap">' + perfilInner(c) + '</div>'; }
   function vistaCand(id) {
     var c = candDe(id); if (!c) { vistaInicio(); return; }
     var p = progDe(c.prog); prog = c.prog;
     var rec = miRec(id) || { r: {}, bon: {}, rd: {}, obs: {} }, P = p.nombre;
+    var riesgo = '<div class="mx-rdh"><span>Riesgo de deserción no académica</span><span class="sc" id="sc-rd"></span></div><div class="mx-extra" style="margin-top:0">' +
+      '<p class="mx-note" style="margin:0 0 6px">Registra la respuesta del candidato. Cada respuesta de riesgo suma 1 punto (máximo 5).</p>' +
+      yn('rd', 't', esc(RD[0].q), (rec.rd || {}).t, RD[0].risk) + yn('rd', 'r', esc(RD[1].q), (rec.rd || {}).r, RD[1].risk) +
+      '<div class="mx-yn" style="display:block"><p style="flex:none">' + esc(RD_GRUPO) + '</p><div class="mx-subq">' +
+      yn('rd', 'e', esc(RD[2].q), (rec.rd || {}).e, 'no') + yn('rd', 'p', esc(RD[3].q), (rec.rd || {}).p, 'no') + '</div></div>' +
+      yn('rd', 'f', esc(RD[4].q), (rec.rd || {}).f, 'si') + '</div>';
     var secs = SEC.map(function(s, si) {
       var crits = s.ids.map(function(cid) {
         var m = PREG[cid], v = rec.r[cid], na = (v === 'na');
@@ -1236,19 +1250,13 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       }).join('');
       var extra = s.id === 'II' ? '<div class="mx-crit" style="border-left-color:var(--sky)"><div class="k"><span>Pregunta complementaria · sin calificación</span></div><p class="q">' + esc(PREG_EXTRA_II) + '</p><p class="hint">Registra la respuesta en las observaciones de la sección.</p></div>' : '';
       var bon = rec.bon[s.id] === 1, bno = rec.bon[s.id] === 0;
-      return '<div class="mx-secbar"><span>' + s.id + '. ' + esc(s.t) + ' (' + Math.round(s.w * 100) + ' %)</span><span class="sc" id="sc-' + s.id + '"></span></div>' + crits + extra +
+      return '<div class="mx-secbar"><span>' + s.id + '. ' + esc(s.t) + ' (' + Math.round(s.w * 100) + ' %)</span><span class="sc" id="sc-' + s.id + '"></span></div>' + crits + (s.id === 'I' ? riesgo : '') + extra +
         '<div class="mx-extra"><h4>Bonificación de la sección</h4><div class="mx-yn" style="padding:0"><p>¿Asignas bonificación al candidato en esta sección?</p><div class="mx-seg">' +
         '<button type="button" class="mx-b yes" aria-pressed="' + bon + '" data-bon="' + s.id + '" data-v="1">' + IC.yes + ' Sí</button>' +
         '<button type="button" class="mx-b bn" aria-pressed="' + bno + '" data-bon="' + s.id + '" data-v="0">' + IC.no + ' No</button></div></div>' +
         '<label class="mx-lbl" style="margin-top:12px" for="ob-' + s.id + '">Observaciones de la sección ' + s.id + '</label>' +
         '<textarea class="mx-ta sm" id="ob-' + s.id + '" data-obs="' + s.id + '" placeholder="Anota evidencias, citas textuales o aspectos a tener en cuenta.">' + esc((rec.obs || {})[s.id] || '') + '</textarea></div>';
     }).join('');
-    var riesgo = '<div class="mx-secbar"><span>Riesgo de deserción no académica</span><span class="sc" id="sc-rd"></span></div><div class="mx-extra" style="margin-top:0">' +
-      '<p class="mx-note" style="margin:0 0 6px">Registra la respuesta del candidato. Cada respuesta de riesgo suma 1 punto (máximo 5).</p>' +
-      yn('rd', 't', esc(RD[0].q), (rec.rd || {}).t, RD[0].risk) + yn('rd', 'r', esc(RD[1].q), (rec.rd || {}).r, RD[1].risk) +
-      '<div class="mx-yn" style="display:block"><p style="flex:none">' + esc(RD_GRUPO) + '</p><div class="mx-subq">' +
-      yn('rd', 'e', esc(RD[2].q), (rec.rd || {}).e, 'no') + yn('rd', 'p', esc(RD[3].q), (rec.rd || {}).p, 'no') + '</div></div>' +
-      yn('rd', 'f', esc(RD[4].q), (rec.rd || {}).f, 'si') + '</div>';
     var gen = '<div class="mx-secbar"><span>Observaciones generales</span><span class="sc"></span></div><div class="mx-extra" style="margin-top:0"><label class="mx-lbl" for="ob-gen">Observaciones generales sobre el candidato</label>' +
       '<textarea class="mx-ta" id="ob-gen" data-obs="gen" placeholder="Impresión general, fortalezas, aspectos por aclarar, recomendación.">' + esc((rec.obs || {}).gen || '') + '</textarea>' +
       '<p class="mx-muted" style="margin-top:8px">Las observaciones las pueden leer quienes entrevistan este programa.</p></div>';
@@ -1256,7 +1264,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     APP.innerHTML = barra() +
       '<div class="mx-live" id="mx-live"><div class="w"><small id="lv-prog"></small><b id="lv-nom"></b></div><div class="sc"><b id="lv-tot">—</b><span id="lv-sub"></span></div></div>' +
       '<div class="mx-back"><button class="mx-btn sec sm" type="button" data-go="programa/' + esc(c.prog) + '">← Lista de candidatos</button>' +
-      '<span class="mx-count">Candidato ' + (ix + 1) + ' de ' + sig.length + '</span></div>' + perfilCard(c) + secs + riesgo + gen +
+      '<span class="mx-count">Candidato ' + (ix + 1) + ' de ' + sig.length + '</span></div>' + perfilCard(c) + secs + gen +
       '<div class="mx-foot"><div class="mx-tot"><b id="ft-tot">—</b><span id="ft-sub" class="mx-muted"></span></div><div class="mx-prog" aria-hidden="true"><i id="ft-bar" style="width:0"></i></div>' +
       '<div class="mx-foot-row"><span class="mx-muted" id="ft-det"></span><div class="mx-row"><button class="mx-btn lime" type="button" data-act="guardarent" id="ft-save">Guardar entrevista</button><button class="mx-btn sec" type="button" data-go="programa/' + esc(c.prog) + '">Volver a la lista</button>' +
       (nx ? '<button class="mx-btn sec" type="button" data-go="cand/' + esc(nx.id) + '">Siguiente candidato →</button>' : '<button class="mx-btn sec" type="button" data-go="consolidado">Ver consolidado →</button>') + '</div></div>' +
@@ -1269,6 +1277,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     var rec = miRec(id), k = calcEval(rec), p = progDe(c.prog);
     var $ = function(i) { return document.getElementById(i); };
     if (!$('lv-nom')) return;
+    var pw = $('pf-wrap'); if (pw && !esAdmin()) { var nuevo = perfilInner(c); if (pw.innerHTML !== nuevo) pw.innerHTML = nuevo; }
     $('lv-prog').textContent = p ? p.nombre : ''; $('lv-nom').textContent = nomC(c);
     $('lv-tot').textContent = k.ent == null ? '—' : f2(k.ent); $('lv-sub').textContent = (k.ent == null ? 'Total entrevista (de 3) · ' : 'de 3 · ') + k.ans + ' de ' + k.n + ' criterios';
     SEC.forEach(function(s) { var e = $('sc-' + s.id); if (e) e.textContent = k.sec[s.id] == null ? 'Sin calificar' : f2(k.sec[s.id]) + ' de 3'; });
@@ -1875,6 +1884,15 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
         m2.textContent = '✔ Entrevista guardada · ' + h + (k.completa ? ' · Completa: ya cuenta en el consolidado.' : ' · Faltan ' + (k.n - k.ans) + ' criterios por calificar para que cuente como completa.');
         setEstado('ok');
       });
+      return;
+    }
+    if (act === 'guardarperfil') {
+      var cid = t.getAttribute('data-id'), cc = candDe(cid), tx = document.getElementById('pf-txt'), pm = document.getElementById('pf-msg');
+      if (!cc || !tx) return;
+      var v = tx.value.trim(); t.disabled = true; if (pm) { pm.textContent = 'Guardando…'; pm.className = 'mx-savemsg'; }
+      Store.admin('candidato', { id: cc.id, prog: cc.prog, nombre: cc.nombre, apellidos: cc.apellidos, doc: cc.doc || '', bas: cc.bas, cli: cc.cli, cul: cc.cul, perfil: v }).then(function() {
+        cc.perfil = v; t.disabled = false; if (pm) { pm.textContent = '✔ Perfil guardado. Ya lo ven las demás personas.'; pm.className = 'mx-savemsg ok'; }
+      }).catch(function(e) { t.disabled = false; if (e && e.code === 'sesion') { salir('Tu sesión terminó. Ingresa de nuevo.'); return; } if (pm) { pm.textContent = 'No se pudo guardar el perfil. Inténtalo de nuevo.'; pm.className = 'mx-savemsg bad'; } });
       return;
     }
     if (act === 'savepw') { guardarPesos(); return; }
