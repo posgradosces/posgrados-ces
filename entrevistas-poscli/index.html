@@ -545,6 +545,14 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .mx-perfil p { margin: 0; font-size: 13.5px; line-height: 1.55; color: #1c2b4a; }
 .mx-perfil.vacio { background: var(--paper); border-left-color: var(--line); }
 .mx-perfil.vacio p { color: var(--muted); font-size: 12.5px; }
+/* ===== columna del candidato fija al desplazar horizontalmente ===== */
+.mx-tw .mx-tb tbody td:first-child, .mx-tw .mx-tb thead tr:first-child th:first-child { position: sticky; left: 0; z-index: 3; }
+.mx-tw .mx-tb thead tr:first-child th:first-child { background: var(--navy); z-index: 5; }
+.mx-tw .mx-tb tbody td:first-child { background: #fff; box-shadow: 2px 0 0 var(--line); }
+.mx-tw .mx-tb tbody tr:nth-child(even) td:first-child { background: #f9fbfd; }
+.mx-tw .mx-tb tbody tr.top3 td:first-child { background: #f1f7d0; box-shadow: inset 4px 0 0 var(--lime), 2px 0 0 var(--line); }
+.mx-tw .mx-tb tbody tr.sel td:first-child { background: var(--tint); }
+.mx-tw .mx-tb td.nm { min-width: 150px; white-space: normal; }
 
 </style>
 </head><body>
