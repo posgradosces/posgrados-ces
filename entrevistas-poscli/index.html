@@ -586,6 +586,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .pw-fc.top { border-color: #2f8f2f; box-shadow: inset 6px 0 0 #2f8f2f; background: #f3faea; }
 .pw-cu { background: #2f8f2f !important; color: #fff !important; }
 
+.mx-gocons { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin: 18px 0 6px; padding: 14px 18px; border-radius: 14px; background: var(--paper); border: 1px solid var(--line); font-size: 14px; color: var(--navy); }
+.mx-gocons.listo { background: #e3f4d0; border-color: #7aa93a; border-left: 6px solid #2f8f2f; }
+.mx-btn.navy { background: var(--navy); color: #fff; }
+
 </style>
 </head><body>
 <div id="ces-entrevistas" lang="es">
@@ -1215,12 +1219,14 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       return '<tr><td class="num">' + (i + 1) + '</td><td class="nm">' + esc(nomC(c)) + '</td><td class="cc">' + esc(c.doc || '') + '</td><td>' + chip + '</td>' +
         '<td class="num">' + otros + ' de ' + ev.length + '</td><td class="act"><button class="mx-btn sm" type="button" data-go="cand/' + esc(c.id) + '">' + (k.hay ? 'Continuar' : 'Entrevistar') + '</button></td></tr>';
     }).join('');
+    var todas = cs.length > 0 && cs.every(function(c) { return calcEval(miRec(c.id)).completa; });
     APP.innerHTML = barra() + saludoHtml() +
       '<div class="mx-back"><div class="mx-title"><span class="n">' + IC.list + '</span><span style="min-width:0"><span class="k">Programa</span><h2>' + esc(p.nombre) + '</h2>' +
       '<span class="m">' + IC.users + ' ' + cs.length + ' candidatos · ' + cuposTxt(p) + '</span></span></div>' +
       '<div class="mx-row">' + (multi || veTodo() ? '<button class="mx-btn sec sm" type="button" data-go="">← Cambiar de programa</button>' : '') + '<button class="mx-btn sec sm" type="button" data-go="consolidado">Ver consolidado</button></div></div>' +
       (cs.length ? '<div class="mx-fld"><label class="mx-lbl" for="mx-fc">Buscar candidato</label><input class="mx-in" id="mx-fc" type="search" placeholder="Nombre, apellido o documento"></div>' +
-        '<div class="mx-tw"><table class="mx-tb sm"><thead><tr><th>#</th><th>Candidato</th><th>Documento</th><th>Tu entrevista</th><th>Entrevistas completas</th><th></th></tr></thead><tbody id="mx-cl">' + filas + '</tbody></table></div>' :
+        '<div class="mx-tw"><table class="mx-tb sm"><thead><tr><th>#</th><th>Candidato</th><th>Documento</th><th>Tu entrevista</th><th>Entrevistas completas</th><th></th></tr></thead><tbody id="mx-cl">' + filas + '</tbody></table></div>' +
+        '<div class="mx-gocons' + (todas ? ' listo' : '') + '"><span>' + (todas ? '<b>✔ Terminaste las entrevistas de este programa.</b> Ya puedes ver el consolidado.' : 'Cuando termines de entrevistar, pasa al consolidado.') + '</span><button class="mx-btn' + (todas ? '' : ' sec') + '" type="button" data-go="consolidado">Ir al consolidado →</button></div>' :
         '<p class="mx-vacio">Este programa todavía no tiene candidatos cargados. La Jefatura de Posgrados los carga desde Administración.</p>');
     var fc = document.getElementById('mx-fc');
     if (fc) fc.addEventListener('input', function() { var q = norm(fc.value); [].forEach.call(document.querySelectorAll('#mx-cl tr'), function(tr) { tr.hidden = q && norm(tr.textContent).indexOf(q) < 0; }); });
@@ -1312,7 +1318,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       '<span class="mx-count">Candidato ' + (ix + 1) + ' de ' + sig.length + '</span></div>' + perfilCard(c) + '<div class="mx-acctool"><span class="mx-muted">Cada sección se despliega al pulsar su título.</span><button type="button" class="mx-pillink" data-act="accall" data-v="1">Expandir todas</button><button type="button" class="mx-pillink" data-act="accall" data-v="0">Contraer todas</button></div>' + secs + gen +
       '<div class="mx-foot"><div class="mx-tot"><b id="ft-tot">—</b><span id="ft-sub" class="mx-muted"></span></div><div class="mx-prog" aria-hidden="true"><i id="ft-bar" style="width:0"></i></div>' +
       '<div class="mx-foot-row"><span class="mx-muted" id="ft-det"></span><div class="mx-row"><button class="mx-btn lime" type="button" data-act="guardarent" id="ft-save">Guardar entrevista</button><button class="mx-btn sec" type="button" data-go="programa/' + esc(c.prog) + '">Volver a la lista</button>' +
-      (nx ? '<button class="mx-btn sec" type="button" data-go="cand/' + esc(nx.id) + '">Siguiente candidato →</button>' : '<button class="mx-btn sec" type="button" data-go="consolidado">Ver consolidado →</button>') + '</div></div>' +
+      (nx ? '<button class="mx-btn sec" type="button" data-go="cand/' + esc(nx.id) + '">Siguiente candidato →</button>' : '') + '<button class="mx-btn' + (nx ? ' sec' : ' navy') + '" type="button" data-go="consolidado" id="ft-cons">Ir al consolidado →</button>' + '</div></div>' +
       '<p class="mx-savemsg" id="ft-msg" role="status" aria-live="polite"></p></div>';
     refrescarForm(id, false);
     window.scrollTo(0, 0);
