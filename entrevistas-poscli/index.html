@@ -590,6 +590,16 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .mx-gocons.listo { background: #e3f4d0; border-color: #7aa93a; border-left: 6px solid #2f8f2f; }
 .mx-btn.navy { background: var(--navy); color: #fff; }
 
+/* no asiste */
+.na-tag { display: block; width: fit-content; margin-top: 3px; padding: 2px 8px; border-radius: 999px; background: var(--badbg); color: var(--badtx); border: 1px solid var(--badtx); font-size: 10.5px; font-weight: 800; letter-spacing: .3px; white-space: nowrap; }
+.pw-fc header .na-tag { display: inline-block; margin: 0 0 0 8px; }
+.mx-naok { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 10px 0 0; padding: 10px 14px; border-radius: 12px; background: var(--paper); border: 1px dashed var(--line); font-size: 13px; color: var(--navy); }
+.mx-naok .mx-muted { margin-right: auto; }
+.mx-naban { margin: 16px 0 12px; padding: 18px 22px; border-radius: 14px; background: var(--badbg); border: 1px solid var(--badtx); border-left: 8px solid var(--badtx); color: var(--navy); }
+.mx-naban small { display: block; color: var(--badtx); font-size: 11.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.mx-naban h2 { margin: 4px 0 8px; font-size: 22px; }
+.mx-naban p { margin: 0; font-size: 14px; line-height: 1.5; }
+
 </style>
 </head><body>
 <div id="ces-entrevistas" lang="es">
@@ -752,12 +762,14 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     var ok = function(x) { return x !== null && x !== undefined && x !== '' && !isNaN(x); };
     return { bas: ok(b) ? +b : null, cli: ok(l) ? +l : null, cul: ok(u) ? +u : null, tot: (ok(b) && ok(l) && ok(u)) ? (+b + +l + +u) : null };
   }
+  function noAsiste(c) { return !!c && (c.noasiste === 1 || c.noasiste === true || c.noasiste === '1'); }
   function globalDe(extot, ent) { if (extot == null || ent == null) return null; return (extot / (DB.cfg.examMax || 300)) * 0.6 + (ent / 3) * 0.4; }
   function metricas(c, ev) {
     var ex = examen(c), m = { c: c, ex: ex };
     if (ev === 'comb') { var cm = combinar(c); m.sec = cm.sec; m.ent = cm.ent; m.bon = cm.bon; m.rd = cm.rd; m.est = cm.hay ? cm.nComp + ' de ' + cm.N : 'Sin calificar'; m.hay = cm.hay; m.bonDec = true; }
     else { var rec = recDe(c.id, ev), k = calcEval(rec); m.sec = k.sec; m.ent = k.ent; m.bon = rec ? k.bon : null; m.rd = (rec && k.rdAns) ? k.rd : null; m.est = !rec || !k.hay ? 'Sin calificar' : (k.completa ? 'Completa' : 'En curso ' + k.ans + '/' + k.n); m.hay = k.hay; }
     m.glob = globalDe(ex.tot, m.ent);
+    if (noAsiste(c)) { m.na = true; m.sec = {}; SEC.forEach(function(z) { m.sec[z.id] = 0; }); m.ent = 0; m.glob = 0; m.bon = 0; m.rd = null; m.est = 'No asiste'; m.hay = true; }
     return m;
   }
   function rankear(arr, get) {
@@ -1051,7 +1063,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   /* ---------------- inicio: elegir programa ---------------- */
   function miProgreso(pid) {
     var cs = candsDe(pid), c = 0, ec = 0;
-    cs.forEach(function(x) { var k = calcEval(miRec(x.id)); if (k.completa) c++; else if (k.hay) ec++; });
+    cs.forEach(function(x) { var k = calcEval(miRec(x.id)); if (noAsiste(x) || k.completa) c++; else if (k.hay) ec++; });
     return { n: cs.length, c: c, ec: ec };
   }
   function chipProg(pid) {
@@ -1215,11 +1227,11 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     var filas = cs.map(function(c, i) {
       var k = calcEval(miRec(c.id)), ev = evaluadoresDe(p.id), otros = 0;
       Object.keys(DB.evals[c.id] || {}).forEach(function(uid) { if (calcEval(DB.evals[c.id][uid]).completa) otros++; });
-      var chip = k.completa ? '<span class="mx-chip ok">Completa</span>' : (k.hay ? '<span class="mx-chip warn">En curso · ' + k.ans + ' de ' + k.n + '</span>' : '<span class="mx-chip">Sin iniciar</span>');
+      var na = noAsiste(c), chip = na ? '<span class="mx-chip bad">No asiste</span>' : k.completa ? '<span class="mx-chip ok">Completa</span>' : (k.hay ? '<span class="mx-chip warn">En curso · ' + k.ans + ' de ' + k.n + '</span>' : '<span class="mx-chip">Sin iniciar</span>');
       return '<tr><td class="num">' + (i + 1) + '</td><td class="nm">' + esc(nomC(c)) + '</td><td class="cc">' + esc(c.doc || '') + '</td><td>' + chip + '</td>' +
-        '<td class="num">' + otros + ' de ' + ev.length + '</td><td class="act"><button class="mx-btn sm" type="button" data-go="cand/' + esc(c.id) + '">' + (k.hay ? 'Continuar' : 'Entrevistar') + '</button></td></tr>';
+        '<td class="num">' + (na ? '—' : otros + ' de ' + ev.length) + '</td><td class="act"><button class="mx-btn sm' + (na ? ' sec' : '') + '" type="button" data-go="cand/' + esc(c.id) + '">' + (na ? 'Ver' : (k.hay ? 'Continuar' : 'Entrevistar')) + '</button></td></tr>';
     }).join('');
-    var todas = cs.length > 0 && cs.every(function(c) { return calcEval(miRec(c.id)).completa; });
+    var todas = cs.length > 0 && cs.every(function(c) { return noAsiste(c) || calcEval(miRec(c.id)).completa; });
     APP.innerHTML = barra() + saludoHtml() +
       '<div class="mx-back"><div class="mx-title"><span class="n">' + IC.list + '</span><span style="min-width:0"><span class="k">Programa</span><h2>' + esc(p.nombre) + '</h2>' +
       '<span class="m">' + IC.users + ' ' + cs.length + ' candidatos · ' + cuposTxt(p) + '</span></span></div>' +
@@ -1263,6 +1275,33 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     return '<div class="mx-perfil"><b>Perfil del candidato</b><p>' + esc(t).replace(/\n/g, '<br>') + '</p></div>';
   }
   function perfilCard(c) { return '<div id="pf-wrap">' + perfilInner(c) + '</div>'; }
+  function candPayload(cc, extra) {
+    var o = { id: cc.id, prog: cc.prog, nombre: cc.nombre, apellidos: cc.apellidos, doc: cc.doc || '', bas: cc.bas, cli: cc.cli, cul: cc.cul, perfil: cc.perfil || '', noasiste: noAsiste(cc) ? 1 : 0 };
+    Object.keys(extra || {}).forEach(function(k) { o[k] = extra[k]; });
+    return o;
+  }
+  function setNoAsiste(id, v) {
+    var cc = candDe(id), pm = document.getElementById('na-msg'); if (!cc) return;
+    if (pm) { pm.textContent = 'Guardando…'; pm.className = 'mx-savemsg'; }
+    Store.admin('candidato', candPayload(cc, { noasiste: v ? 1 : 0 })).then(function() { cc.noasiste = v ? 1 : 0; vistaCand(id); window.scrollTo(0, 0); })
+      .catch(function(e) { if (e && e.code === 'sesion') { salir('Tu sesión terminó. Ingresa de nuevo.'); return; } if (pm) { pm.textContent = 'No se pudo guardar. Inténtalo de nuevo.'; pm.className = 'mx-savemsg bad'; } });
+  }
+  function naCtl(c) {
+    if (!esAdmin()) return '';
+    return '<div class="mx-naok" id="na-ctl"><span class="mx-muted">Si el candidato no se presentó a la entrevista:</span><button type="button" class="mx-btn sec sm" data-act="noasiste1">Marcar «No asiste»</button></div><p class="mx-savemsg" id="na-msg" role="status" aria-live="polite"></p>';
+  }
+  function vistaNoAsiste(c) {
+    var p = progDe(c.prog), sig = candsDe(c.prog), ix = sig.findIndex(function(x) { return x.id === c.id; }), nx = sig[ix + 1];
+    APP.innerHTML = barra() +
+      '<div class="mx-back"><button class="mx-btn sec sm" type="button" data-go="programa/' + esc(c.prog) + '">← Lista de candidatos</button><span class="mx-count">Candidato ' + (ix + 1) + ' de ' + sig.length + '</span></div>' +
+      '<div class="mx-naban" id="na-banner"><small>' + esc(p ? p.nombre : '') + '</small><h2>' + esc(nomC(c)) + '</h2>' +
+      '<p><b>No asiste.</b> La entrevista de este candidato está cancelada. Su entrevista y su resultado global quedan en 0,0 y no entra en los cupos. No hay nada que calificar.</p>' +
+      (esAdmin() ? '<div class="mx-row" style="margin-top:10px"><button type="button" class="mx-btn sec sm" data-act="noasiste2" data-v="0" data-id="' + esc(c.id) + '">Corregir: sí asistió (reactivar entrevista)</button></div><p class="mx-savemsg" id="na-msg" role="status" aria-live="polite"></p>' : '') + '</div>' +
+      perfilCard(c) +
+      '<div class="mx-foot"><div class="mx-foot-row"><span class="mx-muted"></span><div class="mx-row"><button class="mx-btn sec" type="button" data-go="programa/' + esc(c.prog) + '">Volver a la lista</button>' +
+      (nx ? '<button class="mx-btn sec" type="button" data-go="cand/' + esc(nx.id) + '">Siguiente candidato →</button>' : '') + '<button class="mx-btn' + (nx ? ' sec' : ' navy') + '" type="button" data-go="consolidado">Ir al consolidado →</button></div></div></div>';
+    window.scrollTo(0, 0);
+  }
   var accCand = null, accAb = {};
   function abrirSec(sid, scroll) {
     var a = document.getElementById('acc-' + sid); if (!a) return; accAb[sid] = true;
@@ -1276,6 +1315,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   function vistaCand(id) {
     var c = candDe(id); if (!c) { vistaInicio(); return; }
     var p = progDe(c.prog); prog = c.prog;
+    if (noAsiste(c)) { vistaNoAsiste(c); return; }
     var rec = miRec(id) || { r: {}, bon: {}, rd: {}, obs: {} }, P = p.nombre;
     var riesgo = '<div class="mx-rdh"><span>Riesgo de deserción no académica</span><span class="sc" id="sc-rd"></span></div><div class="mx-extra" style="margin-top:0">' +
       '<p class="mx-note" style="margin:0 0 6px">Registra la respuesta del candidato. Cada respuesta de riesgo suma 1 punto (máximo 5).</p>' +
@@ -1315,7 +1355,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     APP.innerHTML = barra() +
       '<div class="mx-live" id="mx-live"><div class="w"><small id="lv-prog"></small><b id="lv-nom"></b></div><div class="sc"><b id="lv-tot">—</b><span id="lv-sub"></span></div></div>' +
       '<div class="mx-back"><button class="mx-btn sec sm" type="button" data-go="programa/' + esc(c.prog) + '">← Lista de candidatos</button>' +
-      '<span class="mx-count">Candidato ' + (ix + 1) + ' de ' + sig.length + '</span></div>' + perfilCard(c) + '<div class="mx-acctool"><span class="mx-muted">Cada sección se despliega al pulsar su título.</span><button type="button" class="mx-pillink" data-act="accall" data-v="1">Expandir todas</button><button type="button" class="mx-pillink" data-act="accall" data-v="0">Contraer todas</button></div>' + secs + gen +
+      '<span class="mx-count">Candidato ' + (ix + 1) + ' de ' + sig.length + '</span></div>' + perfilCard(c) + naCtl(c) + '<div class="mx-acctool"><span class="mx-muted">Cada sección se despliega al pulsar su título.</span><button type="button" class="mx-pillink" data-act="accall" data-v="1">Expandir todas</button><button type="button" class="mx-pillink" data-act="accall" data-v="0">Contraer todas</button></div>' + secs + gen +
       '<div class="mx-foot"><div class="mx-tot"><b id="ft-tot">—</b><span id="ft-sub" class="mx-muted"></span></div><div class="mx-prog" aria-hidden="true"><i id="ft-bar" style="width:0"></i></div>' +
       '<div class="mx-foot-row"><span class="mx-muted" id="ft-det"></span><div class="mx-row"><button class="mx-btn lime" type="button" data-act="guardarent" id="ft-save">Guardar entrevista</button><button class="mx-btn sec" type="button" data-go="programa/' + esc(c.prog) + '">Volver a la lista</button>' +
       (nx ? '<button class="mx-btn sec" type="button" data-go="cand/' + esc(nx.id) + '">Siguiente candidato →</button>' : '') + '<button class="mx-btn' + (nx ? ' sec' : ' navy') + '" type="button" data-go="consolidado" id="ft-cons">Ir al consolidado →</button>' + '</div></div>' +
@@ -1325,6 +1365,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   }
   function refrescarForm(id, remoto) {
     var c = candDe(id); if (!c) return;
+    if (document.getElementById('pf-wrap') && (noAsiste(c) ? 1 : 0) !== (document.getElementById('na-banner') ? 1 : 0)) { if (vista.tipo === 'cand' && vista.id === id) vistaCand(id); return; }
     var rec = miRec(id), k = calcEval(rec), p = progDe(c.prog);
     var $ = function(i) { return document.getElementById(i); };
     if (!$('lv-nom')) return;
@@ -1371,7 +1412,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     var mx = DB.cfg.examMax || 300;
     var rows = candsDe(pid).map(function(c) {
       var m = metricas(c, 'comb');
-      return { c: c, ex: m.ex.tot, aex: m.ex.tot == null ? null : m.ex.tot / mx * 0.6, dec: entRol(c, 'decana'), adm: entRol(c, 'admin'), coo: entRol(c, 'coord'), ent: m.ent, aen: m.ent == null ? null : m.ent / 3 * 0.4, glob: m.glob };
+      var na0 = noAsiste(c);
+      return { c: c, ex: m.ex.tot, aex: m.ex.tot == null ? null : m.ex.tot / mx * 0.6, dec: na0 ? null : entRol(c, 'decana'), adm: na0 ? null : entRol(c, 'admin'), coo: na0 ? null : entRol(c, 'coord'), ent: m.ent, aen: m.ent == null ? null : m.ent / 3 * 0.4, glob: m.glob };
     });
     var rk = rankear(rows, function(x) { return x.glob; });
     rows.forEach(function(x, i) { x.rn = rk[i]; });
@@ -1416,7 +1458,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   function rnSel(r, sel) { return sel ? '<td class="rn ok"><span class="gsel" title="Seleccionado: dentro de los cupos">' + r + '</span></td>' : rnTd(r); }
   function selTag(sel, r) { return sel ? '<span class="sel-tag">✔ Seleccionado · puesto ' + r + '</span>' : ''; }
   var PTRN = '<th class="num sub">Pt</th><th class="num sub">Rn</th>';
-  function nmTd(x, top) { return '<td class="nm"><b>' + esc(nomC(x.c)) + '</b></td>'; }
+  function naChip(c) { return noAsiste(c) ? '<span class="na-tag">No asiste</span>' : ''; }
+  function nmTd(x, top) { return '<td class="nm"><b>' + esc(nomC(x.c)) + '</b>' + naChip(x.c) + '</td>'; }
   function tablaExamen(pid) {
     var rows = filasPond(pid), mx = DB.cfg.examMax || 300, ar = mx / 3, R = pwRank(rows), n = function(v) { return v == null ? '—' : f2(v); };
     var ap = function(v) { return v == null ? '—' : ppTxt(v / ar * 20); };
@@ -1440,7 +1483,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   function tablaGlobal(pid) {
     var rows = filasPond(pid), R = pwRank(rows), n = function(v) { return v == null ? '—' : f2(v); }, p = progDe(pid), cupos = (p && p.cupos) || 0;
     var h = '<tr><th rowspan="2">Candidato</th>' + th2('Aporte examen', '60 %', '', ' rowspan="2"') + th2('Aporte entrevista', '40 %', '', ' rowspan="2"') + th2('Resultado global', 'de 0 a 1', 'pwg', ' colspan="2"') + th2('Global en %', '', '', ' rowspan="2"') + th2('Riesgo', 'de 5', '', ' rowspan="2"') + th2('Bonos', '', '', ' rowspan="2"') + '</tr><tr>' + PTRN + '</tr>';
-    var b = rows.map(function(x, i) { var m = R.ms[i], top = esSel(R, i, cupos, x.glob);
+    var b = rows.map(function(x, i) { var m = R.ms[i], top = esSel(R, i, cupos, noAsiste(x.c) ? null : x.glob);
       return '<tr class="' + (top ? 'ok' : '') + '">' + nmTd(x).replace('</b></td>', '</b>' + selTag(top, R.glob[i]) + '</td>') + '<td class="num">' + (x.aex == null ? '—' : ppTxt(x.aex * 100)) + '</td><td class="num">' + (x.aen == null ? '—' : ppTxt(x.aen * 100)) + '</td><td class="num tot pos pwg">' + n(x.glob) + '</td>' + rnSel(R.glob[i], top) + '<td class="num">' + pcTxt(x.glob) + '</td><td class="num">' + (m.rd == null ? '—' : f1(m.rd)) + '</td><td class="num">' + (m.bon == null ? '—' : f1(m.bon)) + '</td></tr>'; }).join('');
     return pwTabla('Resultado global', h, b, 9);
   }
@@ -1453,8 +1496,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       var ppE = x.aen == null ? null : x.aen * 100; if (ppE != null) seg.push([ppE, '#7aa93a', 'Entrevista']);
       var secs = SEC.map(function(z) { var v = m.sec ? m.sec[z.id] : null; return '<li><span>' + esc(SEC_CORTO[z.id] || z.t) + '</span><em>' + (v == null ? '—' : f2(v) + ' de 3') + '</em><b>' + ppTxt(v == null ? null : v / 3 * z.w * 40) + '<small> de ' + pnum(z.w * 40) + ' %</small></b></li>'; }).join('');
       var bar = '<div class="pw-sk" aria-hidden="true">' + seg.map(function(g) { return '<span title="' + g[2] + ': ' + f1(g[0]) + ' %" style="width:' + g[0] + '%;background:' + g[1] + '"></span>'; }).join('') + '</div>';
-      var top = hay && esSel(R, i, cupos, x.glob);
-      return '<article class="pw-fc' + (top ? ' top' : '') + '"><header><span class="rn' + (R.glob[i] === 1 ? ' one' : '') + '">' + (R.glob[i] === '' ? '—' : R.glob[i]) + '</span><b class="who">' + esc(nomC(x.c)) + '</b>' + (top ? '<span class="pw-cu">✔ Seleccionado · puesto ' + R.glob[i] + '</span>' : '') + '<div class="gl"><small>Resultado global</small><b>' + (hay ? ppTxt(x.glob * 100) : 'Pendiente') + '</b></div></header>' + bar +
+      var top = hay && esSel(R, i, cupos, noAsiste(x.c) ? null : x.glob);
+      return '<article class="pw-fc' + (top ? ' top' : '') + '"><header><span class="rn' + (R.glob[i] === 1 ? ' one' : '') + '">' + (R.glob[i] === '' ? '—' : R.glob[i]) + '</span><b class="who">' + esc(nomC(x.c)) + '</b>' + (noAsiste(x.c) ? '<span class="na-tag">No asiste · entrevista cancelada</span>' : '') + (top ? '<span class="pw-cu">✔ Seleccionado · puesto ' + R.glob[i] + '</span>' : '') + '<div class="gl"><small>Resultado global</small><b>' + (hay ? ppTxt(x.glob * 100) : 'Pendiente') + '</b></div></header>' + bar +
         '<div class="pw-sub"><div><h5>Examen <small>' + (x.aex == null ? '—' : ppTxt(x.aex * 100)) + ' de 60 %</small></h5><ul>' + lin + '</ul></div><div><h5>Entrevista <small>' + (ppE == null ? '—' : ppTxt(ppE)) + ' de 40 %</small></h5><ul>' + secs + '</ul></div></div></article>';
     }).join('') + '</div><p class="pw-leg"><b style="color:#1f5fa8">■ Básicas</b> <b style="color:#2f9ad8">■ Clínicas</b> <b style="color:#6bb6e8">■ Cultura</b> <b style="color:#7aa93a">■ Entrevista</b> · la barra completa es el 100 % posible; lo que ves es lo que logró el candidato.</p>';
   }
@@ -1465,8 +1508,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     var h = '<tr><th rowspan="3" style="min-width:170px">Candidato</th>' + g('Examen', 'de ' + mx, '', 8) + g('Entrevista', 'de 3', 'g2', 12) + g('Global', '', '', 2) + '<th rowspan="3">Riesgo<small>de 5</small></th><th rowspan="3">Bonos</th></tr>' +
       '<tr>' + ['Básicas', 'Clínicas', 'Cultura', 'Total'].map(function(x) { return g(x, '', '', 2); }).join('') + SEC.map(function(z) { return g(esc(SEC_CORTO[z.id] || z.t), '', 'g2', 2); }).join('') + g('Total', '', 'g2', 2) + g('60 % + 40 %', '', '', 2) + '</tr>' +
       '<tr>' + new Array(11).join(PTRN) + PTRN + '</tr>';
-    var b = rows.map(function(x, i) { var m = R.ms[i], e = m.ex, top = esSel(R, i, cupos, x.glob);
-      return '<tr class="' + (top ? 'ok' : '') + '"><td class="nm"><b>' + esc(nomC(x.c)) + '</b>' + selTag(top, R.glob[i]) + '</td>' +
+    var b = rows.map(function(x, i) { var m = R.ms[i], e = m.ex, top = esSel(R, i, cupos, noAsiste(x.c) ? null : x.glob);
+      return '<tr class="' + (top ? 'ok' : '') + '"><td class="nm"><b>' + esc(nomC(x.c)) + '</b>' + naChip(x.c) + selTag(top, R.glob[i]) + '</td>' +
         '<td class="num">' + e0(e.bas) + '</td>' + rnTd(R.bas[i]) + '<td class="num">' + e0(e.cli) + '</td>' + rnTd(R.cli[i]) + '<td class="num">' + e0(e.cul) + '</td>' + rnTd(R.cul[i]) + '<td class="num tot">' + e0(e.tot) + '</td>' + rnTd(R.tot[i]) +
         SEC.map(function(z) { return '<td class="num">' + n(m.sec ? m.sec[z.id] : null) + '</td>' + rnTd(R[z.id][i]); }).join('') + '<td class="num tot">' + n(m.ent) + '</td>' + rnTd(R.ent[i]) +
         '<td class="num tot pos">' + n(m.glob) + '</td>' + rnSel(R.glob[i], top) + '<td class="num">' + (m.rd == null ? '—' : f1(m.rd)) + '</td><td class="num">' + (m.bon == null ? '—' : f1(m.bon)) + '</td></tr>'; }).join('');
@@ -1606,8 +1649,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       var m = ms[i], c = m.c, cut = consState.orden === 'glob' && cupos && pos === cupos && m.glob != null;
       var rn = function(r) { return '<td class="rn' + (r === 1 ? ' one' : '') + '">' + (r === '' ? '' : r) + '</td>'; };
       var pt = function(v, d) { return '<td class="num">' + (v == null ? '—' : (d === 1 ? f1(v) : f2(v))) + '</td>'; };
-      var top = esSel(R, i, cupos, m.glob);
-      return '<tr class="' + (top ? 'ok ' : '') + (cut ? 'cut ' : '') + (consState.exp[c.id] ? 'sel' : '') + '"><td class="nm"><button type="button" class="tg" data-det="' + esc(c.id) + '" aria-expanded="' + (consState.exp[c.id] ? 'true' : 'false') + '"><span class="car" aria-hidden="true">' + (consState.exp[c.id] ? '▾' : '▸') + '</span> ' + esc(nomC(c)) + '</button>' + selTag(top, R.glob[i]) + chipsExtra(c) + '</td>' +
+      var top = esSel(R, i, cupos, noAsiste(m.c) ? null : m.glob);
+      return '<tr class="' + (top ? 'ok ' : '') + (cut ? 'cut ' : '') + (consState.exp[c.id] ? 'sel' : '') + '"><td class="nm"><button type="button" class="tg" data-det="' + esc(c.id) + '" aria-expanded="' + (consState.exp[c.id] ? 'true' : 'false') + '"><span class="car" aria-hidden="true">' + (consState.exp[c.id] ? '▾' : '▸') + '</span> ' + esc(nomC(c)) + '</button>' + naChip(c) + selTag(top, R.glob[i]) + chipsExtra(c) + '</td>' +
         '<td class="num">' + f0(m.ex.bas) + '</td>' + rn(R.bas[i]) + '<td class="num">' + f0(m.ex.cli) + '</td>' + rn(R.cli[i]) + '<td class="num">' + f0(m.ex.cul) + '</td>' + rn(R.cul[i]) + '<td class="num tot">' + f0(m.ex.tot) + '</td>' + rn(R.tot[i]) +
         pt(m.sec.I) + rn(R.I[i]) + pt(m.sec.II) + rn(R.II[i]) + pt(m.sec.III) + rn(R.III[i]) + pt(m.sec.IV) + rn(R.IV[i]) + pt(m.sec.V) + rn(R.V[i]) + '<td class="num tot">' + f2(m.ent) + '</td>' + rn(R.ent[i]) +
         '<td class="num tot pos">' + f2(m.glob) + '</td>' + (top ? rnSel(R.glob[i], true) : rn(R.glob[i])) + '<td class="num">' + (m.rd == null ? '—' : f1(m.rd)) + '</td><td class="num">' + (m.bon == null ? '—' : (ev === 'comb' ? f1(m.bon) : f0(m.bon))) + '</td><td class="num">' + esc(m.est) + '</td></tr>' + (consState.exp[c.id] ? '<tr class="exp"><td colspan="26"><div class="mx-obs-grid">' + evCards(c) + '</div></td></tr>' : '');
@@ -1773,7 +1816,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       return '<tr data-row="' + esc(c.id) + '"><td>' + selProgs('', c.prog).replace('<select class="mx-in" id=""', '<select class="mx-in" data-f="prog"') + '</td>' +
         '<td><input class="mx-in" data-f="nombre" value="' + esc(c.nombre) + '"></td><td><input class="mx-in" data-f="apellidos" value="' + esc(c.apellidos) + '"></td><td><input class="mx-in" data-f="doc" value="' + esc(c.doc || '') + '" style="min-width:110px"></td>' +
         '<td><input class="mx-in" data-f="bas" inputmode="decimal" value="' + esc(c.bas == null ? '' : c.bas) + '" style="width:74px"></td><td><input class="mx-in" data-f="cli" inputmode="decimal" value="' + esc(c.cli == null ? '' : c.cli) + '" style="width:74px"></td><td><input class="mx-in" data-f="cul" inputmode="decimal" value="' + esc(c.cul == null ? '' : c.cul) + '" style="width:74px"></td>' +
-        '<td><textarea class="mx-ta sm" data-f="perfil" rows="2" style="min-width:260px" placeholder="Edad, origen, pregrado, trabajo…">' + esc(c.perfil || '') + '</textarea></td><td class="num">' + f0(examen(c).tot) + '</td><td class="act"><button class="mx-btn sm" type="button" data-save-c="' + esc(c.id) + '">Guardar</button> <button class="mx-btn sm danger" type="button" data-confirm="bc:' + esc(c.id) + '">Eliminar</button></td></tr>';
+        '<td><textarea class="mx-ta sm" data-f="perfil" rows="2" style="min-width:260px" placeholder="Edad, origen, pregrado, trabajo…">' + esc(c.perfil || '') + '</textarea></td><td><select class="mx-in" data-f="noasiste" aria-label="Asistencia"><option value="0">Asiste</option><option value="1"' + (noAsiste(c) ? ' selected' : '') + '>No asiste</option></select></td><td class="num">' + f0(examen(c).tot) + '</td><td class="act"><button class="mx-btn sm" type="button" data-save-c="' + esc(c.id) + '">Guardar</button> <button class="mx-btn sm danger" type="button" data-confirm="bc:' + esc(c.id) + '">Eliminar</button></td></tr>';
     }).join('');
     return '<div class="mx-card2"><h3>Agregar candidato</h3><div class="mx-grid3" style="margin-top:10px">' +
       '<div class="mx-fld"><label class="mx-lbl" for="nc-prog">Programa</label>' + selProgs('nc-prog', admFiltro) + '</div>' +
@@ -1789,7 +1832,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       '<div id="imp-prev">' + impPrevHtml() + '</div></div>' +
       '<div class="mx-card2"><div class="mx-toolbar"><div class="mx-fld"><h3 style="margin-bottom:6px">Candidatos cargados (' + cs.length + ')</h3><label class="mx-lbl" for="adm-fp">Filtrar por programa</label>' + selProgs('adm-fp', admFiltro, true) + '</div></div>' +
       '<p class="mx-muted" style="margin:8px 0">El total del examen se calcula como Básicas + Clínicas + Cultura. Si falta alguna nota, el total y el resultado global quedan pendientes.</p>' +
-      '<div class="mx-tw"><table class="mx-tb" style="min-width:1240px"><thead><tr><th>Programa</th><th>Nombres</th><th>Apellidos</th><th>Documento</th><th>Básicas</th><th>Clínicas</th><th>Cultura</th><th>Perfil del candidato</th><th>Total</th><th></th></tr></thead><tbody>' + (filas || '<tr><td colspan="10"><p class="mx-vacio">No hay candidatos cargados.</p></td></tr>') + '</tbody></table></div></div>';
+      '<div class="mx-tw"><table class="mx-tb" style="min-width:1340px"><thead><tr><th>Programa</th><th>Nombres</th><th>Apellidos</th><th>Documento</th><th>Básicas</th><th>Clínicas</th><th>Cultura</th><th>Perfil del candidato</th><th>Asistencia</th><th>Total</th><th></th></tr></thead><tbody>' + (filas || '<tr><td colspan="10"><p class="mx-vacio">No hay candidatos cargados.</p></td></tr>') + '</tbody></table></div></div>';
   }
   function admProgs() {
     var filas = DB.progs.map(function(p) {
@@ -1945,11 +1988,14 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       });
       return;
     }
+    if (act === 'noasiste1') { var nc0 = document.getElementById('na-ctl'); if (nc0) nc0.innerHTML = '<span><b>¿Confirmas que este candidato NO asistió?</b> Su entrevista se cancela y todo queda en 0,0. Podrás corregirlo después.</span><button type="button" class="mx-btn sm" data-act="noasiste2" data-v="1" data-id="' + esc(vista.id) + '">Sí, no asistió</button><button type="button" class="mx-btn sec sm" data-act="noasiste0">Cancelar</button>'; return; }
+    if (act === 'noasiste0') { var nc1 = document.getElementById('na-ctl'); if (nc1) nc1.innerHTML = '<span class="mx-muted">Si el candidato no se presentó a la entrevista:</span><button type="button" class="mx-btn sec sm" data-act="noasiste1">Marcar «No asiste»</button>'; return; }
+    if (act === 'noasiste2') { t.disabled = true; setNoAsiste(t.getAttribute('data-id'), t.getAttribute('data-v') === '1'); return; }
     if (act === 'guardarperfil') {
       var cid = t.getAttribute('data-id'), cc = candDe(cid), tx = document.getElementById('pf-txt'), pm = document.getElementById('pf-msg');
       if (!cc || !tx) return;
       var v = tx.value.trim(); t.disabled = true; if (pm) { pm.textContent = 'Guardando…'; pm.className = 'mx-savemsg'; }
-      Store.admin('candidato', { id: cc.id, prog: cc.prog, nombre: cc.nombre, apellidos: cc.apellidos, doc: cc.doc || '', bas: cc.bas, cli: cc.cli, cul: cc.cul, perfil: v }).then(function() {
+      Store.admin('candidato', candPayload(cc, { perfil: v })).then(function() {
         cc.perfil = v; t.disabled = false; if (pm) { pm.textContent = '✔ Perfil guardado. Ya lo ven las demás personas.'; pm.className = 'mx-savemsg ok'; }
       }).catch(function(e) { t.disabled = false; if (e && e.code === 'sesion') { salir('Tu sesión terminó. Ingresa de nuevo.'); return; } if (pm) { pm.textContent = 'No se pudo guardar el perfil. Inténtalo de nuevo.'; pm.className = 'mx-savemsg bad'; } });
       return;
@@ -1992,7 +2038,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       return;
     }
     var sc = t.getAttribute('data-save-c'), sp = t.getAttribute('data-save-p'), su = t.getAttribute('data-save-u');
-    if (sc) { var o = rowVals(t.closest('tr')); opAdmin('candidato', { id: sc, prog: o.prog, nombre: o.nombre.trim(), apellidos: o.apellidos.trim(), doc: o.doc.trim(), bas: num(o.bas), cli: num(o.cli), cul: num(o.cul), perfil: (o.perfil || '').trim() }, 'Candidato actualizado.'); return; }
+    if (sc) { var o = rowVals(t.closest('tr')); opAdmin('candidato', { id: sc, prog: o.prog, nombre: o.nombre.trim(), apellidos: o.apellidos.trim(), doc: o.doc.trim(), bas: num(o.bas), cli: num(o.cli), cul: num(o.cul), perfil: (o.perfil || '').trim(), noasiste: o.noasiste === '1' ? 1 : 0 }, 'Candidato actualizado.'); return; }
     if (sp) { var op = rowVals(t.closest('tr')); if (!op.nombre.trim()) { msg('Escribe el nombre del programa.', true); return; } opAdmin('programa', { id: sp, nombre: op.nombre.trim(), cupos: num(op.cupos) || 0 }, 'Programa actualizado.'); return; }
     if (su) { var ou = rowVals(t.closest('tr')); if (!ou.nombre.trim() || !ou.usuario.trim()) { msg('Escribe el nombre y el usuario.', true); return; } if (ou.clave && ou.clave.length < 7) { msg('La clave debe tener al menos 7 caracteres.', true); return; } opAdmin('usuario', { id: su, nombre: ou.nombre.trim(), saludo: (ou.saludo || '').trim(), usuario: ou.usuario.trim(), rol: ou.rol, programas: ou.rol === 'coord' ? (ou.prg || []) : [], clave: ou.clave || '' }, 'Datos de la persona actualizados.'); return; }
     if (act === 'addcand') {
