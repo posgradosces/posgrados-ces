@@ -559,6 +559,33 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .mx-rdh { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 10px; padding: 9px 14px; border-radius: 8px; background: #eaf1fb; border-left: 6px solid var(--lime); color: var(--navy); font-size: 12px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; }
 .mx-rdh span.sc { color: var(--navy); font-size: 12.5px; letter-spacing: 0; text-transform: none; white-space: nowrap; }
 
+/* acordeón de secciones */
+.mx-acch { width: 100%; border: 0; cursor: pointer; text-align: left; font-family: inherit; }
+.mx-acch:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px; }
+.mx-acch .chev { flex: none; width: 9px; height: 9px; margin-left: 4px; border-right: 2.5px solid var(--lime); border-bottom: 2.5px solid var(--lime); transform: rotate(45deg) translateY(-2px); transition: transform .18s; }
+.mx-acc.open > .mx-acch .chev { transform: rotate(-135deg) translateY(-2px); }
+.mx-acc:not(.open) > .mx-acch { opacity: .92; }
+.mx-acch > span:first-child { flex: 1; }
+.mx-acctool { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin: 14px 0 -10px; flex-wrap: wrap; font-size: 12.5px; }
+.mx-acctool .mx-muted { margin-right: auto; }
+.mx-accb[hidden] { display: none; }
+.mx-next { display: flex; justify-content: flex-end; margin: 16px 0 4px; }
+/* bonificación: color propio, distinto del riesgo */
+.mx-extra.bon { background: #fff6dc; border: 1px solid #ecc96a; border-left: 6px solid #e0a100; }
+.mx-extra.bon h4 { color: #6b4a00; display: flex; align-items: center; gap: 8px; }
+.mx-extra.bon .bono-tag { padding: 2px 9px; border-radius: 99px; background: #e0a100; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; }
+.mx-extra.bon .mx-lbl { color: #6b4a00; }
+.mx-acc:not(.open) > .mx-acch { margin-bottom: 0; } .mx-acc:not(.open) + .mx-acc > .mx-acch { margin-top: 10px; }
+
+/* seleccionados según cupos */
+.mx-tb tr.ok td { background: #e3f4d0 !important; }
+.mx-tw .mx-tb tbody tr.ok td:first-child { background: #d2ecb5 !important; box-shadow: inset 6px 0 0 #2f8f2f, 2px 0 0 var(--line); }
+.mx-tb td.rn.ok { background: #cfeab0 !important; }
+.gsel { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; border-radius: 50%; background: #2f8f2f; color: #fff; font-weight: 800; font-size: 13px; box-shadow: 0 1px 3px rgba(20, 80, 20, .35); }
+.sel-tag { display: block; width: fit-content; margin-top: 3px; padding: 2px 8px; border-radius: 999px; background: #2f8f2f; color: #fff; font-size: 10.5px; font-weight: 800; letter-spacing: .3px; white-space: nowrap; }
+.pw-fc.top { border-color: #2f8f2f; box-shadow: inset 6px 0 0 #2f8f2f; background: #f3faea; }
+.pw-cu { background: #2f8f2f !important; color: #fff !important; }
+
 </style>
 </head><body>
 <div id="ces-entrevistas" lang="es">
@@ -1058,7 +1085,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       P.push({ ruta: rc, sel: '#mx-live', t: 'Candidato y puntaje en vivo', x: 'Esta barra te acompaña mientras entrevistas: muestra el candidato y tu puntaje, que se actualiza con cada criterio que calificas.' });
       P.push({ ruta: rc, sel: '.mx-crit', t: 'Pregunta guía y criterio', x: 'Cada criterio trae la pregunta sugerida para hacer al candidato. Las secciones son: motivaciones, antecedentes académicos, antecedentes laborales, habilidades personales y aspiraciones.' });
       P.push({ ruta: rc, sel: '.mx-lvs', t: 'Elige el nivel', x: 'Mientras escuchas, marca el nivel que mejor describe la respuesta: Bajo, Medio, Alto o Muy alto. Cada tarjeta explica qué significa, para calificar con el mismo criterio que los demás entrevistadores. Si vuelves a pulsar el nivel elegido, se desmarca.' });
-      P.push({ ruta: rc, pick: function() { return $q('.mx-na'); }, sel: '.mx-na', t: 'No aplica', x: 'En «Habilidades del trabajo» existe la opción «No aplica», solo para candidatos sin experiencia laboral. Es el único criterio donde se puede usar.' });
+      P.push({ ruta: rc, pick: function() { abrirSec('III'); return $q('.mx-na'); }, sel: '.mx-na', t: 'No aplica', x: 'En «Habilidades del trabajo» existe la opción «No aplica», solo para candidatos sin experiencia laboral. Es el único criterio donde se puede usar.' });
       P.push({ ruta: rc, pick: function() { var b = $q('[data-bon]'); return b ? b.closest('.mx-extra') : null; }, t: 'Bonificación', x: 'Al final de cada sección puedes asignar una bonificación (Sí o No). Si la das, explica el motivo en las observaciones; el consolidado la muestra.' });
       P.push({ ruta: rc, pick: function() { var b = document.getElementById('sc-rd'); return b ? b.parentNode : null; }, t: 'Riesgo de deserción', x: 'Responde Sí o No a cinco preguntas. Cada respuesta de riesgo suma 1 (máximo 5) y se ve en el consolidado.' });
       P.push({ ruta: rc, pick: function() { var b = document.getElementById('ob-gen'); return b ? b.closest('.mx-extra') : null; }, t: 'Observaciones', x: 'Hay un espacio de observaciones por sección y uno general. Lo que escribas lo ven las demás personas que entrevistan ese programa; redáctalo con respeto y de forma objetiva.' });
@@ -1230,6 +1257,16 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     return '<div class="mx-perfil"><b>Perfil del candidato</b><p>' + esc(t).replace(/\n/g, '<br>') + '</p></div>';
   }
   function perfilCard(c) { return '<div id="pf-wrap">' + perfilInner(c) + '</div>'; }
+  var accCand = null, accAb = {};
+  function abrirSec(sid, scroll) {
+    var a = document.getElementById('acc-' + sid); if (!a) return; accAb[sid] = true;
+    a.classList.add('open'); var b = document.getElementById('accb-' + sid); if (b) b.hidden = false; var h = a.querySelector('.mx-acch'); if (h) h.setAttribute('aria-expanded', 'true');
+    if (scroll) a.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function cerrarSec(sid) {
+    var a = document.getElementById('acc-' + sid); if (!a) return; accAb[sid] = false;
+    a.classList.remove('open'); var b = document.getElementById('accb-' + sid); if (b) b.hidden = true; var h = a.querySelector('.mx-acch'); if (h) h.setAttribute('aria-expanded', 'false');
+  }
   function vistaCand(id) {
     var c = candDe(id); if (!c) { vistaInicio(); return; }
     var p = progDe(c.prog); prog = c.prog;
@@ -1240,6 +1277,12 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       '<div class="mx-yn" style="display:block"><p style="flex:none">' + esc(RD_GRUPO) + '</p><div class="mx-subq">' +
       yn('rd', 'e', esc(RD[2].q), (rec.rd || {}).e, 'no') + yn('rd', 'p', esc(RD[3].q), (rec.rd || {}).p, 'no') + '</div></div>' +
       yn('rd', 'f', esc(RD[4].q), (rec.rd || {}).f, 'si') + '</div>';
+    if (accCand !== id) {
+      accCand = id; accAb = {};
+      var prim = null; SEC.some(function(s) { return s.ids.some(function(ci) { if (rec.r[ci] === undefined) { prim = s.id; return true; } return false; }); });
+      accAb[prim || 'I'] = true;
+    }
+    var accAb2 = accAb;
     var secs = SEC.map(function(s, si) {
       var crits = s.ids.map(function(cid) {
         var m = PREG[cid], v = rec.r[cid], na = (v === 'na');
@@ -1250,12 +1293,14 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       }).join('');
       var extra = s.id === 'II' ? '<div class="mx-crit" style="border-left-color:var(--sky)"><div class="k"><span>Pregunta complementaria · sin calificación</span></div><p class="q">' + esc(PREG_EXTRA_II) + '</p><p class="hint">Registra la respuesta en las observaciones de la sección.</p></div>' : '';
       var bon = rec.bon[s.id] === 1, bno = rec.bon[s.id] === 0;
-      return '<div class="mx-secbar"><span>' + s.id + '. ' + esc(s.t) + ' (' + Math.round(s.w * 100) + ' %)</span><span class="sc" id="sc-' + s.id + '"></span></div>' + crits + (s.id === 'I' ? riesgo : '') + extra +
-        '<div class="mx-extra"><h4>Bonificación de la sección</h4><div class="mx-yn" style="padding:0"><p>¿Asignas bonificación al candidato en esta sección?</p><div class="mx-seg">' +
+      var abierta = !!accAb2[s.id], sg = SEC[si + 1];
+      return '<section class="mx-acc' + (abierta ? ' open' : '') + '" id="acc-' + s.id + '"><button type="button" class="mx-secbar mx-acch" data-acc="' + s.id + '" aria-expanded="' + abierta + '" aria-controls="accb-' + s.id + '"><span>' + s.id + '. ' + esc(s.t) + ' (' + Math.round(s.w * 100) + ' %)</span><span class="sc" id="sc-' + s.id + '"></span><i class="chev" aria-hidden="true"></i></button><div class="mx-accb" id="accb-' + s.id + '"' + (abierta ? '' : ' hidden') + '>' + crits + (s.id === 'I' ? riesgo : '') + extra +
+        '<div class="mx-extra bon"><h4><span class="bono-tag">★ Bono</span> Bonificación de la sección</h4><div class="mx-yn" style="padding:0"><p>¿Asignas bonificación al candidato en esta sección?</p><div class="mx-seg">' +
         '<button type="button" class="mx-b yes" aria-pressed="' + bon + '" data-bon="' + s.id + '" data-v="1">' + IC.yes + ' Sí</button>' +
         '<button type="button" class="mx-b bn" aria-pressed="' + bno + '" data-bon="' + s.id + '" data-v="0">' + IC.no + ' No</button></div></div>' +
         '<label class="mx-lbl" style="margin-top:12px" for="ob-' + s.id + '">Observaciones de la sección ' + s.id + '</label>' +
-        '<textarea class="mx-ta sm" id="ob-' + s.id + '" data-obs="' + s.id + '" placeholder="Anota evidencias, citas textuales o aspectos a tener en cuenta.">' + esc((rec.obs || {})[s.id] || '') + '</textarea></div>';
+        '<textarea class="mx-ta sm" id="ob-' + s.id + '" data-obs="' + s.id + '" placeholder="Anota evidencias, citas textuales o aspectos a tener en cuenta.">' + esc((rec.obs || {})[s.id] || '') + '</textarea></div>' +
+        (sg ? '<div class="mx-next"><button type="button" class="mx-btn lime" data-accnext="' + s.id + '">Continuar con la sección ' + sg.id + ' →</button></div>' : '') + '</div></section>';
     }).join('');
     var gen = '<div class="mx-secbar"><span>Observaciones generales</span><span class="sc"></span></div><div class="mx-extra" style="margin-top:0"><label class="mx-lbl" for="ob-gen">Observaciones generales sobre el candidato</label>' +
       '<textarea class="mx-ta" id="ob-gen" data-obs="gen" placeholder="Impresión general, fortalezas, aspectos por aclarar, recomendación.">' + esc((rec.obs || {}).gen || '') + '</textarea>' +
@@ -1264,7 +1309,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     APP.innerHTML = barra() +
       '<div class="mx-live" id="mx-live"><div class="w"><small id="lv-prog"></small><b id="lv-nom"></b></div><div class="sc"><b id="lv-tot">—</b><span id="lv-sub"></span></div></div>' +
       '<div class="mx-back"><button class="mx-btn sec sm" type="button" data-go="programa/' + esc(c.prog) + '">← Lista de candidatos</button>' +
-      '<span class="mx-count">Candidato ' + (ix + 1) + ' de ' + sig.length + '</span></div>' + perfilCard(c) + secs + gen +
+      '<span class="mx-count">Candidato ' + (ix + 1) + ' de ' + sig.length + '</span></div>' + perfilCard(c) + '<div class="mx-acctool"><span class="mx-muted">Cada sección se despliega al pulsar su título.</span><button type="button" class="mx-pillink" data-act="accall" data-v="1">Expandir todas</button><button type="button" class="mx-pillink" data-act="accall" data-v="0">Contraer todas</button></div>' + secs + gen +
       '<div class="mx-foot"><div class="mx-tot"><b id="ft-tot">—</b><span id="ft-sub" class="mx-muted"></span></div><div class="mx-prog" aria-hidden="true"><i id="ft-bar" style="width:0"></i></div>' +
       '<div class="mx-foot-row"><span class="mx-muted" id="ft-det"></span><div class="mx-row"><button class="mx-btn lime" type="button" data-act="guardarent" id="ft-save">Guardar entrevista</button><button class="mx-btn sec" type="button" data-go="programa/' + esc(c.prog) + '">Volver a la lista</button>' +
       (nx ? '<button class="mx-btn sec" type="button" data-go="cand/' + esc(nx.id) + '">Siguiente candidato →</button>' : '<button class="mx-btn sec" type="button" data-go="consolidado">Ver consolidado →</button>') + '</div></div>' +
@@ -1361,6 +1406,9 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       I: g(function(m) { return m.sec.I; }), II: g(function(m) { return m.sec.II; }), III: g(function(m) { return m.sec.III; }), IV: g(function(m) { return m.sec.IV; }), V: g(function(m) { return m.sec.V; }), ent: g(function(m) { return m.ent; }), glob: g(function(m) { return m.glob; }) };
   }
   function rnTd(r) { return '<td class="rn' + (r === 1 ? ' one' : '') + '">' + (r === '' ? '—' : r) + '</td>'; }
+  function esSel(R, i, cupos, g) { return !!(cupos && g != null && R.glob[i] !== '' && R.glob[i] <= cupos); }
+  function rnSel(r, sel) { return sel ? '<td class="rn ok"><span class="gsel" title="Seleccionado: dentro de los cupos">' + r + '</span></td>' : rnTd(r); }
+  function selTag(sel, r) { return sel ? '<span class="sel-tag">✔ Seleccionado · puesto ' + r + '</span>' : ''; }
   var PTRN = '<th class="num sub">Pt</th><th class="num sub">Rn</th>';
   function nmTd(x, top) { return '<td class="nm"><b>' + esc(nomC(x.c)) + '</b></td>'; }
   function tablaExamen(pid) {
@@ -1386,8 +1434,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   function tablaGlobal(pid) {
     var rows = filasPond(pid), R = pwRank(rows), n = function(v) { return v == null ? '—' : f2(v); }, p = progDe(pid), cupos = (p && p.cupos) || 0;
     var h = '<tr><th rowspan="2">Candidato</th>' + th2('Aporte examen', '60 %', '', ' rowspan="2"') + th2('Aporte entrevista', '40 %', '', ' rowspan="2"') + th2('Resultado global', 'de 0 a 1', 'pwg', ' colspan="2"') + th2('Global en %', '', '', ' rowspan="2"') + th2('Riesgo', 'de 5', '', ' rowspan="2"') + th2('Bonos', '', '', ' rowspan="2"') + '</tr><tr>' + PTRN + '</tr>';
-    var b = rows.map(function(x, i) { var m = R.ms[i], top = cupos && x.glob != null && i < cupos;
-      return '<tr class="' + (top ? 'top3' : '') + '">' + nmTd(x) + '<td class="num">' + (x.aex == null ? '—' : ppTxt(x.aex * 100)) + '</td><td class="num">' + (x.aen == null ? '—' : ppTxt(x.aen * 100)) + '</td><td class="num tot pos pwg">' + n(x.glob) + '</td>' + rnTd(R.glob[i]) + '<td class="num">' + pcTxt(x.glob) + '</td><td class="num">' + (m.rd == null ? '—' : f1(m.rd)) + '</td><td class="num">' + (m.bon == null ? '—' : f1(m.bon)) + '</td></tr>'; }).join('');
+    var b = rows.map(function(x, i) { var m = R.ms[i], top = esSel(R, i, cupos, x.glob);
+      return '<tr class="' + (top ? 'ok' : '') + '">' + nmTd(x).replace('</b></td>', '</b>' + selTag(top, R.glob[i]) + '</td>') + '<td class="num">' + (x.aex == null ? '—' : ppTxt(x.aex * 100)) + '</td><td class="num">' + (x.aen == null ? '—' : ppTxt(x.aen * 100)) + '</td><td class="num tot pos pwg">' + n(x.glob) + '</td>' + rnSel(R.glob[i], top) + '<td class="num">' + pcTxt(x.glob) + '</td><td class="num">' + (m.rd == null ? '—' : f1(m.rd)) + '</td><td class="num">' + (m.bon == null ? '—' : f1(m.bon)) + '</td></tr>'; }).join('');
     return pwTabla('Resultado global', h, b, 9);
   }
   function fichasInd(pid) {
@@ -1399,8 +1447,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       var ppE = x.aen == null ? null : x.aen * 100; if (ppE != null) seg.push([ppE, '#7aa93a', 'Entrevista']);
       var secs = SEC.map(function(z) { var v = m.sec ? m.sec[z.id] : null; return '<li><span>' + esc(SEC_CORTO[z.id] || z.t) + '</span><em>' + (v == null ? '—' : f2(v) + ' de 3') + '</em><b>' + ppTxt(v == null ? null : v / 3 * z.w * 40) + '<small> de ' + pnum(z.w * 40) + ' %</small></b></li>'; }).join('');
       var bar = '<div class="pw-sk" aria-hidden="true">' + seg.map(function(g) { return '<span title="' + g[2] + ': ' + f1(g[0]) + ' %" style="width:' + g[0] + '%;background:' + g[1] + '"></span>'; }).join('') + '</div>';
-      var top = cupos && hay && i < cupos;
-      return '<article class="pw-fc' + (top ? ' top' : '') + '"><header><span class="rn' + (R.glob[i] === 1 ? ' one' : '') + '">' + (R.glob[i] === '' ? '—' : R.glob[i]) + '</span><b class="who">' + esc(nomC(x.c)) + '</b>' + (top ? '<span class="pw-cu">Dentro de cupos</span>' : '') + '<div class="gl"><small>Resultado global</small><b>' + (hay ? ppTxt(x.glob * 100) : 'Pendiente') + '</b></div></header>' + bar +
+      var top = hay && esSel(R, i, cupos, x.glob);
+      return '<article class="pw-fc' + (top ? ' top' : '') + '"><header><span class="rn' + (R.glob[i] === 1 ? ' one' : '') + '">' + (R.glob[i] === '' ? '—' : R.glob[i]) + '</span><b class="who">' + esc(nomC(x.c)) + '</b>' + (top ? '<span class="pw-cu">✔ Seleccionado · puesto ' + R.glob[i] + '</span>' : '') + '<div class="gl"><small>Resultado global</small><b>' + (hay ? ppTxt(x.glob * 100) : 'Pendiente') + '</b></div></header>' + bar +
         '<div class="pw-sub"><div><h5>Examen <small>' + (x.aex == null ? '—' : ppTxt(x.aex * 100)) + ' de 60 %</small></h5><ul>' + lin + '</ul></div><div><h5>Entrevista <small>' + (ppE == null ? '—' : ppTxt(ppE)) + ' de 40 %</small></h5><ul>' + secs + '</ul></div></div></article>';
     }).join('') + '</div><p class="pw-leg"><b style="color:#1f5fa8">■ Básicas</b> <b style="color:#2f9ad8">■ Clínicas</b> <b style="color:#6bb6e8">■ Cultura</b> <b style="color:#7aa93a">■ Entrevista</b> · la barra completa es el 100 % posible; lo que ves es lo que logró el candidato.</p>';
   }
@@ -1411,11 +1459,11 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     var h = '<tr><th rowspan="3" style="min-width:170px">Candidato</th>' + g('Examen', 'de ' + mx, '', 8) + g('Entrevista', 'de 3', 'g2', 12) + g('Global', '', '', 2) + '<th rowspan="3">Riesgo<small>de 5</small></th><th rowspan="3">Bonos</th></tr>' +
       '<tr>' + ['Básicas', 'Clínicas', 'Cultura', 'Total'].map(function(x) { return g(x, '', '', 2); }).join('') + SEC.map(function(z) { return g(esc(SEC_CORTO[z.id] || z.t), '', 'g2', 2); }).join('') + g('Total', '', 'g2', 2) + g('60 % + 40 %', '', '', 2) + '</tr>' +
       '<tr>' + new Array(11).join(PTRN) + PTRN + '</tr>';
-    var b = rows.map(function(x, i) { var m = R.ms[i], e = m.ex, top = cupos && x.glob != null && i < cupos;
-      return '<tr class="' + (top ? 'top3' : '') + '"><td class="nm"><b>' + esc(nomC(x.c)) + '</b></td>' +
+    var b = rows.map(function(x, i) { var m = R.ms[i], e = m.ex, top = esSel(R, i, cupos, x.glob);
+      return '<tr class="' + (top ? 'ok' : '') + '"><td class="nm"><b>' + esc(nomC(x.c)) + '</b>' + selTag(top, R.glob[i]) + '</td>' +
         '<td class="num">' + e0(e.bas) + '</td>' + rnTd(R.bas[i]) + '<td class="num">' + e0(e.cli) + '</td>' + rnTd(R.cli[i]) + '<td class="num">' + e0(e.cul) + '</td>' + rnTd(R.cul[i]) + '<td class="num tot">' + e0(e.tot) + '</td>' + rnTd(R.tot[i]) +
         SEC.map(function(z) { return '<td class="num">' + n(m.sec ? m.sec[z.id] : null) + '</td>' + rnTd(R[z.id][i]); }).join('') + '<td class="num tot">' + n(m.ent) + '</td>' + rnTd(R.ent[i]) +
-        '<td class="num tot pos">' + n(m.glob) + '</td>' + rnTd(R.glob[i]) + '<td class="num">' + (m.rd == null ? '—' : f1(m.rd)) + '</td><td class="num">' + (m.bon == null ? '—' : f1(m.bon)) + '</td></tr>'; }).join('');
+        '<td class="num tot pos">' + n(m.glob) + '</td>' + rnSel(R.glob[i], top) + '<td class="num">' + (m.rd == null ? '—' : f1(m.rd)) + '</td><td class="num">' + (m.bon == null ? '—' : f1(m.bon)) + '</td></tr>'; }).join('');
     return pwTabla('Consolidado ponderado', h, b, 27);
   }
   function selProgHtml(id, mp) {
@@ -1439,7 +1487,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     APP.innerHTML = barra() + band('Consolidado ponderado', esc(V.tit || ''), IC.table) + tabsCons('pond') + panelPond() +
       '<div class="mx-toolbar" style="margin-top:14px">' + selProgHtml('pw-cp', V.mp) + '<div class="mx-fld" style="flex:0 0 auto"><span class="mx-lbl">Descarga</span><button class="mx-btn sec sm" type="button" data-act="dlpw">Descargar este consolidado ponderado (Excel)</button></div></div>' +
       '<p class="mx-savemsg" id="pw-dl" role="status" aria-live="polite"></p>' +
-      blkHtml('', 'Consolidado ponderado', 'Pt = puntaje, Rn = posición dentro del programa. La entrevista combina a los entrevistadores con los pesos aplicados; el global es 60 % examen + 40 % entrevista. Las filas resaltadas están dentro de los cupos.', por(tablaExcel)) +
+      blkHtml('', 'Consolidado ponderado', 'Pt = puntaje, Rn = posición dentro del programa. La entrevista combina a los entrevistadores con los pesos aplicados; el global es 60 % examen + 40 % entrevista. Los candidatos en verde quedan seleccionados según los cupos del programa (se indica su puesto).', por(tablaExcel)) +
       blkHtml('', 'Cómo le fue a cada candidato', 'Qué porcentaje logró en cada parte y cuánto suma en el resultado global.', por(fichasInd)) +
       '<p class="pw-n">Solo cuentan las entrevistas que cada persona dejó <b>completas</b>; si un entrevistador aún no termina a un candidato, su peso se reparte entre quienes sí terminaron. Si hay varias personas con el mismo rol, primero se promedian entre sí.</p>' + compSeccion(V);
     if (!suave) window.scrollTo(0, 0);
@@ -1552,11 +1600,11 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       var m = ms[i], c = m.c, cut = consState.orden === 'glob' && cupos && pos === cupos && m.glob != null;
       var rn = function(r) { return '<td class="rn' + (r === 1 ? ' one' : '') + '">' + (r === '' ? '' : r) + '</td>'; };
       var pt = function(v, d) { return '<td class="num">' + (v == null ? '—' : (d === 1 ? f1(v) : f2(v))) + '</td>'; };
-      var top = consState.orden === 'glob' && cupos && pos < cupos && m.glob != null;
-      return '<tr class="' + (top ? 'top3 ' : '') + (cut ? 'cut ' : '') + (consState.exp[c.id] ? 'sel' : '') + '"><td class="nm"><button type="button" class="tg" data-det="' + esc(c.id) + '" aria-expanded="' + (consState.exp[c.id] ? 'true' : 'false') + '"><span class="car" aria-hidden="true">' + (consState.exp[c.id] ? '▾' : '▸') + '</span> ' + esc(nomC(c)) + '</button>' + chipsExtra(c) + '</td>' +
+      var top = esSel(R, i, cupos, m.glob);
+      return '<tr class="' + (top ? 'ok ' : '') + (cut ? 'cut ' : '') + (consState.exp[c.id] ? 'sel' : '') + '"><td class="nm"><button type="button" class="tg" data-det="' + esc(c.id) + '" aria-expanded="' + (consState.exp[c.id] ? 'true' : 'false') + '"><span class="car" aria-hidden="true">' + (consState.exp[c.id] ? '▾' : '▸') + '</span> ' + esc(nomC(c)) + '</button>' + selTag(top, R.glob[i]) + chipsExtra(c) + '</td>' +
         '<td class="num">' + f0(m.ex.bas) + '</td>' + rn(R.bas[i]) + '<td class="num">' + f0(m.ex.cli) + '</td>' + rn(R.cli[i]) + '<td class="num">' + f0(m.ex.cul) + '</td>' + rn(R.cul[i]) + '<td class="num tot">' + f0(m.ex.tot) + '</td>' + rn(R.tot[i]) +
         pt(m.sec.I) + rn(R.I[i]) + pt(m.sec.II) + rn(R.II[i]) + pt(m.sec.III) + rn(R.III[i]) + pt(m.sec.IV) + rn(R.IV[i]) + pt(m.sec.V) + rn(R.V[i]) + '<td class="num tot">' + f2(m.ent) + '</td>' + rn(R.ent[i]) +
-        '<td class="num tot pos">' + f2(m.glob) + '</td>' + rn(R.glob[i]) + '<td class="num">' + (m.rd == null ? '—' : f1(m.rd)) + '</td><td class="num">' + (m.bon == null ? '—' : (ev === 'comb' ? f1(m.bon) : f0(m.bon))) + '</td><td class="num">' + esc(m.est) + '</td></tr>' + (consState.exp[c.id] ? '<tr class="exp"><td colspan="26"><div class="mx-obs-grid">' + evCards(c) + '</div></td></tr>' : '');
+        '<td class="num tot pos">' + f2(m.glob) + '</td>' + (top ? rnSel(R.glob[i], true) : rn(R.glob[i])) + '<td class="num">' + (m.rd == null ? '—' : f1(m.rd)) + '</td><td class="num">' + (m.bon == null ? '—' : (ev === 'comb' ? f1(m.bon) : f0(m.bon))) + '</td><td class="num">' + esc(m.est) + '</td></tr>' + (consState.exp[c.id] ? '<tr class="exp"><td colspan="26"><div class="mx-obs-grid">' + evCards(c) + '</div></td></tr>' : '');
     }).join('');
     var ptRn = '<th class="num sub">Pt</th><th class="num sub">Rn</th>', sub = '';
     for (var q = 0; q < 11; q++) sub += ptRn;
@@ -1868,9 +1916,14 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   /* ---------------- eventos ---------------- */
   APP.addEventListener('click', function(ev) {
     var t = ev.target.closest('button,[data-go]'); if (!t) return;
+    var ac = t.getAttribute('data-acc');
+    if (ac) { if (accAb[ac]) cerrarSec(ac); else abrirSec(ac); return; }
+    var an = t.getAttribute('data-accnext');
+    if (an) { var ix2 = SEC.findIndex(function(x) { return x.id === an; }); cerrarSec(an); if (SEC[ix2 + 1]) abrirSec(SEC[ix2 + 1].id, true); return; }
     var g = t.getAttribute('data-go');
     if (g !== null && !t.hasAttribute('data-act')) { ir(g); return; }
     var act = t.getAttribute('data-act');
+    if (act === 'accall') { var on = t.getAttribute('data-v') === '1'; SEC.forEach(function(x) { if (on) abrirSec(x.id); else cerrarSec(x.id); }); return; }
     if (act === 'salir') { try { location.hash = ''; } catch (e) {} salir(); return; }
     if (act === 'guardarent' && vista.tipo === 'cand') {
       var msg = document.getElementById('ft-msg'), bt = document.getElementById('ft-save'), cid0 = vista.id;
