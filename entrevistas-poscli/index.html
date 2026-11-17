@@ -611,6 +611,19 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .pw-tb th.pwg, .pw-tb td.pwg { background: #f6faee !important; }
 .pw-tb tr.ok td.pwg { background: #eef6df !important; }
 
+/* fichas desplegables */
+.pw-bhb { display: flex; align-items: center; justify-content: space-between; gap: 14px; width: 100%; text-align: left; font-family: inherit; cursor: pointer; padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--navy); }
+.pw-bhb:hover { background: var(--paper); }
+.pw-bhb:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px; }
+.pw-bhb h3 { margin: 0; }
+.pw-bhb p { margin: 2px 0 0; }
+.pw-tg { display: inline-flex; align-items: center; gap: 8px; flex: none; font-size: 12.5px; font-weight: 700; color: var(--blue); }
+.pw-tg .chev { width: 9px; height: 9px; border-right: 2.5px solid var(--blue); border-bottom: 2.5px solid var(--blue); transform: rotate(45deg) translateY(-2px); transition: transform .18s; }
+.pw-fold.open .pw-tg .chev { transform: rotate(-135deg) translateY(-2px); }
+#pw-fichas-b[hidden] { display: none; }
+#pw-fichas-b { margin-top: 12px; }
+.pw-bh .pw-tg i.chev { width: 9px; height: 9px; background: none; border-radius: 0; display: inline-block; margin: 0 4px 0 0; font-size: 0; }
+
 </style>
 </head><body>
 <div id="ces-entrevistas" lang="es">
@@ -963,8 +976,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     if (p[0] === 'programa' && p[1]) return { tipo: 'programa', id: p[1] };
     if (p[0] === 'cand' && p[1]) return { tipo: 'cand', id: p[1] };
     if (p[0] === 'consolidado') return { tipo: 'consolidado' };
-    if (p[0] === 'ponderado') return { tipo: 'ponderado' };
-    if (p[0] === 'comparativo') return { tipo: 'ponderado' };
+    if (p[0] === 'ponderado') return { tipo: 'consolidado' };
+    if (p[0] === 'comparativo') return { tipo: 'consolidado' };
     if (p[0] === 'admin') return { tipo: 'admin' };
     return { tipo: 'inicio' };
   }
@@ -985,7 +998,6 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       '<span class="mx-chip" id="mx-sync" role="status"></span></div>' +
       '<div class="mx-chips"><button class="mx-pillink" type="button" data-go="">Inicio</button>' +
       '<button class="mx-pillink" type="button" data-go="consolidado">Consolidado</button>' +
-      '<button class="mx-pillink pond" type="button" data-go="ponderado">Consolidado ponderado</button>' +
       (y.rol === 'admin' ? '<button class="mx-pillink" type="button" data-go="admin">Administración</button>' : '') +
       '<button class="mx-pillink tour" type="button" data-tour="boton">▶ Dame mi recorrido virtual</button>' +
       '<button class="mx-pillink" type="button" data-act="actualizar">Actualizar</button>' +
@@ -1005,7 +1017,6 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     if (r.tipo === 'cand') vistaCand(r.id);
     else if (r.tipo === 'programa') { var p = progDe(r.id); if (p) { prog = p.id; ssSet('mx_prog', prog); vistaPrograma(); } else vistaInicio(); }
     else if (r.tipo === 'consolidado') vistaConsolidado();
-    else if (r.tipo === 'ponderado') vistaPonderado();
     else if (r.tipo === 'admin' && esAdmin()) vistaAdmin();
     else if (mp.length === 1) { prog = mp[0].id; vistaPrograma(); }
     else vistaInicio();
@@ -1016,7 +1027,6 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     if (vista.tipo === 'inicio') vistaInicio();
     else if (vista.tipo === 'programa') vistaPrograma();
     else if (vista.tipo === 'consolidado') { if (!enCampo) vistaConsolidado(true); }
-    else if (vista.tipo === 'ponderado') { if (!enCampo) vistaPonderado(true); }
     else if (vista.tipo === 'cand') refrescarForm(vista.id, true);
     else if (vista.tipo === 'admin') { if (!enCampo && !document.querySelector('[data-confirm].on')) vistaAdmin(); }
   }
@@ -1118,14 +1128,14 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       P.push({ ruta: rc, pick: function() { var b = document.getElementById('ob-gen'); return b ? b.closest('.mx-extra') : null; }, t: 'Observaciones', x: 'Hay un espacio de observaciones por sección y uno general. Lo que escribas lo ven las demás personas que entrevistan ese programa; redáctalo con respeto y de forma objetiva.' });
       P.push({ ruta: rc, sel: '.mx-foot', t: 'Se guarda solo', x: 'No hay botón de guardar: cada respuesta se guarda sola. Arriba verás «Guardando…» y luego «Guardado · hora»; espera ese aviso antes de cerrar. Abajo tienes la barra de avance y el botón «Siguiente candidato».' });
     }
-    P.push({ ruta: '#/consolidado', sel: '#mx-tabla', t: 'El consolidado', x: 'Muestra, por candidato, el examen, la entrevista y el resultado global, con su posición (Rn) dentro del programa. ' + (rol === 'coord' ? 'Ves únicamente tu programa.' : 'Eliges un programa o la vista de todos.') });
-    if (rol !== 'coord') P.push({ ruta: '#/consolidado', sel: '#mx-cp', t: 'Elige el programa', x: 'Cambia entre un programa y la vista general de todos.' });
-    P.push({ ruta: '#/consolidado', sel: '#mx-ce', t: 'Calificación a mostrar', x: 'Alterna entre la calificación combinada de todos los entrevistadores y la de cada persona por separado.' });
+    P.push({ ruta: '#/consolidado', pick: function() { abrirBlk('det'); return $q('#mx-tabla'); }, t: 'El consolidado por entrevistador', x: 'En «Consolidado por entrevistador» (se abre al final de la página) ves, por candidato, el examen, la entrevista y el resultado global, con su posición (Rn) dentro del programa. ' + (rol === 'coord' ? 'Ves únicamente tu programa.' : 'Eliges un programa o la vista de todos.') });
+    if (rol !== 'coord') P.push({ ruta: '#/consolidado', sel: '#pw-cp', t: 'Elige el programa', x: 'Cambia entre un programa y la vista general de todos.' });
+    P.push({ ruta: '#/consolidado', pick: function() { abrirBlk('det'); return $q('#mx-ce'); }, t: 'Calificación a mostrar', x: 'Alterna entre la calificación combinada de todos los entrevistadores y la de cada persona por separado.' });
     P.push({ ruta: '#/consolidado', pick: function() { return $q('.mx-tb td.nm button') || $q('.mx-tb td.nm'); }, t: 'Despliega a cada candidato', x: 'Pulsa el nombre de un candidato para desplegarlo: verás las observaciones y bonificaciones de cada entrevistador.' });
     P.push({ ruta: '#/consolidado', pick: function() { var b = document.getElementById('mx-dlmsg'); return b ? b.closest('.mx-card2') : null; }, t: 'Descargas', x: 'Baja el consolidado en Excel: ' + (multi || rol !== 'coord' ? 'de un programa o de todos' : 'de tu programa') + ', con una hoja «Detalle» que incluye observaciones y bonificaciones.' });
-    P.push({ ruta: '#/ponderado', sel: '.pw-panel', t: 'Consolidado ponderado y ponderación aplicada', x: 'En la pestaña «Consolidado ponderado» ves, arriba, cómo se calcula el resultado: el peso de cada entrevistador (franja pequeña), el desglose del examen (Básicas, Clínicas y Cultura), el de la entrevista por secciones y el resultado global.' + (rol === 'admin' ? ' Como Jefatura puedes pulsar «Editar pesos», cambiarlos y «Aplicar pesos»: todo se recalcula al instante.' : ' La Jefatura de Posgrados puede modificar los pesos.') });
-    P.push({ ruta: '#/ponderado', sel: '.pw-blk', t: 'Consolidado igual al Excel', x: 'Aquí está todo el consolidado como en tu Excel: puntaje (Pt) y posición (Rn) de Básicas, Clínicas, Cultura, cada sección de la entrevista, el total y el global, más Riesgo y Bonos. Debajo ves, candidato por candidato, qué porcentaje logró en cada parte. Puedes descargarlo en Excel.' });
-    P.push({ ruta: '#/ponderado', sel: '.cp-sec', t: 'Comparativo entre entrevistadores', x: 'Al final ves si los entrevistadores coinciden: la nota de cada uno, la diferencia y la alerta «Revisar» (diferencia de 1,0 o más), la posición según cada uno y, por sección, en qué punto discrepan.' });
+    P.push({ ruta: '#/consolidado', sel: '.pw-panel', t: 'Consolidado ponderado y ponderación aplicada', x: 'En la parte de arriba del Consolidado ves cómo se calcula el resultado: el peso de cada entrevistador (franja pequeña), el desglose del examen (Básicas, Clínicas y Cultura), el de la entrevista por secciones y el resultado global.' + (rol === 'admin' ? ' Como Jefatura puedes pulsar «Editar pesos», cambiarlos y «Aplicar pesos»: todo se recalcula al instante.' : ' La Jefatura de Posgrados puede modificar los pesos.') });
+    P.push({ ruta: '#/consolidado', sel: '.pw-blk', t: 'Consolidado igual al Excel', x: 'Aquí está todo el consolidado como en tu Excel: puntaje (Pt) y posición (Rn) de Básicas, Clínicas, Cultura, cada sección de la entrevista, el total y el global, más Riesgo y Bonos. Debajo ves, candidato por candidato, qué porcentaje logró en cada parte. Puedes descargarlo en Excel.' });
+    P.push({ ruta: '#/consolidado', sel: '.cp-sec', t: 'Comparativo entre entrevistadores', x: 'Al final ves si los entrevistadores coinciden: la nota de cada uno, la diferencia y la alerta «Revisar» (diferencia de 1,0 o más), la posición según cada uno y, por sección, en qué punto discrepan.' });
     P.push({ ruta: '#/consolidado', t: 'Cómo se calcula el resultado', x: T_CALCULO });
     if (rol === 'admin') {
       var tb = function(tab) { return function() { admTab = tab; }; };
@@ -1446,10 +1456,6 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       '<div class="pw-strip"><b class="pw-t">Peso de cada entrevistador</b>' + items + '<span class="pw-sp"></span>' + ed + '</div><p class="mx-savemsg" id="pw-msg" role="status" aria-live="polite" style="margin:0 22px"></p>' +
       '<p class="pw-n pw-nl"><b>Secciones de la entrevista:</b> ' + secs + '. Solo cuentan las entrevistas completas; si alguien no ha terminado, su peso se reparte entre quienes sí.</p></section>';
   }
-  function tabsCons(act) {
-    var b = function(k, h, t) { return '<button class="mx-pillink' + (act === k ? ' on' : '') + '" type="button" data-go="' + h + '">' + t + '</button>'; };
-    return '<div class="mx-tabs pw-tabs">' + b('cons', 'consolidado', 'Consolidado') + b('pond', 'ponderado', 'Consolidado ponderado') + '</div>';
-  }
   function bar2(v, cl) { return '<div class="pw-b ' + cl + '" aria-hidden="true"><i style="width:' + Math.max(0, Math.min(100, v)) + '%"></i></div>'; }
   function pnum(v) { return (Math.round(v * 10) / 10).toString().replace('.', ','); }
   function ppTxt(v) { return v == null || isNaN(v) ? '—' : f1(v) + ' %'; }
@@ -1540,17 +1546,19 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     return { mp: mp, pids: pids, tit: prog === 'todos' ? 'Todos los programas' : (progDe(prog) || {}).nombre };
   }
   function blkHtml(num, tit, sub, inner) { return '<section class="pw-blk"><div class="pw-bh">' + (num ? '<i>' + num + '</i>' : '') + '<div><h3>' + tit + '</h3><p>' + sub + '</p></div></div>' + inner + '</section>'; }
-  function vistaPonderado(suave) {
-    var V = progsVista(), pids = V.pids, multi = pids.length > 1;
+  var blkAb = { fichas: false, det: false };
+  function blkAcc(k, tit, sub, inner) {
+    var ab = !!blkAb[k];
+    return '<section class="pw-blk pw-fold' + (ab ? ' open' : '') + '" id="pw-' + k + '"><button type="button" class="pw-bh pw-bhb" data-act="blk" data-k="' + k + '" aria-expanded="' + ab + '" aria-controls="pw-' + k + '-b"><div><h3>' + tit + '</h3><p>' + sub + '</p></div><span class="pw-tg"><span class="pw-tgt">' + (ab ? 'Ocultar' : 'Ver detalle') + '</span><i class="chev" aria-hidden="true"></i></span></button><div id="pw-' + k + '-b"' + (ab ? '' : ' hidden') + '>' + inner + '</div></section>';
+  }
+  function abrirBlk(k) { blkAb[k] = true; var b = document.getElementById('pw-' + k + '-b'), f = document.getElementById('pw-' + k); if (b) b.hidden = false; if (f) { f.classList.add('open'); var h = f.querySelector('.pw-bhb'); if (h) { h.setAttribute('aria-expanded', 'true'); h.querySelector('.pw-tgt').textContent = 'Ocultar'; } } }
+  function pondHtml(V) {
+    var pids = V.pids, multi = pids.length > 1;
     var por = function(fn) { return pids.map(function(pid) { return (multi ? '<h4 class="pw-ph">' + esc((progDe(pid) || {}).nombre) + '</h4>' : '') + fn(pid); }).join(''); };
-    var glob = '<div class="pw-split" aria-hidden="true"><span class="ex" style="width:60%">Examen 60 %</span><span class="en" style="width:40%">Entrevista 40 %</span></div>';
-    APP.innerHTML = barra() + band('Consolidado ponderado', esc(V.tit || ''), IC.table) + tabsCons('pond') + panelPond() +
-      '<div class="mx-toolbar" style="margin-top:14px">' + selProgHtml('pw-cp', V.mp) + '<div class="mx-fld" style="flex:0 0 auto"><span class="mx-lbl">Descarga</span><button class="mx-btn sec sm" type="button" data-act="dlpw">Descargar este consolidado ponderado (Excel)</button></div></div>' +
-      '<p class="mx-savemsg" id="pw-dl" role="status" aria-live="polite"></p>' +
+    return '<p class="mx-savemsg" id="pw-dl" role="status" aria-live="polite"></p>' +
       blkHtml('', 'Consolidado ponderado', 'Pt = puntaje, Rn = posición dentro del programa. La entrevista combina a los entrevistadores con los pesos aplicados; el global es 60 % examen + 40 % entrevista. Los candidatos en verde quedan seleccionados según los cupos del programa (se indica su puesto); si el programa no tiene cupos definidos, no se marca ninguno: defínelos en Administración › Programas.', por(tablaExcel)) +
-      blkHtml('', 'Cómo le fue a cada candidato', 'Qué porcentaje logró en cada parte y cuánto suma en el resultado global.', por(fichasInd)) +
+      blkAcc('fichas', 'Cómo le fue a cada candidato', 'Qué porcentaje logró en cada parte y cuánto suma en el resultado global. Se abre y se cierra con este título.', por(fichasInd)) +
       '<p class="pw-n">Solo cuentan las entrevistas que cada persona dejó <b>completas</b>; si un entrevistador aún no termina a un candidato, su peso se reparte entre quienes sí terminaron. Si hay varias personas con el mismo rol, primero se promedian entre sí.</p>' + compSeccion(V);
-    if (!suave) window.scrollTo(0, 0);
   }
   /* ---------------- comparativo entre entrevistadores ---------------- */
   var ROLES3 = ['decana', 'admin', 'coord'];
@@ -1621,28 +1629,25 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     say('Aplicando…');
     var c = DB.cfg;
     Store.admin('config', { conv: c.conv || '', examMax: c.examMax || 300, pesos: { coord: w[0], decana: w[1], admin: w[2] }, abierta: c.abierta !== false })
-      .then(function() { return Store.load(); }).then(function(d) { aplicar(d); vistaPonderado(true); var m2 = document.getElementById('pw-msg'); if (m2) { m2.className = 'mx-savemsg ok'; m2.textContent = '✔ Pesos aplicados. El consolidado ya se recalculó.'; } })
+      .then(function() { return Store.load(); }).then(function(d) { aplicar(d); vistaConsolidado(true); var m2 = document.getElementById('pw-msg'); if (m2) { m2.className = 'mx-savemsg ok'; m2.textContent = '✔ Pesos aplicados. El consolidado ya se recalculó.'; } })
       .catch(function(e) { if (e && e.code === 'sesion') { salir('Tu sesión terminó. Ingresa de nuevo.'); return; } say(e && e.code === 'permiso' ? 'No tienes permiso para cambiar los pesos.' : 'No se pudo guardar. Inténtalo de nuevo.', 'bad'); });
   }
   function vistaConsolidado(suave) {
-    var mp = misProgs();
-    if (!prog && mp.length === 1) prog = mp[0].id;
-    if (!prog) prog = veTodo() ? 'todos' : (mp[0] ? mp[0].id : '');
-    if (prog === 'todos' && !veTodo()) prog = mp[0] ? mp[0].id : '';
+    var V = progsVista(), mp = V.mp;
     var pids = prog === 'todos' ? mp.map(function(p) { return p.id; }) : [prog];
     var evs = evaluadoresVista(pids);
     if (consState.ev !== 'comb' && !evs.some(function(e) { return e.id === consState.ev; })) consState.ev = 'comb';
-    var selProg = (mp.length > 1 || veTodo()) ? '<div class="mx-fld"><label class="mx-lbl" for="mx-cp">Programa</label><select class="mx-in" id="mx-cp">' + (veTodo() ? '<option value="todos"' + (prog === 'todos' ? ' selected' : '') + '>Todos los programas</option>' : '') +
-      mp.map(function(p) { return '<option value="' + esc(p.id) + '"' + (prog === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select></div>' : '';
-    var tit = prog === 'todos' ? 'Todos los programas' : (progDe(prog) || {}).nombre;
-    APP.innerHTML = barra() + band('Consolidado', esc(tit || ''), IC.table) + tabsCons('cons') +
-      '<div class="mx-toolbar">' + selProg +
+    var det = '<div class="mx-toolbar">' +
       '<div class="mx-fld"><label class="mx-lbl" for="mx-ce">Calificación a mostrar</label><select class="mx-in" id="mx-ce"><option value="comb">Combinada (todos los entrevistadores)</option>' +
       evs.map(function(e) { return '<option value="' + esc(e.id) + '"' + (consState.ev === e.id ? ' selected' : '') + '>' + esc(e.nombre) + ' · ' + esc(ROL_CORTO[e.rol]) + '</option>'; }).join('') + '</select></div>' +
       '<div class="mx-fld"><label class="mx-lbl" for="mx-co">Orden</label><select class="mx-in" id="mx-co"><option value="alfa">Alfabético</option><option value="glob"' + (consState.orden === 'glob' ? ' selected' : '') + '>Por resultado global</option></select></div>' +
       '<div class="mx-fld" style="flex:0 0 auto"><span class="mx-lbl">Detalle (bonos y observaciones)</span><span class="mx-row"><button class="mx-btn sec sm" type="button" data-act="expall">Desplegar todo</button><button class="mx-btn sec sm" type="button" data-act="colall">Contraer todo</button></span></div></div>' +
       '<p class="mx-muted" id="mx-leyenda"></p><div id="mx-tabla"></div>' + descargasHtml();
-    var ce = document.getElementById('mx-ce'); if (consState.ev !== 'comb') ce.value = consState.ev;
+    APP.innerHTML = barra() + band('Consolidado', esc(V.tit || ''), IC.table) + panelPond() +
+      '<div class="mx-toolbar" style="margin-top:14px">' + selProgHtml('pw-cp', mp) + '<div class="mx-fld" style="flex:0 0 auto"><span class="mx-lbl">Descarga</span><button class="mx-btn sec sm" type="button" data-act="dlpw">Descargar este consolidado ponderado (Excel)</button></div></div>' +
+      pondHtml(V) +
+      blkAcc('det', 'Consolidado por entrevistador', 'Puntaje de cada persona por separado, bonos, observaciones y descargas en Excel.', det);
+    var ce = document.getElementById('mx-ce'); if (ce && consState.ev !== 'comb') ce.value = consState.ev;
     if (!suave) window.scrollTo(0, 0);
     tablaConsolidado();
   }
@@ -1985,6 +1990,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     if (g !== null && !t.hasAttribute('data-act')) { ir(g); return; }
     var act = t.getAttribute('data-act');
     if (act === 'accall') { var on = t.getAttribute('data-v') === '1'; SEC.forEach(function(x) { if (on) abrirSec(x.id); else cerrarSec(x.id); }); return; }
+    if (act === 'blk') { var bk = t.getAttribute('data-k'); blkAb[bk] = !blkAb[bk]; var fb = document.getElementById('pw-' + bk + '-b'), fs = document.getElementById('pw-' + bk); if (fb) fb.hidden = !blkAb[bk]; if (fs) fs.classList.toggle('open', blkAb[bk]); t.setAttribute('aria-expanded', String(!!blkAb[bk])); var tt = t.querySelector('.pw-tgt'); if (tt) tt.textContent = blkAb[bk] ? 'Ocultar' : 'Ver detalle'; return; }
     if (act === 'salir') { try { location.hash = ''; } catch (e) {} salir(); return; }
     if (act === 'guardarent' && vista.tipo === 'cand') {
       var msg = document.getElementById('ft-msg'), bt = document.getElementById('ft-save'), cid0 = vista.id;
@@ -2096,8 +2102,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   APP.addEventListener('change', function(ev) {
     var t = ev.target;
     if (t.type === 'checkbox' && t.closest && t.closest('.mx-dd')) { var dd = t.closest('.mx-dd'), ck = dd.querySelectorAll('input[type=checkbox]:checked'); dd.querySelector('.ddt').textContent = ddResumen(ck.length, ck[0] ? ck[0].getAttribute('data-n') : ''); }
-    if (t.id === 'pw-cp') { prog = t.value; vistaPonderado(true); return; }
-    if (t.id === 'cp-cand') { cmpState.cid = t.value; vistaPonderado(true); return; }
+    if (t.id === 'pw-cp') { prog = t.value; consState.det = ''; vistaConsolidado(true); return; }
+    if (t.id === 'cp-cand') { cmpState.cid = t.value; vistaConsolidado(true); return; }
     if (t.id === 'mx-cp') { prog = t.value; consState.det = ''; vistaConsolidado(true); }
     else if (t.id === 'mx-ce') { consState.ev = t.value; tablaConsolidado(); }
     else if (t.id === 'mx-co') { consState.orden = t.value; tablaConsolidado(); }
