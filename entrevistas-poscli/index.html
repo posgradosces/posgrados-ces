@@ -539,6 +539,12 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .pw-mini2 .pw-strip { padding: 8px 18px; }
 .pw-mini2 .pw-nl { padding: 8px 18px 10px; border-top: 1px solid var(--line); font-size: 12px; }
 .pw-mini2 .pw-edb { margin-top: 8px; }
+/* ===== perfil del candidato ===== */
+.mx-perfil { margin: 12px 0 4px; padding: 12px 16px 14px; border: 1px solid var(--line); border-left: 6px solid var(--lime); border-radius: 12px; background: #fff; }
+.mx-perfil b { display: block; margin-bottom: 4px; color: var(--navy); font-size: 11.5px; text-transform: uppercase; letter-spacing: 1px; }
+.mx-perfil p { margin: 0; font-size: 13.5px; line-height: 1.55; color: #1c2b4a; }
+.mx-perfil.vacio { background: var(--paper); border-left-color: var(--line); }
+.mx-perfil.vacio p { color: var(--muted); font-size: 12.5px; }
 
 </style>
 </head><body>
@@ -1203,6 +1209,11 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       '<button type="button" class="mx-b ' + (riskVal === 'si' ? 'risk' : 'safe') + '" aria-pressed="' + si + '" data-' + attr + '="' + key + '" data-v="si">' + IC.yes + ' Sí</button>' +
       '<button type="button" class="mx-b ' + (riskVal === 'no' ? 'risk' : 'safe') + '" aria-pressed="' + no + '" data-' + attr + '="' + key + '" data-v="no">' + IC.no + ' No</button></div></div>';
   }
+  function perfilCard(c) {
+    var t = String(c.perfil || '').trim();
+    if (!t) return esAdmin() ? '<div class="mx-perfil vacio"><b>Perfil del candidato</b><p>Sin perfil cargado. Puedes escribirlo en Administración › Candidatos.</p></div>' : '';
+    return '<div class="mx-perfil"><b>Perfil del candidato</b><p>' + esc(t).replace(/\n/g, '<br>') + '</p></div>';
+  }
   function vistaCand(id) {
     var c = candDe(id); if (!c) { vistaInicio(); return; }
     var p = progDe(c.prog); prog = c.prog;
@@ -1237,7 +1248,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     APP.innerHTML = barra() +
       '<div class="mx-live" id="mx-live"><div class="w"><small id="lv-prog"></small><b id="lv-nom"></b></div><div class="sc"><b id="lv-tot">—</b><span id="lv-sub"></span></div></div>' +
       '<div class="mx-back"><button class="mx-btn sec sm" type="button" data-go="programa/' + esc(c.prog) + '">← Lista de candidatos</button>' +
-      '<span class="mx-count">Candidato ' + (ix + 1) + ' de ' + sig.length + '</span></div>' + secs + riesgo + gen +
+      '<span class="mx-count">Candidato ' + (ix + 1) + ' de ' + sig.length + '</span></div>' + perfilCard(c) + secs + riesgo + gen +
       '<div class="mx-foot"><div class="mx-tot"><b id="ft-tot">—</b><span id="ft-sub" class="mx-muted"></span></div><div class="mx-prog" aria-hidden="true"><i id="ft-bar" style="width:0"></i></div>' +
       '<div class="mx-foot-row"><span class="mx-muted" id="ft-det"></span><div class="mx-row"><button class="mx-btn lime" type="button" data-act="guardarent" id="ft-save">Guardar entrevista</button><button class="mx-btn sec" type="button" data-go="programa/' + esc(c.prog) + '">Volver a la lista</button>' +
       (nx ? '<button class="mx-btn sec" type="button" data-go="cand/' + esc(nx.id) + '">Siguiente candidato →</button>' : '<button class="mx-btn sec" type="button" data-go="consolidado">Ver consolidado →</button>') + '</div></div>' +
@@ -1691,22 +1702,23 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       return '<tr data-row="' + esc(c.id) + '"><td>' + selProgs('', c.prog).replace('<select class="mx-in" id=""', '<select class="mx-in" data-f="prog"') + '</td>' +
         '<td><input class="mx-in" data-f="nombre" value="' + esc(c.nombre) + '"></td><td><input class="mx-in" data-f="apellidos" value="' + esc(c.apellidos) + '"></td><td><input class="mx-in" data-f="doc" value="' + esc(c.doc || '') + '" style="min-width:110px"></td>' +
         '<td><input class="mx-in" data-f="bas" inputmode="decimal" value="' + esc(c.bas == null ? '' : c.bas) + '" style="width:74px"></td><td><input class="mx-in" data-f="cli" inputmode="decimal" value="' + esc(c.cli == null ? '' : c.cli) + '" style="width:74px"></td><td><input class="mx-in" data-f="cul" inputmode="decimal" value="' + esc(c.cul == null ? '' : c.cul) + '" style="width:74px"></td>' +
-        '<td class="num">' + f0(examen(c).tot) + '</td><td class="act"><button class="mx-btn sm" type="button" data-save-c="' + esc(c.id) + '">Guardar</button> <button class="mx-btn sm danger" type="button" data-confirm="bc:' + esc(c.id) + '">Eliminar</button></td></tr>';
+        '<td><textarea class="mx-ta sm" data-f="perfil" rows="2" style="min-width:260px" placeholder="Edad, origen, pregrado, trabajo…">' + esc(c.perfil || '') + '</textarea></td><td class="num">' + f0(examen(c).tot) + '</td><td class="act"><button class="mx-btn sm" type="button" data-save-c="' + esc(c.id) + '">Guardar</button> <button class="mx-btn sm danger" type="button" data-confirm="bc:' + esc(c.id) + '">Eliminar</button></td></tr>';
     }).join('');
     return '<div class="mx-card2"><h3>Agregar candidato</h3><div class="mx-grid3" style="margin-top:10px">' +
       '<div class="mx-fld"><label class="mx-lbl" for="nc-prog">Programa</label>' + selProgs('nc-prog', admFiltro) + '</div>' +
       '<div class="mx-fld"><label class="mx-lbl" for="nc-nom">Nombres</label><input class="mx-in" id="nc-nom"></div><div class="mx-fld"><label class="mx-lbl" for="nc-ape">Apellidos</label><input class="mx-in" id="nc-ape"></div>' +
       '<div class="mx-fld"><label class="mx-lbl" for="nc-doc">Documento</label><input class="mx-in" id="nc-doc"></div>' +
       '<div class="mx-fld"><label class="mx-lbl" for="nc-bas">Básicas</label><input class="mx-in" id="nc-bas" inputmode="decimal"></div><div class="mx-fld"><label class="mx-lbl" for="nc-cli">Clínicas</label><input class="mx-in" id="nc-cli" inputmode="decimal"></div><div class="mx-fld"><label class="mx-lbl" for="nc-cul">Cultura</label><input class="mx-in" id="nc-cul" inputmode="decimal"></div></div>' +
+      '<div class="mx-fld" style="margin-top:10px"><label class="mx-lbl" for="nc-perfil">Perfil del candidato (opcional)</label><textarea class="mx-ta sm" id="nc-perfil" rows="3" placeholder="Ej.: 27 años. Nació en Bogotá. Pregrado Javeriana 2023. Trabaja en… Segunda vez al CES."></textarea><p class="mx-muted" style="margin-top:4px">Lo verán las personas que entrevistan, en la parte de arriba de la entrevista.</p></div>' +
       '<p class="mx-row" style="margin-top:12px"><button class="mx-btn lime" type="button" data-act="addcand">Agregar candidato</button></p></div>' +
       '<div class="mx-card2"><h3>Cargar candidatos desde un archivo de Excel</h3><p class="mx-note" style="margin-top:6px">Usa la plantilla que te entregó la Coordinación (hojas <b>Programas</b> y <b>Candidatos</b>). Al elegir el archivo verás un resumen y confirmas antes de que se cargue. Los candidatos que ya existen (mismo documento en el mismo programa) no se duplican.</p>' +
       '<p class="mx-row"><label class="mx-btn lime" style="cursor:pointer" for="imp-file">Elegir archivo de Excel…</label><input class="mx-sr" type="file" id="imp-file" accept=".xlsx,.xls,.csv"></p>' +
-      '<details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700;color:var(--blue);font-size:13px">O pega las filas copiadas desde Excel</summary><p class="mx-note" style="margin:8px 0">Columnas: <b>Programa · Nombres · Apellidos · Documento · Básicas · Clínicas · Cultura</b> (sin encabezado).</p>' +
+      '<details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700;color:var(--blue);font-size:13px">O pega las filas copiadas desde Excel</summary><p class="mx-note" style="margin:8px 0">Columnas: <b>Programa · Nombres · Apellidos · Documento · Básicas · Clínicas · Cultura · Perfil (opcional)</b> (sin encabezado).</p>' +
       '<textarea class="mx-code" id="imp-txt" placeholder="Oftalmología&#9;Camila&#9;Restrepo Gómez&#9;1020304050&#9;78&#9;81&#9;70"></textarea><p class="mx-row" style="margin-top:10px"><button class="mx-btn" type="button" data-act="imp">Revisar datos pegados</button></p></details>' +
       '<div id="imp-prev">' + impPrevHtml() + '</div></div>' +
       '<div class="mx-card2"><div class="mx-toolbar"><div class="mx-fld"><h3 style="margin-bottom:6px">Candidatos cargados (' + cs.length + ')</h3><label class="mx-lbl" for="adm-fp">Filtrar por programa</label>' + selProgs('adm-fp', admFiltro, true) + '</div></div>' +
       '<p class="mx-muted" style="margin:8px 0">El total del examen se calcula como Básicas + Clínicas + Cultura. Si falta alguna nota, el total y el resultado global quedan pendientes.</p>' +
-      '<div class="mx-tw"><table class="mx-tb" style="min-width:980px"><thead><tr><th>Programa</th><th>Nombres</th><th>Apellidos</th><th>Documento</th><th>Básicas</th><th>Clínicas</th><th>Cultura</th><th>Total</th><th></th></tr></thead><tbody>' + (filas || '<tr><td colspan="9"><p class="mx-vacio">No hay candidatos cargados.</p></td></tr>') + '</tbody></table></div></div>';
+      '<div class="mx-tw"><table class="mx-tb" style="min-width:1240px"><thead><tr><th>Programa</th><th>Nombres</th><th>Apellidos</th><th>Documento</th><th>Básicas</th><th>Clínicas</th><th>Cultura</th><th>Perfil del candidato</th><th>Total</th><th></th></tr></thead><tbody>' + (filas || '<tr><td colspan="10"><p class="mx-vacio">No hay candidatos cargados.</p></td></tr>') + '</tbody></table></div></div>';
   }
   function admProgs() {
     var filas = DB.progs.map(function(p) {
@@ -1781,7 +1793,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       var kk = clave(idDe[norm(cel(0))] || norm(cel(0)), cel(3), cel(1), cel(2));
       if (vistos[kk]) { dup++; return; }
       vistos[kk] = 1;
-      filas.push({ progNombre: known[norm(cel(0))].nombre, nombre: cel(1), apellidos: cel(2), doc: cel(3), bas: num(cel(4)), cli: num(cel(5)), cul: num(cel(6)) });
+      filas.push({ progNombre: known[norm(cel(0))].nombre, nombre: cel(1), apellidos: cel(2), doc: cel(3), bas: num(cel(4)), cli: num(cel(5)), cul: num(cel(6)), perfil: cel(7) });
     });
     if (mal.length) { admImp = { error: 'No se cargó nada. Revisa las filas ' + mal.slice(0, 10).join(', ') + (mal.length > 10 ? '…' : '') + ': ' + (Object.keys(sinProg).length ? 'el programa no existe (' + Object.keys(sinProg).slice(0, 4).join(', ') + '). Escríbelo igual que en la hoja Programas.' : 'faltan nombres.') }; }
     else if (!filas.length && !nuevos) admImp = { error: dup ? 'Todos los candidatos del archivo ya estaban cargados.' : 'No se encontraron filas para cargar.' };
@@ -1811,7 +1823,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     paso1.then(function() { return Store.load(); }).then(function(d) {
       aplicar(d);
       var idDe = {}; DB.progs.forEach(function(p) { idDe[norm(p.nombre)] = p.id; });
-      var filas = x.filas.map(function(f) { return { prog: idDe[norm(f.progNombre)], nombre: f.nombre, apellidos: f.apellidos, doc: f.doc, bas: f.bas, cli: f.cli, cul: f.cul }; });
+      var filas = x.filas.map(function(f) { return { prog: idDe[norm(f.progNombre)], nombre: f.nombre, apellidos: f.apellidos, doc: f.doc, bas: f.bas, cli: f.cli, cul: f.cul, perfil: f.perfil || '' }; });
       return filas.length ? Store.admin('importar', { filas: filas }) : { ok: true, n: 0 };
     }).then(function(r) { return Store.load().then(function(d) { aplicar(d); vistaAdmin(); msg('Listo. Se cargaron ' + x.filas.length + ' candidatos' + (x.progsNuevos ? ' y se actualizaron los programas.' : '.')); }); })
       .catch(function() { vistaAdmin(); msg('No se pudo completar la carga. Revisa los datos e inténtalo de nuevo.', true); });
@@ -1895,14 +1907,14 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       return;
     }
     var sc = t.getAttribute('data-save-c'), sp = t.getAttribute('data-save-p'), su = t.getAttribute('data-save-u');
-    if (sc) { var o = rowVals(t.closest('tr')); opAdmin('candidato', { id: sc, prog: o.prog, nombre: o.nombre.trim(), apellidos: o.apellidos.trim(), doc: o.doc.trim(), bas: num(o.bas), cli: num(o.cli), cul: num(o.cul) }, 'Candidato actualizado.'); return; }
+    if (sc) { var o = rowVals(t.closest('tr')); opAdmin('candidato', { id: sc, prog: o.prog, nombre: o.nombre.trim(), apellidos: o.apellidos.trim(), doc: o.doc.trim(), bas: num(o.bas), cli: num(o.cli), cul: num(o.cul), perfil: (o.perfil || '').trim() }, 'Candidato actualizado.'); return; }
     if (sp) { var op = rowVals(t.closest('tr')); if (!op.nombre.trim()) { msg('Escribe el nombre del programa.', true); return; } opAdmin('programa', { id: sp, nombre: op.nombre.trim(), cupos: num(op.cupos) || 0 }, 'Programa actualizado.'); return; }
     if (su) { var ou = rowVals(t.closest('tr')); if (!ou.nombre.trim() || !ou.usuario.trim()) { msg('Escribe el nombre y el usuario.', true); return; } if (ou.clave && ou.clave.length < 7) { msg('La clave debe tener al menos 7 caracteres.', true); return; } opAdmin('usuario', { id: su, nombre: ou.nombre.trim(), saludo: (ou.saludo || '').trim(), usuario: ou.usuario.trim(), rol: ou.rol, programas: ou.rol === 'coord' ? (ou.prg || []) : [], clave: ou.clave || '' }, 'Datos de la persona actualizados.'); return; }
     if (act === 'addcand') {
       var gv = function(i) { return document.getElementById(i).value; };
       if (!gv('nc-nom').trim() || !gv('nc-ape').trim()) { msg('Escribe los nombres y apellidos del candidato.', true); return; }
       if (!gv('nc-prog')) { msg('Primero crea un programa en la pestaña Programas.', true); return; }
-      opAdmin('candidato', { prog: gv('nc-prog'), nombre: gv('nc-nom').trim(), apellidos: gv('nc-ape').trim(), doc: gv('nc-doc').trim(), bas: num(gv('nc-bas')), cli: num(gv('nc-cli')), cul: num(gv('nc-cul')) }, 'Candidato agregado.'); return;
+      opAdmin('candidato', { prog: gv('nc-prog'), nombre: gv('nc-nom').trim(), apellidos: gv('nc-ape').trim(), doc: gv('nc-doc').trim(), bas: num(gv('nc-bas')), cli: num(gv('nc-cli')), cul: num(gv('nc-cul')), perfil: gv('nc-perfil').trim() }, 'Candidato agregado.'); return;
     }
     if (act === 'imp') {
       var lineas = document.getElementById('imp-txt').value.split(/\r?\n/).filter(function(l) { return l.trim(); });
