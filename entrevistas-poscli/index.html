@@ -599,6 +599,17 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .mx-naban small { display: block; color: var(--badtx); font-size: 11.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
 .mx-naban h2 { margin: 4px 0 8px; font-size: 22px; }
 .mx-naban p { margin: 0; font-size: 14px; line-height: 1.5; }
+/* seleccionados: tono suave (sobrescribe el anterior) */
+.mx-tb tr.ok td { background: #f3f9e8 !important; }
+.mx-tw .mx-tb tbody tr.ok td:first-child { background: #eaf4d8 !important; box-shadow: inset 4px 0 0 #a6cf6a, 2px 0 0 var(--line); }
+.mx-tb td.rn.ok { background: #f3f9e8 !important; }
+.gsel { min-width: 26px; height: 26px; background: #dcefc0; color: #3b6b17; border: 1.5px solid #9cc860; box-shadow: none; font-size: 12.5px; }
+.sel-tag { background: #e3f0cf; color: #3d6a14; border: 1px solid #c3de9c; font-weight: 700; letter-spacing: 0; }
+.pw-fc.top { border-color: #c3de9c; box-shadow: inset 4px 0 0 #a6cf6a; background: #f8fcf1; }
+.pw-cu { background: #e3f0cf !important; color: #3d6a14 !important; border: 1px solid #c3de9c; font-weight: 700; }
+.pw-fc .rn.one { background: #dcefc0; }
+.pw-tb th.pwg, .pw-tb td.pwg { background: #f6faee !important; }
+.pw-tb tr.ok td.pwg { background: #eef6df !important; }
 
 </style>
 </head><body>
@@ -672,9 +683,9 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   /* ---------------- utilidades ---------------- */
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function norm(s) { return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim(); }
-  function f2(n) { return n == null || isNaN(n) ? '—' : (Math.round(n * 100) / 100).toFixed(2).replace('.', ','); }
-  function f1(n) { return n == null || isNaN(n) ? '—' : (Math.round(n * 10) / 10).toFixed(1).replace('.', ','); }
-  function f0(n) { return n == null || isNaN(n) ? '—' : String(Math.round(n * 100) / 100).replace('.', ','); }
+  function f2(n) { return n == null || isNaN(n) ? '—' : (Math.round(n * 10) / 10).toFixed(1).replace('.', ','); }
+  function f1(n) { return f2(n); }
+  function f0(n) { return n == null || isNaN(n) ? '—' : String(Math.round(n * 10) / 10).replace('.', ','); }
   function cuposTxt(p) { return p && p.cupos > 0 ? p.cupos + (p.cupos === 1 ? ' cupo' : ' cupos') : 'cupos por definir'; }
   function ssGet(k) { try { return sessionStorage.getItem(k) || ''; } catch (e) { return ''; } }
   function ssSet(k, v) { try { if (v) sessionStorage.setItem(k, v); else sessionStorage.removeItem(k); } catch (e) {} }
@@ -1394,7 +1405,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   }
 
   /* ---------------- consolidado ponderado ---------------- */
-  function pctTxt(w, tot) { var v = tot ? w / tot * 100 : 0; return (Math.abs(v - Math.round(v)) < 0.05 ? String(Math.round(v)) : (Math.round(v * 10) / 10).toFixed(1).replace('.', ',')) + ' %'; }
+  function pctTxt(w, tot) { var v = tot ? w / tot * 100 : 0; return (Math.round(v * 10) / 10).toFixed(1).replace('.', ',') + ' %'; }
   function pesosVista() {
     var P = DB.cfg.pesos || {}, w = { decana: pesoRol('decana'), admin: pesoRol('admin'), coord: pesoRol('coord') };
     return { w: w, tot: w.decana + w.admin + w.coord };
@@ -1536,7 +1547,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     APP.innerHTML = barra() + band('Consolidado ponderado', esc(V.tit || ''), IC.table) + tabsCons('pond') + panelPond() +
       '<div class="mx-toolbar" style="margin-top:14px">' + selProgHtml('pw-cp', V.mp) + '<div class="mx-fld" style="flex:0 0 auto"><span class="mx-lbl">Descarga</span><button class="mx-btn sec sm" type="button" data-act="dlpw">Descargar este consolidado ponderado (Excel)</button></div></div>' +
       '<p class="mx-savemsg" id="pw-dl" role="status" aria-live="polite"></p>' +
-      blkHtml('', 'Consolidado ponderado', 'Pt = puntaje, Rn = posición dentro del programa. La entrevista combina a los entrevistadores con los pesos aplicados; el global es 60 % examen + 40 % entrevista. Los candidatos en verde quedan seleccionados según los cupos del programa (se indica su puesto).', por(tablaExcel)) +
+      blkHtml('', 'Consolidado ponderado', 'Pt = puntaje, Rn = posición dentro del programa. La entrevista combina a los entrevistadores con los pesos aplicados; el global es 60 % examen + 40 % entrevista. Los candidatos en verde quedan seleccionados según los cupos del programa (se indica su puesto); si el programa no tiene cupos definidos, no se marca ninguno: defínelos en Administración › Programas.', por(tablaExcel)) +
       blkHtml('', 'Cómo le fue a cada candidato', 'Qué porcentaje logró en cada parte y cuánto suma en el resultado global.', por(fichasInd)) +
       '<p class="pw-n">Solo cuentan las entrevistas que cada persona dejó <b>completas</b>; si un entrevistador aún no termina a un candidato, su peso se reparte entre quienes sí terminaron. Si hay varias personas con el mismo rol, primero se promedian entre sí.</p>' + compSeccion(V);
     if (!suave) window.scrollTo(0, 0);
@@ -1561,7 +1572,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     var cuerpo = function(rows) {
       return rows.map(function(x) {
         var al = x.dif == null ? '<span class="pw-mut">Faltan entrevistas</span>' : x.dif >= 1 ? '<span class="pw-rev">⚠ Revisar</span>' : '<span class="pw-okk">✔ Coinciden</span>';
-        return '<tr><td class="nm"><b>' + esc(nomC(x.c)) + '</b></td><td>' + heat(x.v.decana) + '</td><td>' + heat(x.v.admin) + '</td><td>' + heat(x.v.coord) + '</td><td class="num tot">' + (x.dif == null ? '—' : f2(x.dif)) + '</td><td>' + al + '</td><td class="num">' + (x.rk.decana || '—') + '</td><td class="num">' + (x.rk.admin || '—') + '</td><td class="num">' + (x.rk.coord || '—') + '</td><td class="num tot pos pwg">' + (x.rn === '' ? '—' : x.rn) + '</td></tr>';
+        var cu = ((progDe(x.pid) || {}).cupos) || 0, sl = !!(cu && x.rn !== '' && x.rn <= cu && !noAsiste(x.c));
+        return '<tr class="' + (sl ? 'ok' : '') + '"><td class="nm"><b>' + esc(nomC(x.c)) + '</b>' + naChip(x.c) + selTag(sl, x.rn) + '</td><td>' + heat(x.v.decana) + '</td><td>' + heat(x.v.admin) + '</td><td>' + heat(x.v.coord) + '</td><td class="num tot">' + (x.dif == null ? '—' : f2(x.dif)) + '</td><td>' + al + '</td><td class="num">' + (x.rk.decana || '—') + '</td><td class="num">' + (x.rk.admin || '—') + '</td><td class="num">' + (x.rk.coord || '—') + '</td><td class="num tot pos pwg">' + (x.rn === '' ? '—' : (sl ? '<span class="gsel">' + x.rn + '</span>' : x.rn)) + '</td></tr>';
       }).join('');
     };
     var tabla = pids.map(function(pid) { var rs = all.filter(function(x) { return x.pid === pid; }); return (multi ? '<h4 class="pw-ph">' + esc((progDe(pid) || {}).nombre) + '</h4>' : '') + pwTabla('Comparativo', head, cuerpo(rs), 10); }).join('');
@@ -1718,7 +1730,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     });
     return xlsxP;
   }
-  function r2(v, d) { if (v == null || isNaN(v)) return ''; var k = d === 1 ? 10 : 100; return Math.round(v * k) / k; }
+  function r2(v) { if (v == null || isNaN(v)) return ''; return Math.round(v * 10) / 10; }
   var HCONS = ['Candidato', 'Documento', 'Básicas (Pt)', 'Básicas (Rn)', 'Clínicas (Pt)', 'Clínicas (Rn)', 'Cultura (Pt)', 'Cultura (Rn)', 'Total examen (Pt)', 'Total examen (Rn)', 'Motivaciones (Pt)', 'Motivaciones (Rn)', 'A. académicos (Pt)', 'A. académicos (Rn)', 'A. laborales (Pt)', 'A. laborales (Rn)', 'Hab. personales (Pt)', 'Hab. personales (Rn)', 'Aspiraciones (Pt)', 'Aspiraciones (Rn)', 'Total entrevista (Pt)', 'Total entrevista (Rn)', 'Global (Pt)', 'Global (Rn)', 'Riesgo deserción (de 5)', 'Bonos', 'Entrevistas completas'];
   function filasConsolidado(pids, ev, conProg) {
     var L = [conProg ? ['Programa'].concat(HCONS) : HCONS.slice()];
