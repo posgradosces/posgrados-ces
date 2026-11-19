@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
- 
+/* Diseño: tablero de evaluación con la identidad del aula de residentes CES (azul marino, azul cielo y lima). */
 :root {
   --navy: #15284b; --navy2: #0f1d38; --blue: #004e8c; --sky: #429be2; --lime: #cadd30;
   --paper: #f4f7fb; --tint: #e3edf7; --ink: #15284b; --txt: #3b4a62; --muted: #556070;
@@ -97,6 +97,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .mx-card .n { display: inline-flex; flex: 0 0 46px; width: 46px; height: 46px; align-items: center; justify-content: center; border-radius: 14px; background: var(--blue); color: #fff; font-size: 19px; font-weight: 800; }
 .mx-card.alt .n { background: var(--lime); color: var(--navy); }
 .mx-card .k { display: block; color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; }
+.mx-card { flex-wrap: wrap; }
+.mx-card .l { flex: 1 1 230px; }
+.mx-card .h, .mx-card .m { overflow-wrap: break-word; word-break: normal; hyphens: manual; }
 .mx-card .h { display: block; color: var(--navy); font-size: 16px; font-weight: 700; line-height: 1.35; }
 .mx-card .m { display: flex; align-items: center; gap: 6px; margin-top: 6px; color: var(--navy); font-size: 13px; font-weight: 700; line-height: 1.4; }
 .mx-card .m.off { color: #7a8699; font-weight: 500; }
@@ -213,6 +216,17 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .mx-an.ok { background: #f4f7fb; border-color: var(--line); opacity: .8; }
 .mx-an-h { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; font-size: 13px; }
 .mx-an p { margin: 4px 0 8px; font-size: 13.5px; line-height: 1.55; color: var(--txt); }
+
+.mx-pend { display: flex; gap: 12px; align-items: flex-start; margin: 12px 0 0; padding: 12px 16px; border-radius: 14px; background: #eef4fb; border: 1px solid #cfdcec; border-left: 5px solid var(--blue); color: var(--navy); font-size: 14px; }
+.mx-pend.ok { background: #effbf1; border-color: #b7e4c0; border-left-color: #2e9d4a; color: #14532d; }
+.mx-pend.warn { background: #fff8e6; border-color: #f0dca0; border-left-color: #e0a400; color: #4d3b00; }
+.mx-pend .ic { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: #2e9d4a; color: #fff; font-weight: 800; font-size: 15px; }
+.mx-pend.warn .ic { background: #e0a400; }
+.mx-pend > div { min-width: 0; flex: 1; }
+.mx-pend ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.mx-pend li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 1px solid rgba(0,0,0,.08); }
+.mx-pend li small { display: block; color: #7a5b00; font-size: 12px; }
+.mx-it.is-miss { outline: 3px solid #e0a400; outline-offset: 2px; background: #fffaf0; }
 .mx-hello { padding: 18px 22px; border-radius: 16px; background: #fff; border: 1px solid var(--line); border-left: 5px solid var(--lime); box-shadow: 0 6px 18px rgba(21,40,75,.06); }
 .mx-hello .e { display: block; color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
 .mx-hello h2 { margin: 2px 0 4px; color: var(--navy); font-size: clamp(22px, 3.2vw, 30px); font-weight: 800; line-height: 1.2; letter-spacing: -.3px; }
@@ -261,7 +275,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
       <p class="t">MiniCEX</p>
       <p style="margin-top:4px;color:rgba(255,255,255,.8);font-size:14px;font-weight:600">Prueba práctica para candidatos</p>
     </div>
-    <div><img id="mx-logo" src="https://componentes-virtuales-ces.s3.us-east-1.amazonaws.com/plataforma/logo-blanco.png" alt="Universidad CES" onerror="this.outerHTML='&lt;span style=&#34;color:#fff;font-weight:800;font-size:22px&#34;&gt;Universidad CES&lt;/span&gt;'"></div>
+    <div><img id="mx-logo" src="https://componentes-virtuales-ces.s3.us-east-1.amazonaws.com/plataforma/logo-blanco.png" alt="Universidad CES" onerror="this.outerHTML='&lt;span style=&quot;color:#fff;font-weight:800;font-size:22px&quot;&gt;Universidad CES&lt;/span&gt;'"></div>
   </header>
   <div id="mx-hero-box"></div>
   <main class="mx-main" id="mx-root"><noscript><p class="mx-warn">Esta página necesita JavaScript activo para funcionar.</p></noscript></main>
@@ -274,9 +288,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 
 
 <script>
- 
- 
-window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21geMhf2xSV1ijrGAxVDh9XsWI9GbMIoFotkxPAwp_f1pMekpcXCy9u0-Tw/exec" };
+/* ===== CONFIGURACIÓN: es lo único que hay que editar ===== */
+/* Pega entre las comillas la dirección de la aplicación web de Apps Script (termina en /exec). */
+window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
 </script>
 <script>
 (function() {
@@ -284,13 +298,13 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
   var CFG = window.MX_CONFIG || {};
   var DEMO = !!CFG.demo;
   var BASES = ['Gestión Administrativa', 'Malas Noticias', 'Vía Aérea', 'Marcapasos', 'Taquicardia Ventricular Inestable', 'Toxicología'];
-  var NOTA_MAX = 5; 
+  var NOTA_MAX = 5; // la nota final va de 0 a 5; el porcentaje de cumplimiento (0-100) se muestra al lado
   var SYNC_MS = CFG.syncMs || 25000;
   var SAVE_MS = CFG.saveMs || 1500;
   var APP = document.getElementById('mx-root');
   var HERO = document.getElementById('mx-hero-box');
 
-   
+  /* ---------------- utilidades ---------------- */
   var enc = new TextEncoder(), dec = new TextDecoder();
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -322,10 +336,10 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     gear: svg('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>')
   };
 
-   
+  /* ---------------- datos en memoria ---------------- */
   var BS = BASES.map(function(n, i) { return { id: String(i + 1), num: i + 1, nombre: n, items: [], secciones: [], max: 0 }; });
-  var DB = { cands: [], rub: {}, bases: {}, casos: {}, anot: [] }; 
-  var sess = null; 
+  var DB = { cands: [], rub: {}, bases: {}, casos: {}, anot: [] }; // bases[b] = {docente, evals:{cc:rec}}
+  var sess = null; // {rol, nombre, clave, base}
   var Store = null;
   var dirty = {}, dirtyDoc = {}, dirtyNom = {}, dirtyCands = false, dirtyRub = false;
   var saving = false, saveT = null, pollT = null, ultimaSync = 0, rubSig = '';
@@ -388,7 +402,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
   function nomC(c) { return (c.nombre + ' ' + c.apellidos).replace(/\s+/g, ' ').trim(); }
   function ordAlfa() { return DB.cands.slice().sort(function(a, b) { return norm(a.apellidos + ' ' + a.nombre).localeCompare(norm(b.apellidos + ' ' + b.nombre)); }); }
 
-   
+  /* ---------------- servidor: Apps Script + Excel de respaldo ---------------- */
   var API_OK = /^https:\/\/script\.google\.com\/(a\/macros\/[\w.-]+\/|macros\/)s\/[\w-]+\/exec$/;
   function api(fn, a) {
     return new Promise(function(ok, no) {
@@ -436,13 +450,13 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     };
   }
 
-   
+  /* ---------------- almacenamiento de demostración (solo vista previa) ---------------- */
 
   function crearStore(clave, nombre) {
     return ScriptStore(clave, nombre);
   }
 
-   
+  /* ---------------- guardado y sincronización ---------------- */
   function setEstado(s) {
     var e = document.getElementById('mx-sync');
     if (!e) return;
@@ -455,7 +469,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     e.textContent = t;
   }
 
-  function programarGuardado() { clearTimeout(saveT); setEstado('guardando'); saveT = setTimeout(vaciar, SAVE_MS); }
+  var epoca = 0;
+  function programarGuardado() { epoca++; clearTimeout(saveT); setEstado('guardando'); saveT = setTimeout(vaciar, SAVE_MS); }
 
   function vaciar() {
     if (saving) { saveT = setTimeout(vaciar, 400); return; }
@@ -486,7 +501,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     });
     if (dirtyCands) cadena = cadena.then(function() { var f = dirtyCands; return Store.saveCands(DB.cands).then(function() { if (dirtyCands === f) dirtyCands = false; }); });
     if (dirtyRub) cadena = cadena.then(function() { var cola = dirtyRub; dirtyRub = false; return cola.reduce(function(p, x) { return p.then(function() { return Store.saveRub(x[0], x[1]); }); }, Promise.resolve()); });
-    cadena.then(function() { saving = false; ultimaSync = Date.now(); vaciar(); }).catch(function(e) {
+    cadena.then(function() { saving = false; epoca++; ultimaSync = Date.now(); vaciar(); }).catch(function(e) {
       saving = false;
       if (e && e.code === 'clave') { salir('La clave ya no es válida. Ingresa de nuevo con la clave vigente.'); return; }
       setEstado('error');
@@ -498,9 +513,10 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
 
   function sincronizar() {
     if (!Store || !sess) return Promise.resolve();
+    var ep = epoca;
     return Store.load().then(function(d) {
       if (!d) { ultimaSync = Date.now(); setEstado('ok'); return; }
-      if (saving || Object.keys(dirty).length || dirtyCands || dirtyRub) return;
+      if (saving || Object.keys(dirty).length || dirtyCands || dirtyRub || ep !== epoca) return;
       var cambio = aplicar(d);
       ultimaSync = Date.now();
       repintarVivo(cambio);
@@ -513,7 +529,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
 
   function iniciarSondeo() { clearInterval(pollT); if (DEMO) return; pollT = setInterval(function() { if (!document.hidden) sincronizar(); }, SYNC_MS); }
 
-   
+  /* ---------------- navegación ---------------- */
   function ruta() {
     var h = (location.hash || '').replace(/^#\/?/, '');
     var p = h.split('/');
@@ -594,7 +610,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     } else if (vista.tipo === 'admin') { var a = document.activeElement; if ((!a || !a.closest || !a.closest('#mx-root textarea, #mx-root input')) && !document.querySelector('[data-edit]:not([hidden]), [data-rub]:not([hidden])')) vistaAdmin(); }
   }
 
-   
+  /* ---------------- puerta de acceso ---------------- */
   function vistaPuerta(aviso) {
     APP.innerHTML = '<div class="mx-gate"><div class="ic">' + IC.lock + '</div>' +
       '<h2>Acceso para docentes evaluadores</h2>' +
@@ -651,7 +667,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     vistaPuerta(aviso);
   }
 
-   
+  /* ---------------- inicio ---------------- */
   function cardBase(st) {
     var b = st.id, d = baseDe(b).docente;
     var done = 0;
@@ -666,7 +682,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
 
   function band(e, t, ic) { return '<div class="mx-band"><span class="mx-ico" aria-hidden="true">' + ic + '</span><span style="min-width:0"><span class="e">' + e + '</span><span class="t">' + t + '</span></span></div>'; }
 
-   
+  /* ---------------- saludo y recorrido virtual ---------------- */
   function saludoNombre() {
     var t = String(sess && sess.nombre || '').trim().split(/\s+/).filter(Boolean);
     if (!t.length) return 'Coordinación';
@@ -723,7 +739,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     }
     P.push({ ruta: '#/consolidado', sel: '#mx-cons', t: 'El consolidado', x: 'Muestra a cada residente con su nota de 0 a 5 por base y su resultado final, de mayor a menor. Se ordena solo a medida que los docentes califican.' });
     P.push({ ruta: '#/consolidado', sel: '.mx-seg', t: 'Nota o porcentaje', x: 'Cada base se califica por porcentaje de cumplimiento (puntos obtenidos ÷ puntos de la base) y se convierte a una nota de 0 a 5. El resultado final es el promedio de las seis bases. Aquí cambias entre ver la nota o el porcentaje.' });
-    P.push({ ruta: '#/consolidado', pick: function() { var b = $q('[data-act="csv"]'); return b ? b.parentNode : null; }, t: 'Descargas', x: 'Baja el consolidado en CSV (nota o porcentaje) y el detalle por actividad cuando lo necesites.' });
+    if (admin) P.push({ ruta: '#/consolidado', pick: function() { var b = $q('[data-act="xlsx"]'); return b ? b.parentNode : null; }, t: 'Descargar el Excel', x: 'Un solo Excel con el consolidado de notas, el de porcentajes, las bases con sus docentes y una hoja con el detalle de cada candidato: base, actividades, resultado, evaluador y observaciones.' });
     if (admin) {
       P.push({ ruta: '#/admin', pick: function() { return secDe('Descargar Word'); }, t: 'Word para los evaluadores', x: 'Descarga un Word con el docente de cada base, su caso clínico y las actividades por evaluar con lo que se espera y los puntos. Sirve para que los docentes se preparen antes de empezar.' });
       P.push({ ruta: '#/admin', pick: function() { return secDe('Docente a cargo'); }, t: 'Docente de cada base', x: 'Escribe el nombre del docente evaluador de cada base y, si hace falta, el nombre de la estación. Queda guardado para las próximas sesiones.' });
@@ -813,6 +829,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     else if (a === 'ahora') { c = document.getElementById('tm_no'); if (c && c.checked) tourSilenciar(true); tourCerrarModal(); }
     else if (a === 'sig' && tour) tourIr(Math.min(tour.i + 1, tour.pasos.length - 1));
     else if (a === 'atras' && tour) tourIr(Math.max(0, tour.i - 1));
+    else if (a === 'salirno') tourCerrarModal();
+    else if (a === 'salirsi') { tourCerrarModal(); salir(); }
     else if (a === 'salir') tourSalir();
     else if (a === 'fin') { c = document.getElementById('tp_no'); if (c) tourSilenciar(c.checked); tourSalir(); }
   });
@@ -827,7 +845,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       ['Marca cada actividad', 'Selecciona «Lo realiza» o «No lo realiza» en cada actividad. El puntaje, la nota de 0 a 5 y el porcentaje de cumplimiento se calculan solos. Al terminar, pulsa «Calificar».'],
       ['Sigue con el siguiente', 'Cada cambio se guarda solo y queda registrado con tu nombre. Usa «Siguiente pendiente» para pasar al próximo residente.']
     ];
-    var h = barra() + saludoHtml() +
+    var h = barra() + saludoHtml() + alertaInicio() +
       '<div class="mx-start" style="margin-top:12px"><div style="min-width:0;flex:1 1 280px"><p class="e">Empieza por aquí</p><p class="d">Cada docente evaluador tiene a cargo una base. Elige lo que necesitas:</p></div>' +
       '<div class="mx-chips"><a class="mx-pillink" href="#mx-bases" data-anchor="mx-bases">Mi base</a><a class="mx-pillink" href="#mx-guia" data-anchor="mx-guia">Cómo calificar</a><button class="mx-pillink" type="button" data-go="consolidado">Consolidado</button></div></div>';
     if (admin) {
@@ -844,7 +862,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       '<section>' + band('Paso 2', 'Cómo calificar', IC.check).replace('class="mx-band"', 'class="mx-band" id="mx-guia"') + '<div class="mx-sec-body"><div class="mx-steps">' +
       pasos.map(function(p, i) { return '<div class="mx-step"><span class="b">' + (i + 1) + '</span><span style="min-width:0"><b>' + esc(p[0]) + '</b><span>' + esc(p[1]) + '</span></span></div>'; }).join('') +
       '</div></div></section>' +
-      '<section>' + band('Paso 3', 'Consolidado por candidato', IC.table) + '<div class="mx-sec-body"><div class="mx-card alt" style="cursor:default;flex-wrap:wrap"><span style="min-width:0;flex:1 1 300px"><span class="h">' + 'Nota de 0 a 5 y porcentaje de cumplimiento de cada candidato, de mayor a menor' + '</span><span class="mx-muted" style="display:block;margin-top:4px">Suma lo que registra cada docente en su base. Consúltalo o descárgalo en Excel cuando lo necesites.</span></span><button class="mx-btn" type="button" data-go="consolidado">Ver consolidado →</button></div></div></section>';
+      '<section>' + band('Paso 3', 'Consolidado por candidato', IC.table) + '<div class="mx-sec-body"><div class="mx-card alt" style="cursor:default;flex-wrap:wrap"><span style="min-width:0;flex:1 1 300px"><span class="h">' + 'Nota de 0 a 5 y porcentaje de cumplimiento de cada candidato, de mayor a menor' + '</span><span class="mx-muted" style="display:block;margin-top:4px">Suma lo que registra cada docente en su base. Consúltalo cuando lo necesites' + (admin ? '; también puedes descargarlo en Excel' : '') + '.</span></span><button class="mx-btn" type="button" data-go="consolidado">Ver consolidado →</button></div></div></section>';
     APP.innerHTML = h;
     filtrarBases();
   }
@@ -857,7 +875,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     document.getElementById('mx-svacio').hidden = n > 0;
   }
 
-   
+  /* ---------------- base: rúbrica completa en su propia página ---------------- */
   var selCC = '', ultimoOk = null;
   var obsAbiertas = {};
 
@@ -882,7 +900,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       (st.items.length ?
         '<div class="mx-pick"><div><label class="mx-lbl" for="mx-cin">Residente a evaluar en esta base</label><div class="mx-cb"><input class="mx-in lg" id="mx-cin" type="search" autocomplete="off" placeholder="Busca por nombre o cédula…" role="combobox" aria-expanded="false" aria-controls="mx-clb"><div class="mx-cb-list" id="mx-clb" role="listbox" hidden></div></div></div>' +
         '<button class="mx-btn sec" type="button" data-act="siguiente">Siguiente pendiente</button></div>' : '') +
-      casoHtml(st.id) + anotHtml(st.id) +
+      '<div id="mx-pend"></div>' + casoHtml(st.id) + anotHtml(st.id) +
       '<div id="mx-rubrica"></div>';
     pintarEncabezadoBase(st);
     var c = candPorCC(selCC), inp = document.getElementById('mx-cin');
@@ -897,7 +915,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       c.x.split('\n').filter(function(l) { return l.trim(); }).map(function(l) { return '<p>' + esc(l) + '</p>'; }).join('') + '</section>';
   }
 
-   
+  /* Anotaciones de evaluador: observaciones o correcciones sobre el caso, para la Coordinación */
   function anotHtml(b) {
     if (!DB.casos || !DB.casos[b] || !DB.casos[b].x) return '';
     return '<section class="mx-anot" id="mx-anot" data-b="' + b + '"><button class="mx-anot-t" type="button" data-act="anotabrir" aria-expanded="false" aria-controls="mx-anot-box">' + IC.note + '<span>Anotaciones de evaluador<small>¿Algo por corregir u observar en este caso? Escríbelo aquí.</small></span><span class="mx-anot-c" aria-hidden="true">+</span></button>' +
@@ -923,7 +941,57 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     if (e) e.innerHTML = IC.user + (d ? 'Docente evaluador: <strong>' + esc(d) + '</strong>' : 'Docente por asignar');
   }
 
+
+  /* Pendientes por calificar: residentes sin calificación o con la base incompleta */
+  function pendDe(st) {
+    if (!st.items.length) return [];
+    return ordAlfa().map(function(c) { return { c: c, r: calc(c.cc, st) }; }).filter(function(x) { return x.r.estado !== 'completa'; });
+  }
+  function misBases() {
+    var o = [];
+    BS.forEach(function(st) {
+      if (!st.items.length || !DB.cands.length) return;
+      var mia = sess.base === st.id || DB.cands.some(function(c) { var r = recDe(st.id, c.cc); return r && r.evaluador && sess.nombre && norm(r.evaluador) === norm(sess.nombre); });
+      if (mia) o.push(st);
+    });
+    return o;
+  }
+  function pendEtq(x) { return x.r.estado === 'curso' ? 'Incompleta · ' + x.r.ans + ' de ' + x.r.n : 'Sin calificar'; }
+  function pintarPend(st) {
+    var box = document.getElementById('mx-pend'); if (!box) return;
+    var tot = DB.cands.length;
+    if (!st.items.length || !tot) { box.innerHTML = ''; return; }
+    var p = pendDe(st), hechos = tot - p.length;
+    if (!p.length) { box.innerHTML = '<div class="mx-pend ok" role="status"><span class="ic" aria-hidden="true">✓</span><div><strong>Calificaste a los ' + tot + ' residentes de esta base.</strong></div></div>'; return; }
+    var cursos = p.filter(function(x) { return x.r.estado === 'curso'; }).length, alerta = hechos > 0 || cursos > 0;
+    if (!alerta) { box.innerHTML = '<div class="mx-pend" role="status"><div><strong>' + tot + (tot === 1 ? ' residente por calificar' : ' residentes por calificar') + ' en esta base.</strong></div></div>'; return; }
+    box.innerHTML = '<div class="mx-pend warn" role="alert"><span class="ic" aria-hidden="true">!</span><div><strong>Faltan por calificar ' + p.length + (p.length === 1 ? ' residente' : ' residentes') + ' en esta base</strong>' +
+      (cursos ? '<span> · ' + cursos + (cursos === 1 ? ' tiene la base incompleta' : ' tienen la base incompleta') + '</span>' : '') +
+      '<ul>' + p.slice(0, 8).map(function(x) { return '<li><span>' + esc(nomC(x.c)) + ' <small>' + pendEtq(x) + '</small></span><button type="button" class="mx-btn sec sm" data-act="elegir" data-cc="' + esc(x.c.cc) + '">Calificar</button></li>'; }).join('') + '</ul>' +
+      (p.length > 8 ? '<p class="mx-muted" style="margin:4px 0 0">y ' + (p.length - 8) + ' más (usa «Siguiente pendiente»).</p>' : '') + '</div></div>';
+  }
+  function alertaInicio() {
+    if (!sess || sess.rol === 'admin') return '';
+    var l = misBases().map(function(st) { return { st: st, p: pendDe(st) }; }).filter(function(x) { return x.p.length; });
+    if (!l.length) return '';
+    return '<div class="mx-pend warn" role="alert" style="margin-top:12px"><span class="ic" aria-hidden="true">!</span><div><strong>Tienes residentes por calificar</strong><ul>' +
+      l.map(function(x) { return '<li><span>Base ' + x.st.num + ' · ' + esc(x.st.nombre) + ' <small>' + x.p.length + (x.p.length === 1 ? ' residente' : ' residentes') + '</small></span><button type="button" class="mx-btn sec sm" data-go="base/' + x.st.id + '">Abrir base</button></li>'; }).join('') + '</ul></div></div>';
+  }
+  function salirAviso() {
+    if (!sess || sess.rol === 'admin') return false;
+    var l = misBases().map(function(st) { return { st: st, p: pendDe(st) }; }).filter(function(x) { return x.p.length; });
+    if (!l.length) return false;
+    var d = document.createElement('div'); d.id = 'tour_modal'; d.className = 'mx-tmodal';
+    d.innerHTML = '<div class="mx-tbox" role="alertdialog" aria-modal="true" aria-labelledby="sa_t"><div class="tem" aria-hidden="true">!</div><h2 id="sa_t">Antes de salir, revisa tus pendientes</h2>' +
+      '<p>Todavía hay residentes sin calificar o con la base incompleta:</p>' +
+      l.map(function(x) { return '<p style="margin:0"><strong>Base ' + x.st.num + ' · ' + esc(x.st.nombre) + '</strong><br>' + x.p.slice(0, 6).map(function(y) { return esc(nomC(y.c)) + ' (' + pendEtq(y).toLowerCase() + ')'; }).join('<br>') + (x.p.length > 6 ? '<br>y ' + (x.p.length - 6) + ' más' : '') + '</p>'; }).join('') +
+      '<div class="tbtns"><button class="mx-btn lime" type="button" data-tour="salirno" id="sa_no">Volver a calificar</button><button class="mx-btn sec" type="button" data-tour="salirsi">Salir de todos modos</button></div></div>';
+    document.body.appendChild(d); var b = document.getElementById('sa_no'); if (b) b.focus();
+    return true;
+  }
+
   function pintarRubrica(st) {
+    pintarPend(st);
     var box = document.getElementById('mx-rubrica');
     if (!box) return;
     if (!st.items.length) { box.innerHTML = '<p class="mx-vacio">' + (sess.rol === 'admin' ? 'Esta base aún no tiene rúbrica. Cárgala en Administración.' : 'La rúbrica de esta base se está preparando. Aparecerá aquí en cuanto esté cargada.') + '</p>'; return; }
@@ -948,6 +1016,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
   }
 
   function pintarTotales(st) {
+    pintarPend(st);
     var c = candPorCC(selCC); if (!c) return;
     var r = calc(c.cc, st), rec = r.rec || {}, full = r.ans === r.n;
     var live = document.getElementById('mx-live'), foot = document.getElementById('mx-foot');
@@ -1011,7 +1080,9 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     if (r.ans < r.n) {
       var falta = r.n - r.ans, filas = [].slice.call(document.querySelectorAll('#mx-rubrica .mx-it')), pri = null;
       filas.forEach(function(f) { if (!pri && !/is-yes|is-no/.test(f.className)) pri = f; });
-      if (m) m.textContent = 'Faltan ' + falta + (falta === 1 ? ' actividad' : ' actividades') + ' por marcar. Te llevo a la primera.';
+      var nums = st.items.filter(function(it) { var v = r.rec && r.rec.r ? r.rec.r[it.i] : null; return !(v === 1 || v === 0); }).map(function(it) { return it.i + 1; });
+      filas.forEach(function(f) { f.classList.remove('is-miss'); if (nums.indexOf(+f.getAttribute('data-i') + 1) > -1) f.classList.add('is-miss'); });
+      if (m) m.textContent = 'Faltan ' + falta + (falta === 1 ? ' actividad' : ' actividades') + ' por marcar (' + (falta === 1 ? 'la número ' : 'las números ') + nums.join(', ') + '). Quedan resaltadas; te llevo a la primera.';
       if (pri && pri.scrollIntoView) pri.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
@@ -1059,7 +1130,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     pintarTotales(st); pintarEncabezadoBase(st);
   }
 
-   
+  /* ---------------- consolidado ---------------- */
   function filaCons(c) {
     var conRub = BS.filter(function(s) { return s.items.length; });
     var notas = [], rs = BS.map(function(s) { var r = calc(c.cc, s); if (r.estado === 'completa') notas.push(r.nota); return r; });
@@ -1091,7 +1162,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       '<p class="mx-note">' + 'Cada base se califica por <strong>porcentaje de cumplimiento</strong> (puntos obtenidos ÷ puntos posibles de esa base) y se convierte a una <strong>nota de 0 a 5</strong>. El <strong>resultado final es el promedio de las seis bases</strong>. ' + ' La lista se ordena de mayor a menor nota; los residentes con la calificación final completa aparecen primero. Se actualiza sola a medida que los docentes califican.</p>' +
       '<div class="mx-row" style="margin-bottom:12px"><div style="flex:1 1 280px"><label class="mx-sr" for="mx-fcons">Buscar candidato</label><input class="mx-in" id="mx-fcons" type="search" autocomplete="off" placeholder="Buscar candidato o cédula…"></div>' +
       '<div class="mx-seg" role="group" aria-label="Ver el consolidado en"><button type="button" class="mx-pillink' + (modoCons === 'nota' ? ' on' : '') + '" data-act="modo" data-m="nota" aria-pressed="' + (modoCons === 'nota') + '">Nota 0–5</button><button type="button" class="mx-pillink' + (modoCons === 'pct' ? ' on' : '') + '" data-act="modo" data-m="pct" aria-pressed="' + (modoCons === 'pct') + '">Porcentaje</button></div></div>' +
-      '<div class="mx-row" style="margin-bottom:12px"><button class="mx-btn" type="button" data-act="csv">Consolidado 0–5 (CSV)</button><button class="mx-btn" type="button" data-act="csvpct">Consolidado en % (CSV)</button><button class="mx-btn sec" type="button" data-act="csvdet">Detalle por actividad (CSV)</button><button class="mx-btn sec" type="button" data-act="copiar">Copiar para Excel</button></div>' +
+      (sess.rol === 'admin' ? '<div class="mx-row" style="margin-bottom:12px"><button class="mx-btn" type="button" data-act="xlsx">Descargar Excel del consolidado</button><button class="mx-btn sec" type="button" data-act="copiar">Copiar para Excel</button></div>' : '') +
       '<p class="mx-msg" id="mx-msg-r" role="status" style="margin:0 0 10px"></p><div id="mx-cons"></div></div></section>';
     tablaConsolidado();
   }
@@ -1169,7 +1240,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     try { var b = new Blob([texto], { type: mime }), u = URL.createObjectURL(b), a = document.createElement('a'); a.href = u; a.download = nombre; document.body.appendChild(a); a.click(); setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(u); }, 600); return true; } catch (e) { return false; }
   }
 
-   
+  /* ---------------- Word (.docx) generado en la página, sin librerías ---------------- */
   var MIME_DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
   var CRCT = null;
   function crc32(u8) {
@@ -1178,7 +1249,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     for (var i = 0; i < u8.length; i++) c = CRCT[(c ^ u8[i]) & 255] ^ (c >>> 8);
     return (c ^ 0xFFFFFFFF) >>> 0;
   }
-  function zipStore(files) {
+  function zipStore(files, mime) {
     var enc = new TextEncoder(), parts = [], cd = [], off = 0, cdl = 0;
     files.forEach(function(f) {
       var nm = enc.encode(f.n), d = enc.encode(f.t), crc = crc32(d), h = new DataView(new ArrayBuffer(30)), c = new DataView(new ArrayBuffer(46));
@@ -1191,7 +1262,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     });
     var e = new DataView(new ArrayBuffer(22));
     e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, cdl, true); e.setUint32(16, off, true);
-    return new Blob(parts.concat(cd, [new Uint8Array(e.buffer)]), { type: MIME_DOCX });
+    return new Blob(parts.concat(cd, [new Uint8Array(e.buffer)]), { type: mime || MIME_DOCX });
   }
 
   var NS_W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
@@ -1316,11 +1387,188 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
   }
   function avisoWord(ok, n) { msg('mx-msg-w', DEMO ? 'En la vista previa las descargas están desactivadas. En la página real se descarga ' + n + '.' : (ok ? 'Se descargó ' + n + '.' : 'No se pudo generar el archivo en este navegador.')); }
 
+  /* ---------------- Excel (.xlsx) con formato, generado en la página, sin librerías ---------------- */
+  var MIME_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  var X_NAVY = 'FF15284B', X_BLUE = 'FF004E8C', X_LIME = 'FFCADD30', X_TINT = 'FFE3EDF7', X_ZEBRA = 'FFF4F7FB', X_LINE = 'FFC5D0E0';
+
+  function xlCol(n) { var s = ''; n++; while (n > 0) { var m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; }
+
+  function XEstilos() { this.fonts = ['<font><sz val="11"/><name val="Calibri"/></font>']; this.fills = ['<fill><patternFill patternType="none"/></fill>', '<fill><patternFill patternType="gray125"/></fill>']; this.borders = ['<border><left/><right/><top/><bottom/><diagonal/></border>']; this.xfs = ['<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>']; this.m = {}; this.mf = {}; this.mb = {}; this.mfi = {}; }
+  XEstilos.prototype.idx = function(list, map, xml) { if (map[xml] === undefined) { map[xml] = list.length; list.push(xml); } return map[xml]; };
+  XEstilos.prototype.get = function(o) {
+    o = o || {}; var k = JSON.stringify(o); if (this.m[k] !== undefined) return this.m[k];
+    var f = '<font>' + (o.b ? '<b/>' : '') + (o.i ? '<i/>' : '') + '<sz val="' + (o.sz || 11) + '"/><color rgb="' + (o.color || 'FF1C2B4A') + '"/><name val="Calibri"/></font>';
+    var fi = o.fill ? '<fill><patternFill patternType="solid"><fgColor rgb="' + o.fill + '"/><bgColor indexed="64"/></patternFill></fill>' : this.fills[0];
+    var bc = o.bc || X_LINE, bd = o.bd === false ? this.borders[0] : '<border>' + ['left', 'right', 'top', 'bottom'].map(function(s) { return '<' + s + ' style="thin"><color rgb="' + bc + '"/></' + s + '>'; }).join('') + '<diagonal/></border>';
+    var fmt = o.fmt === 'n2' ? 2 : (o.fmt === 'p1' ? 165 : 0);
+    var al = '<alignment' + (o.h ? ' horizontal="' + o.h + '"' : '') + ' vertical="' + (o.v || 'center') + '"' + (o.wrap ? ' wrapText="1"' : '') + (o.ind ? ' indent="' + o.ind + '"' : '') + '/>';
+    var xf = '<xf numFmtId="' + fmt + '" fontId="' + this.idx(this.fonts, this.mf, f) + '" fillId="' + this.idx(this.fills, this.mfi, fi) + '" borderId="' + this.idx(this.borders, this.mb, bd) + '" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1">' + al + '</xf>';
+    this.xfs.push(xf); this.m[k] = this.xfs.length - 1; return this.m[k];
+  };
+  XEstilos.prototype.xml = function() {
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="165" formatCode="0.0%"/></numFmts>' +
+      '<fonts count="' + this.fonts.length + '">' + this.fonts.join('') + '</fonts><fills count="' + this.fills.length + '">' + this.fills.join('') + '</fills><borders count="' + this.borders.length + '">' + this.borders.join('') + '</borders>' +
+      '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="' + this.xfs.length + '">' + this.xfs.join('') + '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+  };
+
+  function XHoja(nombre, est, tab) { this.nombre = nombre; this.est = est; this.tab = tab; this.rows = {}; this.merges = []; this.cols = []; this.hs = {}; this.links = []; this.freeze = null; }
+  XHoja.prototype.set = function(r, c, v, st) { (this.rows[r] = this.rows[r] || {})[c] = { v: v, s: this.est.get(st) }; };
+  XHoja.prototype.merge = function(r1, c1, r2, c2, v, st) {
+    for (var r = r1; r <= r2; r++) for (var c = c1; c <= c2; c++) this.set(r, c, (r === r1 && c === c1) ? v : null, st);
+    if (r1 !== r2 || c1 !== c2) this.merges.push(xlCol(c1) + (r1 + 1) + ':' + xlCol(c2) + (r2 + 1));
+  };
+  XHoja.prototype.xml = function() {
+    var self = this, rs = Object.keys(this.rows).map(Number).sort(function(a, b) { return a - b; });
+    var data = rs.map(function(r) {
+      var cs = Object.keys(self.rows[r]).map(Number).sort(function(a, b) { return a - b; });
+      return '<row r="' + (r + 1) + '"' + (self.hs[r] ? ' ht="' + self.hs[r] + '" customHeight="1"' : '') + '>' + cs.map(function(c) {
+        var x = self.rows[r][c], ref = xlCol(c) + (r + 1);
+        if (x.v == null || x.v === '') return '<c r="' + ref + '" s="' + x.s + '"/>';
+        if (typeof x.v === 'number' && isFinite(x.v)) return '<c r="' + ref + '" s="' + x.s + '"><v>' + x.v + '</v></c>';
+        return '<c r="' + ref + '" s="' + x.s + '" t="inlineStr"><is><t xml:space="preserve">' + xe(x.v) + '</t></is></c>';
+      }).join('') + '</row>';
+    }).join('');
+    var fz = this.freeze ? '<pane ' + (this.freeze.c ? 'xSplit="' + this.freeze.c + '" ' : '') + 'ySplit="' + this.freeze.r + '" topLeftCell="' + xlCol(this.freeze.c || 0) + (this.freeze.r + 1) + '" activePane="' + (this.freeze.c ? 'bottomRight' : 'bottomLeft') + '" state="frozen"/>' : '';
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetPr><tabColor rgb="' + this.tab + '"/><pageSetUpPr fitToPage="1"/></sheetPr>' +
+      '<sheetViews><sheetView showGridLines="0" workbookViewId="0">' + fz + '</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/>' +
+      '<cols>' + this.cols.map(function(w, i) { return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>'; }).join('') + '</cols><sheetData>' + data + '</sheetData>' +
+      (this.merges.length ? '<mergeCells count="' + this.merges.length + '">' + this.merges.map(function(m) { return '<mergeCell ref="' + m + '"/>'; }).join('') + '</mergeCells>' : '') +
+      (this.links.length ? '<hyperlinks>' + this.links.map(function(l) { return '<hyperlink ref="' + l[0] + '" location="' + xe("'" + l[1].replace(/'/g, "''") + "'!A1") + '" display="' + xe(l[2]) + '"/>'; }).join('') + '</hyperlinks>' : '') +
+      '<pageMargins left="0.5" right="0.5" top="0.6" bottom="0.6" header="0.3" footer="0.3"/><pageSetup orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>';
+  };
+
+  function xlsxBlob(hojas, est) {
+    var hd = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+    var ct = hd + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>' +
+      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+      hojas.map(function(h, i) { return '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'; }).join('') + '</Types>';
+    var rels = hd + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+    var wb = hd + '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView activeTab="0"/></bookViews><sheets>' +
+      hojas.map(function(h, i) { return '<sheet name="' + xe(h.nombre) + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>'; }).join('') + '</sheets></workbook>';
+    var wbr = hd + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      hojas.map(function(h, i) { return '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>'; }).join('') +
+      '<Relationship Id="rId' + (hojas.length + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+    var files = [{ n: '[Content_Types].xml', t: ct }, { n: '_rels/.rels', t: rels }, { n: 'xl/workbook.xml', t: wb }, { n: 'xl/_rels/workbook.xml.rels', t: wbr }, { n: 'xl/styles.xml', t: est.xml() }];
+    hojas.forEach(function(h, i) { files.push({ n: 'xl/worksheets/sheet' + (i + 1) + '.xml', t: h.xml() }); });
+    return zipStore(files, MIME_XLSX);
+  }
+
+  function titulo(t) { return String(t || '').toLowerCase().replace(/(^|[\s\-'])(\S)/g, function(m, a, b) { return a + b.toUpperCase(); }); }
+  function nomX(c) { var t = nomC(c); return t === t.toUpperCase() ? titulo(t) : t; }
+  function nombreHoja(c, usados) {
+    var ap = titulo(c.apellidos).replace(/[\[\]:*?\/\\]/g, ' ').replace(/\s+/g, ' ').trim(), no = titulo(c.nombre).split(/\s+/)[0] || '';
+    var base = (ap + ' ' + no).trim().slice(0, 31).replace(/^'+|'+$/g, '').trim() || c.cc, n = base, k = 2;
+    while (usados[norm(n)]) { var suf = ' ' + k++; n = base.slice(0, 31 - suf.length).trim() + suf; }
+    usados[norm(n)] = 1; return n;
+  }
+  function lineas(t, ancho) { var n = 0; String(t || '').split('\n').forEach(function(l) { n += Math.max(1, Math.ceil(l.length / ancho)); }); return n; }
+
+  function hojaConsolidado(est, nombre, modo, enlaces) {
+    var pct = modo === 'pct', h = new XHoja(nombre, est, X_NAVY), nb = BS.length, ult = 3 + nb + 2, L = ordenCons();
+    var cab = ['Puesto', 'Residente', 'Cédula'].concat(BS.map(function(s) { return 'Base ' + s.num + '\n' + s.nombre; }), [pct ? 'Cumplimiento final' : 'Nota final (0–5)', 'Estado']);
+    h.cols = [8, 36, 15].concat(BS.map(function() { return 17; }), [17, 24]);
+    var ban = { fill: X_NAVY, bd: false, h: 'left', ind: 1 };
+    h.merge(0, 0, 0, ult, 'UNIVERSIDAD CES · FACULTAD DE CIENCIAS DE LA SALUD', Object.assign({ b: 1, sz: 10, color: X_LIME }, ban)); h.hs[0] = 22;
+    h.merge(1, 0, 1, ult, 'MiniCEX · Medicina de Urgencias ' + anioConv() + ' · ' + (pct ? 'Consolidado de cumplimiento (%)' : 'Consolidado de notas'), Object.assign({ b: 1, sz: 18, color: 'FFFFFFFF' }, ban)); h.hs[1] = 34;
+    h.merge(2, 0, 2, ult, 'Generado el ' + fechaLarga(hoy()) + ' · ' + L.length + (L.length === 1 ? ' residente' : ' residentes'), Object.assign({ sz: 10, color: 'FFDCE6F4' }, ban)); h.hs[2] = 22;
+    h.merge(4, 0, 4, ult, 'Cada base se califica por porcentaje de cumplimiento (puntos obtenidos ÷ puntos posibles) y se convierte a una nota de 0 a 5. El resultado final es el promedio de las seis bases, y solo se asigna puesto cuando las seis están calificadas.', { i: 1, sz: 10, color: 'FF46556D', wrap: 1, bd: false, h: 'left', v: 'top' }); h.hs[4] = 32;
+    cab.forEach(function(t, i) { h.set(6, i, t, { b: 1, color: 'FFFFFFFF', fill: X_NAVY, wrap: 1, h: 'center', bc: X_NAVY }); }); h.hs[6] = 64;
+    h.freeze = { r: 7, c: 2 };
+    L.forEach(function(x, i) {
+      var r = 7 + i, z = i % 2 ? X_ZEBRA : 'FFFFFFFF', base = { fill: z }, nm = nomX(x.c);
+      h.set(r, 0, x.pos || '—', { fill: x.final && x.pos <= 3 ? X_LIME : z, b: 1, color: X_NAVY, h: 'center' });
+      h.set(r, 1, nm, Object.assign({ b: 1, color: X_NAVY, ind: 1 }, base)); if (enlaces[x.c.cc]) h.links.push(['B' + (r + 1), enlaces[x.c.cc], nm]);
+      h.set(r, 2, x.c.cc, Object.assign({ h: 'center' }, base));
+      x.rs.forEach(function(s, j) {
+        if (s.estado === 'completa') h.set(r, 3 + j, pct ? s.nota / NOTA_MAX : s.nota, Object.assign({ h: 'center', fmt: pct ? 'p1' : 'n2' }, base));
+        else h.set(r, 3 + j, s.estado === 'curso' ? 'En curso ' + s.ans + '/' + s.n : (s.estado === 'norubrica' ? '—' : 'Pendiente'), Object.assign({ h: 'center', i: 1, color: 'FF7A8699', sz: 10 }, base));
+      });
+      h.set(r, 3 + nb, x.media == null ? '—' : (pct ? x.media / NOTA_MAX : x.media), { b: 1, h: 'center', fill: X_TINT, color: X_NAVY, fmt: pct ? 'p1' : 'n2' });
+      h.set(r, 4 + nb, x.final ? 'Calificación final' : 'Parcial · ' + x.hechas + ' de ' + nb + ' bases', Object.assign({ h: 'center', sz: 10, color: x.final ? 'FF1B6A43' : 'FF7A5B00', b: x.final ? 1 : 0 }, base));
+      h.hs[r] = 22;
+    });
+    return h;
+  }
+
+  function hojaBases(est) {
+    var h = new XHoja('Bases', est, X_BLUE), ban = { fill: X_NAVY, bd: false, h: 'left', ind: 1 };
+    h.cols = [8, 30, 30, 13, 15, 18];
+    h.merge(0, 0, 0, 5, 'UNIVERSIDAD CES · FACULTAD DE CIENCIAS DE LA SALUD', Object.assign({ b: 1, sz: 10, color: X_LIME }, ban)); h.hs[0] = 22;
+    h.merge(1, 0, 1, 5, 'Bases de la prueba y docentes a cargo', Object.assign({ b: 1, sz: 18, color: 'FFFFFFFF' }, ban)); h.hs[1] = 34;
+    ['Base', 'Estación', 'Docente evaluador', 'Actividades', 'Puntos posibles', 'Residentes calificados'].forEach(function(t, i) { h.set(3, i, t, { b: 1, color: 'FFFFFFFF', fill: X_NAVY, wrap: 1, h: 'center', bc: X_NAVY }); }); h.hs[3] = 34;
+    BS.forEach(function(s, i) {
+      var z = i % 2 ? X_ZEBRA : 'FFFFFFFF', ok = DB.cands.filter(function(c) { return calc(c.cc, s).estado === 'completa'; }).length;
+      h.set(4 + i, 0, s.num, { fill: z, h: 'center', b: 1, color: X_NAVY });
+      h.set(4 + i, 1, s.nombre, { fill: z, b: 1, color: X_NAVY, ind: 1, wrap: 1 });
+      h.set(4 + i, 2, baseDe(s.id).docente || 'Por asignar', { fill: z, ind: 1, wrap: 1, i: !baseDe(s.id).docente, color: baseDe(s.id).docente ? 'FF1C2B4A' : 'FF7A8699' });
+      h.set(4 + i, 3, s.items.length, { fill: z, h: 'center' }); h.set(4 + i, 4, s.max, { fill: z, h: 'center' });
+      h.set(4 + i, 5, ok + ' de ' + DB.cands.length, { fill: z, h: 'center' }); h.hs[4 + i] = 24;
+    });
+    return h;
+  }
+
+  function hojaCandidato(est, nombre, x) {
+    var c = x.c, h = new XHoja(nombre, est, X_BLUE), nb = BS.length, ban = { fill: X_NAVY, bd: false, h: 'left', ind: 1 };
+    h.cols = [26, 26, 6, 54, 15, 11, 11, 24, 46];
+    h.merge(0, 0, 0, 8, 'UNIVERSIDAD CES · MiniCEX · MEDICINA DE URGENCIAS ' + anioConv(), Object.assign({ b: 1, sz: 10, color: X_LIME }, ban)); h.hs[0] = 22;
+    h.merge(1, 0, 1, 8, nomX(c), Object.assign({ b: 1, sz: 18, color: 'FFFFFFFF' }, ban)); h.hs[1] = 34;
+    h.merge(2, 0, 2, 8, 'Cédula ' + c.cc + ' · Detalle por base · Generado el ' + fechaLarga(hoy()), Object.assign({ sz: 10, color: 'FFDCE6F4' }, ban)); h.hs[2] = 22;
+    h.merge(4, 0, 4, 8, (x.media == null ? 'Sin bases calificadas todavía' : 'Nota final: ' + fmt2(x.media) + ' / 5 (' + fPct(x.media * 100 / NOTA_MAX) + ' de cumplimiento)') + ' · ' + (x.final ? 'Calificación final' : 'Parcial: ' + x.hechas + ' de ' + nb + ' bases calificadas') + (x.pos ? ' · Puesto ' + x.pos : ''), { b: 1, sz: 12, color: X_NAVY, fill: X_TINT, bd: false, h: 'left', ind: 1 }); h.hs[4] = 28;
+    ['Base', 'Sección', 'N.º', 'Actividad', 'Resultado', 'Puntos obtenidos', 'Puntos posibles', 'Evaluador', 'Observaciones de la base'].forEach(function(t, i) { h.set(6, i, t, { b: 1, color: 'FFFFFFFF', fill: X_NAVY, wrap: 1, h: i === 3 || i === 7 || i === 8 || i === 0 || i === 1 ? 'left' : 'center', ind: i === 3 || i === 7 || i === 8 || i === 0 || i === 1 ? 1 : 0, bc: X_NAVY }); }); h.hs[6] = 34;
+    var r = 7;
+    BS.forEach(function(s, bi) {
+      if (!s.items.length) return;
+      var rec = recDe(s.id, c.cc), n = s.items.length, r0 = r, res = x.rs[bi], z = { fill: X_ZEBRA };
+      var etq = 'Base ' + s.num + '\n' + s.nombre, evalor = (rec && rec.evaluador) || baseDe(s.id).docente || '', obs = (rec && rec.obs || '').trim();
+      var hrow = [];
+      if (!rec) {
+        h.merge(r, 0, r, 1, etq, { b: 1, color: X_NAVY, fill: X_TINT, wrap: 1, h: 'left', ind: 1 });
+        h.merge(r, 2, r, 8, 'Esta base aún no ha sido calificada para este residente.', { i: 1, color: 'FF7A8699', fill: 'FFFFFFFF', h: 'left', ind: 1 }); h.hs[r] = 34; r += 2; return;
+      }
+      s.items.forEach(function(it, k) {
+        var v = rec.r[it.i], rr = r0 + k, y = (k % 2) ? X_ZEBRA : 'FFFFFFFF';
+        h.set(rr, 2, it.i + 1, { h: 'center', fill: y, color: 'FF46556D' });
+        h.set(rr, 3, it.t, { wrap: 1, fill: y, ind: 1, v: 'center' });
+        h.set(rr, 4, v === 1 ? 'Lo realiza' : (v === 0 ? 'No lo realiza' : 'Sin calificar'), v === 1 ? { b: 1, h: 'center', fill: 'FFE6F4EC', color: 'FF1B6A43' } : (v === 0 ? { b: 1, h: 'center', fill: 'FFFDECEA', color: 'FF8A1C15' } : { i: 1, h: 'center', fill: 'FFF1F3F6', color: 'FF7A8699' }));
+        h.set(rr, 5, v === 1 ? it.p : (v === 0 ? 0 : ''), { h: 'center', fill: y }); h.set(rr, 6, it.p, { h: 'center', fill: y, color: 'FF46556D' });
+        hrow[k] = Math.max(18, 15 * lineas(it.t, 56) + 4);
+      });
+      // secciones fusionadas (solo se escribe cuando cambia)
+      var k0 = 0;
+      while (k0 < n) { var k1 = k0; while (k1 + 1 < n && s.items[k1 + 1].sec === s.items[k0].sec) k1++; h.merge(r0 + k0, 1, r0 + k1, 1, s.items[k0].sec, { wrap: 1, h: 'left', ind: 1, fill: X_ZEBRA, color: 'FF46556D', sz: 10 }); k0 = k1 + 1; }
+      // base, evaluador y observaciones: una sola vez por base
+      var need = Math.max(lineas(obs, 48) * 15 + 8, lineas(etq, 24) * 16 + 6), have = hrow.reduce(function(a, b) { return a + b; }, 0);
+      if (have < need) hrow[n - 1] += need - have;
+      h.merge(r0, 0, r0 + n - 1, 0, etq, { b: 1, color: X_NAVY, fill: X_TINT, wrap: 1, h: 'left', ind: 1, v: 'center' });
+      h.merge(r0, 7, r0 + n - 1, 7, evalor, { wrap: 1, h: 'left', ind: 1, fill: 'FFFFFFFF', v: 'center' });
+      h.merge(r0, 8, r0 + n - 1, 8, obs, { wrap: 1, h: 'left', ind: 1, fill: 'FFFFFFFF', v: 'top' });
+      hrow.forEach(function(ht, k) { h.hs[r0 + k] = ht; });
+      r = r0 + n;
+      var cal = res && res.estado === 'completa';
+      h.merge(r, 0, r, 4, 'Total de la base ' + s.num, { b: 1, color: X_NAVY, fill: X_TINT, h: 'right', ind: 1 });
+      h.set(r, 5, res.got, { b: 1, h: 'center', fill: X_TINT, color: X_NAVY }); h.set(r, 6, s.max, { b: 1, h: 'center', fill: X_TINT, color: X_NAVY });
+      h.merge(r, 7, r, 8, cal ? 'Nota de la base: ' + fmt2(res.nota) + ' / 5 · ' + fPct(res.pct) + ' de cumplimiento' : 'Base incompleta (' + res.ans + ' de ' + res.n + ' actividades calificadas)', { b: 1, color: cal ? X_NAVY : 'FF7A5B00', fill: cal ? X_TINT : 'FFFFF8E6', h: 'left', ind: 1 });
+      h.hs[r] = 24; r += 2;
+    });
+    h.merge(r, 0, r, 4, 'Nota final del residente (promedio de las seis bases)', { b: 1, sz: 12, color: X_NAVY, fill: X_LIME, h: 'right', ind: 1 });
+    h.merge(r, 5, r, 6, x.media == null ? '—' : x.media, { b: 1, sz: 14, color: X_NAVY, fill: X_LIME, h: 'center', fmt: 'n2' });
+    h.merge(r, 7, r, 8, x.final ? 'Calificación final' : 'Parcial · ' + x.hechas + ' de ' + nb + ' bases', { b: 1, color: X_NAVY, fill: X_LIME, h: 'left', ind: 1 }); h.hs[r] = 30;
+    return h;
+  }
+
+  function xlsxConsolidado() {
+    var est = new XEstilos(), L = ordenCons(), usados = { consolidado: 1, porcentajes: 1, bases: 1 }, enlaces = {}, hojasC = [];
+    L.forEach(function(x) { if (x.hechas > 0 || BS.some(function(s) { return recDe(s.id, x.c.cc); })) { var n = nombreHoja(x.c, usados); enlaces[x.c.cc] = n; hojasC.push([n, x]); } });
+    var hojas = [hojaConsolidado(est, 'Consolidado', 'nota', enlaces), hojaConsolidado(est, 'Porcentajes', 'pct', enlaces), hojaBases(est)];
+    hojasC.forEach(function(p) { hojas.push(hojaCandidato(est, p[0], p[1])); });
+    return xlsxBlob(hojas, est);
+  }
+
   function msg(id, t) { var e = document.getElementById(id); if (e) e.textContent = t; }
   function avisoDesc(ok, n) { msg('mx-msg-r', DEMO ? 'En la vista previa las descargas están desactivadas. En la página real se descarga ' + n + '.' : (ok ? 'Se descargó ' + n + '.' : 'No se pudo generar el archivo en este navegador.')); }
 
 
-   
+  /* ---------------- lectura de archivos (CSV, TXT y Excel .xlsx) ---------------- */
   function inflar(bytes) {
     var ds = new DecompressionStream('deflate-raw');
     return new Response(new Blob([bytes]).stream().pipeThrough(ds)).arrayBuffer();
@@ -1379,7 +1627,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     });
   }
 
-   
+  /* ---------------- administración ---------------- */
   function parsearCands(txt) {
     var lista = [], om = 0;
     txt.replace(/\r/g, '').split('\n').forEach(function(l) {
@@ -1498,7 +1746,10 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       '<div data-items>' + st.items.map(function(it, i) { return filaEdit(it, i, bloq); }).join('') + '</div>' +
       (bloq ? '' : '<div class="mx-row" style="margin:6px 0 10px"><button class="mx-btn sec sm" type="button" data-act="itemadd">+ Agregar actividad</button></div>') +
       '<p class="mx-msg" data-emsg role="status">' + esc(aviso || '') + '</p>' +
-      '<div class="mx-row"><button class="mx-btn" type="button" data-act="editguardar">Guardar cambios</button><button class="mx-btn sec" type="button" data-act="editcerrar">Cerrar</button></div>';
+      '<div class="mx-row"><button class="mx-btn" type="button" data-act="editguardar">Guardar cambios</button><button class="mx-btn sec" type="button" data-act="editcerrar">Cerrar</button></div>' +
+      '<h4 class="mx-eh">Cambiar de caso</h4><p class="mx-note" style="font-size:13px;margin-top:0">Si esta base va a tener un caso nuevo, puedes borrar el actual y montar el otro: escribiéndolo arriba o cargando el archivo de la rúbrica (con su caso) en «Cargar desde archivo».</p>' +
+      '<div class="mx-row"><button class="mx-btn danger sm" type="button" data-act="casoborrar"' + (c.x ? '' : ' disabled') + '>Borrar solo el caso</button><button class="mx-btn danger sm" type="button" data-act="todoborrar"' + (c.x || st.items.length ? '' : ' disabled') + '>Borrar el caso y la rúbrica</button></div>' +
+      '<p class="mx-msg" data-bmsg role="status"></p>';
     totalEdit(card);
   }
 
@@ -1559,7 +1810,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     return false;
   }
 
-   
+  /* ---------------- eventos ---------------- */
   document.getElementById('mx-up').addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
   APP.addEventListener('click', function(ev) {
@@ -1588,13 +1839,15 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     if (a2 === 'siguiente') { siguiente(); return; }
     if (a2 === 'terminar') { terminarCalif(t); return; }
     if (a2 === 'buscar') { var bi = document.getElementById('mx-cin'); if (bi) { window.scrollTo({ top: 0, behavior: 'smooth' }); bi.focus(); } return; }
-    if (a2 === 'salir') { salir(); return; }
+    if (a2 === 'salir') { if (!salirAviso()) salir(); return; }
     if (a2 === 'actualizar') { setEstado('guardando'); sincronizar(); return; }
     if (a2 === 'reiniciar') {
       if (!selCC || !confirmar(t, '¿Seguro? Reiniciar', 'Reiniciar esta base')) return;
       var st = BS[+vista.b - 1]; delete baseDe(st.id).evals[selCC]; dirty[st.id + '|' + selCC] = true; programarGuardado(); pintarRubrica(st); return;
     }
     if (a2 === 'obs') { var k = t.getAttribute('data-cc'); obsAbiertas[k] = !obsAbiertas[k]; tablaConsolidado(); return; }
+    if ((a2 === 'xlsx' || a2 === 'csv' || a2 === 'csvpct' || a2 === 'csvdet' || a2 === 'copiar') && sess.rol !== 'admin') return;
+    if (a2 === 'xlsx') { var nx = 'MiniCEX-Urgencias-Consolidado.xlsx'; avisoDesc(descargar(nx, xlsxConsolidado(), MIME_XLSX), nx); return; }
     if (a2 === 'csv') { var n1 = 'consolidado-minicex-urgencias-nota-0-5.csv'; avisoDesc(descargar(n1, aCSV(filasCons('nota')), 'text/csv;charset=utf-8'), n1); return; }
     if (a2 === 'csvpct') { var n3 = 'consolidado-minicex-urgencias-porcentaje.csv'; avisoDesc(descargar(n3, aCSV(filasCons('pct')), 'text/csv;charset=utf-8'), n3); return; }
     if (a2 === 'modo') { modoCons = t.getAttribute('data-m') === 'pct' ? 'pct' : 'nota'; vistaConsolidado(); return; }
@@ -1644,6 +1897,20 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
       if (hayCalifs(s1.id) && res.filas.length !== s1.items.length && !confirmar(t, 'Hay calificaciones: se descuadrarán. ¿Guardar igual?', 'Guardar rúbrica')) return; construirBase(s1, res.filas); rubSig = ''; marcarRub(s1.id, res.filas);
       if (card._caso && card._caso.x) { var cs = card._caso; DB.casos[s1.id] = cs; Promise.resolve(Store.saveCaso(s1.id, cs.t, cs.x)).catch(function() {}); }
       vistaAdmin();
+      return;
+    }
+    if ((a2 === 'casoborrar' || a2 === 'todoborrar') && card) {
+      var sb = BS[+card.getAttribute('data-b') - 1], bm = card.querySelector('[data-bmsg]'), todo = a2 === 'todoborrar';
+      if (todo && hayCalifs(sb.id)) { bm.textContent = 'Esta base ya tiene calificaciones, por eso no se puede borrar la rúbrica. Si el caso nuevo la reemplaza, primero entra a la base y pulsa «Reiniciar esta base»; luego vuelve aquí.'; return; }
+      if (!confirmar(t, todo ? '¿Seguro? Se borran caso y rúbrica' : '¿Seguro? Se borra el caso', todo ? 'Borrar el caso y la rúbrica' : 'Borrar solo el caso')) return;
+      delete DB.casos[sb.id];
+      var pb = Promise.resolve(Store.saveCaso(sb.id, '', ''));
+      if (todo) { construirBase(sb, []); rubSig = ''; marcarRub(sb.id, []); }
+      bm.textContent = 'Borrando…'; t.disabled = true;
+      pb.then(function() { return todo ? guardarYEsperar() : null; }).then(function() {
+        var bid = sb.id; vistaAdmin();
+        var nc = document.querySelector('.mx-card2[data-b="' + bid + '"]'); if (nc) { nc.querySelector('[data-edit]').hidden = false; pintarEditor(nc, todo ? '✓ Caso y rúbrica borrados. Ya puedes montar el nuevo caso.' : '✓ Caso borrado. Ya puedes escribir el nuevo caso arriba o cargar el archivo con su rúbrica.'); nc.scrollIntoView({ block: 'nearest' }); }
+      }, function() { t.disabled = false; bm.textContent = 'No se pudo borrar. Revisa tu conexión e inténtalo de nuevo.'; });
       return;
     }
     if (a2 === 'rubvaciar' && card) {
@@ -1714,7 +1981,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21g
     archivoATexto(f).then(function(txt) { var r = parsearCands(txt); agregarCands(r.lista, r.om); }, function() { msg('mx-msg-c', 'No pudimos leer ese archivo. Usa la plantilla de Excel (.xlsx) o un CSV.'); }).then(function() { t.value = ''; });
   });
 
-   
+  /* ---------------- arranque ---------------- */
   (function arrancar() {
     var s = null;
     try { s = JSON.parse(ssGet('mx_sess') || 'null'); } catch (e) {}
