@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
-/* Diseño: tablero de evaluación con la identidad del aula de residentes CES (azul marino, azul cielo y lima). */
+ 
 :root {
   --navy: #15284b; --navy2: #0f1d38; --blue: #004e8c; --sky: #429be2; --lime: #cadd30;
   --paper: #f4f7fb; --tint: #e3edf7; --ink: #15284b; --txt: #3b4a62; --muted: #556070;
@@ -275,7 +275,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
       <p class="t">MiniCEX</p>
       <p style="margin-top:4px;color:rgba(255,255,255,.8);font-size:14px;font-weight:600">Prueba práctica para candidatos</p>
     </div>
-    <div><img id="mx-logo" src="https://componentes-virtuales-ces.s3.us-east-1.amazonaws.com/plataforma/logo-blanco.png" alt="Universidad CES" onerror="this.outerHTML='&lt;span style=&quot;color:#fff;font-weight:800;font-size:22px&quot;&gt;Universidad CES&lt;/span&gt;'"></div>
+    <div><img id="mx-logo" src="https://componentes-virtuales-ces.s3.us-east-1.amazonaws.com/plataforma/logo-blanco.png" alt="Universidad CES" onerror="this.outerHTML='&lt;span style=&#34;color:#fff;font-weight:800;font-size:22px&#34;&gt;Universidad CES&lt;/span&gt;'"></div>
   </header>
   <div id="mx-hero-box"></div>
   <main class="mx-main" id="mx-root"><noscript><p class="mx-warn">Esta página necesita JavaScript activo para funcionar.</p></noscript></main>
@@ -288,9 +288,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 
 
 <script>
-/* ===== CONFIGURACIÓN: es lo único que hay que editar ===== */
-/* Pega entre las comillas la dirección de la aplicación web de Apps Script (termina en /exec). */
-window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
+ 
+ 
+window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbzKGsBp1nA21geMhf2xSV1ijrGAxVDh9XsWI9GbMIoFotkxPAwp_f1pMekpcXCy9u0-Tw/exec" };
 </script>
 <script>
 (function() {
@@ -298,13 +298,13 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
   var CFG = window.MX_CONFIG || {};
   var DEMO = !!CFG.demo;
   var BASES = ['Gestión Administrativa', 'Malas Noticias', 'Vía Aérea', 'Marcapasos', 'Taquicardia Ventricular Inestable', 'Toxicología'];
-  var NOTA_MAX = 5; // la nota final va de 0 a 5; el porcentaje de cumplimiento (0-100) se muestra al lado
+  var NOTA_MAX = 5; 
   var SYNC_MS = CFG.syncMs || 25000;
   var SAVE_MS = CFG.saveMs || 1500;
   var APP = document.getElementById('mx-root');
   var HERO = document.getElementById('mx-hero-box');
 
-  /* ---------------- utilidades ---------------- */
+   
   var enc = new TextEncoder(), dec = new TextDecoder();
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -336,10 +336,10 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
     gear: svg('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>')
   };
 
-  /* ---------------- datos en memoria ---------------- */
+   
   var BS = BASES.map(function(n, i) { return { id: String(i + 1), num: i + 1, nombre: n, items: [], secciones: [], max: 0 }; });
-  var DB = { cands: [], rub: {}, bases: {}, casos: {}, anot: [] }; // bases[b] = {docente, evals:{cc:rec}}
-  var sess = null; // {rol, nombre, clave, base}
+  var DB = { cands: [], rub: {}, bases: {}, casos: {}, anot: [] }; 
+  var sess = null; 
   var Store = null;
   var dirty = {}, dirtyDoc = {}, dirtyNom = {}, dirtyCands = false, dirtyRub = false;
   var saving = false, saveT = null, pollT = null, ultimaSync = 0, rubSig = '';
@@ -402,7 +402,7 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
   function nomC(c) { return (c.nombre + ' ' + c.apellidos).replace(/\s+/g, ' ').trim(); }
   function ordAlfa() { return DB.cands.slice().sort(function(a, b) { return norm(a.apellidos + ' ' + a.nombre).localeCompare(norm(b.apellidos + ' ' + b.nombre)); }); }
 
-  /* ---------------- servidor: Apps Script + Excel de respaldo ---------------- */
+   
   var API_OK = /^https:\/\/script\.google\.com\/(a\/macros\/[\w.-]+\/|macros\/)s\/[\w-]+\/exec$/;
   function api(fn, a) {
     return new Promise(function(ok, no) {
@@ -450,13 +450,13 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
     };
   }
 
-  /* ---------------- almacenamiento de demostración (solo vista previa) ---------------- */
+   
 
   function crearStore(clave, nombre) {
     return ScriptStore(clave, nombre);
   }
 
-  /* ---------------- guardado y sincronización ---------------- */
+   
   function setEstado(s) {
     var e = document.getElementById('mx-sync');
     if (!e) return;
@@ -529,7 +529,7 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
 
   function iniciarSondeo() { clearInterval(pollT); if (DEMO) return; pollT = setInterval(function() { if (!document.hidden) sincronizar(); }, SYNC_MS); }
 
-  /* ---------------- navegación ---------------- */
+   
   function ruta() {
     var h = (location.hash || '').replace(/^#\/?/, '');
     var p = h.split('/');
@@ -610,7 +610,7 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
     } else if (vista.tipo === 'admin') { var a = document.activeElement; if ((!a || !a.closest || !a.closest('#mx-root textarea, #mx-root input')) && !document.querySelector('[data-edit]:not([hidden]), [data-rub]:not([hidden])')) vistaAdmin(); }
   }
 
-  /* ---------------- puerta de acceso ---------------- */
+   
   function vistaPuerta(aviso) {
     APP.innerHTML = '<div class="mx-gate"><div class="ic">' + IC.lock + '</div>' +
       '<h2>Acceso para docentes evaluadores</h2>' +
@@ -667,7 +667,7 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
     vistaPuerta(aviso);
   }
 
-  /* ---------------- inicio ---------------- */
+   
   function cardBase(st) {
     var b = st.id, d = baseDe(b).docente;
     var done = 0;
@@ -682,7 +682,7 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
 
   function band(e, t, ic) { return '<div class="mx-band"><span class="mx-ico" aria-hidden="true">' + ic + '</span><span style="min-width:0"><span class="e">' + e + '</span><span class="t">' + t + '</span></span></div>'; }
 
-  /* ---------------- saludo y recorrido virtual ---------------- */
+   
   function saludoNombre() {
     var t = String(sess && sess.nombre || '').trim().split(/\s+/).filter(Boolean);
     if (!t.length) return 'Coordinación';
@@ -875,7 +875,7 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
     document.getElementById('mx-svacio').hidden = n > 0;
   }
 
-  /* ---------------- base: rúbrica completa en su propia página ---------------- */
+   
   var selCC = '', ultimoOk = null;
   var obsAbiertas = {};
 
@@ -915,7 +915,7 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
       c.x.split('\n').filter(function(l) { return l.trim(); }).map(function(l) { return '<p>' + esc(l) + '</p>'; }).join('') + '</section>';
   }
 
-  /* Anotaciones de evaluador: observaciones o correcciones sobre el caso, para la Coordinación */
+   
   function anotHtml(b) {
     if (!DB.casos || !DB.casos[b] || !DB.casos[b].x) return '';
     return '<section class="mx-anot" id="mx-anot" data-b="' + b + '"><button class="mx-anot-t" type="button" data-act="anotabrir" aria-expanded="false" aria-controls="mx-anot-box">' + IC.note + '<span>Anotaciones de evaluador<small>¿Algo por corregir u observar en este caso? Escríbelo aquí.</small></span><span class="mx-anot-c" aria-hidden="true">+</span></button>' +
@@ -942,7 +942,7 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
   }
 
 
-  /* Pendientes por calificar: residentes sin calificación o con la base incompleta */
+   
   function pendDe(st) {
     if (!st.items.length) return [];
     return ordAlfa().map(function(c) { return { c: c, r: calc(c.cc, st) }; }).filter(function(x) { return x.r.estado !== 'completa'; });
@@ -1130,7 +1130,7 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
     pintarTotales(st); pintarEncabezadoBase(st);
   }
 
-  /* ---------------- consolidado ---------------- */
+   
   function filaCons(c) {
     var conRub = BS.filter(function(s) { return s.items.length; });
     var notas = [], rs = BS.map(function(s) { var r = calc(c.cc, s); if (r.estado === 'completa') notas.push(r.nota); return r; });
@@ -1240,7 +1240,7 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
     try { var b = new Blob([texto], { type: mime }), u = URL.createObjectURL(b), a = document.createElement('a'); a.href = u; a.download = nombre; document.body.appendChild(a); a.click(); setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(u); }, 600); return true; } catch (e) { return false; }
   }
 
-  /* ---------------- Word (.docx) generado en la página, sin librerías ---------------- */
+   
   var MIME_DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
   var CRCT = null;
   function crc32(u8) {
@@ -1387,7 +1387,7 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
   }
   function avisoWord(ok, n) { msg('mx-msg-w', DEMO ? 'En la vista previa las descargas están desactivadas. En la página real se descarga ' + n + '.' : (ok ? 'Se descargó ' + n + '.' : 'No se pudo generar el archivo en este navegador.')); }
 
-  /* ---------------- Excel (.xlsx) con formato, generado en la página, sin librerías ---------------- */
+   
   var MIME_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
   var X_NAVY = 'FF15284B', X_BLUE = 'FF004E8C', X_LIME = 'FFCADD30', X_TINT = 'FFE3EDF7', X_ZEBRA = 'FFF4F7FB', X_LINE = 'FFC5D0E0';
 
@@ -1533,10 +1533,10 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
         h.set(rr, 5, v === 1 ? it.p : (v === 0 ? 0 : ''), { h: 'center', fill: y }); h.set(rr, 6, it.p, { h: 'center', fill: y, color: 'FF46556D' });
         hrow[k] = Math.max(18, 15 * lineas(it.t, 56) + 4);
       });
-      // secciones fusionadas (solo se escribe cuando cambia)
+      
       var k0 = 0;
       while (k0 < n) { var k1 = k0; while (k1 + 1 < n && s.items[k1 + 1].sec === s.items[k0].sec) k1++; h.merge(r0 + k0, 1, r0 + k1, 1, s.items[k0].sec, { wrap: 1, h: 'left', ind: 1, fill: X_ZEBRA, color: 'FF46556D', sz: 10 }); k0 = k1 + 1; }
-      // base, evaluador y observaciones: una sola vez por base
+      
       var need = Math.max(lineas(obs, 48) * 15 + 8, lineas(etq, 24) * 16 + 6), have = hrow.reduce(function(a, b) { return a + b; }, 0);
       if (have < need) hrow[n - 1] += need - have;
       h.merge(r0, 0, r0 + n - 1, 0, etq, { b: 1, color: X_NAVY, fill: X_TINT, wrap: 1, h: 'left', ind: 1, v: 'center' });
@@ -1568,7 +1568,7 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
   function avisoDesc(ok, n) { msg('mx-msg-r', DEMO ? 'En la vista previa las descargas están desactivadas. En la página real se descarga ' + n + '.' : (ok ? 'Se descargó ' + n + '.' : 'No se pudo generar el archivo en este navegador.')); }
 
 
-  /* ---------------- lectura de archivos (CSV, TXT y Excel .xlsx) ---------------- */
+   
   function inflar(bytes) {
     var ds = new DecompressionStream('deflate-raw');
     return new Response(new Blob([bytes]).stream().pipeThrough(ds)).arrayBuffer();
@@ -1627,7 +1627,7 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
     });
   }
 
-  /* ---------------- administración ---------------- */
+   
   function parsearCands(txt) {
     var lista = [], om = 0;
     txt.replace(/\r/g, '').split('\n').forEach(function(l) {
@@ -1810,7 +1810,7 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
     return false;
   }
 
-  /* ---------------- eventos ---------------- */
+   
   document.getElementById('mx-up').addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
   APP.addEventListener('click', function(ev) {
@@ -1981,7 +1981,7 @@ window.MX_CONFIG = { api: "PEGAR_AQUÍ_LA_DIRECCIÓN_DE_LA_APLICACIÓN_WEB" };
     archivoATexto(f).then(function(txt) { var r = parsearCands(txt); agregarCands(r.lista, r.om); }, function() { msg('mx-msg-c', 'No pudimos leer ese archivo. Usa la plantilla de Excel (.xlsx) o un CSV.'); }).then(function() { t.value = ''; });
   });
 
-  /* ---------------- arranque ---------------- */
+   
   (function arrancar() {
     var s = null;
     try { s = JSON.parse(ssGet('mx_sess') || 'null'); } catch (e) {}
