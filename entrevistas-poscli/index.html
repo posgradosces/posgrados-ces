@@ -626,6 +626,12 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 
 .of{font-size:.72em;font-weight:500;opacity:.65}
 
+.cm-rad{display:flex;gap:10px;align-items:flex-start;margin:8px 0;font-size:14px;line-height:1.5;cursor:pointer}
+.cm-rad input{margin-top:4px}
+.cm-sum{font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;background:#eef3f8;color:#15284b;display:inline-block}
+.cm-sum.ok{background:#e7f4dc;color:#2f6b12}
+.cm-sum.bad{background:#fde8e6;color:#a1271b}
+
 </style>
 </head><body>
 <div id="ces-entrevistas" lang="es">
@@ -717,7 +723,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   };
 
   /* ---------------- datos en memoria ---------------- */
-  var DB = { progs: [], cands: [], evals: {}, evaluadores: {}, cfg: { examMax: 300, pesos: { coord: 1, decana: 1, admin: 1 }, abierta: true, conv: '' }, users: [] };
+  var DB = { progs: [], cands: [], evals: {}, evaluadores: {}, cfg: { examMax: 300, pesos: { coord: 1, decana: 1, admin: 1 }, abierta: true, conv: '', comps: [], wcomp: { '*': { bas: 20, cli: 20, cul: 20, ent: 40 } }, totalModo: 'auto' }, users: [] };
   var sess = null; // { token, yo:{id,nombre,rol,programas} }
   var Store = null, dirty = {}, saveT = null, saving = false, pollT = null, ultimaSync = 0;
   var prog = '', vista = { tipo: 'inicio' }, consState = { ev: 'comb', orden: 'alfa', exp: {} }, admTab = 'cands', admImp = null, admDel = null;
@@ -783,18 +789,48 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     grupos.forEach(function(g) { bw += g.w; bs += g.w * g.bon; rs += g.w * g.rd; });
     return { sec: sec, ent: totalDeSec(sec), nComp: recs.length, N: evaluadoresDe(c.prog).length, bon: bw ? bs / bw : null, rd: bw ? rs / bw : null, hay: recs.length > 0 };
   }
+  /* Componentes de la calificación (los define la Jefatura en Administración › Examen y porcentajes):
+     Básicas, Clínicas y Cultura (siempre), los componentes adicionales (p. ej. Prueba práctica de habilidades) y la Entrevista.
+     Cada programa tiene sus porcentajes (suman 100). Lo que un candidato no presenta (NA) reparte su peso entre las demás pruebas del examen. */
+  function aplicaComp(k, pid) { return !k.progs || !k.progs.length || k.progs.indexOf(pid) >= 0; }
+  function compsDe(pid) { return (DB.cfg.comps || []).filter(function(k) { return aplicaComp(k, pid); }); }
+  function pesosDe(pid) { var w = DB.cfg.wcomp || {}; return w[pid] || w['*'] || { bas: 20, cli: 20, cul: 20, ent: 40 }; }
   function examen(c) {
     var ok = function(x) { return x !== null && x !== undefined && x !== '' && !isNaN(x); };
+    var D = DB.cfg, W = pesosDe(c.prog), man = D.totalModo === 'manual', mxc = D.examMax || 300, mxa = mxc / 3;
     var vs = [c.bas, c.cli, c.cul], nas = vs.map(esNA), act = nas.filter(function(x) { return !x; }).length;
-    var mxc = DB.cfg.examMax || 300, mx = mxc / 3 * act, sin = act === 0;
-    var tot = null;
-    if (!sin) { var all = true, sum = 0; vs.forEach(function(v, k) { if (nas[k]) return; if (ok(v)) sum += +v; else all = false; }); tot = all ? sum : null; }
-    return { bas: (!nas[0] && ok(vs[0])) ? +vs[0] : null, cli: (!nas[1] && ok(vs[1])) ? +vs[1] : null, cul: (!nas[2] && ok(vs[2])) ? +vs[2] : null, tot: tot, na: nas[0], nac: nas[1], nau: nas[2], act: act, sin: sin, mx: mx, pct: tot == null ? null : tot / mx, we: sin ? 0 : 0.6, wn: sin ? 1 : 0.4 };
+    var tot = null, mx, blkNA;
+    if (man) { blkNA = esNA(c.tot); mx = mxc; tot = (!blkNA && ok(c.tot)) ? +c.tot : null; }
+    else {
+      blkNA = act === 0; mx = mxa * act;
+      if (!blkNA) { var all = true, sum = 0; vs.forEach(function(v, k) { if (nas[k]) return; if (ok(v)) sum += +v; else all = false; }); tot = all ? sum : null; }
+    }
+    var parts = [];
+    if (man) parts.push({ id: 'tot', w: (+W.bas || 0) + (+W.cli || 0) + (+W.cul || 0), v: tot, max: mxc, na: blkNA });
+    else ['bas', 'cli', 'cul'].forEach(function(k, i) { parts.push({ id: k, w: +W[k] || 0, v: (!nas[i] && ok(vs[i])) ? +vs[i] : null, max: mxa, na: nas[i] }); });
+    var ext = [];
+    compsDe(c.prog).forEach(function(k) {
+      var raw = (c.extra || {})[k.id], na = esNA(raw), pt = { id: k.id, nombre: k.nombre, w: +W[k.id] || 0, v: (!na && ok(raw)) ? +raw : null, max: k.max || 100, na: na };
+      parts.push(pt); ext.push(pt);
+    });
+    var S = 0, A = 0; parts.forEach(function(q) { S += q.w; if (!q.na) A += q.w; });
+    var f = A > 0 ? S / A : 0, pend = false, aex = 0, pp = {}, w = {};
+    parts.forEach(function(q) {
+      q.w2 = q.na ? 0 : q.w * f; w[q.id] = q.w2;
+      if (q.na) { q.pp = null; }
+      else if (q.v == null) { q.pp = null; if (q.w2 > 0) pend = true; }
+      else { q.pp = q.v / q.max * q.w2; aex += q.pp; }
+      pp[q.id] = q.pp;
+    });
+    var sin = S > 0 && A === 0, wEnt = (+W.ent || 0) + (sin ? S : 0);
+    return { bas: (!nas[0] && ok(vs[0])) ? +vs[0] : null, cli: (!nas[1] && ok(vs[1])) ? +vs[1] : null, cul: (!nas[2] && ok(vs[2])) ? +vs[2] : null, tot: tot, na: nas[0], nac: nas[1], nau: nas[2], act: act,
+      man: man, blkNA: blkNA, parcial: !man && act < 3 && act > 0, sin: sin, mx: mx, pct: tot == null ? null : tot / mx,
+      we: A > 0 ? S / 100 : 0, wn: wEnt / 100, aex: pend ? null : aex / 100, pp: pp, w: w, ext: ext };
   }
   function naK(e, k) { return k === 'bas' ? e.na : (k === 'cli' ? e.nac : e.nau); }
   function esNA(v) { return typeof v === 'string' && /^\s*n\s*[.\/]?\s*a\s*\.?\s*$/i.test(v); }
   function noAsiste(c) { return !!c && (c.noasiste === 1 || c.noasiste === true || c.noasiste === '1'); }
-  function globalDe(ex, ent) { if (ent == null) return null; if (ex.sin) return ent / 3; if (ex.pct == null) return null; return ex.pct * 0.6 + (ent / 3) * 0.4; }
+  function globalDe(ex, ent) { if (ent == null || ex.aex == null) return null; return ex.aex + (ent / 3) * ex.wn; }
   function metricas(c, ev) {
     var ex = examen(c), m = { c: c, ex: ex };
     if (ev === 'comb') { var cm = combinar(c); m.sec = cm.sec; m.ent = cm.ent; m.bon = cm.bon; m.rd = cm.rd; m.est = cm.hay ? cm.nComp + ' de ' + cm.N : 'Sin calificar'; m.hay = cm.hay; m.bonDec = true; }
@@ -850,7 +886,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       var id = pid(pn); progs.filter(function(x) { return x.id === id; })[0].cupos = muestra[pn][1]; primeros[pn] = 'c' + (n + 1);
       for (var i = 0; i < muestra[pn][0]; i++) { n++; var nm = nombres[(i + pi) % nombres.length]; cands.push({ id: 'c' + n, prog: id, nombre: nm[0], apellidos: nm[1], doc: String(1000000000 + n * 7919), bas: 60 + ((n * 7) % 35), cli: 62 + ((n * 11) % 33), cul: 55 + ((n * 5) % 40) }); }
     });
-    var L = { progs: progs, cands: cands, evals: {}, users: users, cfg: { examMax: 300, pesos: { coord: 1, decana: 1, admin: 1 }, abierta: true, conv: 'Convocatoria 2027-1' } };
+    var L = { progs: progs, cands: cands, evals: {}, users: users, cfg: { examMax: 300, pesos: { coord: 1, decana: 1, admin: 1 }, abierta: true, conv: 'Convocatoria 2027-1', comps: [{ id: 'pra', nombre: 'Prueba práctica de habilidades', max: 100, progs: [pid('Medicina de Urgencias'), pid('Electrofisiología Cardíaca')].filter(Boolean) }], wcomp: { '*': { bas: 20, cli: 20, cul: 20, ent: 40, pra: 0 } }, totalModo: 'auto' } };
     function marcas(seed) { var r = {}; CRIT.forEach(function(c, i) { r[c.id] = (seed + i * 3 + (seed >> 1)) % 4; }); if (seed % 4 === 0) r['III.2'] = 'na'; return r; }
     function rec(u, seed, completa) {
       var r = marcas(seed); if (!completa) { delete r['V.1']; delete r['IV.2']; }
@@ -925,6 +961,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
 
   function aplicar(d) {
     DB.progs = d.progs || []; DB.cands = d.cands || []; DB.evaluadores = d.evaluadores || {}; DB.cfg = d.cfg || DB.cfg; DB.users = d.users || [];
+    DB.cfg.comps = DB.cfg.comps || []; DB.cfg.wcomp = DB.cfg.wcomp || { '*': { bas: 20, cli: 20, cul: 20, ent: 40 } }; DB.cfg.totalModo = DB.cfg.totalModo || 'auto';
     var evals = d.evals || {};
     Object.keys(dirty).forEach(function(cid) { var mine = recDe(cid, sess.yo.id); evals[cid] = evals[cid] || {}; if (mine) evals[cid][sess.yo.id] = mine; });
     DB.evals = evals;
@@ -1116,7 +1153,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   function tourSilenciar(v) { try { if (v) localStorage.setItem(tourKey(), '1'); else localStorage.removeItem(tourKey()); } catch (e) {} }
   function $q(sel) { return document.querySelector(sel); }
   function hashDe(h) { return String(h || '').replace(/^#\/?/, ''); }
-  var T_CALCULO = 'La entrevista pesa así: Motivaciones 10 %, Antecedentes académicos 30 %, Laborales 20 %, Habilidades personales 30 % y Aspiraciones 10 % (resultado de 0 a 3). La plataforma une las calificaciones de la Decanatura, la Jefatura y la Coordinación, y solo cuenta las entrevistas completas. El resultado global es 60 % examen y 40 % entrevista; si falta alguna nota del examen queda «pendiente».';
+  var T_CALCULO = 'La entrevista pesa así: Motivaciones 10 %, Antecedentes académicos 30 %, Laborales 20 %, Habilidades personales 30 % y Aspiraciones 10 % (resultado de 0 a 3). La plataforma une las calificaciones de la Decanatura, la Jefatura y la Coordinación, y solo cuenta las entrevistas completas. El resultado global combina el examen y la entrevista según los porcentajes que define la Jefatura (por defecto 60 % y 40 %); si falta alguna nota del examen queda «pendiente».';
   function tourPasos() {
     var rol = sess.yo.rol, mp = misProgs(), pr = mp.filter(function(x) { return candsDe(x.id).length; })[0] || mp[0], c0 = pr ? candsDe(pr.id)[0] : null;
     var rp = pr ? '#/programa/' + pr.id : '#/', rc = c0 ? '#/cand/' + c0.id : null, P = [];
@@ -1441,7 +1478,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     var rows = candsDe(pid).map(function(c) {
       var m = metricas(c, 'comb');
       var na0 = noAsiste(c);
-      return { c: c, ex: m.ex.tot, aex: m.ex.sin ? 0 : (m.ex.pct == null ? null : m.ex.pct * 0.6), dec: na0 ? null : entRol(c, 'decana'), adm: na0 ? null : entRol(c, 'admin'), coo: na0 ? null : entRol(c, 'coord'), ent: m.ent, aen: m.ent == null ? null : m.ent / 3 * m.ex.wn, glob: m.glob };
+      return { c: c, ex: m.ex.tot, aex: m.ex.aex, dec: na0 ? null : entRol(c, 'decana'), adm: na0 ? null : entRol(c, 'admin'), coo: na0 ? null : entRol(c, 'coord'), ent: m.ent, aen: m.ent == null ? null : m.ent / 3 * m.ex.wn, glob: m.glob };
     });
     var rk = rankear(rows, function(x) { return x.glob; });
     rows.forEach(function(x, i) { x.rn = rk[i]; });
@@ -1459,7 +1496,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       [['wd', 'Decanatura', 'decana'], ['wa', 'Jefatura', 'admin'], ['wc', 'Coordinación', 'coord']].map(function(x) { return '<label class="pw-in">' + x[1] + ' <input class="mx-in" id="pw-' + x[0] + '" inputmode="decimal" value="' + esc(pv.w[x[2]]) + '" aria-label="Peso de ' + x[1] + '"></label>'; }).join('') +
       '<button class="mx-btn lime sm" type="button" data-act="savepw">Aplicar pesos</button><span class="pw-hint">Ejemplos: 1-1-1 (iguales) o 40-20-40.</span></div></details>' : '';
     var secs = SEC.map(function(z) { return esc(SEC_CORTO[z.id] || z.t) + ' ' + Math.round(z.w * 100) + ' %'; }).join(' · ');
-    return '<section class="pw-panel pw-mini2" aria-labelledby="pw-t"><div class="pw-h"><span class="pw-tag">Ponderación aplicada</span><h2 id="pw-t">Global = Examen 60 % + Entrevista 40 %</h2></div>' +
+    return '<section class="pw-panel pw-mini2" aria-labelledby="pw-t"><div class="pw-h"><span class="pw-tag">Ponderación aplicada</span><h2 id="pw-t">Global = Examen ' + pnum(100 - (+pesosDe('*').ent || 0)) + ' % + Entrevista ' + pnum(+pesosDe('*').ent || 0) + ' %' + (Object.keys(DB.cfg.wcomp || {}).length > 1 ? ' <small style="font-size:.6em;font-weight:600;opacity:.8">(algunos programas tienen porcentajes propios)</small>' : '') + '</h2></div>' +
       '<div class="pw-strip"><b class="pw-t">Peso de cada entrevistador</b>' + items + '<span class="pw-sp"></span>' + ed + '</div><p class="mx-savemsg" id="pw-msg" role="status" aria-live="polite" style="margin:0 22px"></p>' +
       '<p class="pw-n pw-nl"><b>Secciones de la entrevista:</b> ' + secs + '. Solo cuentan las entrevistas completas; si alguien no ha terminado, su peso se reparte entre quienes sí.</p></section>';
   }
@@ -1484,60 +1521,49 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   var PTRN = '<th class="num sub">Pt</th><th class="num sub">Rn</th>';
   function naChip(c) { return noAsiste(c) ? '<span class="na-tag">No asiste</span>' : ''; }
   function nmTd(x, top) { return '<td class="nm"><b>' + esc(nomC(x.c)) + '</b>' + naChip(x.c) + '</td>'; }
-  function tablaExamen(pid) {
-    var rows = filasPond(pid), mx = DB.cfg.examMax || 300, ar = mx / 3, R = pwRank(rows), n = function(v) { return v == null ? '—' : f2(v); };
-    var ap = function(v, e, k) { if (naK(e, k)) return 'N.A.'; return v == null ? '—' : ppTxt(v / ar * (60 / e.act)); };
-    var h = '<tr><th rowspan="2">Candidato</th>' + th2('Básicas', 'nota de ' + pnum(ar), '', ' colspan="2"') + th2('Clínicas', 'nota de ' + pnum(ar), '', ' colspan="2"') + th2('Cultura', 'nota de ' + pnum(ar), '', ' colspan="2"') + th2('Total examen', 'de ' + mx, '', ' colspan="2"') + th2('Cuánto aporta al global', '20 % c/u (30 % si falta una)', '', ' colspan="3"') + th2('Aporte examen', 'máx. 60 %', 'pwg', ' rowspan="2"') + '</tr>' +
-      '<tr>' + PTRN + PTRN + PTRN + PTRN + th2('Básicas') + th2('Clínicas') + th2('Cultura') + '</tr>';
-    var b = rows.map(function(x, i) {
-      var e = examen(x.c), f = function(v) { return v == null ? '—' : f1(v); }, fk = function(k) { return naK(e, k) ? 'N.A.' : f(e[k]); }, ft = e.sin ? 'N.A.' : f(x.ex) + (e.act < 3 ? '<small class="of"> /' + pnum(e.mx) + '</small>' : '');
-      return '<tr>' + nmTd(x) + '<td class="num">' + fk('bas') + '</td>' + rnTd(R.bas[i]) + '<td class="num">' + fk('cli') + '</td>' + rnTd(R.cli[i]) + '<td class="num">' + fk('cul') + '</td>' + rnTd(R.cul[i]) + '<td class="num tot">' + ft + '</td>' + rnTd(R.tot[i]) +
-        '<td class="num">' + ap(e.bas, e, 'bas') + '</td><td class="num">' + ap(e.cli, e, 'cli') + '</td><td class="num">' + ap(e.cul, e, 'cul') + '</td><td class="num tot pos pwg">' + (e.sin ? 'N.A.' : (x.aex == null ? '—' : ppTxt(x.aex * 100))) + '</td></tr>';
-    }).join('');
-    return pwTabla('Examen', h, b, 15);
-  }
-  function tablaEntrevista(pid) {
-    var rows = filasPond(pid), pv = pesosVista(), R = pwRank(rows), n = function(v) { return v == null ? '—' : f2(v); };
-    var h = '<tr><th rowspan="2">Candidato</th>' + th2('Decanatura', 'peso ' + pctTxt(pv.w.decana, pv.tot), '', ' rowspan="2"') + th2('Jefatura', 'peso ' + pctTxt(pv.w.admin, pv.tot), '', ' rowspan="2"') + th2('Coordinación', 'peso ' + pctTxt(pv.w.coord, pv.tot), '', ' rowspan="2"') +
-      SEC.map(function(z) { return th2(esc(SEC_CORTO[z.id] || z.t), Math.round(z.w * 100) + ' %', '', ' colspan="2"'); }).join('') + th2('Entrevista ponderada', 'de 3', '', ' colspan="2"') + th2('Aporte entrevista', 'máx. 40 %', 'pwg', ' rowspan="2"') + '</tr><tr>' + PTRN + PTRN + PTRN + PTRN + PTRN + PTRN + '</tr>';
-    var b = rows.map(function(x, i) { var m = R.ms[i]; return '<tr>' + nmTd(x) + '<td class="num">' + n(x.dec) + '</td><td class="num">' + n(x.adm) + '</td><td class="num">' + n(x.coo) + '</td>' +
-      SEC.map(function(z) { return '<td class="num">' + n(m.sec ? m.sec[z.id] : null) + '</td>' + rnTd(R[z.id][i]); }).join('') + '<td class="num tot">' + n(x.ent) + '</td>' + rnTd(R.ent[i]) + '<td class="num tot pos pwg">' + (x.aen == null ? '—' : ppTxt(x.aen * 100)) + '</td></tr>'; }).join('');
-    return pwTabla('Entrevista', h, b, 17);
-  }
-  function tablaGlobal(pid) {
-    var rows = filasPond(pid), R = pwRank(rows), n = function(v) { return v == null ? '—' : f2(v); }, p = progDe(pid), cupos = (p && p.cupos) || 0;
-    var h = '<tr><th rowspan="2">Candidato</th>' + th2('Aporte examen', '60 %', '', ' rowspan="2"') + th2('Aporte entrevista', '40 %', '', ' rowspan="2"') + th2('Resultado global', 'de 0 a 1', 'pwg', ' colspan="2"') + th2('Global en %', '', '', ' rowspan="2"') + th2('Riesgo', 'de 5', '', ' rowspan="2"') + th2('Bonos', '', '', ' rowspan="2"') + '</tr><tr>' + PTRN + '</tr>';
-    var b = rows.map(function(x, i) { var m = R.ms[i], top = esSel(R, i, cupos, noAsiste(x.c) ? null : x.glob);
-      return '<tr class="' + (top ? 'ok' : '') + '">' + nmTd(x).replace('</b></td>', '</b>' + selTag(top, R.glob[i]) + '</td>') + '<td class="num">' + (x.aex == null ? '—' : ppTxt(x.aex * 100)) + '</td><td class="num">' + (x.aen == null ? '—' : ppTxt(x.aen * 100)) + '</td><td class="num tot pos pwg">' + n(x.glob) + '</td>' + rnSel(R.glob[i], top) + '<td class="num">' + pcTxt(x.glob) + '</td><td class="num">' + (m.rd == null ? '—' : f1(m.rd)) + '</td><td class="num">' + (m.bon == null ? '—' : f1(m.bon)) + '</td></tr>'; }).join('');
-    return pwTabla('Resultado global', h, b, 9);
-  }
   function fichasInd(pid) {
     var rows = filasPond(pid), mx = DB.cfg.examMax || 300, ar = mx / 3, R = pwRank(rows), p = progDe(pid), cupos = (p && p.cupos) || 0;
-    var AREA = [['bas', 'Básicas', '#1f5fa8'], ['cli', 'Clínicas', '#2f9ad8'], ['cul', 'Cultura general', '#6bb6e8']];
+    var AREA = [['bas', 'Básicas', '#1f5fa8'], ['cli', 'Clínicas', '#2f9ad8'], ['cul', 'Cultura general', '#6bb6e8']], EX = extrasDe([pid]);
+    var li = function(nom, col, v, max, pp, w, na) { return '<li><span><i style="background:' + col + '"></i>' + esc(nom) + '</span>' + (na ? '<em>N.A. (no se presenta)</em><b>—</b>' : '<em>' + (v == null ? '—' : f1(v) + ' de ' + pnum(max)) + '</em><b>' + ppTxt(pp) + '<small> de ' + pnum(w) + ' %</small></b>') + '</li>'; };
     return '<div class="pw-fich">' + rows.map(function(x, i) {
-      var e = examen(x.c), m = R.ms[i], hay = x.glob != null, seg = [];
-      var lin = AREA.map(function(a) { if (naK(e, a[0])) return '<li><span><i style="background:' + a[2] + '"></i>' + a[1] + '</span><em>N.A. (no se presenta)</em><b>—</b></li>'; var v = e[a[0]], pp = v == null ? null : v / ar * (60 / e.act); if (pp != null) { seg.push([pp, a[2], a[1]]); } return '<li><span><i style="background:' + a[2] + '"></i>' + a[1] + '</span><em>' + (v == null ? '—' : f1(v) + ' de ' + pnum(ar)) + '</em><b>' + ppTxt(pp) + '<small> de ' + pnum(60 / e.act) + ' %</small></b></li>'; }).join('');
+      var e = examen(x.c), m = R.ms[i], hay = x.glob != null, seg = [], lin = '';
+      var add = function(nom, col, v, max, id, na) { var pp = e.pp[id]; if (pp != null) seg.push([pp, col, nom]); lin += li(nom, col, v, max, pp, e.w[id], na); };
+      if (e.man) add('Total examen', '#1f5fa8', e.tot, DB.cfg.examMax || 300, 'tot', e.blkNA);
+      else AREA.forEach(function(a) { add(a[1], a[2], e[a[0]], ar, a[0], naK(e, a[0])); });
+      EX.forEach(function(k, j) { var q = extDe(e, k); if (q) add(k.nombre, EXT_COL[j % EXT_COL.length], q.v, q.max, k.id, q.na); });
       var ppE = x.aen == null ? null : x.aen * 100; if (ppE != null) seg.push([ppE, '#7aa93a', 'Entrevista']);
       var secs = SEC.map(function(z) { var v = m.sec ? m.sec[z.id] : null; return '<li><span>' + esc(SEC_CORTO[z.id] || z.t) + '</span><em>' + (v == null ? '—' : f2(v) + ' de 3') + '</em><b>' + ppTxt(v == null ? null : v / 3 * z.w * 100 * e.wn) + '<small> de ' + pnum(z.w * 100 * e.wn) + ' %</small></b></li>'; }).join('');
       var bar = '<div class="pw-sk" aria-hidden="true">' + seg.map(function(g) { return '<span title="' + g[2] + ': ' + f1(g[0]) + ' %" style="width:' + g[0] + '%;background:' + g[1] + '"></span>'; }).join('') + '</div>';
       var top = hay && esSel(R, i, cupos, noAsiste(x.c) ? null : x.glob);
       return '<article class="pw-fc' + (top ? ' top' : '') + '"><header><span class="rn' + (R.glob[i] === 1 ? ' one' : '') + '">' + (R.glob[i] === '' ? '—' : R.glob[i]) + '</span><b class="who">' + esc(nomC(x.c)) + '</b>' + (noAsiste(x.c) ? '<span class="na-tag">No asiste · entrevista cancelada</span>' : '') + (top ? '<span class="pw-cu">✔ Seleccionado · puesto ' + R.glob[i] + '</span>' : '') + '<div class="gl"><small>Resultado global</small><b>' + (hay ? ppTxt(x.glob * 100) : 'Pendiente') + '</b></div></header>' + bar +
-        '<div class="pw-sub"><div><h5>Examen <small>' + (e.sin ? 'no cuenta' : (x.aex == null ? '—' : ppTxt(x.aex * 100)) + ' de 60 %') + '</small></h5><ul>' + lin + '</ul></div><div><h5>Entrevista <small>' + (ppE == null ? '—' : ppTxt(ppE)) + ' de ' + pnum(e.wn * 100) + ' %</small></h5><ul>' + secs + '</ul></div></div></article>';
-    }).join('') + '</div><p class="pw-leg"><b style="color:#1f5fa8">■ Básicas</b> <b style="color:#2f9ad8">■ Clínicas</b> <b style="color:#6bb6e8">■ Cultura</b> <b style="color:#7aa93a">■ Entrevista</b> · la barra completa es el 100 % posible; lo que ves es lo que logró el candidato.</p>';
+        '<div class="pw-sub"><div><h5>Examen <small>' + (e.sin ? 'no cuenta' : (x.aex == null ? '—' : ppTxt(x.aex * 100)) + ' de ' + pnum(e.we * 100) + ' %') + '</small></h5><ul>' + lin + '</ul></div><div><h5>Entrevista <small>' + (ppE == null ? '—' : ppTxt(ppE)) + ' de ' + pnum(e.wn * 100) + ' %</small></h5><ul>' + secs + '</ul></div></div></article>';
+    }).join('') + '</div><p class="pw-leg">' + (DB.cfg.totalModo === 'manual' ? '<b style="color:#1f5fa8">■ Total examen</b> ' : '<b style="color:#1f5fa8">■ Básicas</b> <b style="color:#2f9ad8">■ Clínicas</b> <b style="color:#6bb6e8">■ Cultura</b> ') + EX.map(function(k, j) { return '<b style="color:' + EXT_COL[j % EXT_COL.length] + '">■ ' + esc(k.nombre) + '</b> '; }).join('') + '<b style="color:#7aa93a">■ Entrevista</b> · la barra completa es el 100 % posible; lo que ves es lo que logró el candidato.</p>';
   }
+  var EXT_COL = ['#8e6bbf', '#d98a2b', '#c2547a', '#3f9e86', '#7b7f8a', '#b8a02e'];
+  function extrasDe(pids) { return (DB.cfg.comps || []).filter(function(k) { return pids.some(function(p) { return aplicaComp(k, p); }); }); }
+  function extDe(e, k) { for (var i = 0; i < e.ext.length; i++) if (e.ext[i].id === k.id) return e.ext[i]; return null; }
+  function extTxt(e, k, fm) { var q = extDe(e, k); if (!q) return '—'; if (q.na) return 'N.A.'; return q.v == null ? '—' : fm(q.v); }
+  function extRank(ms, k) { return rankear(ms, function(m) { var q = extDe(m.ex, k); return q && !q.na ? q.v : null; }); }
+  var NOM_COMP = { bas: 'Básicas', cli: 'Clínicas', cul: 'Cultura', ent: 'Entrevista' };
+  function nomComp(id) { if (NOM_COMP[id]) return NOM_COMP[id]; var k = (DB.cfg.comps || []).filter(function(x) { return x.id === id; })[0]; return k ? k.nombre : id; }
+  function pesosLinea(pid) {
+    var W = pesosDe(pid), ids = ['bas', 'cli', 'cul'].concat(compsDe(pid).map(function(k) { return k.id; }), ['ent']);
+    return '<p class="pw-leg"><b>Porcentajes del global en este programa:</b> ' + ids.map(function(id) { return esc(nomComp(id)) + ' ' + pnum(+W[id] || 0) + ' %'; }).join(' · ') + (DB.cfg.totalModo === 'manual' ? ' · «Total examen» digitado a mano (reemplaza a Básicas + Clínicas + Cultura)' : '') + '.</p>';
+  }
+  function tablaExcelP(pid) { return tablaExcel(pid) + pesosLinea(pid); }
   function tablaExcel(pid) {
-    var rows = filasPond(pid), R = pwRank(rows), p = progDe(pid), cupos = (p && p.cupos) || 0, mx = DB.cfg.examMax || 300;
+    var rows = filasPond(pid), R = pwRank(rows), p = progDe(pid), cupos = (p && p.cupos) || 0, mx = DB.cfg.examMax || 300, EX = extrasDe([pid]), RX = EX.map(function(k) { return extRank(R.ms, k); });
     var n = function(v) { return v == null ? '—' : f2(v); }, e0 = function(v) { return v == null ? '—' : f0(v); };
     var g = function(t, sub, cl, cs) { return '<th class="g' + (cl ? ' ' + cl : '') + '" colspan="' + cs + '">' + t + (sub ? '<small>' + sub + '</small>' : '') + '</th>'; };
-    var h = '<tr><th rowspan="3" style="min-width:170px">Candidato</th>' + g('Examen', 'de ' + mx, '', 8) + g('Entrevista', 'de 3', 'g2', 12) + g('Global', '', '', 2) + '<th rowspan="3">Riesgo<small>de 5</small></th><th rowspan="3">Bonos</th></tr>' +
-      '<tr>' + ['Básicas', 'Clínicas', 'Cultura', 'Total'].map(function(x) { return g(x, '', '', 2); }).join('') + SEC.map(function(z) { return g(esc(SEC_CORTO[z.id] || z.t), '', 'g2', 2); }).join('') + g('Total', '', 'g2', 2) + g('60 % + 40 %', '', '', 2) + '</tr>' +
-      '<tr>' + new Array(11).join(PTRN) + PTRN + '</tr>';
+    var h = '<tr><th rowspan="3" style="min-width:170px">Candidato</th>' + g('Examen', 'de ' + mx, '', 8 + 2 * EX.length) + g('Entrevista', 'de 3', 'g2', 12) + g('Global', '', '', 2) + '<th rowspan="3">Riesgo<small>de 5</small></th><th rowspan="3">Bonos</th></tr>' +
+      '<tr>' + ['Básicas', 'Clínicas', 'Cultura', 'Total'].map(function(x) { return g(x, '', '', 2); }).join('') + EX.map(function(k) { return g(esc(k.nombre), 'de ' + pnum(k.max), '', 2); }).join('') + SEC.map(function(z) { return g(esc(SEC_CORTO[z.id] || z.t), '', 'g2', 2); }).join('') + g('Total', '', 'g2', 2) + g('Ponderado', '', '', 2) + '</tr>' +
+      '<tr>' + new Array(11 + EX.length).join(PTRN) + PTRN + '</tr>';
     var b = rows.map(function(x, i) { var m = R.ms[i], e = m.ex, top = esSel(R, i, cupos, noAsiste(x.c) ? null : x.glob);
       return '<tr class="' + (top ? 'ok' : '') + '"><td class="nm"><b>' + esc(nomC(x.c)) + '</b>' + naChip(x.c) + selTag(top, R.glob[i]) + '</td>' +
-        '<td class="num">' + (e.na ? 'N.A.' : e0(e.bas)) + '</td>' + rnTd(R.bas[i]) + '<td class="num">' + (e.nac ? 'N.A.' : e0(e.cli)) + '</td>' + rnTd(R.cli[i]) + '<td class="num">' + (e.nau ? 'N.A.' : e0(e.cul)) + '</td>' + rnTd(R.cul[i]) + '<td class="num tot">' + (e.sin ? 'N.A.' : e0(e.tot) + (e.act < 3 ? '<small class="of"> /' + pnum(e.mx) + '</small>' : '')) + '</td>' + rnTd(R.tot[i]) +
+        '<td class="num">' + (e.na ? 'N.A.' : e0(e.bas)) + '</td>' + rnTd(R.bas[i]) + '<td class="num">' + (e.nac ? 'N.A.' : e0(e.cli)) + '</td>' + rnTd(R.cli[i]) + '<td class="num">' + (e.nau ? 'N.A.' : e0(e.cul)) + '</td>' + rnTd(R.cul[i]) + '<td class="num tot">' + (e.blkNA ? 'N.A.' : e0(e.tot) + (e.parcial ? '<small class="of"> /' + pnum(e.mx) + '</small>' : '')) + '</td>' + rnTd(R.tot[i]) + EX.map(function(k, j) { return '<td class="num">' + extTxt(e, k, e0) + '</td>' + rnTd(RX[j][i]); }).join('') +
         SEC.map(function(z) { return '<td class="num">' + n(m.sec ? m.sec[z.id] : null) + '</td>' + rnTd(R[z.id][i]); }).join('') + '<td class="num tot">' + n(m.ent) + '</td>' + rnTd(R.ent[i]) +
         '<td class="num tot pos">' + n(m.glob) + '</td>' + rnSel(R.glob[i], top) + '<td class="num">' + (m.rd == null ? '—' : f1(m.rd)) + '</td><td class="num">' + (m.bon == null ? '—' : f1(m.bon)) + '</td></tr>'; }).join('');
-    return pwTabla('Consolidado ponderado', h, b, 27);
+    return pwTabla('Consolidado ponderado', h, b, 27 + 2 * EX.length);
   }
   function selProgHtml(id, mp) {
     return (mp.length > 1 || veTodo()) ? '<div class="mx-fld"><label class="mx-lbl" for="' + id + '">Programa</label><select class="mx-in" id="' + id + '">' + (veTodo() ? '<option value="todos"' + (prog === 'todos' ? ' selected' : '') + '>Todos los programas</option>' : '') +
@@ -1563,7 +1589,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     var pids = V.pids, multi = pids.length > 1;
     var por = function(fn) { return pids.map(function(pid) { return (multi ? '<h4 class="pw-ph">' + esc((progDe(pid) || {}).nombre) + '</h4>' : '') + fn(pid); }).join(''); };
     return '<p class="mx-savemsg" id="pw-dl" role="status" aria-live="polite"></p>' +
-      blkHtml('', 'Consolidado ponderado', 'Pt = puntaje, Rn = posición dentro del programa. La entrevista combina a los entrevistadores con los pesos aplicados; el global es 60 % examen + 40 % entrevista. Si un candidato no presenta una prueba (N.A.), su peso se reparte entre las que sí presentó; si no presenta ninguna, el global es 100 % entrevista. Los candidatos en verde quedan seleccionados según los cupos del programa (se indica su puesto); si el programa no tiene cupos definidos, no se marca ninguno: defínelos en Administración › Programas.', por(tablaExcel)) +
+      blkHtml('', 'Consolidado ponderado', 'Pt = puntaje, Rn = posición dentro del programa. La entrevista combina a los entrevistadores con los pesos aplicados; el global combina las pruebas del examen y la entrevista según los porcentajes que define la Jefatura (se indican bajo cada tabla). Si un candidato no presenta una prueba (N.A.), su peso se reparte entre las demás pruebas del examen; si no presenta ninguna, el global es 100 % entrevista. Los candidatos en verde quedan seleccionados según los cupos del programa (se indica su puesto); si el programa no tiene cupos definidos, no se marca ninguno: defínelos en Administración › Programas.', por(tablaExcelP)) +
       blkAcc('fichas', 'Cómo le fue a cada candidato', 'Qué porcentaje logró en cada parte y cuánto suma en el resultado global. Se abre y se cierra con este título.', por(fichasInd)) +
       '<p class="pw-n">Solo cuentan las entrevistas que cada persona dejó <b>completas</b>; si un entrevistador aún no termina a un candidato, su peso se reparte entre quienes sí terminaron. Si hay varias personas con el mismo rol, primero se promedian entre sí.</p>' + compSeccion(V);
   }
@@ -1611,11 +1637,14 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       '<span class="pw-leg" style="margin:0">' + ROLES3.map(function(r) { return '<b style="color:' + ROL_COL[r] + '">■ ' + ROL_NOM[r] + '</b>'; }).join(' ') + '</span></div>' + det + '</section>';
   }
   function filasPondXlsx(pids) {
-    var pv = pesosVista(), mx = DB.cfg.examMax || 300, R = [['PONDERACIÓN APLICADA'], [], ['Entre entrevistadores', 'Peso asignado', 'Porcentaje'], ['Decanatura', pv.w.decana, pctTxt(pv.w.decana, pv.tot)], ['Jefatura de Posgrados', pv.w.admin, pctTxt(pv.w.admin, pv.tot)], ['Coordinación del programa', pv.w.coord, pctTxt(pv.w.coord, pv.tot)], [], ['Secciones de la entrevista', 'Porcentaje']];
+    var pv = pesosVista(), mx = DB.cfg.examMax || 300, EX = extrasDe(pids), man = DB.cfg.totalModo === 'manual';
+    var R = [['PONDERACIÓN APLICADA'], [], ['Entre entrevistadores', 'Peso asignado', 'Porcentaje'], ['Decanatura', pv.w.decana, pctTxt(pv.w.decana, pv.tot)], ['Jefatura de Posgrados', pv.w.admin, pctTxt(pv.w.admin, pv.tot)], ['Coordinación del programa', pv.w.coord, pctTxt(pv.w.coord, pv.tot)], [], ['Secciones de la entrevista', 'Porcentaje']];
     SEC.forEach(function(x) { R.push([x.t, Math.round(x.w * 100) + ' %']); });
-    R.push([], ['Resultado global', 'Porcentaje'], ['Examen (sobre ' + mx + ')', '60 %'], ['Entrevista (0 a 3)', '40 %'], [], ['Fórmula', 'Global = (Examen ÷ ' + mx + ' × 0,60) + (Entrevista ÷ 3 × 0,40)'], ['Nota', 'Solo cuentan entrevistas completas; el peso de quien no ha terminado se reparte entre quienes sí terminaron.']);
-    var C = [['Programa', 'Posición', 'Candidato', 'Documento', 'Básicas', 'Clínicas', 'Cultura', 'Examen total', 'Aporte examen (×60 %)', 'Entrevista Decanatura', 'Entrevista Jefatura', 'Entrevista Coordinación'].concat(SEC.map(function(z) { return z.t + ' (' + Math.round(z.w * 100) + ' %)'; })).concat(['Entrevista ponderada (0-3)', 'Aporte entrevista (×40 %)', 'Resultado global'])];
-    pids.forEach(function(pid) { filasPond(pid).forEach(function(x) { var ex = examen(x.c), ms = metricas(x.c, 'comb'); C.push([(progDe(pid) || {}).nombre, x.rn, nomC(x.c), x.c.doc || '', ex.na ? 'N.A.' : ex.bas, ex.nac ? 'N.A.' : ex.cli, ex.nau ? 'N.A.' : ex.cul, ex.sin ? 'N.A.' : r2(x.ex), ex.sin ? 'N.A.' : r2(x.aex), r2(x.dec), r2(x.adm), r2(x.coo)].concat(SEC.map(function(z) { return r2(ms.sec ? ms.sec[z.id] : null); })).concat([r2(x.ent), r2(x.aen), r2(x.glob)])); }); });
+    R.push([], ['Porcentajes del resultado global por programa']);
+    pids.forEach(function(pid) { var W = pesosDe(pid); R.push([(progDe(pid) || {}).nombre].concat(['bas', 'cli', 'cul'].concat(compsDe(pid).map(function(k) { return k.id; }), ['ent']).map(function(id) { return nomComp(id) + ' ' + pnum(+W[id] || 0) + ' %'; }))); });
+    R.push([], ['Fórmula', 'Global = suma de (nota ÷ máximo de cada prueba × su porcentaje) + (Entrevista ÷ 3 × su porcentaje). Lo que figura N.A. reparte su porcentaje entre las demás pruebas del examen; si todo el examen es N.A., el global es 100 % entrevista.'], ['Total examen', man ? 'Digitado a mano por la Jefatura (de ' + mx + ')' : 'Suma de Básicas + Clínicas + Cultura'], ['Nota', 'Solo cuentan entrevistas completas; el peso de quien no ha terminado se reparte entre quienes sí terminaron.']);
+    var C = [['Programa', 'Posición', 'Candidato', 'Documento', 'Básicas', 'Clínicas', 'Cultura', 'Examen total'].concat(EX.map(function(k) { return k.nombre + ' (de ' + pnum(k.max) + ')'; }), ['Aporte examen (% del global)', 'Entrevista Decanatura', 'Entrevista Jefatura', 'Entrevista Coordinación'], SEC.map(function(z) { return z.t + ' (' + Math.round(z.w * 100) + ' %)'; }), ['Entrevista ponderada (0-3)', 'Aporte entrevista (% del global)', 'Resultado global'])];
+    pids.forEach(function(pid) { filasPond(pid).forEach(function(x) { var ex = examen(x.c), ms = metricas(x.c, 'comb'); C.push([(progDe(pid) || {}).nombre, x.rn, nomC(x.c), x.c.doc || '', ex.na ? 'N.A.' : ex.bas, ex.nac ? 'N.A.' : ex.cli, ex.nau ? 'N.A.' : ex.cul, ex.blkNA ? 'N.A.' : r2(x.ex)].concat(EX.map(function(k) { return extTxt(ex, k, r2); }), [ex.sin ? 'N.A.' : r2(x.aex == null ? null : x.aex * 100), r2(x.dec), r2(x.adm), r2(x.coo)], SEC.map(function(z) { return r2(ms.sec ? ms.sec[z.id] : null); }), [r2(x.ent), r2(x.aen == null ? null : x.aen * 100), r2(x.glob)])); }); });
     return { ley: R, tab: C };
   }
   function descargarPond() {
@@ -1666,6 +1695,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       I: rankear(ms, function(m) { return m.sec.I; }), II: rankear(ms, function(m) { return m.sec.II; }), III: rankear(ms, function(m) { return m.sec.III; }), IV: rankear(ms, function(m) { return m.sec.IV; }), V: rankear(ms, function(m) { return m.sec.V; }),
       ent: rankear(ms, function(m) { return m.ent; }), glob: rankear(ms, function(m) { return m.glob; })
     };
+    var EX = extrasDe([pid]), RX = EX.map(function(k) { return extRank(ms, k); });
     var idx = ms.map(function(m, i) { return i; });
     if (consState.orden === 'glob') idx.sort(function(a, b) { var ga = ms[a].glob, gb = ms[b].glob; if (ga == null && gb == null) return a - b; if (ga == null) return 1; if (gb == null) return -1; return gb - ga; });
     var cupos = (p && p.cupos) || 0;
@@ -1675,16 +1705,16 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       var pt = function(v, d) { return '<td class="num">' + (v == null ? '—' : (d === 1 ? f1(v) : f2(v))) + '</td>'; };
       var top = esSel(R, i, cupos, noAsiste(m.c) ? null : m.glob);
       return '<tr class="' + (top ? 'ok ' : '') + (cut ? 'cut ' : '') + (consState.exp[c.id] ? 'sel' : '') + '"><td class="nm"><button type="button" class="tg" data-det="' + esc(c.id) + '" aria-expanded="' + (consState.exp[c.id] ? 'true' : 'false') + '"><span class="car" aria-hidden="true">' + (consState.exp[c.id] ? '▾' : '▸') + '</span> ' + esc(nomC(c)) + '</button>' + naChip(c) + selTag(top, R.glob[i]) + chipsExtra(c) + '</td>' +
-        '<td class="num">' + (m.ex.na ? 'N.A.' : f0(m.ex.bas)) + '</td>' + rn(R.bas[i]) + '<td class="num">' + (m.ex.nac ? 'N.A.' : f0(m.ex.cli)) + '</td>' + rn(R.cli[i]) + '<td class="num">' + (m.ex.nau ? 'N.A.' : f0(m.ex.cul)) + '</td>' + rn(R.cul[i]) + '<td class="num tot">' + (m.ex.sin ? 'N.A.' : f0(m.ex.tot) + (m.ex.act < 3 ? '<small class="of"> /' + pnum(m.ex.mx) + '</small>' : '')) + '</td>' + rn(R.tot[i]) +
+        '<td class="num">' + (m.ex.na ? 'N.A.' : f0(m.ex.bas)) + '</td>' + rn(R.bas[i]) + '<td class="num">' + (m.ex.nac ? 'N.A.' : f0(m.ex.cli)) + '</td>' + rn(R.cli[i]) + '<td class="num">' + (m.ex.nau ? 'N.A.' : f0(m.ex.cul)) + '</td>' + rn(R.cul[i]) + '<td class="num tot">' + (m.ex.blkNA ? 'N.A.' : f0(m.ex.tot) + (m.ex.parcial ? '<small class="of"> /' + pnum(m.ex.mx) + '</small>' : '')) + '</td>' + rn(R.tot[i]) + EX.map(function(k, j) { return '<td class="num">' + extTxt(m.ex, k, f0) + '</td>' + rn(RX[j][i]); }).join('') +
         pt(m.sec.I) + rn(R.I[i]) + pt(m.sec.II) + rn(R.II[i]) + pt(m.sec.III) + rn(R.III[i]) + pt(m.sec.IV) + rn(R.IV[i]) + pt(m.sec.V) + rn(R.V[i]) + '<td class="num tot">' + f2(m.ent) + '</td>' + rn(R.ent[i]) +
-        '<td class="num tot pos">' + f2(m.glob) + '</td>' + (top ? rnSel(R.glob[i], true) : rn(R.glob[i])) + '<td class="num">' + (m.rd == null ? '—' : f1(m.rd)) + '</td><td class="num">' + (m.bon == null ? '—' : (ev === 'comb' ? f1(m.bon) : f0(m.bon))) + '</td><td class="num">' + esc(m.est) + '</td></tr>' + (consState.exp[c.id] ? '<tr class="exp"><td colspan="26"><div class="mx-obs-grid">' + evCards(c) + '</div></td></tr>' : '');
+        '<td class="num tot pos">' + f2(m.glob) + '</td>' + (top ? rnSel(R.glob[i], true) : rn(R.glob[i])) + '<td class="num">' + (m.rd == null ? '—' : f1(m.rd)) + '</td><td class="num">' + (m.bon == null ? '—' : (ev === 'comb' ? f1(m.bon) : f0(m.bon))) + '</td><td class="num">' + esc(m.est) + '</td></tr>' + (consState.exp[c.id] ? '<tr class="exp"><td colspan="' + (26 + 2 * EX.length) + '"><div class="mx-obs-grid">' + evCards(c) + '</div></td></tr>' : '');
     }).join('');
     var ptRn = '<th class="num sub">Pt</th><th class="num sub">Rn</th>', sub = '';
-    for (var q = 0; q < 11; q++) sub += ptRn;
-    var head = '<tr><th rowspan="3" style="min-width:170px">Candidato</th><th class="g" colspan="8">Examen (de ' + (DB.cfg.examMax || 300) + ')</th><th class="g g2" colspan="12">Entrevista (de 3)</th><th class="g" colspan="2">Global</th>' +
+    for (var q = 0; q < 11 + EX.length; q++) sub += ptRn;
+    var head = '<tr><th rowspan="3" style="min-width:170px">Candidato</th><th class="g" colspan="' + (8 + 2 * EX.length) + '">Examen (de ' + (DB.cfg.examMax || 300) + ')</th><th class="g g2" colspan="12">Entrevista (de 3)</th><th class="g" colspan="2">Global</th>' +
       '<th rowspan="3">Riesgo<small>de 5</small></th><th rowspan="3">Bonos</th><th rowspan="3">' + (ev === 'comb' ? 'Entrevistas completas' : 'Estado') + '</th></tr>' +
-      '<tr>' + ['Básicas', 'Clínicas', 'Cultura', 'Total'].map(function(x) { return '<th class="g" colspan="2">' + x + '</th>'; }).join('') +
-      ['I', 'II', 'III', 'IV', 'V'].map(function(s) { return '<th class="g g2" colspan="2">' + SEC_CORTO[s] + '</th>'; }).join('') + '<th class="g g2" colspan="2">Total</th><th class="g" colspan="2">60 % + 40 %</th></tr>' +
+      '<tr>' + ['Básicas', 'Clínicas', 'Cultura', 'Total'].map(function(x) { return '<th class="g" colspan="2">' + x + '</th>'; }).join('') + EX.map(function(k) { return '<th class="g" colspan="2">' + esc(k.nombre) + '</th>'; }).join('') +
+      ['I', 'II', 'III', 'IV', 'V'].map(function(s) { return '<th class="g g2" colspan="2">' + SEC_CORTO[s] + '</th>'; }).join('') + '<th class="g g2" colspan="2">Total</th><th class="g" colspan="2">Ponderado</th></tr>' +
       '<tr>' + sub + '</tr>';
     return '<div class="mx-card2" style="margin-bottom:16px;padding:14px 16px"><h3>' + esc(p ? p.nombre : '') + ' <span class="mx-chip">' + cs.length + ' candidatos · ' + cuposTxt(p) + '</span></h3>' +
       (cs.length ? '<div class="mx-tw" style="margin-top:10px"><table class="mx-tb"><thead>' + head + '</thead><tbody>' + rows + '</tbody></table></div>' : '<p class="mx-vacio" style="margin-top:10px">Sin candidatos cargados.</p>') + '</div>';
@@ -1745,13 +1775,15 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   function r2(v) { if (v == null || isNaN(v)) return ''; return Math.round(v * 10) / 10; }
   var HCONS = ['Candidato', 'Documento', 'Básicas (Pt)', 'Básicas (Rn)', 'Clínicas (Pt)', 'Clínicas (Rn)', 'Cultura (Pt)', 'Cultura (Rn)', 'Total examen (Pt)', 'Total examen (Rn)', 'Motivaciones (Pt)', 'Motivaciones (Rn)', 'A. académicos (Pt)', 'A. académicos (Rn)', 'A. laborales (Pt)', 'A. laborales (Rn)', 'Hab. personales (Pt)', 'Hab. personales (Rn)', 'Aspiraciones (Pt)', 'Aspiraciones (Rn)', 'Total entrevista (Pt)', 'Total entrevista (Rn)', 'Global (Pt)', 'Global (Rn)', 'Riesgo deserción (de 5)', 'Bonos', 'Entrevistas completas'];
   function filasConsolidado(pids, ev, conProg) {
-    var L = [conProg ? ['Programa'].concat(HCONS) : HCONS.slice()];
+    var EX = extrasDe(pids), hc = HCONS.slice(0, 10).concat([].concat.apply([], EX.map(function(k) { return [k.nombre + ' (Pt)', k.nombre + ' (Rn)']; })), HCONS.slice(10));
+    var L = [conProg ? ['Programa'].concat(hc) : hc];
     pids.forEach(function(pid) {
       var cs = candsDe(pid), ms = cs.map(function(c) { return metricas(c, ev); });
       var g = function(f) { return rankear(ms, f); };
-      var R = [g(function(m) { return m.ex.bas; }), g(function(m) { return m.ex.cli; }), g(function(m) { return m.ex.cul; }), g(function(m) { return m.ex.tot; }), g(function(m) { return m.sec.I; }), g(function(m) { return m.sec.II; }), g(function(m) { return m.sec.III; }), g(function(m) { return m.sec.IV; }), g(function(m) { return m.sec.V; }), g(function(m) { return m.ent; }), g(function(m) { return m.glob; })];
+      var R = [g(function(m) { return m.ex.bas; }), g(function(m) { return m.ex.cli; }), g(function(m) { return m.ex.cul; }), g(function(m) { return m.ex.pct; }), g(function(m) { return m.sec.I; }), g(function(m) { return m.sec.II; }), g(function(m) { return m.sec.III; }), g(function(m) { return m.sec.IV; }), g(function(m) { return m.sec.V; }), g(function(m) { return m.ent; }), g(function(m) { return m.glob; })];
+      var RX = EX.map(function(k) { return extRank(ms, k); });
       ms.forEach(function(m, i) {
-        var row = [nomC(m.c), m.c.doc || '', (m.ex.na ? 'N.A.' : r2(m.ex.bas)), R[0][i], (m.ex.nac ? 'N.A.' : r2(m.ex.cli)), R[1][i], (m.ex.nau ? 'N.A.' : r2(m.ex.cul)), R[2][i], (m.ex.sin ? 'N.A.' : r2(m.ex.tot)), R[3][i], r2(m.sec.I), R[4][i], r2(m.sec.II), R[5][i], r2(m.sec.III), R[6][i], r2(m.sec.IV), R[7][i], r2(m.sec.V), R[8][i], r2(m.ent), R[9][i], r2(m.glob), R[10][i], r2(m.rd, 1), r2(m.bon, 1), m.est];
+        var row = [nomC(m.c), m.c.doc || '', (m.ex.na ? 'N.A.' : r2(m.ex.bas)), R[0][i], (m.ex.nac ? 'N.A.' : r2(m.ex.cli)), R[1][i], (m.ex.nau ? 'N.A.' : r2(m.ex.cul)), R[2][i], (m.ex.blkNA ? 'N.A.' : r2(m.ex.tot)), R[3][i]].concat([].concat.apply([], EX.map(function(k, j) { return [extTxt(m.ex, k, r2), RX[j][i]]; }))).concat([r2(m.sec.I), R[4][i], r2(m.sec.II), R[5][i], r2(m.sec.III), R[6][i], r2(m.sec.IV), R[7][i], r2(m.sec.V), R[8][i], r2(m.ent), R[9][i], r2(m.glob), R[10][i], r2(m.rd, 1), r2(m.bon, 1), m.est]);
         L.push(conProg ? [(progDe(pid) || {}).nombre].concat(row) : row);
       });
     });
@@ -1820,43 +1852,108 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   /* ---------------- administración (solo Jefatura de Posgrados) ---------------- */
   function msg(t, bad) { var m = document.getElementById('mx-amsg'); if (m) { m.textContent = t; m.style.color = bad ? 'var(--badtx)' : 'var(--blue)'; } }
   function opAdmin(op, p, okMsg) {
-    return Store.admin(op, p).then(function() { return Store.load(); }).then(function(d) { aplicar(d); vistaAdmin(); msg(okMsg || 'Cambios guardados.'); }).catch(function(e) {
-      var m = { permiso: 'No tienes permiso para esta acción.', conCandidatos: 'No se puede eliminar un programa que tiene candidatos. Elimina o traslada primero a los candidatos.', clave: 'Escribe una clave para el nuevo usuario.', propio: 'No puedes eliminar tu propio usuario.', usuario: 'Ese usuario ya existe.', claveCorta: 'La clave debe tener al menos 7 caracteres.', claveRepetida: 'Esa clave ya la usa otra persona. Elige una distinta.', ultimoAdmin: 'Debe quedar al menos una persona con rol de Jefatura de Posgrados.', duplicado: 'Ya existe un programa con ese nombre.', datos: 'Revisa los datos: falta información o hay un valor no válido.', ocupado: 'El sistema está ocupado. Inténtalo de nuevo en unos segundos.' };
+    return Store.admin(op, p).then(function() { return Store.load(); }).then(function(d) { aplicar(d); if (op === 'config') cmpD = null; vistaAdmin(); msg(okMsg || 'Cambios guardados.'); }).catch(function(e) {
+      var m = { permiso: 'No tienes permiso para esta acción.', conCandidatos: 'No se puede eliminar un programa que tiene candidatos. Elimina o traslada primero a los candidatos.', clave: 'Escribe una clave para el nuevo usuario.', propio: 'No puedes eliminar tu propio usuario.', usuario: 'Ese usuario ya existe.', claveCorta: 'La clave debe tener al menos 7 caracteres.', claveRepetida: 'Esa clave ya la usa otra persona. Elige una distinta.', ultimoAdmin: 'Debe quedar al menos una persona con rol de Jefatura de Posgrados.', duplicado: 'Ya existe un programa o componente con ese nombre.', pesos100: 'Los porcentajes de cada programa deben sumar exactamente 100 %. Revisa los porcentajes.', datos: 'Revisa los datos: falta información o hay un valor no válido.', ocupado: 'El sistema está ocupado. Inténtalo de nuevo en unos segundos.' };
       if (e && e.code === 'sesion') { salir('Tu sesión terminó. Ingresa de nuevo.'); return; }
       msg(m[e && e.code] || 'No se pudo guardar. Inténtalo de nuevo.', true);
     });
   }
   function selProgs(id, cur, todos) { return '<select class="mx-in" id="' + id + '">' + (todos ? '<option value="">Todos los programas</option>' : '') + DB.progs.map(function(p) { return '<option value="' + esc(p.id) + '"' + (cur === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select>'; }
   function vistaAdmin() {
-    var tabs = [['cands', 'Candidatos'], ['progs', 'Programas'], ['users', 'Usuarios y claves'], ['cierre', 'Cierre y descargas'], ['ajustes', 'Ajustes']];
-    var cuerpo = admTab === 'cands' ? admCands() : admTab === 'progs' ? admProgs() : admTab === 'users' ? admUsers() : admTab === 'cierre' ? admCierre() : admAjustes();
+    var tabs = [['cands', 'Candidatos'], ['progs', 'Programas'], ['users', 'Usuarios y claves'], ['comp', 'Examen y porcentajes'], ['cierre', 'Cierre y descargas'], ['ajustes', 'Ajustes']];
+    var cuerpo = admTab === 'cands' ? admCands() : admTab === 'progs' ? admProgs() : admTab === 'users' ? admUsers() : admTab === 'comp' ? admComp() : admTab === 'cierre' ? admCierre() : admAjustes();
     APP.innerHTML = barra() + band('Administración', 'Solo la Jefatura de Posgrados puede modificar esta información', IC.gear) +
       '<div class="mx-tabs">' + tabs.map(function(t) { return '<button class="mx-pillink' + (admTab === t[0] ? ' on' : '') + '" type="button" data-tab="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div><p class="mx-msg" id="mx-amsg" role="status"></p>' + cuerpo;
   }
   var admFiltro = '';
   function admCands() {
+    var man = DB.cfg.totalModo === 'manual', EXA = DB.cfg.comps || [];
+    var inp = function(f, v) { return '<input class="mx-in" data-f="' + f + '" inputmode="decimal" value="' + esc(v == null ? '' : v) + '" style="width:74px">'; };
     var cs = DB.cands.filter(function(c) { return !admFiltro || c.prog === admFiltro; }).sort(function(a, b) { return norm((progDe(a.prog) || {}).nombre + a.apellidos).localeCompare(norm((progDe(b.prog) || {}).nombre + b.apellidos)); });
     var filas = cs.map(function(c) {
       return '<tr data-row="' + esc(c.id) + '"><td>' + selProgs('', c.prog).replace('<select class="mx-in" id=""', '<select class="mx-in" data-f="prog"') + '</td>' +
         '<td><input class="mx-in" data-f="nombre" value="' + esc(c.nombre) + '"></td><td><input class="mx-in" data-f="apellidos" value="' + esc(c.apellidos) + '"></td><td><input class="mx-in" data-f="doc" value="' + esc(c.doc || '') + '" style="min-width:110px"></td>' +
-        '<td><input class="mx-in" data-f="bas" inputmode="decimal" value="' + esc(c.bas == null ? '' : c.bas) + '" style="width:74px"></td><td><input class="mx-in" data-f="cli" inputmode="decimal" value="' + esc(c.cli == null ? '' : c.cli) + '" style="width:74px"></td><td><input class="mx-in" data-f="cul" inputmode="decimal" value="' + esc(c.cul == null ? '' : c.cul) + '" style="width:74px"></td>' +
-        '<td><textarea class="mx-ta sm" data-f="perfil" rows="2" style="min-width:260px" placeholder="Edad, origen, pregrado, trabajo…">' + esc(c.perfil || '') + '</textarea></td><td><select class="mx-in" data-f="noasiste" aria-label="Asistencia"><option value="0">Asiste</option><option value="1"' + (noAsiste(c) ? ' selected' : '') + '>No asiste</option></select></td><td class="num">' + f0(examen(c).tot) + '</td><td class="act"><button class="mx-btn sm" type="button" data-save-c="' + esc(c.id) + '">Guardar</button> <button class="mx-btn sm danger" type="button" data-confirm="bc:' + esc(c.id) + '">Eliminar</button></td></tr>';
+        '<td>' + inp('bas', c.bas) + '</td><td>' + inp('cli', c.cli) + '</td><td>' + inp('cul', c.cul) + '</td>' + (man ? '<td>' + inp('tot', c.tot) + '</td>' : '<td class="num">' + (examen(c).blkNA ? 'N.A.' : f0(examen(c).tot)) + '</td>') +
+        EXA.map(function(k) { return '<td>' + (aplicaComp(k, c.prog) ? inp('x_' + k.id, (c.extra || {})[k.id]) : '<span class="mx-muted" title="Este componente no aplica a este programa">No aplica</span>') + '</td>'; }).join('') +
+        '<td><textarea class="mx-ta sm" data-f="perfil" rows="2" style="min-width:260px" placeholder="Edad, origen, pregrado, trabajo…">' + esc(c.perfil || '') + '</textarea></td><td><select class="mx-in" data-f="noasiste" aria-label="Asistencia"><option value="0">Asiste</option><option value="1"' + (noAsiste(c) ? ' selected' : '') + '>No asiste</option></select></td><td class="act"><button class="mx-btn sm" type="button" data-save-c="' + esc(c.id) + '">Guardar</button> <button class="mx-btn sm danger" type="button" data-confirm="bc:' + esc(c.id) + '">Eliminar</button></td></tr>';
     }).join('');
     return '<div class="mx-card2"><h3>Agregar candidato</h3><div class="mx-grid3" style="margin-top:10px">' +
       '<div class="mx-fld"><label class="mx-lbl" for="nc-prog">Programa</label>' + selProgs('nc-prog', admFiltro) + '</div>' +
       '<div class="mx-fld"><label class="mx-lbl" for="nc-nom">Nombres</label><input class="mx-in" id="nc-nom"></div><div class="mx-fld"><label class="mx-lbl" for="nc-ape">Apellidos</label><input class="mx-in" id="nc-ape"></div>' +
       '<div class="mx-fld"><label class="mx-lbl" for="nc-doc">Documento</label><input class="mx-in" id="nc-doc"></div>' +
-      '<div class="mx-fld"><label class="mx-lbl" for="nc-bas">Básicas</label><input class="mx-in" id="nc-bas" inputmode="decimal"></div><div class="mx-fld"><label class="mx-lbl" for="nc-cli">Clínicas</label><input class="mx-in" id="nc-cli" inputmode="decimal"></div><div class="mx-fld"><label class="mx-lbl" for="nc-cul">Cultura</label><input class="mx-in" id="nc-cul" inputmode="decimal"></div></div>' +
+      '<div class="mx-fld"><label class="mx-lbl" for="nc-bas">Básicas</label><input class="mx-in" id="nc-bas" inputmode="decimal"></div><div class="mx-fld"><label class="mx-lbl" for="nc-cli">Clínicas</label><input class="mx-in" id="nc-cli" inputmode="decimal"></div><div class="mx-fld"><label class="mx-lbl" for="nc-cul">Cultura</label><input class="mx-in" id="nc-cul" inputmode="decimal"></div>' +
+      (man ? '<div class="mx-fld"><label class="mx-lbl" for="nc-tot">Total examen</label><input class="mx-in" id="nc-tot" inputmode="decimal"></div>' : '') +
+      EXA.map(function(k) { return '<div class="mx-fld"><label class="mx-lbl" for="nc-x-' + esc(k.id) + '">' + esc(k.nombre) + '</label><input class="mx-in" id="nc-x-' + esc(k.id) + '" inputmode="decimal"></div>'; }).join('') + '</div>' +
       '<div class="mx-fld" style="margin-top:10px"><label class="mx-lbl" for="nc-perfil">Perfil del candidato (opcional)</label><textarea class="mx-ta sm" id="nc-perfil" rows="3" placeholder="Ej.: 27 años. Nació en Bogotá. Pregrado Javeriana 2023. Trabaja en… Segunda vez al CES."></textarea><p class="mx-muted" style="margin-top:4px">Lo verán las personas que entrevistan, en la parte de arriba de la entrevista.</p></div>' +
       '<p class="mx-row" style="margin-top:12px"><button class="mx-btn lime" type="button" data-act="addcand">Agregar candidato</button></p></div>' +
       '<div class="mx-card2"><h3>Cargar candidatos desde un archivo de Excel</h3><p class="mx-note" style="margin-top:6px">Usa la plantilla que te entregó la Coordinación (hojas <b>Programas</b> y <b>Candidatos</b>). Al elegir el archivo verás un resumen y confirmas antes de que se cargue. Los candidatos que ya existen (mismo documento en el mismo programa) no se duplican.</p>' +
       '<p class="mx-row"><label class="mx-btn lime" style="cursor:pointer" for="imp-file">Elegir archivo de Excel…</label><input class="mx-sr" type="file" id="imp-file" accept=".xlsx,.xls,.csv"></p>' +
-      '<details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700;color:var(--blue);font-size:13px">O pega las filas copiadas desde Excel</summary><p class="mx-note" style="margin:8px 0">Columnas: <b>Programa · Nombres · Apellidos · Documento · Básicas · Clínicas · Cultura · Perfil (opcional)</b> (sin encabezado).</p>' +
+      '<details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700;color:var(--blue);font-size:13px">O pega las filas copiadas desde Excel</summary><p class="mx-note" style="margin:8px 0">Columnas: <b>Programa · Nombres · Apellidos · Documento · Básicas · Clínicas · Cultura · Perfil (opcional) · Total examen (solo si es manual)' + (EXA.length ? ' · ' + EXA.map(function(k) { return esc(k.nombre); }).join(' · ') : '') + '</b> (sin encabezado). Escribe NA en lo que el candidato no presenta.</p>' +
       '<textarea class="mx-code" id="imp-txt" placeholder="Oftalmología&#9;Camila&#9;Restrepo Gómez&#9;1020304050&#9;78&#9;81&#9;70"></textarea><p class="mx-row" style="margin-top:10px"><button class="mx-btn" type="button" data-act="imp">Revisar datos pegados</button></p></details>' +
       '<div id="imp-prev">' + impPrevHtml() + '</div></div>' +
       '<div class="mx-card2"><div class="mx-toolbar"><div class="mx-fld"><h3 style="margin-bottom:6px">Candidatos cargados (' + cs.length + ')</h3><label class="mx-lbl" for="adm-fp">Filtrar por programa</label>' + selProgs('adm-fp', admFiltro, true) + '</div></div>' +
-      '<p class="mx-muted" style="margin:8px 0">El total del examen se calcula como Básicas + Clínicas + Cultura. Si falta alguna nota, el total y el resultado global quedan pendientes. <b>Pruebas que no presenta:</b> escribe <b>NA</b> en esa casilla (no 0). Si no presenta Básicas, el 60 % del examen se reparte entre Clínicas y Cultura (30 % cada una). Si no presenta ninguna de las tres, el examen no cuenta y el resultado global es solo la entrevista (100 %).</p>' +
-      '<div class="mx-tw"><table class="mx-tb" style="min-width:1340px"><thead><tr><th>Programa</th><th>Nombres</th><th>Apellidos</th><th>Documento</th><th>Básicas</th><th>Clínicas</th><th>Cultura</th><th>Perfil del candidato</th><th>Asistencia</th><th>Total</th><th></th></tr></thead><tbody>' + (filas || '<tr><td colspan="10"><p class="mx-vacio">No hay candidatos cargados.</p></td></tr>') + '</tbody></table></div></div>';
+      '<p class="mx-muted" style="margin:8px 0">' + (man ? 'El <b>Total examen</b> se digita a mano (modo manual definido en «Examen y porcentajes»).' : 'El total del examen se calcula como Básicas + Clínicas + Cultura.') + ' Si falta alguna nota, el resultado global queda pendiente. <b>Pruebas que no presenta:</b> escribe <b>NA</b> en esa casilla (no 0): su porcentaje se reparte entre las demás pruebas del examen. Si no presenta ninguna, el examen no cuenta y el global es solo la entrevista. Los componentes adicionales (p. ej. prueba práctica) solo aplican a los programas que la Jefatura definió.</p>' +
+      '<div class="mx-tw"><table class="mx-tb" style="min-width:' + (1340 + 90 * EXA.length) + 'px"><thead><tr><th>Programa</th><th>Nombres</th><th>Apellidos</th><th>Documento</th><th>Básicas</th><th>Clínicas</th><th>Cultura</th><th>Total examen</th>' + EXA.map(function(k) { return '<th>' + esc(k.nombre) + '</th>'; }).join('') + '<th>Perfil del candidato</th><th>Asistencia</th><th></th></tr></thead><tbody>' + (filas || '<tr><td colspan="' + (10 + EXA.length) + '"><p class="mx-vacio">No hay candidatos cargados.</p></td></tr>') + '</tbody></table></div></div>';
+  }
+  /* ---------------- Examen y porcentajes (solo Jefatura) ---------------- */
+  var cmpD = null;
+  function cmpInit() { cmpD = { comps: copia(DB.cfg.comps || []), wcomp: copia(DB.cfg.wcomp || { '*': { bas: 20, cli: 20, cul: 20, ent: 40 } }), modo: DB.cfg.totalModo || 'auto', sel: '*' }; if (!cmpD.wcomp['*']) cmpD.wcomp['*'] = { bas: 20, cli: 20, cul: 20, ent: 40 }; }
+  function cmpIds(sel) { return ['bas', 'cli', 'cul'].concat(cmpD.comps.filter(function(k) { return sel === '*' ? !(k.progs && k.progs.length) : aplicaComp(k, sel); }).map(function(k) { return k.id; }), ['ent']); }
+  function cmpNom(id) { if (NOM_COMP[id]) return NOM_COMP[id]; var k = cmpD.comps.filter(function(x) { return x.id === id; })[0]; return k ? k.nombre : id; }
+  function cmpSuma(sel) { var W = cmpD.wcomp[sel] || cmpD.wcomp['*'], t = 0; cmpIds(sel).forEach(function(id) { t += +W[id] || 0; }); return Math.round(t * 100) / 100; }
+  function cmpSumaHtml(sel) { var t = cmpSuma(sel), ok = Math.abs(t - 100) <= 0.05; return '<span class="cm-sum ' + (ok ? 'ok' : 'bad') + '" id="cm-sum" role="status">Suma: <b>' + pnum(t) + ' %</b> ' + (ok ? '✔' : '— debe sumar 100 %') + '</span>'; }
+  function cmpValida() {
+    var d = cmpD, nombres = {};
+    for (var i = 0; i < d.comps.length; i++) {
+      var k = d.comps[i], n = norm(k.nombre);
+      if (!n) return 'Todos los componentes necesitan un nombre.';
+      if (['basicas', 'clinicas', 'cultura', 'entrevista'].indexOf(n) >= 0 || nombres[n]) return 'El nombre «' + k.nombre + '» está repetido.';
+      nombres[n] = 1;
+      if (!(+k.max > 0)) return 'La nota máxima de «' + k.nombre + '» debe ser mayor que 0.';
+    }
+    if (Math.abs(cmpSuma('*') - 100) > 0.05) return 'Los porcentajes por defecto deben sumar 100 %.';
+    for (var j = 0; j < DB.progs.length; j++) { var pid = DB.progs[j].id; if (Math.abs(cmpSuma(pid) - 100) > 0.05) return 'En «' + DB.progs[j].nombre + '» los porcentajes suman ' + pnum(cmpSuma(pid)) + ' %. Deben sumar 100 %.'; }
+    return '';
+  }
+  function admComp() {
+    if (!cmpD) cmpInit();
+    var d = cmpD, sel = d.sel, own = sel === '*' || !!d.wcomp[sel], W = d.wcomp[sel] || d.wcomp['*'], mxa = (DB.cfg.examMax || 300) / 3;
+    var modo = '<div class="mx-card2"><h3>Total del examen</h3><p class="mx-muted" style="margin:6px 0 10px">El «Total examen» es la cuarta columna junto a Básicas, Clínicas y Cultura. Elige cómo se diligencia (aplica a todos los programas).</p>' +
+      '<label class="cm-rad"><input type="radio" name="cm-modo" value="auto"' + (d.modo === 'auto' ? ' checked' : '') + '> <span><b>Automático</b> — suma de Básicas + Clínicas + Cultura (lo que no se presenta, NA, no suma).</span></label>' +
+      '<label class="cm-rad"><input type="radio" name="cm-modo" value="manual"' + (d.modo === 'manual' ? ' checked' : '') + '> <span><b>Manual</b> — se digita el total de cada candidato (máximo ' + pnum(DB.cfg.examMax || 300) + '). En este modo el porcentaje de Básicas + Clínicas + Cultura se aplica al total digitado.</span></label></div>';
+    var fijas = [['Básicas', 'Nota máxima ' + pnum(mxa) + ' (el puntaje máximo del examen ÷ 3, en Ajustes)'], ['Clínicas', 'Nota máxima ' + pnum(mxa)], ['Cultura', 'Nota máxima ' + pnum(mxa)], ['Entrevista', 'De 0 a 3 (la calculan los entrevistadores)']];
+    var filas = fijas.map(function(f) { return '<tr><td><b>' + f[0] + '</b> <span class="mx-chip">fija</span></td><td class="mx-muted">' + f[1] + '</td><td class="mx-muted">Todos los programas</td><td></td></tr>'; }).join('') +
+      d.comps.map(function(k, i) {
+        return '<tr><td><input class="mx-in" data-ck="nombre" data-i="' + i + '" value="' + esc(k.nombre) + '" aria-label="Nombre del componente" style="min-width:230px"></td><td><input class="mx-in" data-ck="max" data-i="' + i + '" inputmode="decimal" value="' + esc(k.max) + '" style="width:80px" aria-label="Nota máxima"></td>' +
+          '<td>' + progPicker(k.progs || [], 'data-ckp="' + i + '"').replace('Elegir programas…', 'Todos los programas') + '</td><td><button class="mx-btn sm danger" type="button" data-cm="del" data-i="' + i + '">Quitar</button></td></tr>';
+      }).join('');
+    var comps = '<div class="mx-card2"><h3>Componentes de la calificación</h3><p class="mx-muted" style="margin:6px 0 10px">Básicas, Clínicas, Cultura y Entrevista son fijas. Aquí agregas pruebas adicionales (por ejemplo, la <b>Prueba práctica de habilidades</b> de Urgencias y Electrofisiología) y eliges a qué programas aplican (sin marcar = todos). Su <b>porcentaje</b> se define abajo.</p>' +
+      '<div class="mx-tw"><table class="mx-tb" style="min-width:760px"><thead><tr><th>Componente</th><th>Nota máxima</th><th>Aplica a</th><th></th></tr></thead><tbody>' + filas + '</tbody></table></div>' +
+      '<p class="mx-row" style="margin-top:12px"><button class="mx-btn" type="button" data-cm="add">+ Agregar componente</button></p></div>';
+    var opts = '<option value="*"' + (sel === '*' ? ' selected' : '') + '>Por defecto (todos los programas)</option>' + DB.progs.map(function(p) { return '<option value="' + esc(p.id) + '"' + (sel === p.id ? ' selected' : '') + '>' + esc(p.nombre) + (d.wcomp[p.id] ? ' · porcentajes propios' : '') + '</option>'; }).join('');
+    var restr = d.comps.filter(function(k) { return k.progs && k.progs.length; });
+    var pesos = '<div class="mx-card2"><h3>Porcentajes del resultado global</h3><p class="mx-muted" style="margin:6px 0 10px">Cada programa debe sumar <b>100 %</b>. Define los porcentajes por defecto y, donde un programa necesite otros (por ejemplo, Urgencias con prueba práctica), elígelo en la lista y define los suyos. Si un candidato tiene NA en una prueba del examen, su porcentaje se reparte entre las demás pruebas del examen.</p>' +
+      '<div class="mx-fld" style="max-width:420px"><label class="mx-lbl" for="cm-sel">Programa</label><select class="mx-in" id="cm-sel">' + opts + '</select></div>' +
+      (sel !== '*' && !own ? '<p class="mx-note" style="margin:10px 0">Este programa usa los porcentajes por defecto. <button class="mx-btn sm" type="button" data-cm="own">Definir porcentajes propios</button></p>' : '') +
+      (sel === '*' && restr.length ? '<p class="mx-note" style="margin:10px 0">Los componentes que aplican solo a algunos programas (' + restr.map(function(k) { return esc(k.nombre); }).join(', ') + ') se les asigna el porcentaje dentro de cada programa.</p>' : '') +
+      '<div class="mx-tw" style="margin-top:10px"><table class="mx-tb" style="min-width:380px;max-width:520px"><thead><tr><th>Componente</th><th>% del global</th></tr></thead><tbody>' +
+      cmpIds(sel).map(function(id) { return '<tr><td><b>' + esc(cmpNom(id)) + '</b></td><td><input class="mx-in" data-w="' + esc(id) + '" inputmode="decimal" value="' + esc(+W[id] || 0) + '" style="width:90px"' + (own ? '' : ' disabled') + ' aria-label="Porcentaje de ' + esc(cmpNom(id)) + '"> %</td></tr>'; }).join('') +
+      '<tr><td><b>Total</b></td><td>' + cmpSumaHtml(sel) + '</td></tr></tbody></table></div>' +
+      (sel !== '*' && own ? '<p class="mx-row" style="margin-top:10px"><button class="mx-btn sm sec" type="button" data-cm="def">Volver a los porcentajes por defecto</button></p>' : '') + '</div>';
+    return modo + comps + pesos + '<div class="mx-card2"><p class="mx-row"><button class="mx-btn lime" type="button" data-cm="save">Guardar examen y porcentajes</button><button class="mx-btn sec" type="button" data-cm="reset">Descartar cambios</button></p><p class="mx-muted" style="margin-top:8px">Los cambios se aplican a todas las tablas y al resultado global apenas los guardes.</p></div>';
+  }
+  function cmpClick(t) {
+    var a = t.getAttribute('data-cm'), d = cmpD; if (!d) return false;
+    if (a === 'add') { var id = 'x' + Math.random().toString(36).replace(/[^a-z0-9]/g, '').slice(0, 6); d.comps.push({ id: id, nombre: 'Nuevo componente', max: 100, progs: [] }); Object.keys(d.wcomp).forEach(function(k) { d.wcomp[k][id] = 0; }); vistaAdmin(); return true; }
+    if (a === 'del') { var i = +t.getAttribute('data-i'), k = d.comps[i]; if (k) { d.comps.splice(i, 1); Object.keys(d.wcomp).forEach(function(q) { delete d.wcomp[q][k.id]; }); } vistaAdmin(); return true; }
+    if (a === 'own') { d.wcomp[d.sel] = copia(d.wcomp['*']); vistaAdmin(); return true; }
+    if (a === 'def') { delete d.wcomp[d.sel]; vistaAdmin(); return true; }
+    if (a === 'reset') { cmpD = null; vistaAdmin(); msg('Se descartaron los cambios sin guardar.'); return true; }
+    if (a === 'save') {
+      var e = cmpValida(); if (e) { msg(e, true); return true; }
+      opAdmin('config', { conv: DB.cfg.conv || '', examMax: DB.cfg.examMax, pesos: DB.cfg.pesos, abierta: !!DB.cfg.abierta, comps: d.comps, wcomp: d.wcomp, totalModo: d.modo }, 'Examen y porcentajes guardados.'); return true;
+    }
+    return false;
   }
   function admProgs() {
     var filas = DB.progs.map(function(p) {
@@ -1931,7 +2028,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       var kk = clave(idDe[norm(cel(0))] || norm(cel(0)), cel(3), cel(1), cel(2));
       if (vistos[kk]) { dup++; return; }
       vistos[kk] = 1;
-      filas.push({ progNombre: known[norm(cel(0))].nombre, nombre: cel(1), apellidos: cel(2), doc: cel(3), bas: numNA(cel(4)), cli: numNA(cel(5)), cul: numNA(cel(6)), perfil: cel(7) });
+      filas.push({ progNombre: known[norm(cel(0))].nombre, nombre: cel(1), apellidos: cel(2), doc: cel(3), bas: numNA(cel(4)), cli: numNA(cel(5)), cul: numNA(cel(6)), perfil: cel(7), tot: numNA(cel(8)), extra: (function() { var o = {}; (DB.cfg.comps || []).forEach(function(k, j) { var v = numNA(cel(9 + j)); if (v !== null) o[k.id] = v; }); return o; })() });
     });
     if (mal.length) { admImp = { error: 'No se cargó nada. Revisa las filas ' + mal.slice(0, 10).join(', ') + (mal.length > 10 ? '…' : '') + ': ' + (Object.keys(sinProg).length ? 'el programa no existe (' + Object.keys(sinProg).slice(0, 4).join(', ') + '). Escríbelo igual que en la hoja Programas.' : 'faltan nombres.') }; }
     else if (!filas.length && !nuevos) admImp = { error: dup ? 'Todos los candidatos del archivo ya estaban cargados.' : 'No se encontraron filas para cargar.' };
@@ -1961,7 +2058,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     paso1.then(function() { return Store.load(); }).then(function(d) {
       aplicar(d);
       var idDe = {}; DB.progs.forEach(function(p) { idDe[norm(p.nombre)] = p.id; });
-      var filas = x.filas.map(function(f) { return { prog: idDe[norm(f.progNombre)], nombre: f.nombre, apellidos: f.apellidos, doc: f.doc, bas: f.bas, cli: f.cli, cul: f.cul, perfil: f.perfil || '' }; });
+      var filas = x.filas.map(function(f) { return { prog: idDe[norm(f.progNombre)], nombre: f.nombre, apellidos: f.apellidos, doc: f.doc, bas: f.bas, cli: f.cli, cul: f.cul, perfil: f.perfil || '', tot: f.tot, extra: f.extra }; });
       return filas.length ? Store.admin('importar', { filas: filas }) : { ok: true, n: 0 };
     }).then(function(r) { return Store.load().then(function(d) { aplicar(d); vistaAdmin(); msg('Listo. Se cargaron ' + x.filas.length + ' candidatos' + (x.progsNuevos ? ' y se actualizaron los programas.' : '.')); }); })
       .catch(function() { vistaAdmin(); msg('No se pudo completar la carga. Revisa los datos e inténtalo de nuevo.', true); });
@@ -2042,6 +2139,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
     var bn = t.getAttribute('data-bon'); if (bn && vista.tipo === 'cand') { var bv = +t.getAttribute('data-v'); mutar(vista.id, function(r) { if (r.bon[bn] === bv) delete r.bon[bn]; else r.bon[bn] = bv; }); return; }
     var rd = t.getAttribute('data-rd'); if (rd && vista.tipo === 'cand') { var rv = t.getAttribute('data-v'); mutar(vista.id, function(r) { if (r.rd[rd] === rv) delete r.rd[rd]; else r.rd[rd] = rv; }); return; }
     if (t.hasAttribute('data-tab')) { admTab = t.getAttribute('data-tab'); vistaAdmin(); return; }
+    if (t.hasAttribute('data-cm') && cmpClick(t)) return;
     if (!esAdmin()) return;
     if (act === 'impok') { ejecutarImport(); return; }
     if (act === 'impno') { admImp = null; var pvx = document.getElementById('imp-prev'); if (pvx) pvx.innerHTML = ''; return; }
@@ -2064,14 +2162,14 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
       return;
     }
     var sc = t.getAttribute('data-save-c'), sp = t.getAttribute('data-save-p'), su = t.getAttribute('data-save-u');
-    if (sc) { var o = rowVals(t.closest('tr')); opAdmin('candidato', { id: sc, prog: o.prog, nombre: o.nombre.trim(), apellidos: o.apellidos.trim(), doc: o.doc.trim(), bas: numNA(o.bas), cli: numNA(o.cli), cul: numNA(o.cul), perfil: (o.perfil || '').trim(), noasiste: o.noasiste === '1' ? 1 : 0 }, 'Candidato actualizado.'); return; }
+    if (sc) { var o = rowVals(t.closest('tr')); opAdmin('candidato', { id: sc, prog: o.prog, nombre: o.nombre.trim(), apellidos: o.apellidos.trim(), doc: o.doc.trim(), bas: numNA(o.bas), cli: numNA(o.cli), cul: numNA(o.cul), perfil: (o.perfil || '').trim(), noasiste: o.noasiste === '1' ? 1 : 0, extra: (function() { var ex = {}; (DB.cfg.comps || []).forEach(function(k) { if (('x_' + k.id) in o) ex[k.id] = numNA(o['x_' + k.id]); }); return ex; })(), tot: ('tot' in o) ? numNA(o.tot) : undefined }, 'Candidato actualizado.'); return; }
     if (sp) { var op = rowVals(t.closest('tr')); if (!op.nombre.trim()) { msg('Escribe el nombre del programa.', true); return; } opAdmin('programa', { id: sp, nombre: op.nombre.trim(), cupos: num(op.cupos) || 0 }, 'Programa actualizado.'); return; }
     if (su) { var ou = rowVals(t.closest('tr')); if (!ou.nombre.trim() || !ou.usuario.trim()) { msg('Escribe el nombre y el usuario.', true); return; } if (ou.clave && ou.clave.length < 7) { msg('La clave debe tener al menos 7 caracteres.', true); return; } opAdmin('usuario', { id: su, nombre: ou.nombre.trim(), saludo: (ou.saludo || '').trim(), usuario: ou.usuario.trim(), rol: ou.rol, programas: ou.rol === 'coord' ? (ou.prg || []) : [], clave: ou.clave || '' }, 'Datos de la persona actualizados.'); return; }
     if (act === 'addcand') {
       var gv = function(i) { return document.getElementById(i).value; };
       if (!gv('nc-nom').trim() || !gv('nc-ape').trim()) { msg('Escribe los nombres y apellidos del candidato.', true); return; }
       if (!gv('nc-prog')) { msg('Primero crea un programa en la pestaña Programas.', true); return; }
-      opAdmin('candidato', { prog: gv('nc-prog'), nombre: gv('nc-nom').trim(), apellidos: gv('nc-ape').trim(), doc: gv('nc-doc').trim(), bas: numNA(gv('nc-bas')), cli: numNA(gv('nc-cli')), cul: numNA(gv('nc-cul')), perfil: gv('nc-perfil').trim() }, 'Candidato agregado.'); return;
+      opAdmin('candidato', { prog: gv('nc-prog'), nombre: gv('nc-nom').trim(), apellidos: gv('nc-ape').trim(), doc: gv('nc-doc').trim(), bas: numNA(gv('nc-bas')), cli: numNA(gv('nc-cli')), cul: numNA(gv('nc-cul')), perfil: gv('nc-perfil').trim(), tot: document.getElementById('nc-tot') ? numNA(gv('nc-tot')) : undefined, extra: (function() { var ex = {}; (DB.cfg.comps || []).forEach(function(k) { var el = document.getElementById('nc-x-' + k.id); if (el) ex[k.id] = numNA(el.value); }); return ex; })() }, 'Candidato agregado.'); return;
     }
     if (act === 'imp') {
       var lineas = document.getElementById('imp-txt').value.split(/\r?\n/).filter(function(l) { return l.trim(); });
@@ -2101,6 +2199,8 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   APP.addEventListener('input', function(ev) {
     var t = ev.target;
     if (t.classList && t.classList.contains('mx-ddq')) { var q = norm(t.value); [].forEach.call(t.parentNode.querySelectorAll('.mx-ddl label'), function(l) { l.hidden = !!q && l.getAttribute('data-s').indexOf(q) < 0; }); return; }
+    if (cmpD && t.getAttribute && t.getAttribute('data-ck')) { var kk = cmpD.comps[+t.getAttribute('data-i')]; if (kk) { var f = t.getAttribute('data-ck'); kk[f] = f === 'max' ? (num(t.value) || 0) : t.value; } return; }
+    if (cmpD && t.getAttribute && t.getAttribute('data-w')) { var Wd = cmpD.wcomp[cmpD.sel]; if (Wd) { Wd[t.getAttribute('data-w')] = num(t.value) || 0; var sm = document.getElementById('cm-sum'); if (sm) sm.outerHTML = cmpSumaHtml(cmpD.sel); } return; }
     if (t.id === 'adm-fu') {
       var qu = norm(t.value), vis = 0, tot = 0;
       [].forEach.call(document.querySelectorAll('tr[data-row]'), function(tr) { tot++; var h = !!qu && tr.getAttribute('data-s').indexOf(qu) < 0; tr.hidden = h; if (!h) vis++; });
@@ -2110,6 +2210,9 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   APP.addEventListener('change', function(ev) {
     var t = ev.target;
     if (t.type === 'checkbox' && t.closest && t.closest('.mx-dd')) { var dd = t.closest('.mx-dd'), ck = dd.querySelectorAll('input[type=checkbox]:checked'); dd.querySelector('.ddt').textContent = ddResumen(ck.length, ck[0] ? ck[0].getAttribute('data-n') : ''); }
+    if (cmpD && t.name === 'cm-modo') { cmpD.modo = t.value; return; }
+    if (cmpD && t.id === 'cm-sel') { cmpD.sel = t.value; vistaAdmin(); return; }
+    if (cmpD && t.getAttribute && t.getAttribute('data-ckp') !== null && t.type === 'checkbox') { var kc = cmpD.comps[+t.getAttribute('data-ckp')]; if (kc) kc.progs = [].map.call(t.closest('.mx-dd').querySelectorAll('input[type=checkbox]:checked'), function(i) { return i.value; }); return; }
     if (t.id === 'pw-cp') { prog = t.value; consState.det = ''; vistaConsolidado(true); return; }
     if (t.id === 'cp-cand') { cmpState.cid = t.value; vistaConsolidado(true); return; }
     if (t.id === 'mx-cp') { prog = t.value; consState.det = ''; vistaConsolidado(true); }
@@ -2121,7 +2224,7 @@ window.MX_CONFIG = { api: "https://script.google.com/macros/s/AKfycbwm-I-BnQ5bHP
   });
   document.getElementById('mx-up').addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
-  if (CFG.expose) window.MX_TEST = { calcEval: calcEval, globalDe: globalDe, DB: DB, rankear: rankear, metricas: metricas, examen: examen, combinar: combinar };
+  if (CFG.expose) window.MX_TEST = { calcEval: calcEval, globalDe: globalDe, DB: DB, rankear: rankear, metricas: metricas, examen: examen, combinar: combinar, filasConsolidado: function(a, b, c) { return filasConsolidado(a, b, c); }, filasPondXlsx: function(a) { return filasPondXlsx(a); }, filasDetalle: function(a) { return filasDetalle(a); } };
   /* ---------------- arranque ---------------- */
   if (DEMO) LOCAL = localInit();
   var tok = ssGet('mx_tok');
