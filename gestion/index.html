@@ -3800,12 +3800,30 @@ document.addEventListener('click', function(e) {
   }
 });
 
+// Último resultado de cada buscador del Dashboard (res-residente, res-campo, res-rotacion),
+// tal como quedó filtrado y ordenado, para descargarlo completo en Excel.
+const resultadosExcelDb_ = {};
+const NOMBRES_EXCEL_DB_ = { 'res-residente': 'Por_residente', 'res-campo': 'Por_institucion', 'res-rotacion': 'Por_rotacion' };
+function descargarResultadosDbExcel(seccion) {
+  const filas = resultadosExcelDb_[seccion] || [];
+  if (!filas.length) { mostrarMensaje('No hay resultados para descargar. Haz una búsqueda primero.', 'error'); return; }
+  const datos = [['Residente', 'Cédula', 'Programa', 'Periodo', 'Mes', 'Campo de rotación', 'Rotación', 'Estado']];
+  filas.forEach(f => datos.push([f.ResidenteNombre || '', f.ResidenteID || '', f.Programa || '', f.Semestre || '', f.Mes || '', f.CampoRotacion || '', f.Rotacion || '', f.Estado || '']));
+  const ws = XLSX.utils.aoa_to_sheet(datos);
+  ws['!cols'] = [{ wch: 36 }, { wch: 14 }, { wch: 42 }, { wch: 10 }, { wch: 14 }, { wch: 36 }, { wch: 36 }, { wch: 14 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Resultados');
+  XLSX.writeFile(wb, 'Dashboard_' + (NOMBRES_EXCEL_DB_[seccion] || 'Resultados') + '_' + new Date().toISOString().slice(0, 10) + '.xlsx');
+}
+
 function tablaResultados(filas, seccion) {
   seccion = seccion || 'resultados';
   limpiarSeccionDb(seccion);
   if (filas.length === 0) return '<p style="color:#999; font-size:13px;">Sin resultados.' + (document.getElementById('db-buscar-todos') && !document.getElementById('db-buscar-todos').checked ? ' Prueba marcando "Buscar en todos los periodos".' : '') + '</p>';
   const ordenadas = filas.slice().sort((a, b) => String(a.Semestre).localeCompare(String(b.Semestre)) || MESES.indexOf(a.Mes) - MESES.indexOf(b.Mes));
-  return `<p style="font-size:12px; color:#888; margin:0 0 6px;">${filas.length} resultado${filas.length === 1 ? '' : 's'}</p><table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th>Periodo / mes</th><th>Campo / Rotación</th><th>Estado</th><th></th></tr></thead><tbody>
+  // Se guarda el resultado completo (no solo las 100 filas visibles) para poder descargarlo en Excel.
+  resultadosExcelDb_[seccion] = ordenadas;
+  return `<div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin:0 0 6px;"><span style="font-size:12px; color:#888;">${filas.length} resultado${filas.length === 1 ? '' : 's'}</span><button class="btn-secundario btn-pequeno" onclick="descargarResultadosDbExcel('${seccion}')">📥 Descargar Excel</button></div><table class="lista"><thead><tr><th>Residente</th><th>Programa</th><th>Periodo / mes</th><th>Campo / Rotación</th><th>Estado</th><th></th></tr></thead><tbody>
     ${ordenadas.slice(0, 100).map(f => {
       const colores = COLORES_ESTADO[f.Estado] || { bg: '#eee', tx: '#333' };
       const nAcc = regDb(() => irACeldaDesdeComentario(f.ClaveUnica, f.Programa, f.Semestre), seccion);
