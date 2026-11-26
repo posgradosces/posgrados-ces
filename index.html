@@ -520,6 +520,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-ch.peligro:hover{background:#fff3f4;border-color:#e09aa4}
 .btn-ch input{display:none}
 .hint-nota{font-size:11.5px;color:var(--sec);margin-top:8px;line-height:1.5}
+.vr-carta{margin-top:10px;background:var(--az-suave);border:1px solid var(--az-claro);border-radius:12px;padding:10px 12px}
+.vr-carta .k{font-size:11px;font-weight:700;color:var(--sec);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.btn-carta{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:#fff;border:1.5px solid var(--borde);border-radius:10px;padding:9px 12px;margin-top:8px;font-family:inherit;cursor:pointer;color:var(--az)}
+.btn-carta:hover{border-color:var(--az-med)}
+.btn-carta:disabled{opacity:.65;cursor:wait}
+.btn-carta .ic{font-size:18px;line-height:1}
+.btn-carta b{display:block;font-size:12.5px}
+.btn-carta small{display:block;font-size:11.5px;color:var(--sec);font-weight:400;margin-top:1px}
+.carta-estado{font-size:11.5px;margin-top:6px;line-height:1.4}
+.carta-estado.bien{color:var(--teal)}
+.carta-estado.mal{color:#9C0006}
+.vr-carta-gris{margin-top:10px;background:var(--fondo);border:1px solid var(--borde);border-radius:12px;padding:9px 12px;font-size:12px;color:var(--sec);line-height:1.5}
 .btn-subir{background:var(--az);color:#fff;border:none;border-radius:11px;padding:12px 18px;font-size:13.5px;font-weight:700;cursor:pointer;width:100%;display:block;text-align:center;font-family:inherit}
 .btn-subir:hover{background:var(--az-med)}
 
@@ -2091,7 +2103,7 @@ function renderCrono(cedula) {
   const hoySem = semDeAbsR_(hoyAbsR_());
   VR = { cedula, nombre, prog, nivel, filas, clavesEval, mapaRotaciones, checklistItems, perfil: null,
     semSel: semsDatos.includes(hoySem) ? hoySem : semsDatos[semsDatos.length - 1], listaNotasAbierta: false, cumpleCerrado: false, confetiCumple: false,
-    requisitos: leerRequisitosLocalR_(cedula), reqSubiendo: {}, reqMsg: {} };
+    requisitos: leerRequisitosLocalR_(cedula), reqSubiendo: {}, reqMsg: {}, cartas: null };
   VR.novedades = (modo === 'residente') ? calcularNovedadesR_(cedula, mis) : null;
 
   document.getElementById('crono-contenido').innerHTML = `
@@ -2157,6 +2169,7 @@ function renderCrono(cedula) {
   renderChecklistResidente(checklistItems);
   sincronizarConDrive(prog, nombre + '_' + cedula, mapaRotaciones, checklistItems);
   cargarPerfilResidente_(cedula);
+  cargarCartasR_(cedula);
   if (modo === 'residente' && !leerLocal_(TOUR_KEY)) setTimeout(iniciarTourR_, 700);
 }
 
@@ -2458,6 +2471,98 @@ function pintarMesesR_() {
   }).join('') || '<div class="sin">Sin rotaciones en este semestre.</div>';
 }
 
+// ---------- Carta de presentación a centros de práctica ----------
+// El servidor decide qué meses tienen carta (rotación Confirmada, mes en curso o futuro) y a qué centros.
+// Si el mes tiene varios centros, el residente elige a cuál la necesita (una carta por centro).
+const normCampoR_ = s => String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+
+async function cargarCartasR_(cedula) {
+  if (!URL_BACKEND_GESTION) return;
+  const controlador = new AbortController();
+  const t = setTimeout(() => controlador.abort(), 15000);
+  try {
+    const resp = await fetch(URL_BACKEND_GESTION + '?accion=opcionesCartaPresentacion&id=' + encodeURIComponent(cedula), { signal: controlador.signal });
+    const data = await resp.json();
+    if (data && data.ok && VR && VR.cedula === cedula) {
+      VR.cartas = data.items || [];
+      refrescarHojaVR_();
+    }
+  } catch (e) { /* sin carta: el resto del portal sigue igual */ }
+  finally { clearTimeout(t); }
+}
+
+function itemCartaR_(f) {
+  if (!VR || !VR.cartas) return null;
+  return VR.cartas.find(i => i.semestre === f.sem && normMesR_(i.mes) === normMesR_(f.mes) && normCampoR_(i.campo) === normCampoR_(f.camp)) || null;
+}
+
+function cartaHtmlR_(f) {
+  if (!VR || f.camp === 'VACACIONES') return '';
+  const futuro = f.abs !== null && f.abs >= hoyAbsR_();
+  if (f.est === 'Pendiente') {
+    return futuro ? '<div class="vr-carta-gris">📄 La carta de presentación se habilita cuando el centro confirme tu rotación.</div>' : '';
+  }
+  if (f.est !== 'Confirmado') return '';
+  const it = itemCartaR_(f);
+  if (!it) return '';
+  if (!it.disponible || !it.centros.length) {
+    return '<div class="vr-carta-gris">📄 Tu carta de presentación aún no está disponible. Escribe a coordinación y la revisamos.</div>';
+  }
+  const botones = it.centros.map((c, n) => `
+      <button class="btn-carta" onclick="descargarCartaR_(${f.i},${n},this)">
+        <span class="ic" aria-hidden="true">⬇</span>
+        <span><b>Descargar carta de presentación</b><small>Dirigida a ${escR_(c)} · PDF</small></span>
+      </button>`).join('');
+  const aviso = (it.sinNombre && it.sinNombre.length)
+    ? `<p class="hint-nota">Para ${escR_(it.sinNombre.join(', '))} coordinación debe completar el nombre del centro; escríbele si la necesitas.</p>` : '';
+  return `<div class="vr-carta"><div class="k">Carta de presentación</div>
+      ${botones}
+      <p class="hint-nota">Se genera al momento, con tus datos y la fecha de hoy.${it.centros.length > 1 ? ' Elige el centro al que la necesitas.' : ''}</p>
+      ${aviso}
+      <div class="carta-estado" role="status"></div></div>`;
+}
+
+async function descargarCartaR_(i, n, btn) {
+  if (!VR) return;
+  const f = VR.filas[i];
+  const it = f ? itemCartaR_(f) : null;
+  if (!it || !it.centros[n]) return;
+  const centro = it.centros[n];
+  const cont = btn.closest('.vr-carta');
+  const estado = cont ? cont.querySelector('.carta-estado') : null;
+  const textoOriginal = btn.innerHTML;
+  btn.disabled = true;
+  const titulo = btn.querySelector('b');
+  if (titulo) titulo.textContent = 'Generando tu carta...';
+  if (estado) { estado.textContent = ''; estado.className = 'carta-estado'; }
+  const controlador = new AbortController();
+  const t = setTimeout(() => controlador.abort(), 45000);
+  try {
+    const url = URL_BACKEND_GESTION + '?accion=cartaPresentacion&id=' + encodeURIComponent(VR.cedula) +
+      '&semestre=' + encodeURIComponent(it.semestre) + '&mes=' + encodeURIComponent(it.mes) +
+      '&campo=' + encodeURIComponent(it.campo) + '&centro=' + encodeURIComponent(centro);
+    const data = await (await fetch(url, { signal: controlador.signal })).json();
+    if (!data.ok) throw new Error(data.error || 'No se pudo generar la carta.');
+    const bytes = Uint8Array.from(atob(data.base64), c => c.charCodeAt(0));
+    const blobUrl = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = ('Carta_presentacion_' + centro).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w\-]+/g, '_') + '.pdf';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    if (estado) { estado.textContent = 'Listo: tu carta se descargó. Búscala en tus descargas.'; estado.className = 'carta-estado bien'; }
+  } catch (e) {
+    if (estado) {
+      estado.textContent = e.name === 'AbortError' ? 'Tardó más de lo normal. Intenta de nuevo.' : (e.message || 'No se pudo generar la carta. Intenta de nuevo en unos segundos.');
+      estado.className = 'carta-estado mal';
+    }
+  } finally {
+    clearTimeout(t);
+    btn.disabled = false;
+    btn.innerHTML = textoOriginal;
+  }
+}
+
 // ---------- Hoja de detalle: TODO lo de cada mes (campo, rotación, estado, observación y evaluación) ----------
 function abrirHojaVR(indices) {
   const filas = indices.map(i => VR.filas[i]).filter(Boolean);
@@ -2504,6 +2609,7 @@ function abrirHojaVR(indices) {
         <div class="vr-dato"><span>Estado</span><span>${estado}</span></div>
         <div class="vr-dato"><span>Observación</span><span>${f.obs ? `<span class="obs-cell">${escR_(f.obs)}</span>` : '<span class="dash-cell">—</span>'}</span></div>
         <div class="vr-eval"><div class="k">Evaluación y documentos</div>${evalHtml}</div>
+        ${cartaHtmlR_(f)}
       </div>`;
     }).join('')}`;
   filas.forEach(f => { if (f.ev.tipo === 'nota' && !estaCargadaR_(f.ev.claveRot)) actualizarUIEval(f.ev.claveRot); });
